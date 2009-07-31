@@ -8,6 +8,7 @@ namespace DataJockey {
 	class Mixer {
 		public:
 			Mixer(unsigned int numPlayers = 0);
+			~Mixer();
 			//this creates internal buffers
 			//** must be called BEFORE the audio callback starts 
 			//but after all the players are added
@@ -19,8 +20,11 @@ namespace DataJockey {
 			//actually compute nframes of audio
 			void audio_compute_and_fill(JackCpp::AudioIO::audioBufVector outBufferVector,
 					unsigned int numFrames);
+
+			//getters
 			std::vector<Player *> mPlayers;
-		protected:
+		private:
+			//internal buffers
 			std::vector<float **> mPlayerBuffers;
 			float ** mCueBuffer;
 	};

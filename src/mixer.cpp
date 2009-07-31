@@ -8,6 +8,19 @@ Mixer::Mixer(unsigned int numPlayers){
 		add_player(new Player);
 }
 
+Mixer::~Mixer(){
+	//clean up!
+	if(mCueBuffer != NULL){
+		delete [] mCueBuffer[0];
+		delete [] mCueBuffer[1];
+		delete [] mCueBuffer;
+	}
+	for(unsigned int i = 0; i < mPlayerBuffers.size(); i++){
+		delete [] mPlayerBuffers[i];
+	}
+	
+}
+
 void Mixer::setup_audio(
 		unsigned int sampleRate,
 		unsigned int maxBufferLen){
