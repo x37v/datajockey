@@ -2,21 +2,21 @@
 #define DATAJOCKEY_AUDIOIO_HPP
 
 #include "jackaudioio.hpp"
-#include "mixer.hpp"
+#include "master.hpp"
 #include <vector>
 
 namespace DataJockey {
 	class AudioIO : public JackCpp::AudioIO {
 		public:
 			AudioIO();
-			Mixer * mixer();
+			Master * master();
 			void start();
 		protected:
 			virtual int audioCallback(
 					jack_nframes_t nframes, 
 					audioBufVector inBufs,
 					audioBufVector outBufs);
-			Mixer mMixer;
+			Master mMaster;
 	};
 }
 

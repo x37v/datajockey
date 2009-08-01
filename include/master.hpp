@@ -5,10 +5,10 @@
 #include <vector>
 
 namespace DataJockey {
-	class Mixer {
+	class Master {
 		public:
-			Mixer(unsigned int numPlayers = 0);
-			~Mixer();
+			Master(unsigned int numPlayers = 0);
+			~Master();
 			//this creates internal buffers
 			//** must be called BEFORE the audio callback starts 
 			//but after all the players are added

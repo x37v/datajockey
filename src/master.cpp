@@ -1,9 +1,9 @@
-#include "mixer.hpp"
+#include "master.hpp"
 #include <math.h>
 
 using namespace DataJockey;
 
-Mixer::Mixer(unsigned int numPlayers){
+Master::Master(unsigned int numPlayers){
 	mCueBuffer = NULL;
 	for(unsigned int i = 0; i < numPlayers; i++)
 		add_player(new Player);
@@ -18,7 +18,7 @@ Mixer::Mixer(unsigned int numPlayers){
 	mCrossFadeMixers[1] = 1;
 }
 
-Mixer::~Mixer(){
+Master::~Master(){
 	//clean up!
 	if(mCueBuffer != NULL){
 		delete [] mCueBuffer[0];
@@ -40,7 +40,7 @@ Mixer::~Mixer(){
 	
 }
 
-void Mixer::setup_audio(
+void Master::setup_audio(
 		unsigned int sampleRate,
 		unsigned int maxBufferLen){
 	if(mCueBuffer != NULL){
@@ -82,11 +82,11 @@ void Mixer::setup_audio(
 	mCrossFadeBuffer[1] = new float[maxBufferLen];
 }
 
-void Mixer::add_player(Player * p){
+void Master::add_player(Player * p){
 	mPlayers.push_back(p);
 }
 
-void Mixer::audio_compute_and_fill(
+void Master::audio_compute_and_fill(
 		JackCpp::AudioIO::audioBufVector outBufferVector,
 		unsigned int numFrames){
 	//set up players
@@ -160,11 +160,11 @@ void Mixer::audio_compute_and_fill(
 }
 
 //getters
-float Mixer::master_volume(){ return mMasterVolume; }
-float Mixer::cue_volume(){ return mCueVolume; }
-bool Mixer::cross_fadeing(){ return mCrossFade; }
-float Mixer::cross_fade_position(){ return mCrossFadePosition; }
-unsigned int Mixer::cross_fade_mixer(unsigned int index){
+float Master::master_volume(){ return mMasterVolume; }
+float Master::cue_volume(){ return mCueVolume; }
+bool Master::cross_fadeing(){ return mCrossFade; }
+float Master::cross_fade_position(){ return mCrossFadePosition; }
+unsigned int Master::cross_fade_mixer(unsigned int index){
 	if(index > 1)
 		return 0;
 	else
@@ -172,23 +172,23 @@ unsigned int Mixer::cross_fade_mixer(unsigned int index){
 }
 
 //setters
-void Mixer::master_volume(float val){
+void Master::master_volume(float val){
 	mMasterVolume = val;
 }
 
-void Mixer::cue_volume(float val){
+void Master::cue_volume(float val){
 	mCueVolume = val;
 }
 
-void Mixer::cross_fade(bool val){
+void Master::cross_fade(bool val){
 	mCrossFade = val;
 }
 
-void Mixer::cross_fade_position(float val){
+void Master::cross_fade_position(float val){
 	mCrossFadePosition = val;
 }
 
-void Mixer::cross_fade_mixers(unsigned int left, unsigned int right){
+void Master::cross_fade_mixers(unsigned int left, unsigned int right){
 	if(left < mPlayers.size() && right < mPlayers.size() && left != right){
 		mCrossFadeMixers[0] = left;
 		mCrossFadeMixers[1] = right;
