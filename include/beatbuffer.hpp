@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace DataJockey {
-	//assuming 4/4 for now
+	//XXX assuming 4/4 for now
 	class BeatBuffer {
 		public:
 			BeatBuffer(std::string dataLocation) throw(std::runtime_error);
