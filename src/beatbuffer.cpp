@@ -24,6 +24,7 @@ double BeatBuffer::get_time(const TimePoint position){
 			int beat = position.beat() + position.bar() * 4;
 			unsigned int size = mBeatData.size();
 			beat += mStartBeat;
+			//make sure we're in range!
 			if(beat < 0)
 				return 0.0;
 			if(beat >= size)
