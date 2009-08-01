@@ -24,19 +24,29 @@ namespace DataJockey {
 			//getters
 			float master_volume();
 			float cue_volume();
+			bool cross_fadeing();
+			float cross_fade_position();
+			unsigned int cross_fade_mixer(unsigned int index);
 
 			//setters
 			void master_volume(float val);
 			void cue_volume(float val);
+			void cross_fade(bool val);
+			void cross_fade_position(float val);
+			void cross_fade_mixers(unsigned int left, unsigned int right);
 		private:
 			//internal buffers
 			std::vector<float **> mPlayerBuffers;
 			float ** mCueBuffer;
 			float * mMasterVolumeBuffer;
+			float ** mCrossFadeBuffer;
 
 			std::vector<Player *> mPlayers;
 			float mMasterVolume;
 			float mCueVolume;
+			unsigned int mCrossFadeMixers[2];
+			bool mCrossFade;
+			float mCrossFadePosition;
 	};
 }
 
