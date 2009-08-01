@@ -7,14 +7,15 @@ namespace DataJockey {
 			enum time_type {BEAT_BAR, SECONDS};
 			TimePoint();
 			//getters
-			time_type type();
-			int bar();
-			int beat();
+			time_type type() const;
+			int bar() const;
+			int beat() const;
 			//this simply tells how far into the beat we are.. 0..1
-			double pos_in_beat();
-			float beats_per_bar();
-			float beat_type();
-			double seconds();
+			double pos_in_beat() const;
+			float beats_per_bar() const;
+			float beat_type() const;
+			double seconds() const;
+			bool valid() const;
 			//setters
 			void type(time_type t);
 			void bar(int val);

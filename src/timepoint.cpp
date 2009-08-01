@@ -8,13 +8,23 @@ TimePoint::TimePoint(){
 }
 
 //getters
-TimePoint::time_type TimePoint::type(){ return mType; }
-int TimePoint::bar(){ return mBar; }
-int TimePoint::beat(){ return mBeat; }
-double TimePoint::pos_in_beat(){ return mPosInBeat; }
-float TimePoint::beats_per_bar(){ return mBeatsPerBar; }
-float TimePoint::beat_type(){ return mBeatType; }
-double TimePoint::seconds(){ return mSeconds; }
+TimePoint::time_type TimePoint::type() const { return mType; }
+int TimePoint::bar() const { return mBar; }
+int TimePoint::beat() const { return mBeat; }
+double TimePoint::pos_in_beat() const { return mPosInBeat; }
+float TimePoint::beats_per_bar() const { return mBeatsPerBar; }
+float TimePoint::beat_type() const { return mBeatType; }
+double TimePoint::seconds() const { return mSeconds; }
+bool TimePoint::valid() const {
+	if(mType == SECONDS)
+		return true;
+	else {
+		if (mBar < 0 || mBeat < 0)
+			return false;
+		else
+			return true;
+	}
+}
 
 //setters
 void TimePoint::type(TimePoint::time_type t){ mType = t; }
