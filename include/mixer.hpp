@@ -22,11 +22,21 @@ namespace DataJockey {
 					unsigned int numFrames);
 
 			//getters
-			std::vector<Player *> mPlayers;
+			float master_volume();
+			float cue_volume();
+
+			//setters
+			void master_volume(float val);
+			void cue_volume(float val);
 		private:
 			//internal buffers
 			std::vector<float **> mPlayerBuffers;
 			float ** mCueBuffer;
+			float * mMasterVolumeBuffer;
+
+			std::vector<Player *> mPlayers;
+			float mMasterVolume;
+			float mCueVolume;
 	};
 }
 

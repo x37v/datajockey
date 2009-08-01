@@ -21,12 +21,10 @@ int main(int argc, char * argv[]){
 	audioio.connectToPhysical(0,0);
 	audioio.connectToPhysical(1,1);
 
-	sleep(60);
-	//sleep(10);
-	//player.play_state(DataJockey::Player::PAUSE);
-	//sleep(3);
-	//player.play_state(DataJockey::Player::PLAY);
-	//sleep(10);
+	//audioio.connectToPhysical(2,0);
+	//audioio.connectToPhysical(3,1);
+
+	sleep(20);
 	audioio.stop();
 
 	return 0;
