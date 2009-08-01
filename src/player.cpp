@@ -163,6 +163,7 @@ void Player::play_state(play_state_t val){
 }
 
 void Player::out_state(out_state_t val){
+	mOutState = val;
 }
 
 void Player::stretch_method(stretch_method_t val){
