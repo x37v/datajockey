@@ -26,6 +26,8 @@ Mixer::~Mixer(){
 		delete [] mCueBuffer;
 	}
 	for(unsigned int i = 0; i < mPlayerBuffers.size(); i++){
+		delete [] mPlayerBuffers[i][0];
+		delete [] mPlayerBuffers[i][1];
 		delete [] mPlayerBuffers[i];
 	}
 	if(mMasterVolumeBuffer)
@@ -50,10 +52,16 @@ void Mixer::setup_audio(
 	mCueBuffer[0] = new float[maxBufferLen];
 	mCueBuffer[1] = new float[maxBufferLen];
 
+	if(mPlayerBuffers.size()){
+		for(unsigned int i = 0; i < mPlayerBuffers.size(); i++){
+			delete [] mPlayerBuffers[i][0];
+			delete [] mPlayerBuffers[i][1];
+			delete [] mPlayerBuffers[i];
+		}
+	}
+
 	//set up the players and their buffers
 	for(unsigned int i = 0; i < mPlayers.size(); i++){
-		//XXX what if this method is called 2 times during a session?
-		//XXX memory leak!
 		float ** sampleBuffer = new float*[2];
 		sampleBuffer[0] = new float[maxBufferLen];
 		sampleBuffer[1] = new float[maxBufferLen];
