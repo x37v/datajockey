@@ -16,7 +16,7 @@ BeatBuffer::BeatBuffer(std::string dataLocation)
 }
 
 //XXX assuming 4/4
-double BeatBuffer::time_at_position(const TimePoint position){
+double BeatBuffer::time_at_position(const TimePoint position) const {
 	if(TimePoint::SECONDS == position.type())
 		return position.seconds();
 	else {
@@ -42,28 +42,22 @@ double BeatBuffer::time_at_position(const TimePoint position){
 	}
 }
 
-TimePoint BeatBuffer::position_at_time(double seconds){
+TimePoint BeatBuffer::position_at_time(double seconds) const {
 	TimePoint pos;
 	unsigned int size;
 	size = mBeatData.size();
 	if(size > 0 && seconds >= 0){
 		for(unsigned int i = 0; i < size; i++){
 			//XXX assuming 4/4
-			if(mBeatData[i] == seconds){
-				pos.bar(i / 4);
-				pos.beat(i % 4);
-				pos.pos_in_beat(0);
-			} else if(mBeatData[i] > seconds){
+			if(mBeatData[i] == seconds)
+				pos.at_bar(i / 4, i % 4);
+			else if(mBeatData[i] > seconds){
 				if(i > 0){
 					unsigned int beat = i - 1;
-					pos.bar(beat / 4);
-					pos.beat(beat % 4);
-					pos.pos_in_beat((seconds - mBeatData[beat]) / (mBeatData[i] - mBeatData[beat]));
-				} else {
-					pos.bar(0);
-					pos.beat(0);
-					pos.pos_in_beat(0);
-				}
+					pos.at_bar(beat / 4, beat % 4, 
+						(seconds - mBeatData[beat]) / (mBeatData[i] - mBeatData[beat]));
+				} else 
+					pos.at_bar(0);
 				return pos;
 			}
 		}
@@ -73,7 +67,7 @@ TimePoint BeatBuffer::position_at_time(double seconds){
 	return pos;
 }
 
-TimePoint BeatBuffer::end(){
+TimePoint BeatBuffer::end() const {
 	TimePoint pos;
 	unsigned int beats;
 	if(mBeatData.size() == 0)
@@ -81,9 +75,7 @@ TimePoint BeatBuffer::end(){
 	//XXX assuming 4/4
 	beats = mBeatData.size() - mStartBeat;
 	pos.type(TimePoint::BEAT_BAR);
-	pos.bar(beats / 4);
-	pos.beat(beats % 4);
-	pos.pos_in_beat(0);
+	pos.at_bar(beats / 4, beats % 4);
 }
 
 void BeatBuffer::load(std::string dataLocation)
@@ -151,17 +143,15 @@ void BeatBuffer::load(std::string dataLocation)
 	}
 }
 
-/*
 
+/*
 #include <iostream>
 using std::cout;
 using std::endl;
 
 int main(int argc, char * argv[]){
 	TimePoint t;
-	t.beat(0);
-	t.bar(1);
-	t.pos_in_beat(0.0);
+	t.at_bar(1);
 
 	BeatBuffer b(argv[1]);
 
