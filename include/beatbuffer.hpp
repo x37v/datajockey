@@ -11,8 +11,8 @@ namespace DataJockey {
 	class BeatBuffer {
 		public:
 			BeatBuffer(std::string dataLocation) throw(std::runtime_error);
-			double get_time(const TimePoint position);
-			TimePoint get_position(double seconds);
+			double time_at_position(const TimePoint position);
+			TimePoint position_at_time(double seconds);
 			TimePoint end();
 		private:
 			void load(std::string dataLocation) throw(std::runtime_error);

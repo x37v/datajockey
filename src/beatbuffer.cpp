@@ -16,7 +16,7 @@ BeatBuffer::BeatBuffer(std::string dataLocation)
 }
 
 //XXX assuming 4/4
-double BeatBuffer::get_time(const TimePoint position){
+double BeatBuffer::time_at_position(const TimePoint position){
 	if(TimePoint::SECONDS == position.type())
 		return position.seconds();
 	else {
@@ -25,11 +25,13 @@ double BeatBuffer::get_time(const TimePoint position){
 			unsigned int size = mBeatData.size();
 			beat += mStartBeat;
 			//make sure we're in range!
-			if(beat < 0)
+			if (size == 0)
 				return 0.0;
-			if(beat >= size)
+			else if(beat < 0)
+				return 0.0;
+			else if(beat >= size)
 				return mBeatData.back();
-			else if (position.pos_in_beat() < 0 || 
+			else if (position.pos_in_beat() <= 0 || 
 					(position.pos_in_beat() > 0 && beat + 1 >= size))
 				return mBeatData[beat];
 			else
@@ -40,9 +42,34 @@ double BeatBuffer::get_time(const TimePoint position){
 	}
 }
 
-TimePoint BeatBuffer::get_position(double seconds){
+TimePoint BeatBuffer::position_at_time(double seconds){
 	TimePoint pos;
-	//XXX not implemented yet!
+	unsigned int size;
+	size = mBeatData.size();
+	if(size > 0 && seconds >= 0){
+		for(unsigned int i = 0; i < size; i++){
+			//XXX assuming 4/4
+			if(mBeatData[i] == seconds){
+				pos.bar(i / 4);
+				pos.beat(i % 4);
+				pos.pos_in_beat(0);
+			} else if(mBeatData[i] > seconds){
+				if(i > 0){
+					unsigned int beat = i - 1;
+					pos.bar(beat / 4);
+					pos.beat(beat % 4);
+					pos.pos_in_beat((seconds - mBeatData[beat]) / (mBeatData[i] - mBeatData[beat]));
+				} else {
+					pos.bar(0);
+					pos.beat(0);
+					pos.pos_in_beat(0);
+				}
+				return pos;
+			}
+		}
+		//XXX wasn't found.. should return end or invalid?
+		return end();
+	}
 	return pos;
 }
 
@@ -123,3 +150,29 @@ void BeatBuffer::load(std::string dataLocation)
 		throw std::runtime_error(str);
 	}
 }
+
+/*
+
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int main(int argc, char * argv[]){
+	TimePoint t;
+	t.beat(0);
+	t.bar(1);
+	t.pos_in_beat(0.0);
+
+	BeatBuffer b(argv[1]);
+
+	cout << b.time_at_position(t) << endl;
+	cout << b.end().bar() << " : " << b.end().beat() << endl;
+
+	t = b.position_at_time(6.75490263682522 );
+	cout << "position : " << endl;
+	cout << t.bar() << " : " << t.beat() << " : " << t.pos_in_beat() << endl;
+
+	return 0;
+}
+
+*/

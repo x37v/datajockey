@@ -24,6 +24,10 @@ namespace DataJockey {
 			void beats_per_bar(float val);
 			void beat_type(float val);
 			void seconds(double val);
+
+			//these reset the internal state
+			void at_bar(int newBar, int newBeat = 0, double newPos = 0.0);
+			void at_beat(int newBeat, double newPos = 0.0);
 			
 			void invalidate();
 		private:

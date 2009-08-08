@@ -34,6 +34,18 @@ void TimePoint::pos_in_beat(double val){ mPosInBeat = val; }
 void TimePoint::beats_per_bar(float val){ mBeatsPerBar = val; }
 void TimePoint::beat_type(float val){ mBeatType = val; }
 void TimePoint::seconds(double val){ mSeconds = val; }
+void TimePoint::at_bar(int newBar, int newBeat, double newPos){
+	bar(newBar);
+	beat(newBeat);
+	pos_in_beat(newPos);
+}
+
+//XXX assuming 4/4
+void TimePoint::at_beat(int newBeat, double newPos){
+	bar(newBeat / 4);
+	beat(newBeat % 4);
+	pos_in_beat(newPos);
+}
 
 void TimePoint::invalidate(){
 	mSeconds = -1;
