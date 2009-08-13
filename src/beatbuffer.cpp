@@ -47,15 +47,15 @@ TimePoint BeatBuffer::position_at_time(double seconds) const {
 	unsigned int size;
 	size = mBeatData.size();
 	if(size > 0 && seconds >= 0){
-		for(unsigned int i = 0; i < size; i++){
+		for(unsigned int i = mStartBeat; i < size; i++){
 			//XXX assuming 4/4
 			if(mBeatData[i] == seconds)
-				pos.at_bar(i / 4, i % 4);
+				pos.at_bar((i - mStartBeat) / 4, (i - mStartBeat) % 4);
 			else if(mBeatData[i] > seconds){
 				if(i > 0){
-					unsigned int beat = i - 1;
+					unsigned int beat = i - 1 - mStartBeat;
 					pos.at_bar(beat / 4, beat % 4, 
-						(seconds - mBeatData[beat]) / (mBeatData[i] - mBeatData[beat]));
+						(seconds - mBeatData[beat]) / (mBeatData[i - mStartBeat] - mBeatData[beat]));
 				} else 
 					pos.at_bar(0);
 				return pos;
@@ -141,6 +141,15 @@ void BeatBuffer::load(std::string dataLocation)
 		str.append(dataLocation);
 		throw std::runtime_error(str);
 	}
+}
+
+unsigned int BeatBuffer::start_offset() const {
+	return mStartBeat;
+}
+
+void BeatBuffer::start_offset(unsigned int val){
+	if(val < mBeatData.size())
+		mStartBeat = val;
 }
 
 

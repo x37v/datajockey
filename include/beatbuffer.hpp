@@ -14,8 +14,13 @@ namespace DataJockey {
 			double time_at_position(const TimePoint position) const;
 			TimePoint position_at_time(double seconds) const;
 			TimePoint end() const;
+			unsigned int start_offset() const;
+			//setters
+			void start_offset(unsigned int b);
 		private:
 			void load(std::string dataLocation) throw(std::runtime_error);
+			//the start beat lets us offset the data
+			//indicating where bar 0, beat 0 should in the data
 			unsigned int mStartBeat;
 			std::vector<double> mBeatData;
 	};
