@@ -7,12 +7,12 @@ namespace DataJockey {
 	class Transport {
 		public:
 			Transport();
-			//const TimePoint * time_point();
+			const TimePoint& time_point() const;
 			virtual void start() = 0;
 			virtual void stop() = 0;
 		private:
 			//the current time point of this transport
-			TimePoint mTimePoint;
+			TimePoint mPosition;
 	};
 }
 

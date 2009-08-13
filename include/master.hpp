@@ -22,11 +22,11 @@ namespace DataJockey {
 					unsigned int numFrames);
 
 			//getters
-			float master_volume();
-			float cue_volume();
-			bool cross_fadeing();
-			float cross_fade_position();
-			unsigned int cross_fade_mixer(unsigned int index);
+			float master_volume() const;
+			float cue_volume() const;
+			bool cross_fadeing() const;
+			float cross_fade_position() const;
+			unsigned int cross_fade_mixer(unsigned int index) const;
 
 			//setters
 			void master_volume(float val);

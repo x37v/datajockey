@@ -7,7 +7,7 @@ namespace DataJockey {
 	class Command {
 		public:
 			virtual ~Command();
-			TimePoint time_executed();
+			const TimePoint& time_executed();
 			void time_executed(TimePoint const & t);
 			virtual void execute() = 0;
 		private:

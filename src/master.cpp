@@ -160,11 +160,11 @@ void Master::audio_compute_and_fill(
 }
 
 //getters
-float Master::master_volume(){ return mMasterVolume; }
-float Master::cue_volume(){ return mCueVolume; }
-bool Master::cross_fadeing(){ return mCrossFade; }
-float Master::cross_fade_position(){ return mCrossFadePosition; }
-unsigned int Master::cross_fade_mixer(unsigned int index){
+float Master::master_volume() const { return mMasterVolume; }
+float Master::cue_volume() const { return mCueVolume; }
+bool Master::cross_fadeing() const { return mCrossFade; }
+float Master::cross_fade_position() const { return mCrossFadePosition; }
+unsigned int Master::cross_fade_mixer(unsigned int index) const {
 	if(index > 1)
 		return 0;
 	else
