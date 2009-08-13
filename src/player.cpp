@@ -22,6 +22,9 @@ Player::Player(){
 	mSampleIndex = 0;
 	mSampleIndexResidual = 0.0;
 	mRubberBandStretcher = NULL;
+
+	//by default we start at the beginning of the audio
+	mStartPosition.at_bar(0);
 }
 
 Player::~Player(){
