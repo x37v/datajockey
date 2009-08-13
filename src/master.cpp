@@ -6,7 +6,7 @@ using namespace DataJockey;
 Master::Master(unsigned int numPlayers){
 	mCueBuffer = NULL;
 	for(unsigned int i = 0; i < numPlayers; i++)
-		add_player(new Player);
+		add_player();
 	mMasterVolume = 1.0;
 	mCueVolume = 1.0;
 	mCueBuffer = NULL;
@@ -36,6 +36,9 @@ Master::~Master(){
 		delete [] mCrossFadeBuffer[0];
 		delete [] mCrossFadeBuffer[1];
 		delete [] mCrossFadeBuffer;
+	}
+	for(unsigned int i = 0; i < mPlayers.size(); i++){
+		delete mPlayers[i];
 	}
 	
 }
@@ -82,8 +85,8 @@ void Master::setup_audio(
 	mCrossFadeBuffer[1] = new float[maxBufferLen];
 }
 
-void Master::add_player(Player * p){
-	mPlayers.push_back(p);
+void Master::add_player(){
+	mPlayers.push_back(new Player);
 }
 
 void Master::audio_compute_and_fill(
@@ -169,6 +172,10 @@ unsigned int Master::cross_fade_mixer(unsigned int index) const {
 		return 0;
 	else
 		return mCrossFadeMixers[index];
+}
+
+const std::vector<Player *>& Master::players() const{
+	return mPlayers;
 }
 
 //setters

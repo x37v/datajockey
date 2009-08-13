@@ -16,7 +16,7 @@ namespace DataJockey {
 					unsigned int sampleRate,
 					unsigned int maxBufferLen);
 			//cannot be called while audio callback is running
-			void add_player(Player * p);
+			void add_player();
 			//actually compute nframes of audio
 			void audio_compute_and_fill(JackCpp::AudioIO::audioBufVector outBufferVector,
 					unsigned int numFrames);
@@ -27,6 +27,7 @@ namespace DataJockey {
 			bool cross_fadeing() const;
 			float cross_fade_position() const;
 			unsigned int cross_fade_mixer(unsigned int index) const;
+			const std::vector<Player *>& players() const;
 
 			//setters
 			void master_volume(float val);
