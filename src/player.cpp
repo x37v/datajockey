@@ -191,19 +191,24 @@ void Player::play_speed(double val){
 	mPlaySpeed = val;
 }
 
-void Player::position(TimePoint val){
+void Player::position(const TimePoint &val){
+	mPosition = val;
 }
 
-void Player::start_position(TimePoint val){
+void Player::start_position(const TimePoint &val){
+	mStartPosition = val;
 }
 
-void Player::end_position(TimePoint val){
+void Player::end_position(const TimePoint &val){
+	mEndPosition = val;
 }
 
-void Player::loop_start_position(TimePoint val){
+void Player::loop_start_position(const TimePoint &val){
+	mLoopStartPosition = val;
 }
 
-void Player::loop_end_position(TimePoint val){
+void Player::loop_end_position(const TimePoint &val){
+	mLoopEndPosition = val;
 }
 
 void Player::audio_buffer(AudioBuffer * buf){
@@ -218,9 +223,11 @@ void Player::position_relative(TimePoint amt){
 }
 
 void Player::Player::play_speed_relative(double amt){
+	mPlaySpeed += amt;
 }
 
 void Player::Player::Player::volume_relative(double amt){
+	mVolume += amt;
 }
 
 //command stuff

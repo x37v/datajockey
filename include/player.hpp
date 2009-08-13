@@ -64,11 +64,11 @@ namespace DataJockey {
 			void loop(bool val);
 			void volume(double val);
 			void play_speed(double val);
-			void position(TimePoint val);
-			void start_position(TimePoint val);
-			void end_position(TimePoint val);
-			void loop_start_position(TimePoint val);
-			void loop_end_position(TimePoint val);
+			void position(const TimePoint &val);
+			void start_position(const TimePoint &val);
+			void end_position(const TimePoint &val);
+			void loop_start_position(const TimePoint &val);
+			void loop_end_position(const TimePoint &val);
 			void audio_buffer(AudioBuffer * buf);
 
 			//misc
