@@ -1,6 +1,7 @@
 #ifndef DATAJOCKEY_PLAYER_HPP
 #define DATAJOCKEY_PLAYER_HPP
 
+#include "command.hpp"
 #include "timepoint.hpp"
 #include "transport.hpp"
 #include "jackaudioio.hpp"
@@ -68,6 +69,7 @@ namespace DataJockey {
 			void end_position(TimePoint val);
 			void loop_start_position(TimePoint val);
 			void loop_end_position(TimePoint val);
+			void audio_buffer(AudioBuffer * buf);
 
 			//misc
 			void position_relative(TimePoint amt); //go to a position relative to the current position
@@ -98,10 +100,67 @@ namespace DataJockey {
 			unsigned int mSampleIndex;
 			double mSampleIndexResidual;
 			RubberBand::RubberBandStretcher * mRubberBandStretcher;
-
-		public:
 			AudioBuffer * mAudioBuffer;
 	};
+	class PlayerCommand : public Command {
+		public:
+			PlayerCommand(Player * player);
+			//getters
+			Player * player();
+			TimePoint position_executed();
+			//setters
+			void position_executed(TimePoint const & t);
+		private:
+			Player * mPlayer;
+			//this comes from the player's position
+			TimePoint mPositionExecuted;
+	};
+	class PlayerStateCommand : public PlayerCommand {
+		public:
+			enum action_t {
+				PLAY, PAUSE,
+				OUT_MAIN, OUT_CUE,
+				SYNC, NO_SYNC,
+				MUTE, NO_MUTE,
+				LOOP, NO_LOOP
+			};
+			PlayerStateCommand(Player * player, action_t action);
+			virtual void execute();
+		private:
+			action_t mAction;
+	};
+	class PlayerDoubleCommand : public PlayerCommand {
+		public:
+			enum action_t {
+				VOLUME, VOLUME_RELATIVE,
+				PLAY_SPEED, PLAY_SPEED_RELATIVE
+			};
+			PlayerDoubleCommand(Player * player, action_t action, double value);
+			virtual void execute();
+		private:
+			action_t mAction;
+			double mValue;
+	};
+	class PlayerLoadCommand : public PlayerCommand {
+		public:
+			PlayerLoadCommand(Player * player, AudioBuffer * buffer);
+			virtual void execute();
+		private:
+			AudioBuffer * mAudioBuffer;
+	};
+	class PlayerPositionCommand : public PlayerCommand {
+		public:
+			enum position_t {
+				PLAY, PLAY_RELATIVE, 
+				START, END, LOOP_START, LOOP_END
+			};
+			PlayerPositionCommand(Player * player, position_t target, TimePoint & timepoint);
+			virtual void execute();
+		private:
+			position_t mTarget;
+			TimePoint mTimePoint;
+	};
+
 }
 
 #endif

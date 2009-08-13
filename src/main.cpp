@@ -17,11 +17,11 @@ int main(int argc, char * argv[]){
 
 	audioio.master()->add_player(&player);
 	audioio.master()->add_player(&player2);
-	player.mAudioBuffer = &buffer;
+	player.audio_buffer(&buffer);
 	player.play_state(DataJockey::Player::PLAY);
 	player.play_speed(0.95);
 
-	player2.mAudioBuffer = &buffer2;
+	player2.audio_buffer(&buffer2);
 	player2.play_state(DataJockey::Player::PLAY);
 	player2.play_speed(1.1);
 

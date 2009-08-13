@@ -8,7 +8,7 @@ Player::Player(){
 	//states
 	mPlayState = PAUSE;
 	mOutState = CUE;
-	mStretchMethod = PLAY_RATE;
+	mStretchMethod = RUBBER_BAND;
 	mMute = false;
 	mSync = false;
 	mLoop = false;
@@ -108,7 +108,7 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 
 				if(mRubberBandStretcher->retrieve(tmp, 1)){
 					for(unsigned int i = 0; i < 2; i++){
-						mixBuffer[i][frame] = tmp[i][0];
+						mixBuffer[i][frame] = *tmp[i];
 					}
 				}
 				break;
@@ -203,6 +203,10 @@ void Player::loop_start_position(TimePoint val){
 void Player::loop_end_position(TimePoint val){
 }
 
+void Player::audio_buffer(AudioBuffer * buf){
+	mAudioBuffer = buf;
+}
+
 
 //misc
 void Player::position_relative(TimePoint amt){
@@ -214,3 +218,147 @@ void Player::Player::play_speed_relative(double amt){
 void Player::Player::Player::volume_relative(double amt){
 }
 
+//command stuff
+//
+PlayerCommand::PlayerCommand(Player * player){
+	mPlayer = player;
+}
+
+Player * PlayerCommand::player(){ return mPlayer; }
+TimePoint PlayerCommand::position_executed(){ return mPositionExecuted; }
+void PlayerCommand::position_executed(TimePoint const & t){
+	mPositionExecuted = t;
+}
+
+PlayerStateCommand::PlayerStateCommand(Player * player, action_t action) :
+	PlayerCommand(player)
+{
+	mAction = action;
+}
+
+void PlayerStateCommand::execute(){
+	Player * p = player(); 
+	if(p != NULL){
+		//store the time executed
+		position_executed(p->position());
+		//execute the action
+		switch(mAction){
+			case PLAY:
+				p->play_state(Player::PLAY);
+				break;
+			case PAUSE:
+				p->play_state(Player::PAUSE);
+				break;
+			case OUT_MAIN:
+				p->out_state(Player::MAIN_MIX);
+				break;
+			case OUT_CUE:
+				p->out_state(Player::CUE);
+				break;
+			case SYNC:
+				p->sync(true);
+				break;
+			case NO_SYNC:
+				p->sync(false);
+				break;
+			case MUTE:
+				p->mute(true);
+				break;
+			case NO_MUTE:
+				p->mute(false);
+				break;
+			case LOOP:
+				p->loop(true);
+				break;
+			case NO_LOOP:
+				p->loop(false);
+				break;
+		};
+	}
+}
+
+PlayerDoubleCommand::PlayerDoubleCommand(Player * player, 
+		action_t action, double value) :
+	PlayerCommand(player)
+{
+	mAction = action;
+	mValue = value;
+	
+}
+
+void PlayerDoubleCommand::execute(){
+	Player * p = player(); 
+	if(p != NULL){
+		//store the time executed
+		position_executed(p->position());
+		//execute the action
+		switch(mAction){
+			case VOLUME:
+				p->volume(mValue);
+				break;
+			case VOLUME_RELATIVE:
+				p->volume_relative(mValue);
+				break;
+			case PLAY_SPEED:
+				p->play_speed(mValue);
+				break;
+			case PLAY_SPEED_RELATIVE:
+				p->play_speed_relative(mValue);
+				break;
+		};
+	}
+}
+
+PlayerLoadCommand::PlayerLoadCommand(Player * player, AudioBuffer * buffer) : 
+	PlayerCommand(player)
+{
+	mAudioBuffer = buffer;
+}
+
+void PlayerLoadCommand::execute(){
+	Player * p = player(); 
+	if(p != NULL){
+		//store the time executed
+		position_executed(p->position());
+		//execute the action
+		p->audio_buffer(mAudioBuffer);
+	}
+}
+
+
+PlayerPositionCommand::PlayerPositionCommand(Player * player, 
+		position_t target, TimePoint & timepoint) : 
+	PlayerCommand(player)
+{
+	mTimePoint = timepoint;
+	mTarget = target;
+}
+
+void PlayerPositionCommand::execute(){
+	Player * p = player(); 
+	if(p != NULL){
+		//store the time executed
+		position_executed(p->position());
+		//execute the action
+		switch(mTarget){
+			case PLAY:
+				p->position(mTimePoint);
+				break;
+			case PLAY_RELATIVE:
+				p->position_relative(mTimePoint);
+				break;
+			case START:
+				p->start_position(mTimePoint);
+				break;
+			case END:
+				p->end_position(mTimePoint);
+				break;
+			case LOOP_START:
+				p->loop_start_position(mTimePoint);
+				break;
+			case LOOP_END:
+				p->loop_end_position(mTimePoint);
+				break;
+		};
+	}
+}
