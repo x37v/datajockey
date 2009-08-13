@@ -154,11 +154,11 @@ bool Player::syncing(){ return mSync; }
 bool Player::looping(){ return mLoop; }
 double Player::volume(){ return mVolume; }
 double Player::play_speed(){ return mPlaySpeed; }
-TimePoint Player::position(){ return mPosition; }
-TimePoint Player::start_position(){ return mStartPosition; }
-TimePoint Player::end_position(){ return mEndPosition; }
-TimePoint Player::loop_start_position(){ return mLoopStartPosition; }
-TimePoint Player::loop_end_position(){ return mLoopEndPosition; }
+const TimePoint& Player::position(){ return mPosition; }
+const TimePoint& Player::start_position(){ return mStartPosition; }
+const TimePoint& Player::end_position(){ return mEndPosition; }
+const TimePoint& Player::loop_start_position(){ return mLoopStartPosition; }
+const TimePoint& Player::loop_end_position(){ return mLoopEndPosition; }
 
 //setters
 void Player::play_state(play_state_t val){
@@ -339,7 +339,7 @@ void PlayerLoadCommand::execute(){
 
 
 PlayerPositionCommand::PlayerPositionCommand(Player * player, 
-		position_t target, TimePoint & timepoint) : 
+		position_t target, const TimePoint & timepoint) : 
 	PlayerCommand(player)
 {
 	mTimePoint = timepoint;

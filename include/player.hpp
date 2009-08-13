@@ -49,11 +49,11 @@ namespace DataJockey {
 			bool looping();
 			double volume();
 			double play_speed();
-			TimePoint position();
-			TimePoint start_position();
-			TimePoint end_position();
-			TimePoint loop_start_position();
-			TimePoint loop_end_position();
+			const TimePoint& position();
+			const TimePoint& start_position();
+			const TimePoint& end_position();
+			const TimePoint& loop_start_position();
+			const TimePoint& loop_end_position();
 
 			//setters
 			void play_state(play_state_t val);
@@ -154,7 +154,7 @@ namespace DataJockey {
 				PLAY, PLAY_RELATIVE, 
 				START, END, LOOP_START, LOOP_END
 			};
-			PlayerPositionCommand(Player * player, position_t target, TimePoint & timepoint);
+			PlayerPositionCommand(Player * player, position_t target, const TimePoint & timepoint);
 			virtual void execute();
 		private:
 			position_t mTarget;
