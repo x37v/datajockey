@@ -16,7 +16,7 @@ BeatBuffer::BeatBuffer(std::string dataLocation)
 }
 
 //XXX assuming 4/4
-double BeatBuffer::time_at_position(const TimePoint position) const {
+double BeatBuffer::time_at_position(const TimePoint& position) const {
 	if(TimePoint::SECONDS == position.type())
 		return position.seconds();
 	else {
@@ -44,10 +44,22 @@ double BeatBuffer::time_at_position(const TimePoint position) const {
 
 TimePoint BeatBuffer::position_at_time(double seconds) const {
 	TimePoint pos;
-	unsigned int size;
-	size = mBeatData.size();
+	pos.at_bar(0);
+	return position_at_time(seconds, pos);
+}
+
+TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos) const {
+	TimePoint pos;
+	unsigned int size = mBeatData.size();
+	unsigned int start = mStartBeat;
+
 	if(size > 0 && seconds >= 0){
-		for(unsigned int i = mStartBeat; i < size; i++){
+		//advance to the last position
+		//XXX what about TimePoint::SECONDS types?
+		if(lastPos.type() == TimePoint::BEAT_BAR)
+			start += lastPos.beats_per_bar() * lastPos.bar() + lastPos.beat();
+
+		for(unsigned int i = start; i < size; i++){
 			//XXX assuming 4/4
 			if(mBeatData[i] == seconds)
 				pos.at_bar((i - mStartBeat) / 4, (i - mStartBeat) % 4);
