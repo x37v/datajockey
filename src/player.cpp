@@ -205,6 +205,8 @@ void Player::loop_end_position(TimePoint val){
 
 void Player::audio_buffer(AudioBuffer * buf){
 	mAudioBuffer = buf;
+	//set at the start
+	mPosition = mStartPosition;
 }
 
 
