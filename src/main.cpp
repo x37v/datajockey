@@ -1,4 +1,5 @@
 #include "audiobuffer.hpp"
+#include "beatbuffer.hpp"
 #include "audioio.hpp"
 #include "player.hpp"
 #include "master.hpp"
@@ -9,25 +10,29 @@ using std::cout;
 using std::endl;
 
 int main(int argc, char * argv[]){
-	if(argc < 3)
-		return -1;
+	//if(argc < 3)
+		//return -1;
 	DataJockey::AudioIO audioio;
-	DataJockey::AudioBuffer buffer(argv[1]);
-	DataJockey::AudioBuffer buffer2(argv[2]);
+	DataJockey::AudioBuffer buffer("/mp3/model_500/classics/02-the_chase_smooth_remix.flac");
+	DataJockey::BeatBuffer beatBuffer("/home/alex/.datajockey/annotation/2.yaml");
+	DataJockey::AudioBuffer buffer2("/mp3/new_order/movement/01-dreams_never_end.flac");
+	DataJockey::BeatBuffer beatBuffer2("/home/alex/.datajockey/annotation/2186.yaml");
 	DataJockey::Master * master = audioio.master();
 	master->add_player();
 	master->add_player();
 
 	master->players()[0]->audio_buffer(&buffer);
+	master->players()[0]->beat_buffer(&beatBuffer);
 	master->players()[0]->play_state(DataJockey::Player::PLAY);
 	master->players()[0]->play_speed(0.95);
 
 	master->players()[1]->audio_buffer(&buffer2);
+	master->players()[1]->beat_buffer(&beatBuffer2);
 	master->players()[1]->play_state(DataJockey::Player::PLAY);
 	master->players()[1]->play_speed(1.1);
 	
 	DataJockey::TimePoint pos;
-	pos.at_bar(20, 1);
+	pos.at_bar(20, 0);
 	master->players()[0]->position(pos);
 
 	cout << "starting" << endl;
