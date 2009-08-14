@@ -75,8 +75,9 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 		mPlayState = PAUSE;
 
 	if(mStretchMethod == RUBBER_BAND){
-		mRubberBandStretcher->setTimeRatio(1.0 / mPlaySpeed);
 		if(mPlayState == PLAY){
+			//XXX SYNC not implemented yet!
+			mRubberBandStretcher->setTimeRatio(1.0 / mPlaySpeed);
 			while(mRubberBandStretcher->available() < numFrames){
 				unsigned int winSize = MIN(RUBBERBAND_WINDOW_SIZE, numFrames);
 				for(unsigned int i = 0; i < 2; i++){
@@ -89,13 +90,18 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 			}
 		}
 		mSampleIndexResidual = 0;
-	}
+		//update our position
+		if(mBeatBuffer){
+			mPosition = mBeatBuffer->position_at_time(
+					(double)mSampleIndex / (double)mSampleRate, mPosition);
+		}
+	} 
 }
 
 //actually compute one frame, filling an internal buffer
 //syncing to the transport if mSync == true
 void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer, 
-		const Transport& transport){
+		const Transport& transport, bool inbeat){
 	if(!mAudioBuffer)
 		return;
 	//zero out the frame;
@@ -103,37 +109,29 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 	//compute the volume
 	mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
-	//do we need to update the mSampleIndex based on the position?
-	if(mPositionDirty)
-		update_position(transport);
-
-	/*
-	 * XXX
-	 we should really just update the speed so that our beats line up
-	 but we should also offset based on when we started playing
-	 if(mSync && mBeatBuffer)
-	 position(transport.position());
-	 */
-	/*
-	if(mSync && mBeatBuffer){
-		TimePoint next = mPosition;
-		double next_beat_time = transport.seconds_till_next_beat();
-		next.advance_beat();
-		next.pos_in_beat(0.0);
-		if(next_beat_time != 0){
-			double newSpeed 
-				= mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
-			newSpeed /= next_beat_time; 
-			if(newSpeed > 0.1 && newSpeed < 8)
-				mPlaySpeed = newSpeed;
-		}
-	}
-	 */
-
 	//compute the actual frame
 	if(mPlayState == PLAY){
 		switch(mStretchMethod){
 			case PLAY_RATE:
+				//do we need to update the mSampleIndex based on the position?
+				if(mPositionDirty)
+					update_position(transport);
+				//only update the rate on the beat.
+				if(inbeat && mSync && mBeatBuffer){
+					double secTillBeat = transport.seconds_till_next_beat();
+					if(secTillBeat != 0){
+						TimePoint next = mPosition;
+						next.advance_beat();
+						next.pos_in_beat(0.0);
+						double newSpeed = mBeatBuffer->time_at_position(next) - 
+							mBeatBuffer->time_at_position(mPosition);
+						newSpeed /= secTillBeat; 
+						//XXX should make this a setting
+						if(newSpeed > 0.25 && newSpeed < 4)
+							mPlaySpeed = newSpeed;
+					}
+				}
+
 				for(unsigned int i = 0; i < 2; i++){
 					mixBuffer[i][frame] = 
 						mAudioBuffer->sample(i, mSampleIndex, mSampleIndexResidual);
@@ -141,6 +139,11 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 				mSampleIndexResidual += mPlaySpeed;
 				mSampleIndex += floor(mSampleIndexResidual);
 				mSampleIndexResidual -= floor(mSampleIndexResidual);
+				//update our position
+				if(mBeatBuffer){
+					mPosition = mBeatBuffer->position_at_time(
+							((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
+				}
 				break;
 			case RUBBER_BAND:
 				//XXX can't this be simplified?
@@ -158,11 +161,6 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 				break;
 			default:
 				break;
-		}
-		//update our position
-		if(mBeatBuffer){
-			mPosition = mBeatBuffer->position_at_time(
-					((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
 		}
 	}
 }

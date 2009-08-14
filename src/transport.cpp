@@ -16,18 +16,20 @@ void Transport::setup(unsigned int sampleRate){
 	bpm(mBPM);
 }
 
-void Transport::tick(){
+bool Transport::tick(){
 	double index = mPosition.pos_in_beat() + mIncrement;
 	if(index >= 1.0){
 		while(index >= 1.0){
 			index -= 1.0;
 			mPosition.advance_beat();
 		}
-		mSecondsTillNextBeat = 0;
 		mPosition.pos_in_beat(index);
+		mSecondsTillNextBeat = (1.0 - index) * 60.0 / mBPM;
+		return true;
 	} else {
 		mPosition.pos_in_beat(index);
 		mSecondsTillNextBeat = (1.0 - index) * 60.0 / mBPM;
+		return false;
 	}
 }
 

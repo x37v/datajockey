@@ -33,9 +33,11 @@ namespace DataJockey {
 			void audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 					const Transport& transport); 
 			//actually compute one frame, filling an internal buffer
-			//syncing to the transport if mSync == true
+			//syncing to the transport if mSync == true,
+			//inbeat reflects if the transport computed a new beat on the last
+			//tick
 			void audio_compute_frame(unsigned int frame, float ** mixBuffer, 
-					const Transport& transport); 
+					const Transport& transport, bool inbeat); 
 			//finalize audio computation, apply effects, etc.
 			void audio_post_compute(unsigned int numFrames, float ** mixBuffer); 
 			//actually fill the output vectors

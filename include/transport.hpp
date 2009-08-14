@@ -18,8 +18,9 @@ namespace DataJockey {
 			void bpm(double val);
 
 			//misc
-			void tick();
-			//only valid right after a tick()
+			//tick the clock, outputs true if new beat, false otherwise
+			bool tick();
+			//only valid right after tick() 
 			double seconds_till_next_beat() const;
 			
 			//virtual void start() = 0;
