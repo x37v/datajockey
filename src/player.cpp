@@ -90,12 +90,12 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 				mSampleIndex += winSize;
 				mRubberBandStretcher->process(mixBuffer, winSize, false);
 			}
-		}
-		mSampleIndexResidual = 0;
-		//update our position
-		if(mBeatBuffer){
-			mPosition = mBeatBuffer->position_at_time(
-					(double)mSampleIndex / (double)mSampleRate, mPosition);
+			mSampleIndexResidual = 0;
+			//update our position
+			if(mBeatBuffer){
+				mPosition = mBeatBuffer->position_at_time(
+						(double)mSampleIndex / (double)mSampleRate, mPosition);
+			}
 		}
 	} 
 }
@@ -164,6 +164,7 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 						position(mLoopStartPosition);
 					}
 				}
+				//XXX deal with position if there is no beat buffer
 				break;
 			case RUBBER_BAND:
 				float *tmp[2], vals[2];
