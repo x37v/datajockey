@@ -113,16 +113,23 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 	if(mPlayState == PLAY){
 		switch(mStretchMethod){
 			case PLAY_RATE:
-				//do we need to update the mSampleIndex based on the position?
-				if(mPositionDirty)
-					update_position(transport);
 				//only update the rate on the beat.
 				if(inbeat && mSync && mBeatBuffer){
 					double secTillBeat = transport.seconds_till_next_beat();
+					//we don't want to advance a beat if we just got to where
+					//we want to be
+					if(mPositionDirty)
+						update_position(transport);
+					else {
+						//on beat we advance our beat,
+						//make our pos_in_beat the same as the transport
+						mPosition.advance_beat();
+						mPosition.pos_in_beat(transport.position().pos_in_beat());
+						update_position(transport);
+					}
 					if(secTillBeat != 0){
 						TimePoint next = mPosition;
 						next.advance_beat();
-						next.pos_in_beat(0.0);
 						double newSpeed = mBeatBuffer->time_at_position(next) - 
 							mBeatBuffer->time_at_position(mPosition);
 						newSpeed /= secTillBeat; 
@@ -130,7 +137,9 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 						if(newSpeed > 0.25 && newSpeed < 4)
 							mPlaySpeed = newSpeed;
 					}
-				}
+				//do we need to update the mSampleIndex based on the position?
+				} else if(mPositionDirty)
+					update_position(transport);
 
 				for(unsigned int i = 0; i < 2; i++){
 					mixBuffer[i][frame] = 
@@ -146,12 +155,9 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 				}
 				break;
 			case RUBBER_BAND:
-				//XXX can't this be simplified?
-				float *tmp[2];
-				float right;
-				float left;
-				tmp[0] = &right;
-				tmp[1] = &left;
+				float *tmp[2], vals[2];
+				tmp[0] = &vals[0];
+				tmp[1] = &vals[2];
 
 				if(mRubberBandStretcher->retrieve(tmp, 1)){
 					for(unsigned int i = 0; i < 2; i++){
