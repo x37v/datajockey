@@ -31,6 +31,15 @@ namespace DataJockey {
 			
 			void advance_beat();
 			void invalidate();
+
+			//comparison operators
+			//XXX should throw error if comparing against invalid or wrong type ?
+			bool operator==(const TimePoint &other) const;
+			bool operator!=(const TimePoint &other) const;
+			bool operator<(const TimePoint &other) const;
+			bool operator>(const TimePoint &other) const;
+			bool operator<=(const TimePoint &other) const;
+			bool operator>=(const TimePoint &other) const;
 		private:
 			time_type mType;
 			//mirroring jack transport

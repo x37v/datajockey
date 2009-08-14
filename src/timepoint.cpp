@@ -91,3 +91,96 @@ void TimePoint::invalidate(){
 	mPosInBeat = -1; 
 }
 
+bool TimePoint::operator==(const TimePoint &other) const {
+	if(other.valid() && valid()){
+		if(other.type() == SECONDS){ 
+			if(this->type() != SECONDS)
+				return false;
+			else if (this->seconds() != other.seconds())
+				return false;
+			else
+				return true;
+		} else {
+			//XXX we should do transformations between time
+			//signatures here..
+			if(this->type() != BEAT_BAR)
+				return false;
+			else if(this->bar() != other.bar() ||
+					this->beat() != other.beat() ||
+					this->pos_in_beat() != other.pos_in_beat() ||
+					this->beat_type() != other.beat_type() ||
+					this->beats_per_bar() != other.beats_per_bar())
+				return false;
+			else
+				return true;
+		}
+	} else
+		return false;
+}
+
+bool TimePoint::operator!=(const TimePoint &other) const {
+	return !(*this == other);
+}
+
+bool TimePoint::operator<(const TimePoint &other) const {
+	if(other.valid() && valid()){
+		if(other.type() == SECONDS){ 
+			if(this->type() != SECONDS)
+				return false;
+			else if (this->seconds() < other.seconds())
+				return true;
+			else
+				return false;
+		} else {
+			if(this->type() != BEAT_BAR)
+				return false;
+			else {
+				//XXX ignoring beat_type!  Assuing x/4
+				unsigned int this_beats = this->beat() + this->bar() * this->beats_per_bar();
+				unsigned int other_beats = other.beat() + other.bar() * other.beats_per_bar();
+				if(this_beats < other_beats || 
+						(this_beats == other_beats && this->pos_in_beat() < other.pos_in_beat()))
+					return true;
+				else 
+					return false;
+			}
+		}
+	} else
+		return false;
+}
+
+bool TimePoint::operator>(const TimePoint &other) const {
+	if(other.valid() && valid()){
+		if(other.type() == SECONDS){ 
+			if(this->type() != SECONDS)
+				return false;
+			else if (this->seconds() > other.seconds())
+				return true;
+			else
+				return false;
+		} else {
+			if(this->type() != BEAT_BAR)
+				return false;
+			else {
+				//XXX ignoring beat_type!  Assuing x/4
+				unsigned int this_beats = this->beat() + this->bar() * this->beats_per_bar();
+				unsigned int other_beats = other.beat() + other.bar() * other.beats_per_bar();
+				if(this_beats > other_beats || 
+						(this_beats == other_beats && this->pos_in_beat() > other.pos_in_beat()))
+					return true;
+				else 
+					return false;
+			}
+		}
+	} else
+		return false;
+}
+
+bool TimePoint::operator<=(const TimePoint &other) const {
+	return ((*this < other) || (*this == other));
+}
+
+bool TimePoint::operator>=(const TimePoint &other) const {
+	return ((*this > other) || (*this == other));
+}
+

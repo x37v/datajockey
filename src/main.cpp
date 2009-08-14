@@ -41,10 +41,11 @@ int main(int argc, char * argv[]){
 
 	
 	DataJockey::TimePoint pos;
+	DataJockey::TimePoint pos2;
 	pos.at_bar(1, 0);
 	master->players()[0]->position(pos);
-	pos.at_bar(1, 3);
-	master->players()[1]->position(pos);
+	pos2.at_bar(1, 3);
+	master->players()[1]->position(pos2);
 
 	cout << "starting" << endl;
 	audioio.start();
