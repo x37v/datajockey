@@ -73,6 +73,8 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 
 	if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
 		mPlayState = PAUSE;
+	if(mEndPosition.valid() && mPosition >= mEndPosition)
+		mPlayState = PAUSE;
 
 	if(mStretchMethod == RUBBER_BAND){
 		if(mPlayState == PLAY){
@@ -152,6 +154,15 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 				if(mBeatBuffer){
 					mPosition = mBeatBuffer->position_at_time(
 							((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
+				}
+				//if we've reached the end then stop, if we've reached the end of the loop
+				//reposition to the beginning of the loop
+				if(mEndPosition.valid() && mPosition >= mEndPosition)
+					mPlayState = PAUSE;
+				else if(mLoop && mLoopEndPosition.valid() && 
+						mLoopStartPosition.valid() &&
+						mPosition >= mLoopEndPosition) {
+					position(mLoopStartPosition);
 				}
 				break;
 			case RUBBER_BAND:
@@ -235,6 +246,7 @@ void Player::sync(bool val){
 }
 
 void Player::loop(bool val){
+	mLoop = val;
 }
 
 void Player::volume(double val){

@@ -44,8 +44,13 @@ int main(int argc, char * argv[]){
 	DataJockey::TimePoint pos2;
 	pos.at_bar(1, 0);
 	master->players()[0]->position(pos);
-	pos2.at_bar(1, 3);
+
+	pos2.at_bar(1, 1);
 	master->players()[1]->position(pos2);
+	master->players()[1]->loop_start_position(pos2);
+	pos2.at_bar(3, 1);
+	master->players()[1]->loop_end_position(pos2);
+	master->players()[1]->loop(true);
 
 	cout << "starting" << endl;
 	audioio.start();
@@ -57,9 +62,9 @@ int main(int argc, char * argv[]){
 
 	master->cross_fade(true);
 	master->cross_fade_mixers(0,1);
-	master->cross_fade_position(0);
-	sleep(10);
-	for(unsigned int i = 0; i <= 10; i++){
+	master->cross_fade_position(0.5);
+	sleep(20);
+	for(unsigned int i = 5; i <= 10; i++){
 		master->cross_fade_position((float)i * 0.1);
 		cout << master->cross_fade_position() << endl;
 		sleep(1);
@@ -67,7 +72,10 @@ int main(int argc, char * argv[]){
 	sleep(1);
 	cout << "ending sync" << endl;
 	master->players()[1]->sync(false);
-	sleep(20);
+	sleep(10);
+	cout << "ending loop" << endl;
+	master->players()[1]->loop(false);
+	sleep(10);
 	cout << "stopping" << endl;
 	audioio.stop();
 	sleep(1);
