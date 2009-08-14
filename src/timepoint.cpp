@@ -77,6 +77,12 @@ void TimePoint::at_beat(unsigned int newBeat, double newPos){
 	pos_in_beat(newPos);
 }
 
+void TimePoint::advance_beat(){
+	mBeat += 1;
+	while(mBeat >= mBeatsPerBar)
+		mBar += 1;
+}
+
 void TimePoint::invalidate(){
 	mSeconds = -1;
 	mBar = mBeat = 0;

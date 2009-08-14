@@ -29,6 +29,7 @@ namespace DataJockey {
 			void at_bar(unsigned int newBar, unsigned int newBeat = 0, double newPos = 0.0);
 			void at_beat(unsigned int newBeat, double newPos = 0.0);
 			
+			void advance_beat();
 			void invalidate();
 		private:
 			time_type mType;
