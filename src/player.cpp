@@ -8,7 +8,7 @@ Player::Player(){
 	//states
 	mPlayState = PAUSE;
 	mOutState = CUE;
-	mStretchMethod = RUBBER_BAND;
+	mStretchMethod = PLAY_RATE;
 	mMute = false;
 	mSync = false;
 	mLoop = false;
@@ -19,6 +19,7 @@ Player::Player(){
 
 	mVolumeBuffer = NULL;
 	mAudioBuffer = NULL;
+	mBeatBuffer = NULL;
 	mSampleIndex = 0;
 	mSampleIndexResidual = 0.0;
 	mRubberBandStretcher = NULL;
@@ -59,6 +60,8 @@ void Player::setup_audio(
 //the audio computation methods
 //setup for audio computation
 void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer){
+	if(!mAudioBuffer)
+		return;
 	if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
 		mPlayState = PAUSE;
 
@@ -83,7 +86,9 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer){
 //actually compute one frame, filling an internal buffer
 //syncing to the transport if mSync == true
 void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer, 
-		const Transport * transport){
+		const Transport& transport){
+	if(!mAudioBuffer)
+		return;
 	//zero out the frame;
 	mixBuffer[0][frame] = mixBuffer[1][frame] = 0.0;
 	//compute the volume
@@ -123,11 +128,15 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 
 //finalize audio computation, apply effects, etc.
 void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
+	if(!mAudioBuffer)
+		return;
 }
 
 //actually fill the output vectors
 void Player::audio_fill_output_buffers(unsigned int numFrames,
 		float ** mixBuffer, float ** cueBuffer){
+	if(!mAudioBuffer)
+		return;
 
 	//send the data out, copying to the cue buffer before volume if needed
 	if(mOutState == CUE){
@@ -213,6 +222,12 @@ void Player::loop_end_position(const TimePoint &val){
 
 void Player::audio_buffer(AudioBuffer * buf){
 	mAudioBuffer = buf;
+	//set at the start
+	mPosition = mStartPosition;
+}
+
+void Player::beat_buffer(BeatBuffer * buf){
+	mBeatBuffer = buf;
 	//set at the start
 	mPosition = mStartPosition;
 }
@@ -321,10 +336,14 @@ void PlayerDoubleCommand::execute(){
 	}
 }
 
-PlayerLoadCommand::PlayerLoadCommand(Player * player, AudioBuffer * buffer) : 
+PlayerLoadCommand::PlayerLoadCommand(Player * player, 
+		AudioBuffer * buffer,
+		BeatBuffer * beatBuffer
+		) : 
 	PlayerCommand(player)
 {
 	mAudioBuffer = buffer;
+	mBeatBuffer = beatBuffer;
 }
 
 void PlayerLoadCommand::execute(){
@@ -334,6 +353,7 @@ void PlayerLoadCommand::execute(){
 		position_executed(p->position());
 		//execute the action
 		p->audio_buffer(mAudioBuffer);
+		p->beat_buffer(mBeatBuffer);
 	}
 }
 

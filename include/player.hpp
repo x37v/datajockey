@@ -6,6 +6,7 @@
 #include "transport.hpp"
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
+#include "beatbuffer.hpp"
 #include "RubberBandStretcher.h"
 
 namespace DataJockey {
@@ -33,7 +34,7 @@ namespace DataJockey {
 			//actually compute one frame, filling an internal buffer
 			//syncing to the transport if mSync == true
 			void audio_compute_frame(unsigned int frame, float ** mixBuffer, 
-					const Transport * transport); 
+					const Transport& transport); 
 			//finalize audio computation, apply effects, etc.
 			void audio_post_compute(unsigned int numFrames, float ** mixBuffer); 
 			//actually fill the output vectors
@@ -70,6 +71,7 @@ namespace DataJockey {
 			void loop_start_position(const TimePoint &val);
 			void loop_end_position(const TimePoint &val);
 			void audio_buffer(AudioBuffer * buf);
+			void beat_buffer(BeatBuffer * buf);
 
 			//misc
 			void position_relative(TimePoint amt); //go to a position relative to the current position
@@ -101,6 +103,7 @@ namespace DataJockey {
 			double mSampleIndexResidual;
 			RubberBand::RubberBandStretcher * mRubberBandStretcher;
 			AudioBuffer * mAudioBuffer;
+			BeatBuffer * mBeatBuffer;
 	};
 	class PlayerCommand : public Command {
 		public:
@@ -143,10 +146,11 @@ namespace DataJockey {
 	};
 	class PlayerLoadCommand : public PlayerCommand {
 		public:
-			PlayerLoadCommand(Player * player, AudioBuffer * buffer);
+			PlayerLoadCommand(Player * player, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
 			virtual void execute();
 		private:
 			AudioBuffer * mAudioBuffer;
+			BeatBuffer * mBeatBuffer;
 	};
 	class PlayerPositionCommand : public PlayerCommand {
 		public:

@@ -83,6 +83,7 @@ void Master::setup_audio(
 	mCrossFadeBuffer = new float*[2];
 	mCrossFadeBuffer[0] = new float[maxBufferLen];
 	mCrossFadeBuffer[1] = new float[maxBufferLen];
+	mTransport.setup(sampleRate);
 }
 
 void Master::add_player(){
@@ -98,6 +99,8 @@ void Master::audio_compute_and_fill(
 
 	//compute their samples [and do other stuff]
 	for(unsigned int frame = 0; frame < numFrames; frame++){
+		//tick the transport
+		mTransport.tick();
 		for(unsigned int chan = 0; chan < 2; chan++){
 			//zero out the cue buffer
 			mCueBuffer[chan][frame] = 0.0;
@@ -121,7 +124,7 @@ void Master::audio_compute_and_fill(
 		for(unsigned int chan = 0; chan < 4; chan++)
 			outBufferVector[chan][frame] = 0.0;
 		for(unsigned int p = 0; p < mPlayers.size(); p++)
-			mPlayers[p]->audio_compute_frame(frame, mPlayerBuffers[p], NULL);
+			mPlayers[p]->audio_compute_frame(frame, mPlayerBuffers[p], mTransport);
 		//set volume
 		mMasterVolumeBuffer[frame] = mMasterVolume;
 	}

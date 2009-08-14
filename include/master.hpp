@@ -2,6 +2,7 @@
 #define DATAJOCKEY_MIXER_HPP
 
 #include "player.hpp"
+#include "transport.hpp"
 #include <vector>
 
 namespace DataJockey {
@@ -43,6 +44,7 @@ namespace DataJockey {
 			float ** mCrossFadeBuffer;
 
 			std::vector<Player *> mPlayers;
+			Transport mTransport;
 			float mMasterVolume;
 			float mCueVolume;
 			unsigned int mCrossFadeMixers[2];
