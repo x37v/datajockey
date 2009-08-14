@@ -103,7 +103,7 @@ namespace DataJockey {
 			//internals, bookkeeping, etc
 			unsigned int mSampleRate;
 			float * mVolumeBuffer;
-			unsigned int mSampleIndex;
+			unsigned long mSampleIndex;
 			double mSampleIndexResidual;
 			RubberBand::RubberBandStretcher * mRubberBandStretcher;
 			AudioBuffer * mAudioBuffer;

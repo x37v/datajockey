@@ -25,6 +25,8 @@ int main(int argc, char * argv[]){
 	master->players()[0]->beat_buffer(&beatBuffer);
 	master->players()[0]->play_state(DataJockey::Player::PLAY);
 	master->players()[0]->play_speed(0.95);
+	master->players()[0]->sync(true);
+
 
 	master->players()[1]->audio_buffer(&buffer2);
 	master->players()[1]->beat_buffer(&beatBuffer2);

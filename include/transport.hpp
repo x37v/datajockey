@@ -19,6 +19,8 @@ namespace DataJockey {
 
 			//misc
 			void tick();
+			//only valid right after a tick()
+			double seconds_till_next_beat() const;
 			
 			//virtual void start() = 0;
 			//virtual void stop() = 0;
@@ -28,6 +30,9 @@ namespace DataJockey {
 			double mBPM;
 			unsigned int mSampleRate;
 			double mIncrement;
+			bool mSetup;
+			//only valid right after a tick()
+			double mSecondsTillNextBeat;
 	};
 }
 

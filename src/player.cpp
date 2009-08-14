@@ -108,10 +108,29 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 	if(mPositionDirty)
 		update_position(transport);
 
+	/*
+	 * XXX
+	 we should really just update the speed so that our beats line up
+	 but we should also offset based on when we started playing
+	 if(mSync && mBeatBuffer)
+	 position(transport.position());
+	 */
+	/*
+	 *XXX this doesn't work for RUBBER_BAND
+	if(mSync && mBeatBuffer){
+		TimePoint next = mPosition;
+		double next_beat_time = transport.seconds_till_next_beat();
+		next.advance_beat();
+		next.pos_in_beat(0.0);
+		if(next_beat_time != 0){
+			mPlaySpeed = mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
+			mPlaySpeed /= next_beat_time; 
+		}
+	}
+	*/
+
 	//compute the actual frame
 	if(mPlayState == PLAY){
-		if(mSync && mBeatBuffer){
-		}
 		switch(mStretchMethod){
 			case PLAY_RATE:
 				for(unsigned int i = 0; i < 2; i++){
@@ -139,6 +158,11 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 			default:
 				break;
 		}
+	}
+	//update our position
+	if(mBeatBuffer){
+		mPosition = mBeatBuffer->position_at_time(
+				((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
 	}
 }
 
