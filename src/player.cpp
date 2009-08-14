@@ -60,7 +60,6 @@ void Player::setup_audio(
 	mSetup = true;
 }
 
-
 //the audio computation methods
 //setup for audio computation
 void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
@@ -116,18 +115,20 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 	 position(transport.position());
 	 */
 	/*
-	 *XXX this doesn't work for RUBBER_BAND
 	if(mSync && mBeatBuffer){
 		TimePoint next = mPosition;
 		double next_beat_time = transport.seconds_till_next_beat();
 		next.advance_beat();
 		next.pos_in_beat(0.0);
 		if(next_beat_time != 0){
-			mPlaySpeed = mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
-			mPlaySpeed /= next_beat_time; 
+			double newSpeed 
+				= mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
+			newSpeed /= next_beat_time; 
+			if(newSpeed > 0.1 && newSpeed < 8)
+				mPlaySpeed = newSpeed;
 		}
 	}
-	*/
+	 */
 
 	//compute the actual frame
 	if(mPlayState == PLAY){
@@ -158,11 +159,11 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 			default:
 				break;
 		}
-	}
-	//update our position
-	if(mBeatBuffer){
-		mPosition = mBeatBuffer->position_at_time(
-				((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
+		//update our position
+		if(mBeatBuffer){
+			mPosition = mBeatBuffer->position_at_time(
+					((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
+		}
 	}
 }
 
