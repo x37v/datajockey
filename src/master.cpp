@@ -95,7 +95,7 @@ void Master::audio_compute_and_fill(
 		unsigned int numFrames){
 	//set up players
 	for(unsigned int p = 0; p < mPlayers.size(); p++)
-		mPlayers[p]->audio_pre_compute(numFrames, mPlayerBuffers[p]);
+		mPlayers[p]->audio_pre_compute(numFrames, mPlayerBuffers[p], mTransport);
 
 	//compute their samples [and do other stuff]
 	for(unsigned int frame = 0; frame < numFrames; frame++){

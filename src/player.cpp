@@ -26,6 +26,9 @@ Player::Player(){
 
 	//by default we start at the beginning of the audio
 	mStartPosition.at_bar(0);
+
+	mPositionDirty = false;
+	mSetup = false;
 }
 
 Player::~Player(){
@@ -54,14 +57,21 @@ void Player::setup_audio(
 				RubberBand::RubberBandStretcher::OptionThreadingNever);
 	//XXX what is the ideal size?
 	mRubberBandStretcher->setMaxProcessSize(maxBufferLen * 4);
+	mSetup = true;
 }
 
 
 //the audio computation methods
 //setup for audio computation
-void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer){
+void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
+		const Transport& transport){ 
 	if(!mAudioBuffer)
 		return;
+
+	//do we need to update the mSampleIndex based on the position?
+	if(mPositionDirty)
+		update_position(transport);
+
 	if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
 		mPlayState = PAUSE;
 
@@ -94,8 +104,14 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 	//compute the volume
 	mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
+	//do we need to update the mSampleIndex based on the position?
+	if(mPositionDirty)
+		update_position(transport);
+
 	//compute the actual frame
 	if(mPlayState == PLAY){
+		if(mSync && mBeatBuffer){
+		}
 		switch(mStretchMethod){
 			case PLAY_RATE:
 				for(unsigned int i = 0; i < 2; i++){
@@ -202,6 +218,30 @@ void Player::play_speed(double val){
 
 void Player::position(const TimePoint &val){
 	mPosition = val;
+	//if we're not set up then we cannot update our sample index because we don't
+	//know the sample rate, so we just set dirty = true
+	if(!mSetup){
+		mPositionDirty = true;
+		return;
+	}
+
+	//update sample index
+	//if we don't have a beat buffer
+	//we should either set to the value [in seconds] if it a TimePoint::SECONDS
+	//or if not, we should use the transport rate to convert it to seconds from
+	//bars + beats [which we can only do while playing so we set mPositionDirty
+	//= true]
+	//otherwise we grab the time from the beat buffer!
+	mPositionDirty = false;
+	if(mPosition.type() == TimePoint::SECONDS){
+		mSampleIndex = mSampleRate * mPosition.seconds();
+		mSampleIndexResidual = 0;
+	} else if(mBeatBuffer){
+		mSampleIndex = mSampleRate * mBeatBuffer->time_at_position(mPosition);
+		mSampleIndexResidual = 0;
+	} else
+		mPositionDirty = true;
+
 }
 
 void Player::start_position(const TimePoint &val){
@@ -237,12 +277,33 @@ void Player::beat_buffer(BeatBuffer * buf){
 void Player::position_relative(TimePoint amt){
 }
 
-void Player::Player::play_speed_relative(double amt){
+void Player::play_speed_relative(double amt){
 	mPlaySpeed += amt;
 }
 
-void Player::Player::Player::volume_relative(double amt){
+void Player::volume_relative(double amt){
 	mVolume += amt;
+}
+
+
+void Player::update_position(const Transport& transport){
+	mPositionDirty = false;
+
+	//if the type is seconds then set to that value
+	//if it isn't and we have a beat buffer set to the appropriate value
+	//otherwise guess the position based on the bar/beat and the current transport
+	//tempo
+	if(mPosition.type() == TimePoint::SECONDS){
+		mSampleIndex = mSampleRate * mPosition.seconds();
+		mSampleIndexResidual = 0;
+	} else if(mBeatBuffer){
+		mSampleIndex = mSampleRate * mBeatBuffer->time_at_position(mPosition);
+		mSampleIndexResidual = 0;
+	} else {
+		mSampleIndex = (double)mSampleRate * ((60.0 / transport.bpm()) *
+				(double)(mPosition.bar() * mPosition.beats_per_bar() + mPosition.beat()));
+		mSampleIndexResidual = 0;
+	}
 }
 
 //command stuff

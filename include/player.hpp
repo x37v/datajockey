@@ -30,7 +30,8 @@ namespace DataJockey {
 			//the player doesn't own its own buffer, it is passed it..
 			//but it does own it between pre_compute and fill_output
 			//setup for audio computation, we will be computing numFrames
-			void audio_pre_compute(unsigned int numFrames, float ** mixBuffer); 
+			void audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
+					const Transport& transport); 
 			//actually compute one frame, filling an internal buffer
 			//syncing to the transport if mSync == true
 			void audio_compute_frame(unsigned int frame, float ** mixBuffer, 
@@ -86,11 +87,14 @@ namespace DataJockey {
 			bool mMute;
 			bool mSync; //sync to main transport or not
 			bool mLoop;
+			bool mSetup;
 
 			//continuous
 			double mVolume;
 			double mPlaySpeed;
 			TimePoint mPosition; //the current position in the audio
+			bool mPositionDirty; //indicates if the sampleindex needs update based
+										//on the position update
 			TimePoint mStartPosition; //where we start the playback
 			TimePoint mEndPosition; //where we end the playback
 			TimePoint mLoopStartPosition;
@@ -104,6 +108,9 @@ namespace DataJockey {
 			RubberBand::RubberBandStretcher * mRubberBandStretcher;
 			AudioBuffer * mAudioBuffer;
 			BeatBuffer * mBeatBuffer;
+
+			//helpers
+			void update_position(const Transport& transport);
 	};
 	class PlayerCommand : public Command {
 		public:

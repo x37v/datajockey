@@ -2,8 +2,8 @@
 
 using namespace DataJockey;
 
-TimePoint::TimePoint(){
-	mType = BEAT_BAR;
+TimePoint::TimePoint(time_type t ){
+	mType = t;
 	//default type is 4/4
 	mBeatsPerBar = mBeatType = 4;
 	invalidate();

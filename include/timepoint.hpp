@@ -5,7 +5,7 @@ namespace DataJockey {
 	class TimePoint {
 		public:
 			enum time_type {BEAT_BAR, SECONDS};
-			TimePoint();
+			TimePoint(time_type t = BEAT_BAR);
 			//getters
 			time_type type() const;
 			unsigned int bar() const;

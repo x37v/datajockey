@@ -2,6 +2,7 @@
 #include "audioio.hpp"
 #include "player.hpp"
 #include "master.hpp"
+#include "timepoint.hpp"
 #include <iostream>
 
 using std::cout;
@@ -24,6 +25,10 @@ int main(int argc, char * argv[]){
 	master->players()[1]->audio_buffer(&buffer2);
 	master->players()[1]->play_state(DataJockey::Player::PLAY);
 	master->players()[1]->play_speed(1.1);
+	
+	DataJockey::TimePoint pos;
+	pos.at_bar(20, 1);
+	master->players()[0]->position(pos);
 
 	cout << "starting" << endl;
 	audioio.start();
