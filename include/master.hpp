@@ -3,6 +3,7 @@
 
 #include "player.hpp"
 #include "transport.hpp"
+#include "scheduler.hpp"
 #include <vector>
 
 namespace DataJockey {
@@ -29,6 +30,7 @@ namespace DataJockey {
 			float cross_fade_position() const;
 			unsigned int cross_fade_mixer(unsigned int index) const;
 			const std::vector<Player *>& players() const;
+			Scheduler * scheduler();
 
 			//setters
 			void master_volume(float val);
@@ -45,6 +47,7 @@ namespace DataJockey {
 
 			std::vector<Player *> mPlayers;
 			Transport mTransport;
+			Scheduler mScheduler;
 			float mMasterVolume;
 			float mCueVolume;
 			unsigned int mCrossFadeMixers[2];

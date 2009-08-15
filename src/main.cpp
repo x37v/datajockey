@@ -39,23 +39,46 @@ int main(int argc, char * argv[]){
 	master->players()[1]->play_speed(1.1);
 	master->players()[1]->sync(true);
 
-	
-	DataJockey::TimePoint pos;
-	DataJockey::TimePoint pos2;
-	pos.at_bar(1, 0);
-	master->players()[0]->position(pos);
-
-	pos2.at_bar(1, 1);
-	master->players()[1]->position(pos2);
-	master->players()[1]->loop_start_position(pos2);
-	pos2.at_bar(3, 1);
-	master->players()[1]->loop_end_position(pos2);
-	master->players()[1]->loop(true);
-
 	cout << "starting" << endl;
 	audioio.start();
 	audioio.connectToPhysical(0,0);
 	audioio.connectToPhysical(1,1);
+
+	{
+		using namespace DataJockey;
+		TimePoint pos;
+
+		//player 0
+		pos.at_bar(1, 0);
+		master->scheduler()->execute(
+				new DataJockey::PlayerPositionCommand(master->players()[0], 
+					PlayerPositionCommand::PLAY,
+					pos)
+				);
+
+		//player 1
+		pos.at_bar(1, 1);
+		master->scheduler()->execute(
+				new DataJockey::PlayerPositionCommand(master->players()[1], 
+					PlayerPositionCommand::LOOP_START,
+					pos)
+				);
+		master->scheduler()->execute(
+				new DataJockey::PlayerPositionCommand(master->players()[1], 
+					PlayerPositionCommand::PLAY,
+					pos)
+				);
+		pos.at_bar(3, 1);
+		master->scheduler()->execute(
+				new DataJockey::PlayerPositionCommand(master->players()[1], 
+					PlayerPositionCommand::LOOP_END,
+					pos)
+				);
+		master->scheduler()->execute(
+				new DataJockey::PlayerStateCommand(master->players()[1], 
+					PlayerStateCommand::LOOP)
+				);
+	}
 
 	//audioio.connectToPhysical(2,0);
 	//audioio.connectToPhysical(3,1);
@@ -70,11 +93,19 @@ int main(int argc, char * argv[]){
 		sleep(1);
 	}
 	sleep(1);
-	cout << "ending sync" << endl;
-	master->players()[1]->sync(false);
-	sleep(10);
-	cout << "ending loop" << endl;
-	master->players()[1]->loop(false);
+	{
+		cout << "ending sync" << endl;
+		master->scheduler()->execute(
+				new DataJockey::PlayerStateCommand(master->players()[1], 
+					DataJockey::PlayerStateCommand::NO_SYNC)
+				);
+		sleep(10);
+		cout << "ending loop" << endl;
+		master->scheduler()->execute(
+				new DataJockey::PlayerStateCommand(master->players()[1], 
+					DataJockey::PlayerStateCommand::NO_LOOP)
+				);
+	}
 	sleep(10);
 	cout << "stopping" << endl;
 	audioio.stop();

@@ -93,6 +93,10 @@ void Master::add_player(){
 void Master::audio_compute_and_fill(
 		JackCpp::AudioIO::audioBufVector outBufferVector,
 		unsigned int numFrames){
+
+	//execute the schedule
+	mScheduler.execute_schedule(mTransport);
+
 	//set up players
 	for(unsigned int p = 0; p < mPlayers.size(); p++)
 		mPlayers[p]->audio_pre_compute(numFrames, mPlayerBuffers[p], mTransport);
@@ -101,6 +105,8 @@ void Master::audio_compute_and_fill(
 	for(unsigned int frame = 0; frame < numFrames; frame++){
 		//tick the transport
 		bool beat = mTransport.tick();
+		//execute the schedule
+		mScheduler.execute_schedule(mTransport);
 		for(unsigned int chan = 0; chan < 2; chan++){
 			//zero out the cue buffer
 			mCueBuffer[chan][frame] = 0.0;
@@ -177,8 +183,12 @@ unsigned int Master::cross_fade_mixer(unsigned int index) const {
 		return mCrossFadeMixers[index];
 }
 
-const std::vector<Player *>& Master::players() const{
+const std::vector<Player *>& Master::players() const {
 	return mPlayers;
+}
+
+Scheduler * Master::scheduler(){
+	return &mScheduler;
 }
 
 //setters
