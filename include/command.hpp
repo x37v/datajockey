@@ -10,6 +10,10 @@ namespace DataJockey {
 			const TimePoint& time_executed();
 			void time_executed(TimePoint const & t);
 			virtual void execute() = 0;
+			//this is executed back in the main thread
+			//after the command has come back from the audio thread
+			//by default it does nothing
+			virtual void execute_done();
 		private:
 			TimePoint mTimeExecuted;
 	};
