@@ -43,6 +43,16 @@ int main(int argc, char * argv[]){
 	audioio.start();
 	audioio.connectToPhysical(0,0);
 	audioio.connectToPhysical(1,1);
+	{
+		using namespace DataJockey;
+		TimePoint pos;
+		pos.at_bar(10);
+		//cout << "ending loop" << endl;
+		master->scheduler()->schedule( pos,
+				new DataJockey::PlayerStateCommand(master->players()[1], 
+					DataJockey::PlayerStateCommand::NO_LOOP)
+				);
+	}
 
 	{
 		using namespace DataJockey;
@@ -100,11 +110,6 @@ int main(int argc, char * argv[]){
 					DataJockey::PlayerStateCommand::NO_SYNC)
 				);
 		sleep(10);
-		cout << "ending loop" << endl;
-		master->scheduler()->execute(
-				new DataJockey::PlayerStateCommand(master->players()[1], 
-					DataJockey::PlayerStateCommand::NO_LOOP)
-				);
 	}
 	sleep(10);
 	cout << "stopping" << endl;

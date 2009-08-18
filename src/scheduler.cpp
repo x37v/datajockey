@@ -11,7 +11,7 @@ Scheduler::Scheduler() :
 	mCommandsIn(1024), mCommandsOut(1024)
 {
 	mSchedule = NULL; 
-	mScheduleCur = NULL;
+	invalidate_schedule_pointers();
 }
 
 void Scheduler::execute(Command * cmd){
@@ -53,6 +53,34 @@ void Scheduler::execute_schedule(const Transport& transport){
 			mCommandsOut.write(cmd);
 		//XXX what if there is no write space?
 	}
+	//actually eval the scheuldule
+	//XXX not quite correct i don't think
+	if(mSchedule != NULL){
+		if(mScheduleCur == NULL)
+			mScheduleCur = mSchedule;
+		if(mScheduleCur->time > transport.position())
+			return;
+		//set our 'last' pointer if it isn't set
+		if(mScheduleLast == NULL)
+			mScheduleLast = mScheduleCur;
+		//XXX should we backtrack before this in case we have new nodes?
+		//advance until we're at the correct location in the schedule:
+		//the next node is null or the next time is greater than the current time
+		while(mScheduleCur->next != NULL && mScheduleCur->next->time < transport.position())
+			mScheduleCur = mScheduleCur->next;
+
+		if(mScheduleLast == mScheduleCur){
+			mScheduleLast->command->execute();
+		} else {
+			//execute all of the stuff we need to execute
+			//XXX is this correct, with the timing?
+			while(mScheduleLast != mScheduleCur){
+				mScheduleLast->command->execute();
+				mScheduleLast = mScheduleLast->next;
+			}
+		}
+	}
+
 }
 
 void Scheduler::execute_done_actions(){
@@ -64,6 +92,10 @@ void Scheduler::execute_done_actions(){
 		mCommandsOut.read(cmd);
 		cmd->execute_done();
 	}
+}
+
+void Scheduler::invalidate_schedule_pointers(){
+	mScheduleCur = mScheduleLast = NULL;
 }
 
 void Scheduler::add(ScheduleNode * node){

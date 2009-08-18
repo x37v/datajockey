@@ -16,6 +16,10 @@ namespace DataJockey {
 			ScheduleNode * mSchedule;
 			//a pointer to the [guessed] current location in the schedule
 			ScheduleNode * mScheduleCur;
+			//a pointer to the last executed location in the schedule
+			//we need this because we might not execute the schedule at every sample
+			//so we might have to execute scheduled items within a range of time
+			ScheduleNode * mScheduleLast;
 		public:
 			Scheduler();
 			//this executes a command now, scheduler now owns this command
@@ -34,6 +38,9 @@ namespace DataJockey {
 			//this is called back in the main thread, 
 			//clearing the command out buffer and executing their done actions
 			void execute_done_actions();
+			//this is called to invalid the mScheduleLast and Cur pointer
+			//incase we've jumped around in the transport
+			void invalidate_schedule_pointers();
 
 			friend class AddCommand;
 		private:

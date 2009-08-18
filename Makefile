@@ -26,4 +26,4 @@ first: ${OBJ}
 	g++ ${CFLAGS} ${OBJ} ${LIBS}
 
 clean:
-	rm ${OBJ}
+	rm -f ${OBJ}
