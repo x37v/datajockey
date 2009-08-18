@@ -16,10 +16,9 @@ namespace DataJockey {
 			ScheduleNode * mSchedule;
 			//a pointer to the [guessed] current location in the schedule
 			ScheduleNode * mScheduleCur;
-			//a pointer to the last executed location in the schedule
-			//we need this because we might not execute the schedule at every sample
-			//so we might have to execute scheduled items within a range of time
-			ScheduleNode * mScheduleLast;
+			//this is is the last spot that the schedule was run
+			//it can be invalidated if we jump around in the transport
+			TimePoint mLastScheduledTime;
 		public:
 			Scheduler();
 			//this executes a command now, scheduler now owns this command

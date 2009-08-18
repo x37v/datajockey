@@ -54,33 +54,57 @@ void Scheduler::execute_schedule(const Transport& transport){
 		//XXX what if there is no write space?
 	}
 	//actually eval the scheuldule
-	//XXX not quite correct i don't think
-	if(mSchedule != NULL){
-		if(mScheduleCur == NULL)
-			mScheduleCur = mSchedule;
-		if(mScheduleCur->time > transport.position())
-			return;
-		//set our 'last' pointer if it isn't set
-		if(mScheduleLast == NULL)
-			mScheduleLast = mScheduleCur;
-		//XXX should we backtrack before this in case we have new nodes?
-		//advance until we're at the correct location in the schedule:
-		//the next node is null or the next time is greater than the current time
-		while(mScheduleCur->next != NULL && mScheduleCur->next->time < transport.position())
-			mScheduleCur = mScheduleCur->next;
+	if(mSchedule == NULL)
+		return;
+	if(mScheduleCur == NULL)
+		mScheduleCur = mSchedule;
 
-		if(mScheduleLast == mScheduleCur){
-			mScheduleLast->command->execute();
-		} else {
-			//execute all of the stuff we need to execute
-			//XXX is this correct, with the timing?
-			while(mScheduleLast != mScheduleCur){
-				mScheduleLast->command->execute();
-				mScheduleLast = mScheduleLast->next;
+	//backtrack, if we have a valid last time, we go to the
+	//node just past the last time
+	//otherwise we go to the node closest to the front that
+	//has time >= transport.position()
+	if(mLastScheduledTime.valid()){
+		//here we are concerned with anything that has a timepoint
+		//larger than the last time and less than or equal to the 
+		//transport time
+		while(mScheduleCur->prev != NULL && 
+				mScheduleCur->prev->time > mLastScheduledTime){
+			mScheduleCur = mScheduleCur->prev;
+		}
+		if(mScheduleCur->time > mLastScheduledTime &&
+				mScheduleCur->time <= transport.position()){
+			//iterate through the schedule, executing as we go
+			//until our next node is either null, or has a time point
+			//greater than the transport position
+			while(true){
+				//execute
+				mScheduleCur->command->execute();
+				//advance or break
+				if(mScheduleCur->next == NULL ||
+						mScheduleCur->next->time > transport.position()){
+					break;
+				} else
+					mScheduleCur = mScheduleCur->next;
 			}
 		}
+	} else {
+		//here we only care about stuff that is scheduled exactly at the
+		//transport time
+		while(mScheduleCur->prev != NULL && 
+				mScheduleCur->prev->time >= transport.position()){
+			mScheduleCur = mScheduleCur->prev;
+		}
+		//execute everything at the time of the transport
+		while(mScheduleCur->time == transport.position()){
+			mScheduleCur->command->execute();
+			if(mScheduleCur->next == NULL)
+				break;
+			else
+				mScheduleCur = mScheduleCur->next;
+		}
 	}
-
+	//store the current time as the 'last time' for next time we execute_schedule
+	mLastScheduledTime = transport.position();
 }
 
 void Scheduler::execute_done_actions(){
@@ -95,7 +119,8 @@ void Scheduler::execute_done_actions(){
 }
 
 void Scheduler::invalidate_schedule_pointers(){
-	mScheduleCur = mScheduleLast = NULL;
+	mScheduleCur = NULL;
+	mLastScheduledTime.invalidate();
 }
 
 void Scheduler::add(ScheduleNode * node){

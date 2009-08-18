@@ -105,8 +105,12 @@ void Master::audio_compute_and_fill(
 	for(unsigned int frame = 0; frame < numFrames; frame++){
 		//tick the transport
 		bool beat = mTransport.tick();
-		//execute the schedule
-		mScheduler.execute_schedule(mTransport);
+		//XXX this should be a setting
+		//only execute every 64 samples, at 44.1khz this is every 1.45ms
+		if(frame % 64 == 0){
+			//execute the schedule
+			mScheduler.execute_schedule(mTransport);
+		}
 		for(unsigned int chan = 0; chan < 2; chan++){
 			//zero out the cue buffer
 			mCueBuffer[chan][frame] = 0.0;
