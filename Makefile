@@ -20,6 +20,9 @@ OBJ = ${SRC:.cpp=.o}
 
 first: datajockey
 
+#the master depends on the scheduler
+src/master.o: src/scheduler.o
+
 .cpp.o:
 	@echo CC $<
 	@${CC} -c ${CFLAGS} -o $*.o $<

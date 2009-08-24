@@ -2,6 +2,7 @@
 #include "timepoint.hpp"
 #include <iostream>
 
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -78,10 +79,16 @@ void Scheduler::execute_schedule(const Transport& transport){
 		//here we are concerned with anything that has a timepoint
 		//larger than the last time and less than or equal to the 
 		//transport time
+
+		//seek back in case we have new nodes that are valid
 		while(mScheduleCur->prev != NULL && 
 				mScheduleCur->prev->time > mLastScheduledTime){
 			mScheduleCur = mScheduleCur->prev;
 		}
+		//seek forward until our time is in range
+		while(mScheduleCur->time <= mLastScheduledTime && mScheduleCur->next != NULL)
+			mScheduleCur = mScheduleCur->next;
+
 		if(mScheduleCur->time > mLastScheduledTime &&
 				mScheduleCur->time <= transport.position()){
 			//iterate through the schedule, executing as we go
@@ -90,6 +97,10 @@ void Scheduler::execute_schedule(const Transport& transport){
 			while(true){
 				//execute
 				mScheduleCur->command->execute();
+#ifdef DEBUG
+				cout << "executing: " << mScheduleCur->time.bar() << " : " <<
+				mScheduleCur->time.beat() << endl;
+#endif
 				//advance or break
 				if(mScheduleCur->next == NULL ||
 						mScheduleCur->next->time > transport.position()){
@@ -101,13 +112,23 @@ void Scheduler::execute_schedule(const Transport& transport){
 	} else {
 		//here we only care about stuff that is scheduled exactly at the
 		//transport time
+		
+		//seek back
 		while(mScheduleCur->prev != NULL && 
 				mScheduleCur->prev->time >= transport.position()){
 			mScheduleCur = mScheduleCur->prev;
 		}
+		//seek forward until our time is in range
+		while(mScheduleCur->time < transport.position() && mScheduleCur->next != NULL)
+			mScheduleCur = mScheduleCur->next;
+
 		//execute everything at the time of the transport
 		while(mScheduleCur->time == transport.position()){
 			mScheduleCur->command->execute();
+#ifdef DEBUG
+			cout << "executing: " << mScheduleCur->time.bar() << " : " <<
+				mScheduleCur->time.beat() << endl;
+#endif
 			if(mScheduleCur->next == NULL)
 				break;
 			else
@@ -156,16 +177,31 @@ void Scheduler::add(ScheduleNode * node){
 		if(node->next)
 			node->next->prev = node;
 	}
+#ifdef DEBUG
+	ScheduleNode * tmp = mSchedule;
+	cout << "node list: " << endl;
+	while(tmp != NULL){
+		cout << tmp->time.bar() << " : " <<
+			tmp->time.beat() << endl;
+		tmp = tmp->next;
+	}
+	cout << "end list" << endl;
+#endif
 }
 
 void Scheduler::remove(ScheduleNode * node){
+	//if this is the first node then we need to update our head pointer
+	if(mSchedule == node)
+		mSchedule = node->next;
+	//if this is the current node, update the current node pointer
+	if(mScheduleCur == node)
+		mScheduleCur = node->prev;
+	
+	//actually remove the node from the list
 	if(node->next)
 		node->next->prev = node->prev;
 	if(node->prev)
 		node->prev->next = node->next;
-	//if this is the first node then we need to update our head pointer
-	if(mSchedule == node)
-		mSchedule = node->next;
 }
 
 Scheduler::ScheduleNode::ScheduleNode(Command * c, const TimePoint& t){

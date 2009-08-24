@@ -64,19 +64,8 @@ int main(int argc, char * argv[]){
 	{
 		using namespace DataJockey;
 		TimePoint pos;
-		pos.at_bar(1, 2);
-		master->scheduler()->schedule( pos,
-				new DataJockey::PlayerStateCommand(master->players()[0], 
-					DataJockey::PlayerStateCommand::NO_MUTE)
-				);
-		pos.at_bar(1, 1);
-		master->scheduler()->schedule( pos,
-				new DataJockey::PlayerStateCommand(master->players()[0], 
-					DataJockey::PlayerStateCommand::MUTE)
-				);
-
-		/*
-		for(unsigned int i = 0; i < 8; i++){
+		unsigned int i;
+		for(i = 0; i < 16; i++){
 			pos.at_bar(i / 4, i % 4);
 			master->scheduler()->schedule( pos,
 					new DataJockey::PlayerStateCommand(master->players()[i % 2], 
@@ -87,7 +76,15 @@ int main(int argc, char * argv[]){
 						DataJockey::PlayerStateCommand::NO_MUTE)
 					);
 		}
-		*/
+		pos.at_bar(i / 4, i % 4);
+		master->scheduler()->schedule( pos,
+				new DataJockey::PlayerStateCommand(master->players()[i % 2], 
+					DataJockey::PlayerStateCommand::NO_MUTE)
+				);
+		master->scheduler()->schedule( pos,
+				new DataJockey::PlayerStateCommand(master->players()[(i + 1) % 2], 
+					DataJockey::PlayerStateCommand::NO_MUTE)
+				);
 	}
 
 	{
