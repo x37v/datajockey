@@ -109,7 +109,6 @@ int main(int argc, char * argv[]){
 				new DataJockey::PlayerStateCommand(master->players()[1], 
 					DataJockey::PlayerStateCommand::NO_SYNC)
 				);
-		sleep(10);
 	}
 	sleep(10);
 	cout << "stopping" << endl;

@@ -18,12 +18,14 @@ SRC = \
 
 OBJ = ${SRC:.cpp=.o}
 
+first: datajockey
+
 .cpp.o:
 	@echo CC $<
 	@${CC} -c ${CFLAGS} -o $*.o $<
 
-first: ${OBJ}
-	g++ ${CFLAGS} ${OBJ} ${LIBS}
+datajockey: ${OBJ}
+	g++ -o $@ ${CFLAGS} ${OBJ} ${LIBS}
 
 clean:
-	rm -f ${OBJ}
+	rm -f ${OBJ} datajockey
