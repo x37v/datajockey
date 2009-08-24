@@ -4,9 +4,12 @@
 #include "command.hpp"
 #include "transport.hpp"
 #include <jackringbuffer.hpp>
+#include <map>
 
 namespace DataJockey {
 	class Scheduler {
+		public:
+			typedef unsigned long node_id_t;
 		private:
 			JackCpp::RingBuffer<Command *> mCommandsIn;
 			JackCpp::RingBuffer<Command *> mCommandsOut;
@@ -19,20 +22,23 @@ namespace DataJockey {
 			//this is is the last spot that the schedule was run
 			//it can be invalidated if we jump around in the transport
 			TimePoint mLastScheduledTime;
+			node_id_t mNodeIndex;
+			//this maps the index given by the schedule for a node to a pointer
+			//to the node itself
+			std::map<node_id_t, ScheduleNode *> mNodeMap;
 		public:
 			Scheduler();
 			//this executes a command now, scheduler now owns this command
 			void execute(Command * cmd);
 			//this schedules a command based on the main transport
 			//returns an ID for this node
-			unsigned int schedule(const TimePoint &time, Command * cmd);
+			node_id_t schedule(const TimePoint &time, Command * cmd);
 			//removes a scheduled node
-			void remove(unsigned int id);
+			void remove(node_id_t id);
 			//this clears the schedule [as soon as possible]
 			void clear();
 			//this is called by the audio callback
 			//it executes commands based on the schedule
-			//XXX memory leak, we don't yet clear out mCommandsOut;
 			void execute_schedule(const Transport& transport);
 			//this is called back in the main thread, 
 			//clearing the command out buffer and executing their done actions
@@ -51,6 +57,7 @@ namespace DataJockey {
 			class ScheduleNode {
 				public:
 					ScheduleNode(Command * c, const TimePoint& t);
+					~ScheduleNode();
 					ScheduleNode * next;
 					ScheduleNode * prev;
 					Command * command;
@@ -60,6 +67,15 @@ namespace DataJockey {
 			class AddCommand : public Command {
 				public:
 					AddCommand(Scheduler * scheduler, ScheduleNode * node);
+					virtual void execute();
+				private:
+					Scheduler * mScheduler;
+					ScheduleNode * mNode;
+			};
+
+			class RemoveCommand : public Command {
+				public:
+					RemoveCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
 				private:
 					Scheduler * mScheduler;

@@ -11,6 +11,7 @@ Scheduler::Scheduler() :
 	mCommandsIn(1024), mCommandsOut(1024)
 {
 	mSchedule = NULL; 
+	mNodeIndex = 0;
 	invalidate_schedule_pointers();
 }
 
@@ -23,16 +24,26 @@ void Scheduler::execute(Command * cmd){
 	}
 }
 
-unsigned int Scheduler::schedule(const TimePoint &time, Command * cmd){
+Scheduler::node_id_t Scheduler::schedule(const TimePoint &time, Command * cmd){
+	node_id_t index = mNodeIndex++;
 	ScheduleNode * node = new ScheduleNode(cmd, time);;
 	AddCommand * addCmd = new AddCommand(this, node);
 	execute(addCmd);
-	//XXX not implemented
-	return 0;
+	mNodeMap[index] = node;
+	//return the index of this node
+	return index;
 }
 
-void remove(unsigned int id){
-	//XXX not implemented
+void Scheduler::remove(Scheduler::node_id_t id){
+	//find the node
+	std::map<node_id_t, ScheduleNode *>::iterator it;
+	it = mNodeMap.find(id);
+	if(it != mNodeMap.end()){
+		//execute a remove command
+		execute( new RemoveCommand(this, it->second));
+		//remove the node from the map
+		mNodeMap.erase(it);
+	}
 }
 
 void Scheduler::clear(){
@@ -108,13 +119,13 @@ void Scheduler::execute_schedule(const Transport& transport){
 }
 
 void Scheduler::execute_done_actions(){
-	//while there are commands to be executed
-	//execute them, noteing the time, 
-	//and write them to the out buffer
+	//while there are commands in the out buffer, execute their done action
+	//and then clean up
 	while(mCommandsOut.getReadSpace()){
 		Command * cmd;
 		mCommandsOut.read(cmd);
 		cmd->execute_done();
+		delete cmd;
 	}
 }
 
@@ -152,12 +163,19 @@ void Scheduler::remove(ScheduleNode * node){
 		node->next->prev = node->prev;
 	if(node->prev)
 		node->prev->next = node->next;
+	//if this is the first node then we need to update our head pointer
+	if(mSchedule == node)
+		mSchedule = node->next;
 }
 
 Scheduler::ScheduleNode::ScheduleNode(Command * c, const TimePoint& t){
 	next = prev = NULL;
 	command = c;
 	time = t;
+}
+
+Scheduler::ScheduleNode::~ScheduleNode(){
+	delete command;
 }
 
 Scheduler::AddCommand::AddCommand(Scheduler * scheduler, ScheduleNode * node){
@@ -168,3 +186,13 @@ Scheduler::AddCommand::AddCommand(Scheduler * scheduler, ScheduleNode * node){
 void Scheduler::AddCommand::execute(){
 	mScheduler->add(mNode);
 }
+
+Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * node){
+	mScheduler = scheduler;
+	mNode = node;
+}
+
+void Scheduler::RemoveCommand::execute(){
+	mScheduler->remove(mNode);
+}
+

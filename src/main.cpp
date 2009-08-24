@@ -48,6 +48,13 @@ int main(int argc, char * argv[]){
 		TimePoint pos;
 		pos.at_bar(10);
 		//cout << "ending loop" << endl;
+		//this is pointless but I just want to make sure it works
+		master->scheduler()->remove(
+				master->scheduler()->schedule( pos,
+					new DataJockey::PlayerStateCommand(master->players()[1], 
+						DataJockey::PlayerStateCommand::NO_LOOP)
+					));
+		//actually schedule the command
 		master->scheduler()->schedule( pos,
 				new DataJockey::PlayerStateCommand(master->players()[1], 
 					DataJockey::PlayerStateCommand::NO_LOOP)
@@ -90,6 +97,9 @@ int main(int argc, char * argv[]){
 				);
 	}
 
+	sleep(1);
+	master->scheduler()->execute_done_actions();
+
 	//audioio.connectToPhysical(2,0);
 	//audioio.connectToPhysical(3,1);
 
@@ -110,6 +120,9 @@ int main(int argc, char * argv[]){
 					DataJockey::PlayerStateCommand::NO_SYNC)
 				);
 	}
+
+	sleep(1);
+	master->scheduler()->execute_done_actions();
 	sleep(10);
 	cout << "stopping" << endl;
 	audioio.stop();
