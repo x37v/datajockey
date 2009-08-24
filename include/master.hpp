@@ -54,6 +54,43 @@ namespace DataJockey {
 			bool mCrossFade;
 			float mCrossFadePosition;
 	};
+	class MasterCommand : public Command {
+		public:
+			MasterCommand(Master * master);
+			Master * master() const;
+		private:
+			Master * mMaster; 
+	};
+	class MasterBoolCommand : public MasterCommand {
+		public:
+			enum action_t {
+				XFADE, NO_XFADE
+			};
+			MasterBoolCommand(Master * master, action_t action);
+			virtual void execute();
+		private:
+			action_t mAction;
+	};
+	class MasterDoubleCommand : public MasterCommand {
+		public:
+			enum action_t {
+				MAIN_VOLUME,
+				CUE_VOLUME,
+				XFADE_POSITION
+			};
+			MasterDoubleCommand(Master * master, action_t action, double val);
+			virtual void execute();
+		private:
+			action_t mAction;
+			double mValue;
+	};
+	class MasterXFadeSelectCommand : public MasterCommand {
+		public:
+			MasterXFadeSelectCommand(Master * master, unsigned int left, unsigned int right);
+			virtual void execute();
+		private:
+			unsigned int mSel[2];
+	};
 }
 
 #endif
