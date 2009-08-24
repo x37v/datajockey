@@ -128,16 +128,26 @@ int main(int argc, char * argv[]){
 
 	//audioio.connectToPhysical(2,0);
 	//audioio.connectToPhysical(3,1);
-
-	master->cross_fade(true);
-	master->cross_fade_mixers(0,1);
-	master->cross_fade_position(0.5);
-	sleep(20);
-	for(unsigned int i = 5; i <= 10; i++){
-		master->cross_fade_position((float)i * 0.1);
-		cout << master->cross_fade_position() << endl;
-		sleep(1);
+	
+	{
+		using namespace DataJockey;
+		//master->cross_fade(true);
+		master->scheduler()->execute( new MasterBoolCommand(master, MasterBoolCommand::XFADE));
+		//master->cross_fade_mixers(0,1);
+		master->scheduler()->execute( new MasterXFadeSelectCommand(master, 0,1));
+		//master->cross_fade_position(0.5);
+		master->scheduler()->execute( new MasterDoubleCommand(master, 
+					MasterDoubleCommand::XFADE_POSITION, 0.5));
+		sleep(20);
+		for(unsigned int i = 5; i <= 10; i++){
+			//master->cross_fade_position((float)i * 0.1);
+			master->scheduler()->execute( new MasterDoubleCommand(master, 
+						MasterDoubleCommand::XFADE_POSITION, (float)i * 0.1));
+			sleep(1);
+			cout << master->cross_fade_position() << endl;
+		}
 	}
+
 	sleep(1);
 	{
 		cout << "ending sync" << endl;
