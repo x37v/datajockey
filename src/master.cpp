@@ -195,6 +195,10 @@ Scheduler * Master::scheduler(){
 	return &mScheduler;
 }
 
+Transport * Master::transport(){
+	return &mTransport;
+}
+
 //setters
 void Master::master_volume(float val){
 	mMasterVolume = val;

@@ -144,7 +144,13 @@ int main(int argc, char * argv[]){
 			master->scheduler()->execute( new MasterDoubleCommand(master, 
 						MasterDoubleCommand::XFADE_POSITION, (float)i * 0.1));
 			sleep(1);
-			cout << master->cross_fade_position() << endl;
+			cout << "xfade pos: " << master->cross_fade_position() << endl;
+		}
+		for(unsigned int i = 0; i < 20; i++){
+			master->scheduler()->execute( new TransportBPMCommand(master->transport(), 
+						master->transport()->bpm() + 0.5));
+			usleep(100000);
+			cout << "bpm: " << master->transport()->bpm() << endl;
 		}
 	}
 

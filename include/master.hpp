@@ -31,6 +31,7 @@ namespace DataJockey {
 			unsigned int cross_fade_mixer(unsigned int index) const;
 			const std::vector<Player *>& players() const;
 			Scheduler * scheduler();
+			Transport * transport();
 
 			//setters
 			void master_volume(float val);
