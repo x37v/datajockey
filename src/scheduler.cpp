@@ -214,21 +214,31 @@ Scheduler::ScheduleNode::~ScheduleNode(){
 	delete command;
 }
 
-Scheduler::AddCommand::AddCommand(Scheduler * scheduler, ScheduleNode * node){
+Scheduler::SchedulerCommand::SchedulerCommand(Scheduler * scheduler){
 	mScheduler = scheduler;
+}
+
+Scheduler * Scheduler::SchedulerCommand::scheduler() const {
+	return mScheduler;
+}
+
+Scheduler::AddCommand::AddCommand(Scheduler * scheduler, ScheduleNode * node) : 
+	SchedulerCommand(scheduler)
+{
 	mNode = node;
 }
 
 void Scheduler::AddCommand::execute(){
-	mScheduler->add(mNode);
+	scheduler()->add(mNode);
 }
 
-Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * node){
-	mScheduler = scheduler;
+Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * node) :
+	SchedulerCommand(scheduler)
+{
 	mNode = node;
 }
 
 void Scheduler::RemoveCommand::execute(){
-	mScheduler->remove(mNode);
+	scheduler()->remove(mNode);
 }
 

@@ -64,23 +64,31 @@ namespace DataJockey {
 					TimePoint time;
 			};
 
-			class AddCommand : public Command {
+			class SchedulerCommand : public Command {
+				public:
+					SchedulerCommand(Scheduler * scheduler);
+				protected:
+					Scheduler * scheduler() const;
+				private:
+					Scheduler * mScheduler;
+			};
+
+			class AddCommand : public SchedulerCommand {
 				public:
 					AddCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
 				private:
-					Scheduler * mScheduler;
 					ScheduleNode * mNode;
 			};
 
-			class RemoveCommand : public Command {
+			class RemoveCommand : public SchedulerCommand {
 				public:
 					RemoveCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
 				private:
-					Scheduler * mScheduler;
 					ScheduleNode * mNode;
 			};
+
 	};
 }
 
