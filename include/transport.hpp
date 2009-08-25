@@ -2,6 +2,7 @@
 #define DATAJOCKEY_TRANSPORT_HPP
 
 #include "timepoint.hpp"
+#include "command.hpp"
 
 namespace DataJockey {
 	class Transport {
@@ -34,6 +35,32 @@ namespace DataJockey {
 			bool mSetup;
 			//only valid right after a tick()
 			double mSecondsTillNextBeat;
+	};
+
+	class TransportCommand : public Command {
+		public:
+			TransportCommand(Transport * t);
+		protected:
+			Transport * transport() const;
+		private:
+			Transport * mTransport;
+	};
+
+	class TransportPositionCommand : public TransportCommand {
+		public:
+			TransportPositionCommand(Transport * t, const TimePoint& pos);
+			virtual void execute();
+		private:
+			TimePoint mTimePoint;
+			
+	};
+
+	class TransportBPMCommand : public TransportCommand {
+		public:
+			TransportBPMCommand(Transport * t, double bpm);
+			virtual void execute();
+		private:
+			double mBPM;
 	};
 }
 

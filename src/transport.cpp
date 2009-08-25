@@ -49,3 +49,34 @@ void Transport::bpm(double val){
 	if(mSetup)
 		mIncrement = mBPM / (60.0 * (double)mSampleRate);
 }
+
+TransportCommand::TransportCommand(Transport * t){
+	mTransport = t;
+}
+
+Transport * TransportCommand::transport() const {
+	return mTransport;
+}
+
+TransportPositionCommand::TransportPositionCommand(
+		Transport * t, const TimePoint& pos) :
+	TransportCommand(t) 
+{ 
+	mTimePoint = pos;
+}
+
+void TransportPositionCommand::execute(){
+	if(mTimePoint.valid())
+		transport()->position(mTimePoint);
+}
+
+TransportBPMCommand::TransportBPMCommand(Transport * t, double bpm) :
+	TransportCommand(t)
+{
+	mBPM = bpm;
+}
+
+void TransportBPMCommand::execute(){
+	transport()->bpm(mBPM);
+}
+
