@@ -1,5 +1,5 @@
 #-ffast-math avoids denormals i think
-INCLUDES = -Iinclude -I/usr/local/include/rubberband 
+INCLUDES = -Iinclude -I/usr/local/include/rubberband -I/usr/include/
 LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lyamlcpp -lsyck 
 CFLAGS = -g -ffast-math ${INCLUDES}
 
