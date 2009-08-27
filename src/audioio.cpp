@@ -29,13 +29,15 @@ AudioIO::AudioIO() :
 		addOutPort("output1");
 		addOutPort("cue0");
 		addOutPort("cue1");
+		mMaster = Master::instance();
 }
 
 Master * AudioIO::master(){
-	return &mMaster;
+	return mMaster;
 }
+
 void AudioIO::start(){
-	mMaster.setup_audio(getSampleRate(), getBufferSize());
+	mMaster->setup_audio(getSampleRate(), getBufferSize());
 	JackCpp::AudioIO::start();
 }
 
@@ -44,7 +46,7 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
 		audioBufVector inBufs,
 		// A vector of pointers to each output port.
 		audioBufVector outBufs){
-	mMaster.audio_compute_and_fill(outBufs, nframes);
+	mMaster->audio_compute_and_fill(outBufs, nframes);
 	/*
 	jack_position_t pos;
 	jack_transport_state_t state = jack_transport_query (client(), &pos);

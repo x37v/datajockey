@@ -8,9 +8,15 @@
 
 namespace DataJockey {
 	class Master {
-		public:
-			Master(unsigned int numPlayers = 0);
+		private:
+			//singleton
+			Master();
+			Master(const Master&);
+			Master& operator=(const Master&);
 			~Master();
+			static Master * cInstance;
+		public:
+			static Master * instance();
 			//this creates internal buffers
 			//** must be called BEFORE the audio callback starts 
 			//but after all the players are added
@@ -57,7 +63,7 @@ namespace DataJockey {
 	};
 	class MasterCommand : public Command {
 		public:
-			MasterCommand(Master * master);
+			MasterCommand();
 			Master * master() const;
 		private:
 			Master * mMaster; 
@@ -67,7 +73,7 @@ namespace DataJockey {
 			enum action_t {
 				XFADE, NO_XFADE
 			};
-			MasterBoolCommand(Master * master, action_t action);
+			MasterBoolCommand(action_t action);
 			virtual void execute();
 		private:
 			action_t mAction;
@@ -79,7 +85,7 @@ namespace DataJockey {
 				CUE_VOLUME,
 				XFADE_POSITION
 			};
-			MasterDoubleCommand(Master * master, action_t action, double val);
+			MasterDoubleCommand(action_t action, double val);
 			virtual void execute();
 		private:
 			action_t mAction;
@@ -87,7 +93,7 @@ namespace DataJockey {
 	};
 	class MasterXFadeSelectCommand : public MasterCommand {
 		public:
-			MasterXFadeSelectCommand(Master * master, unsigned int left, unsigned int right);
+			MasterXFadeSelectCommand(unsigned int left, unsigned int right);
 			virtual void execute();
 		private:
 			unsigned int mSel[2];

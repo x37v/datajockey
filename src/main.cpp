@@ -22,7 +22,7 @@ int main(int argc, char * argv[]){
 	DataJockey::BeatBuffer beatBuffer("/home/alex/music/annotation/377.yaml");
 	DataJockey::AudioBuffer buffer2("/mp3/2_live_crew/is_what_we_are/5-throw_the_d.flac");
 	DataJockey::BeatBuffer beatBuffer2("/home/alex/music/annotation/441.yaml");
-	DataJockey::Master * master = audioio.master();
+	DataJockey::Master * master = DataJockey::Master::instance();
 	master->add_player();
 	master->add_player();
 
@@ -132,16 +132,16 @@ int main(int argc, char * argv[]){
 	{
 		using namespace DataJockey;
 		//master->cross_fade(true);
-		master->scheduler()->execute( new MasterBoolCommand(master, MasterBoolCommand::XFADE));
+		master->scheduler()->execute( new MasterBoolCommand(MasterBoolCommand::XFADE));
 		//master->cross_fade_mixers(0,1);
-		master->scheduler()->execute( new MasterXFadeSelectCommand(master, 0,1));
+		master->scheduler()->execute( new MasterXFadeSelectCommand(0,1));
 		//master->cross_fade_position(0.5);
-		master->scheduler()->execute( new MasterDoubleCommand(master, 
+		master->scheduler()->execute( new MasterDoubleCommand(
 					MasterDoubleCommand::XFADE_POSITION, 0.5));
 		sleep(20);
 		for(unsigned int i = 5; i <= 10; i++){
 			//master->cross_fade_position((float)i * 0.1);
-			master->scheduler()->execute( new MasterDoubleCommand(master, 
+			master->scheduler()->execute( new MasterDoubleCommand(
 						MasterDoubleCommand::XFADE_POSITION, (float)i * 0.1));
 			sleep(1);
 			cout << "xfade pos: " << master->cross_fade_position() << endl;

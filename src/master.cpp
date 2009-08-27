@@ -3,9 +3,18 @@
 
 using namespace DataJockey;
 
-Master::Master(unsigned int numPlayers){
+#define DEFAULT_NUM_PLAYERS 2
+Master * Master::cInstance = NULL;
+
+Master * Master::instance(){
+	if(cInstance == NULL)
+		cInstance = new Master;
+	return cInstance;
+}
+
+Master::Master(){
 	mCueBuffer = NULL;
-	for(unsigned int i = 0; i < numPlayers; i++)
+	for(unsigned int i = 0; i < DEFAULT_NUM_PLAYERS; i++)
 		add_player();
 	mMasterVolume = 1.0;
 	mCueVolume = 1.0;
@@ -19,6 +28,7 @@ Master::Master(unsigned int numPlayers){
 }
 
 Master::~Master(){
+	cInstance = NULL;
 	//clean up!
 	if(mCueBuffer != NULL){
 		delete [] mCueBuffer[0];
@@ -40,7 +50,6 @@ Master::~Master(){
 	for(unsigned int i = 0; i < mPlayers.size(); i++){
 		delete mPlayers[i];
 	}
-	
 }
 
 void Master::setup_audio(
@@ -225,16 +234,15 @@ void Master::cross_fade_mixers(unsigned int left, unsigned int right){
 
 //commands
 
-MasterCommand::MasterCommand(Master * master){
-	mMaster = master;
+MasterCommand::MasterCommand(){
+	mMaster = Master::instance();
 }
 
 Master * MasterCommand::master() const {
 	return mMaster;
 }
 
-MasterBoolCommand::MasterBoolCommand(Master * master, action_t action) : 
-	MasterCommand(master)
+MasterBoolCommand::MasterBoolCommand(action_t action)
 {
 	mAction = action;
 }
@@ -250,8 +258,7 @@ void MasterBoolCommand::execute(){
 	};
 }
 
-MasterDoubleCommand::MasterDoubleCommand(Master * master, action_t action, double val) :
-	MasterCommand(master)
+MasterDoubleCommand::MasterDoubleCommand(action_t action, double val)
 {
 	mAction = action;
 	mValue = val;
@@ -271,9 +278,8 @@ void MasterDoubleCommand::execute(){
 	};
 }
 
-MasterXFadeSelectCommand::MasterXFadeSelectCommand(Master * master, 
-		unsigned int left, unsigned int right) : 
-	MasterCommand(master)
+MasterXFadeSelectCommand::MasterXFadeSelectCommand(
+		unsigned int left, unsigned int right)
 {
 	mSel[0] = left;
 	mSel[1] = right;

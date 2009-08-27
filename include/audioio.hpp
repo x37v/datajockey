@@ -16,7 +16,7 @@ namespace DataJockey {
 					jack_nframes_t nframes, 
 					audioBufVector inBufs,
 					audioBufVector outBufs);
-			Master mMaster;
+			Master * mMaster;
 	};
 }
 
