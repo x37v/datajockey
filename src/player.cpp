@@ -1,5 +1,6 @@
 #include "player.hpp"
 #include <math.h>
+#include "master.hpp"
 #define RUBBERBAND_WINDOW_SIZE 64
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 using namespace DataJockey;
@@ -350,18 +351,26 @@ void Player::update_position(const Transport& transport){
 
 //command stuff
 //
-PlayerCommand::PlayerCommand(Player * player){
-	mPlayer = player;
+PlayerCommand::PlayerCommand(unsigned int idx){
+	mIndex = idx;
 }
 
-Player * PlayerCommand::player(){ return mPlayer; }
+unsigned int PlayerCommand::index(){ return mIndex; }
 TimePoint PlayerCommand::position_executed(){ return mPositionExecuted; }
 void PlayerCommand::position_executed(TimePoint const & t){
 	mPositionExecuted = t;
 }
 
-PlayerStateCommand::PlayerStateCommand(Player * player, action_t action) :
-	PlayerCommand(player)
+Player * PlayerCommand::player(){
+	std::vector<Player *> players = Master::instance()->players();
+	if(players.size() <= mIndex)
+		return NULL;
+	else
+		return players[mIndex];
+}
+
+PlayerStateCommand::PlayerStateCommand(unsigned int idx, action_t action) :
+	PlayerCommand(idx)
 {
 	mAction = action;
 }
@@ -407,9 +416,9 @@ void PlayerStateCommand::execute(){
 	}
 }
 
-PlayerDoubleCommand::PlayerDoubleCommand(Player * player, 
+PlayerDoubleCommand::PlayerDoubleCommand(unsigned int idx, 
 		action_t action, double value) :
-	PlayerCommand(player)
+	PlayerCommand(idx)
 {
 	mAction = action;
 	mValue = value;
@@ -439,11 +448,11 @@ void PlayerDoubleCommand::execute(){
 	}
 }
 
-PlayerLoadCommand::PlayerLoadCommand(Player * player, 
+PlayerLoadCommand::PlayerLoadCommand(unsigned int idx, 
 		AudioBuffer * buffer,
 		BeatBuffer * beatBuffer
 		) : 
-	PlayerCommand(player)
+	PlayerCommand(idx)
 {
 	mAudioBuffer = buffer;
 	mBeatBuffer = beatBuffer;
@@ -461,9 +470,9 @@ void PlayerLoadCommand::execute(){
 }
 
 
-PlayerPositionCommand::PlayerPositionCommand(Player * player, 
+PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
 		position_t target, const TimePoint & timepoint) : 
-	PlayerCommand(player)
+	PlayerCommand(idx)
 {
 	mTimePoint = timepoint;
 	mTarget = target;

@@ -116,14 +116,16 @@ namespace DataJockey {
 	};
 	class PlayerCommand : public Command {
 		public:
-			PlayerCommand(Player * player);
+			PlayerCommand(unsigned int idx);
 			//getters
-			Player * player();
+			unsigned int index();
 			TimePoint position_executed();
 			//setters
 			void position_executed(TimePoint const & t);
+		protected:
+			Player * player();
 		private:
-			Player * mPlayer;
+			unsigned int mIndex;
 			//this comes from the player's position
 			TimePoint mPositionExecuted;
 	};
@@ -136,7 +138,7 @@ namespace DataJockey {
 				MUTE, NO_MUTE,
 				LOOP, NO_LOOP
 			};
-			PlayerStateCommand(Player * player, action_t action);
+			PlayerStateCommand(unsigned int idx, action_t action);
 			virtual void execute();
 		private:
 			action_t mAction;
@@ -147,7 +149,7 @@ namespace DataJockey {
 				VOLUME, VOLUME_RELATIVE,
 				PLAY_SPEED, PLAY_SPEED_RELATIVE
 			};
-			PlayerDoubleCommand(Player * player, action_t action, double value);
+			PlayerDoubleCommand(unsigned int idx, action_t action, double value);
 			virtual void execute();
 		private:
 			action_t mAction;
@@ -155,7 +157,7 @@ namespace DataJockey {
 	};
 	class PlayerLoadCommand : public PlayerCommand {
 		public:
-			PlayerLoadCommand(Player * player, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
+			PlayerLoadCommand(unsigned int idx, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
 			virtual void execute();
 		private:
 			AudioBuffer * mAudioBuffer;
@@ -167,7 +169,7 @@ namespace DataJockey {
 				PLAY, PLAY_RELATIVE, 
 				START, END, LOOP_START, LOOP_END
 			};
-			PlayerPositionCommand(Player * player, position_t target, const TimePoint & timepoint);
+			PlayerPositionCommand(unsigned int idx, position_t target, const TimePoint & timepoint);
 			virtual void execute();
 		private:
 			position_t mTarget;

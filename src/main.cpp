@@ -51,12 +51,12 @@ int main(int argc, char * argv[]){
 		//this is pointless but I just want to make sure it works
 		master->scheduler()->remove(
 				master->scheduler()->schedule( pos,
-					new DataJockey::PlayerStateCommand(master->players()[1], 
+					new DataJockey::PlayerStateCommand(1,
 						DataJockey::PlayerStateCommand::NO_LOOP)
 					));
 		//actually schedule the command
 		master->scheduler()->schedule( pos,
-				new DataJockey::PlayerStateCommand(master->players()[1], 
+				new DataJockey::PlayerStateCommand(1,
 					DataJockey::PlayerStateCommand::NO_LOOP)
 				);
 	}
@@ -68,21 +68,21 @@ int main(int argc, char * argv[]){
 		for(i = 0; i < 16; i++){
 			pos.at_bar(i / 4, i % 4);
 			master->scheduler()->schedule( pos,
-					new DataJockey::PlayerStateCommand(master->players()[i % 2], 
+					new DataJockey::PlayerStateCommand(i % 2, 
 						DataJockey::PlayerStateCommand::MUTE)
 					);
 			master->scheduler()->schedule( pos,
-					new DataJockey::PlayerStateCommand(master->players()[(i + 1) % 2], 
+					new DataJockey::PlayerStateCommand((i + 1) % 2, 
 						DataJockey::PlayerStateCommand::NO_MUTE)
 					);
 		}
 		pos.at_bar(i / 4, i % 4);
 		master->scheduler()->schedule( pos,
-				new DataJockey::PlayerStateCommand(master->players()[i % 2], 
+				new DataJockey::PlayerStateCommand(i % 2, 
 					DataJockey::PlayerStateCommand::NO_MUTE)
 				);
 		master->scheduler()->schedule( pos,
-				new DataJockey::PlayerStateCommand(master->players()[(i + 1) % 2], 
+				new DataJockey::PlayerStateCommand((i + 1) % 2, 
 					DataJockey::PlayerStateCommand::NO_MUTE)
 				);
 	}
@@ -94,7 +94,7 @@ int main(int argc, char * argv[]){
 		//player 0
 		pos.at_bar(1, 0);
 		master->scheduler()->execute(
-				new DataJockey::PlayerPositionCommand(master->players()[0], 
+				new DataJockey::PlayerPositionCommand(0,
 					PlayerPositionCommand::PLAY,
 					pos)
 				);
@@ -102,23 +102,23 @@ int main(int argc, char * argv[]){
 		//player 1
 		pos.at_bar(1, 1);
 		master->scheduler()->execute(
-				new DataJockey::PlayerPositionCommand(master->players()[1], 
+				new DataJockey::PlayerPositionCommand(1,
 					PlayerPositionCommand::LOOP_START,
 					pos)
 				);
 		master->scheduler()->execute(
-				new DataJockey::PlayerPositionCommand(master->players()[1], 
+				new DataJockey::PlayerPositionCommand(1,
 					PlayerPositionCommand::PLAY,
 					pos)
 				);
 		pos.at_bar(3, 1);
 		master->scheduler()->execute(
-				new DataJockey::PlayerPositionCommand(master->players()[1], 
+				new DataJockey::PlayerPositionCommand(10,
 					PlayerPositionCommand::LOOP_END,
 					pos)
 				);
 		master->scheduler()->execute(
-				new DataJockey::PlayerStateCommand(master->players()[1], 
+				new DataJockey::PlayerStateCommand(1,
 					PlayerStateCommand::LOOP)
 				);
 	}
@@ -158,7 +158,7 @@ int main(int argc, char * argv[]){
 	{
 		cout << "ending sync" << endl;
 		master->scheduler()->execute(
-				new DataJockey::PlayerStateCommand(master->players()[1], 
+				new DataJockey::PlayerStateCommand(1,
 					DataJockey::PlayerStateCommand::NO_SYNC)
 				);
 	}
