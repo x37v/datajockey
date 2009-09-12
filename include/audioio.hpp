@@ -7,8 +7,14 @@
 
 namespace DataJockey {
 	class AudioIO : public JackCpp::AudioIO {
-		public:
+		private:
 			AudioIO();
+			~AudioIO();
+			AudioIO(const AudioIO&);
+			AudioIO& operator=(const AudioIO&);
+			static AudioIO * cInstance;
+		public:
+			static AudioIO * instance();
 			Master * master();
 			void start();
 		protected:

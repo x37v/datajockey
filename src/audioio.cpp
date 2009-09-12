@@ -23,6 +23,8 @@
 
 using namespace DataJockey;
 
+AudioIO * AudioIO::cInstance = NULL;
+
 AudioIO::AudioIO() : 
 	JackCpp::AudioIO("datajockey", 0, 0){
 		addOutPort("output0");
@@ -30,6 +32,15 @@ AudioIO::AudioIO() :
 		addOutPort("cue0");
 		addOutPort("cue1");
 		mMaster = Master::instance();
+}
+
+AudioIO::~AudioIO(){
+}
+
+AudioIO * AudioIO::instance(){
+	if(cInstance == NULL)
+		cInstance = new AudioIO;
+	return cInstance;
 }
 
 Master * AudioIO::master(){

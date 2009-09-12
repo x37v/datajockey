@@ -12,7 +12,7 @@ using std::endl;
 int main(int argc, char * argv[]){
 	//if(argc < 3)
 		//return -1;
-	DataJockey::AudioIO audioio;
+	DataJockey::AudioIO * audioio = DataJockey::AudioIO::instance();
 	cout << "reading in buffers" << endl;
 	//DataJockey::AudioBuffer buffer2("/mp3/model_500/classics/02-the_chase_smooth_remix.flac");
 	//DataJockey::BeatBuffer beatBuffer2("/home/alex/.datajockey/annotation/2.yaml");
@@ -40,9 +40,9 @@ int main(int argc, char * argv[]){
 	master->players()[1]->sync(true);
 
 	cout << "starting" << endl;
-	audioio.start();
-	audioio.connectToPhysical(0,0);
-	audioio.connectToPhysical(1,1);
+	audioio->start();
+	audioio->connectToPhysical(0,0);
+	audioio->connectToPhysical(1,1);
 	{
 		using namespace DataJockey;
 		TimePoint pos;
@@ -167,7 +167,7 @@ int main(int argc, char * argv[]){
 	master->scheduler()->execute_done_actions();
 	sleep(10);
 	cout << "stopping" << endl;
-	audioio.stop();
+	audioio->stop();
 	sleep(1);
 
 	return 0;
