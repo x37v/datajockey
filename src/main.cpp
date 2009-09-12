@@ -113,7 +113,7 @@ int main(int argc, char * argv[]){
 				);
 		pos.at_bar(3, 1);
 		master->scheduler()->execute(
-				new DataJockey::PlayerPositionCommand(10,
+				new DataJockey::PlayerPositionCommand(1,
 					PlayerPositionCommand::LOOP_END,
 					pos)
 				);
