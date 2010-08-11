@@ -1,0 +1,28 @@
+Yaml:
+
+---
+ctime: TIME
+mtime: TIME
+title: [optional]
+type: seconds or bar_beat
+schedule:
+- time: 0.323
+  objects:
+    - name: MasterDoubleCommand
+	   value: 0.43
+		type: main_volume
+	 - name: PlayerStateCommand
+	   value: play
+		index: 0
+- time: 1.23
+  objects:
+    - name: PlayerDoubleCommand
+	   value: 1.0
+		type: volume
+		index: 0
+- time: 2.00
+  objects:
+    - name: PlayerDoubleCommand
+	   value: 1.0
+		type: volume
+		index: 1
