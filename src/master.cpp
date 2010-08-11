@@ -258,6 +258,11 @@ void MasterBoolCommand::execute(){
 	};
 }
 
+bool MasterBoolCommand::store(CommandIOData& data) {
+	//XXX TODO
+	return false;
+}
+
 MasterDoubleCommand::MasterDoubleCommand(action_t action, double val)
 {
 	mAction = action;
@@ -278,6 +283,11 @@ void MasterDoubleCommand::execute(){
 	};
 }
 
+bool MasterDoubleCommand::store(CommandIOData& data) {
+	//XXX TODO
+	return false;
+}
+
 MasterXFadeSelectCommand::MasterXFadeSelectCommand(
 		unsigned int left, unsigned int right)
 {
@@ -287,5 +297,10 @@ MasterXFadeSelectCommand::MasterXFadeSelectCommand(
 
 void MasterXFadeSelectCommand::execute(){
 	master()->cross_fade_mixers(mSel[0], mSel[1]);
+}
+
+bool MasterXFadeSelectCommand::store(CommandIOData& data) {
+	//XXX TODO
+	return false;
 }
 

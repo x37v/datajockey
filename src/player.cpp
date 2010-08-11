@@ -416,6 +416,11 @@ void PlayerStateCommand::execute(){
 	}
 }
 
+bool PlayerStateCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
+}
+
 PlayerDoubleCommand::PlayerDoubleCommand(unsigned int idx, 
 		action_t action, double value) :
 	PlayerCommand(idx)
@@ -448,6 +453,11 @@ void PlayerDoubleCommand::execute(){
 	}
 }
 
+bool PlayerDoubleCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
+}
+
 PlayerLoadCommand::PlayerLoadCommand(unsigned int idx, 
 		AudioBuffer * buffer,
 		BeatBuffer * beatBuffer
@@ -469,6 +479,10 @@ void PlayerLoadCommand::execute(){
 	}
 }
 
+bool PlayerLoadCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
+}
 
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
 		position_t target, const TimePoint & timepoint) : 
@@ -506,3 +520,9 @@ void PlayerPositionCommand::execute(){
 		};
 	}
 }
+
+bool PlayerPositionCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
+}
+

@@ -4,6 +4,7 @@
 #include "player.hpp"
 #include "transport.hpp"
 #include "scheduler.hpp"
+#include "types.hpp"
 #include <vector>
 
 namespace DataJockey {
@@ -75,6 +76,7 @@ namespace DataJockey {
 			};
 			MasterBoolCommand(action_t action);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			action_t mAction;
 	};
@@ -87,6 +89,7 @@ namespace DataJockey {
 			};
 			MasterDoubleCommand(action_t action, double val);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			action_t mAction;
 			double mValue;
@@ -95,6 +98,7 @@ namespace DataJockey {
 		public:
 			MasterXFadeSelectCommand(unsigned int left, unsigned int right);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			unsigned int mSel[2];
 	};

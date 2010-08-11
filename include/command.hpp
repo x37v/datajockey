@@ -1,7 +1,8 @@
-#ifndef DATAJOCKEY_COMMAND_CPP
-#define DATAJOCKEY_COMMAND_CPP
+#ifndef DATAJOCKEY_COMMAND_HPP
+#define DATAJOCKEY_COMMAND_HPP
 
 #include "timepoint.hpp"
+#include "types.hpp"
 
 namespace DataJockey {
 	class Command {
@@ -14,6 +15,10 @@ namespace DataJockey {
 			//after the command has come back from the audio thread
 			//by default it does nothing
 			virtual void execute_done();
+			//this is called in order to populate a CommandIOData object from this
+			//Command object
+			//return true on actual storage, false on empty
+			virtual bool store(CommandIOData& data) = 0;
 		private:
 			TimePoint mTimeExecuted;
 	};

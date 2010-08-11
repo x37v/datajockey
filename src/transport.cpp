@@ -70,6 +70,11 @@ void TransportPositionCommand::execute(){
 		transport()->position(mTimePoint);
 }
 
+bool TransportPositionCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
+}
+
 TransportBPMCommand::TransportBPMCommand(Transport * t, double bpm) :
 	TransportCommand(t)
 {
@@ -78,5 +83,10 @@ TransportBPMCommand::TransportBPMCommand(Transport * t, double bpm) :
 
 void TransportBPMCommand::execute(){
 	transport()->bpm(mBPM);
+}
+
+bool TransportBPMCommand::store(CommandIOData& data){
+	//XXX TODO
+	return false;
 }
 

@@ -140,6 +140,7 @@ namespace DataJockey {
 			};
 			PlayerStateCommand(unsigned int idx, action_t action);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			action_t mAction;
 	};
@@ -151,6 +152,7 @@ namespace DataJockey {
 			};
 			PlayerDoubleCommand(unsigned int idx, action_t action, double value);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			action_t mAction;
 			double mValue;
@@ -159,6 +161,7 @@ namespace DataJockey {
 		public:
 			PlayerLoadCommand(unsigned int idx, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			AudioBuffer * mAudioBuffer;
 			BeatBuffer * mBeatBuffer;
@@ -171,6 +174,7 @@ namespace DataJockey {
 			};
 			PlayerPositionCommand(unsigned int idx, position_t target, const TimePoint & timepoint);
 			virtual void execute();
+			virtual bool store(CommandIOData& data);
 		private:
 			position_t mTarget;
 			TimePoint mTimePoint;

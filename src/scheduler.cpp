@@ -204,16 +204,6 @@ void Scheduler::remove(ScheduleNode * node){
 		node->prev->next = node->next;
 }
 
-Scheduler::ScheduleNode::ScheduleNode(Command * c, const TimePoint& t){
-	next = prev = NULL;
-	command = c;
-	time = t;
-}
-
-Scheduler::ScheduleNode::~ScheduleNode(){
-	delete command;
-}
-
 Scheduler::SchedulerCommand::SchedulerCommand(Scheduler * scheduler){
 	mScheduler = scheduler;
 }
@@ -232,6 +222,11 @@ void Scheduler::AddCommand::execute(){
 	scheduler()->add(mNode);
 }
 
+bool Scheduler::AddCommand::store(CommandIOData& data){
+	//DO NOTHING, this doesn't store shit
+	return false;
+}
+
 Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * node) :
 	SchedulerCommand(scheduler)
 {
@@ -240,5 +235,10 @@ Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * no
 
 void Scheduler::RemoveCommand::execute(){
 	scheduler()->remove(mNode);
+}
+
+bool Scheduler::RemoveCommand::store(CommandIOData& data){
+	//DO NOTHING, this doesn't store shit
+	return false;
 }
 

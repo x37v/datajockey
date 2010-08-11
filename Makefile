@@ -1,5 +1,5 @@
 #-ffast-math avoids denormals i think
-INCLUDES = -Iinclude -I/usr/local/include/rubberband 
+INCLUDES = -Iinclude -I/usr/include/rubberband 
 LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lyamlcpp -lsyck 
 CFLAGS = -g -ffast-math ${INCLUDES}
 
@@ -12,6 +12,7 @@ SRC = \
 		src/master.cpp \
 		src/player.cpp \
 		src/scheduler.cpp \
+		src/schedulenode.cpp \
 		src/soundfile.cpp \
 		src/timepoint.cpp \
 		src/transport.cpp \

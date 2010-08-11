@@ -3,6 +3,7 @@
 
 #include "command.hpp"
 #include "transport.hpp"
+#include "schedulenode.hpp"
 #include <jackringbuffer.hpp>
 #include <map>
 
@@ -13,7 +14,6 @@ namespace DataJockey {
 		private:
 			JackCpp::RingBuffer<Command *> mCommandsIn;
 			JackCpp::RingBuffer<Command *> mCommandsOut;
-			class ScheduleNode;
 			class AddCommand;
 			//this is the main schedule, relative to the transport
 			ScheduleNode * mSchedule;
@@ -54,16 +54,6 @@ namespace DataJockey {
 			//removes a node from the schedule
 			void remove(ScheduleNode * node);
 
-			class ScheduleNode {
-				public:
-					ScheduleNode(Command * c, const TimePoint& t);
-					~ScheduleNode();
-					ScheduleNode * next;
-					ScheduleNode * prev;
-					Command * command;
-					TimePoint time;
-			};
-
 			class SchedulerCommand : public Command {
 				public:
 					SchedulerCommand(Scheduler * scheduler);
@@ -77,6 +67,7 @@ namespace DataJockey {
 				public:
 					AddCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
+					virtual bool store(CommandIOData& data);
 				private:
 					ScheduleNode * mNode;
 			};
@@ -85,6 +76,7 @@ namespace DataJockey {
 				public:
 					RemoveCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
+					virtual bool store(CommandIOData& data);
 				private:
 					ScheduleNode * mNode;
 			};
