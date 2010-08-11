@@ -258,7 +258,7 @@ void MasterBoolCommand::execute(){
 	};
 }
 
-bool MasterBoolCommand::store(CommandIOData& data) {
+bool MasterBoolCommand::store(CommandIOData& data) const {
 	//XXX TODO
 	return false;
 }
@@ -283,7 +283,7 @@ void MasterDoubleCommand::execute(){
 	};
 }
 
-bool MasterDoubleCommand::store(CommandIOData& data) {
+bool MasterDoubleCommand::store(CommandIOData& data) const {
 	//XXX TODO
 	return false;
 }
@@ -299,7 +299,7 @@ void MasterXFadeSelectCommand::execute(){
 	master()->cross_fade_mixers(mSel[0], mSel[1]);
 }
 
-bool MasterXFadeSelectCommand::store(CommandIOData& data) {
+bool MasterXFadeSelectCommand::store(CommandIOData& data) const {
 	//XXX TODO
 	return false;
 }

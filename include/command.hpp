@@ -18,7 +18,7 @@ namespace DataJockey {
 			//this is called in order to populate a CommandIOData object from this
 			//Command object
 			//return true on actual storage, false on empty
-			virtual bool store(CommandIOData& data) = 0;
+			virtual bool store(CommandIOData& data) const = 0;
 		private:
 			TimePoint mTimeExecuted;
 	};

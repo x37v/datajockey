@@ -355,10 +355,15 @@ PlayerCommand::PlayerCommand(unsigned int idx){
 	mIndex = idx;
 }
 
-unsigned int PlayerCommand::index(){ return mIndex; }
-TimePoint PlayerCommand::position_executed(){ return mPositionExecuted; }
+unsigned int PlayerCommand::index() const { return mIndex; }
+const TimePoint& PlayerCommand::position_executed() const { return mPositionExecuted; }
 void PlayerCommand::position_executed(TimePoint const & t){
 	mPositionExecuted = t;
+}
+
+void PlayerCommand::store(CommandIOData& data, const std::string& name) const {
+	data["name"] = name;
+	data["player"] = (int)index();
 }
 
 Player * PlayerCommand::player(){
@@ -416,9 +421,41 @@ void PlayerStateCommand::execute(){
 	}
 }
 
-bool PlayerStateCommand::store(CommandIOData& data){
-	//XXX TODO
-	return false;
+bool PlayerStateCommand::store(CommandIOData& data) const{
+	PlayerCommand::store(data, "PlayerStateCommand");
+	switch(mAction){
+		case PLAY:
+			data["action"] = "play";
+			break;
+		case PAUSE:
+			data["action"] = "pause";
+			break;
+		case OUT_MAIN:
+			data["action"] = "out_main";
+			break;
+		case OUT_CUE:
+			data["action"] = "out_cue";
+			break;
+		case SYNC:
+			data["action"] = "sync";
+			break;
+		case NO_SYNC:
+			data["action"] = "no_sync";
+			break;
+		case MUTE:
+			data["action"] = "mute";
+			break;
+		case NO_MUTE:
+			data["action"] = "no_mute";
+			break;
+		case LOOP:
+			data["action"] = "loop";
+			break;
+		case NO_LOOP:
+			data["action"] = "no_loop";
+			break;
+	};
+	return true;
 }
 
 PlayerDoubleCommand::PlayerDoubleCommand(unsigned int idx, 
@@ -453,9 +490,24 @@ void PlayerDoubleCommand::execute(){
 	}
 }
 
-bool PlayerDoubleCommand::store(CommandIOData& data){
-	//XXX TODO
-	return false;
+bool PlayerDoubleCommand::store(CommandIOData& data) const{
+	PlayerCommand::store(data, "PlayerDoubleCommand");
+	switch(mAction){
+		case VOLUME:
+			data["action"] = "volume";
+			break;
+		case VOLUME_RELATIVE:
+			data["action"] = "volume_relative";
+			break;
+		case PLAY_SPEED:
+			data["action"] = "play_speed";
+			break;
+		case PLAY_SPEED_RELATIVE:
+			data["action"] = "play_speed_relative";
+			break;
+	};
+	data["value"] = mValue;
+	return true;
 }
 
 PlayerLoadCommand::PlayerLoadCommand(unsigned int idx, 
@@ -479,8 +531,10 @@ void PlayerLoadCommand::execute(){
 	}
 }
 
-bool PlayerLoadCommand::store(CommandIOData& data){
-	//XXX TODO
+bool PlayerLoadCommand::store(CommandIOData& data) const{
+	PlayerCommand::store(data, "PlayerLoadCommand");
+	//XXX how to do this one?  maybe associate a global map of files loaded,
+	//indicies to file names or database indicies?
 	return false;
 }
 
@@ -521,8 +575,30 @@ void PlayerPositionCommand::execute(){
 	}
 }
 
-bool PlayerPositionCommand::store(CommandIOData& data){
-	//XXX TODO
+bool PlayerPositionCommand::store(CommandIOData& data) const{
+	PlayerCommand::store(data, "PlayerPositionCommand");
+	switch(mTarget){
+		case PLAY:
+			data["target"] = "play";
+			break;
+		case PLAY_RELATIVE:
+			data["target"] = "play_relative";
+			break;
+		case START:
+			data["target"] = "start";
+			break;
+		case END:
+			data["target"] = "end";
+			break;
+		case LOOP_START:
+			data["target"] = "loop_start";
+			break;
+		case LOOP_END:
+			data["target"] = "loop_end";
+			break;
+	};
+	//XXX string representation of time point;
+	//data["time_point"] = mTimePoint;
 	return false;
 }
 

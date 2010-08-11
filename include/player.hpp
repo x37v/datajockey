@@ -118,10 +118,12 @@ namespace DataJockey {
 		public:
 			PlayerCommand(unsigned int idx);
 			//getters
-			unsigned int index();
-			TimePoint position_executed();
+			unsigned int index() const;
+			const TimePoint& position_executed() const;
 			//setters
 			void position_executed(TimePoint const & t);
+			//misc
+			void store(CommandIOData& data, const std::string& name) const;
 		protected:
 			Player * player();
 		private:
@@ -140,7 +142,7 @@ namespace DataJockey {
 			};
 			PlayerStateCommand(unsigned int idx, action_t action);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			action_t mAction;
 	};
@@ -152,7 +154,7 @@ namespace DataJockey {
 			};
 			PlayerDoubleCommand(unsigned int idx, action_t action, double value);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			action_t mAction;
 			double mValue;
@@ -161,7 +163,7 @@ namespace DataJockey {
 		public:
 			PlayerLoadCommand(unsigned int idx, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			AudioBuffer * mAudioBuffer;
 			BeatBuffer * mBeatBuffer;
@@ -174,7 +176,7 @@ namespace DataJockey {
 			};
 			PlayerPositionCommand(unsigned int idx, position_t target, const TimePoint & timepoint);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			position_t mTarget;
 			TimePoint mTimePoint;

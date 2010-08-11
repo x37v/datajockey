@@ -50,7 +50,7 @@ namespace DataJockey {
 		public:
 			TransportPositionCommand(Transport * t, const TimePoint& pos);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			TimePoint mTimePoint;
 			
@@ -60,7 +60,7 @@ namespace DataJockey {
 		public:
 			TransportBPMCommand(Transport * t, double bpm);
 			virtual void execute();
-			virtual bool store(CommandIOData& data);
+			virtual bool store(CommandIOData& data) const;
 		private:
 			double mBPM;
 	};

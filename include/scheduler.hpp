@@ -67,7 +67,7 @@ namespace DataJockey {
 				public:
 					AddCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
-					virtual bool store(CommandIOData& data);
+					virtual bool store(CommandIOData& data) const;
 				private:
 					ScheduleNode * mNode;
 			};
@@ -76,7 +76,7 @@ namespace DataJockey {
 				public:
 					RemoveCommand(Scheduler * scheduler, ScheduleNode * node);
 					virtual void execute();
-					virtual bool store(CommandIOData& data);
+					virtual bool store(CommandIOData& data) const;
 				private:
 					ScheduleNode * mNode;
 			};

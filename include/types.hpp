@@ -5,7 +5,7 @@
 
 namespace DataJockey {
 	//this is the type of data which we use for storing and restoring a command from file
-	typedef yaml::node CommandIOData;
+	typedef yaml::map CommandIOData;
 }
 
 #endif
