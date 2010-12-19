@@ -1,6 +1,6 @@
 #include "beatbuffer.hpp"
-#include <yamlcpp/yaml.hpp>
-#include <yamlcpp/parser.hpp>
+//#include <yamlcpp/yaml.hpp>
+//#include <yamlcpp/parser.hpp>
 
 using namespace DataJockey;
 
@@ -94,6 +94,7 @@ void BeatBuffer::load(std::string dataLocation)
 	throw(std::runtime_error)
 {
 	mBeatData.clear();
+#if 0
 
 	//read in the beat location information
 	try {
@@ -153,6 +154,7 @@ void BeatBuffer::load(std::string dataLocation)
 		str.append(dataLocation);
 		throw std::runtime_error(str);
 	}
+#endif
 }
 
 unsigned int BeatBuffer::start_offset() const {

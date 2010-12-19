@@ -1,6 +1,6 @@
 #-ffast-math avoids denormals i think
 INCLUDES = -Iinclude -I/usr/include/rubberband 
-LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lyamlcpp -lsyck 
+LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband
 CFLAGS = -g -ffast-math ${INCLUDES}
 
 SRC = \
