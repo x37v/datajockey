@@ -1,6 +1,6 @@
 #include "transport.hpp"
 
-using namespace DataJockey;
+using namespace DataJockey::Internal;
 
 Transport::Transport(){
 	mPosition.at_bar(0);

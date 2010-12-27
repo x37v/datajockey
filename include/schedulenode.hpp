@@ -5,15 +5,17 @@
 #include "timepoint.hpp"
 
 namespace DataJockey {
-	class ScheduleNode {
-		public:
-			ScheduleNode(Command * c, const TimePoint& t);
-			~ScheduleNode();
-			ScheduleNode * next;
-			ScheduleNode * prev;
-			Command * command;
-			TimePoint time;
-	};
+   namespace Internal {
+      class ScheduleNode {
+         public:
+            ScheduleNode(Command * c, const TimePoint& t);
+            ~ScheduleNode();
+            ScheduleNode * next;
+            ScheduleNode * prev;
+            Command * command;
+            TimePoint time;
+      };
+   }
 }
 
 

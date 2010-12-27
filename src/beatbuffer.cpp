@@ -2,7 +2,7 @@
 //#include <yamlcpp/yaml.hpp>
 //#include <yamlcpp/parser.hpp>
 
-using namespace DataJockey;
+using namespace DataJockey::Internal;
 
 template<typename Type>
 Type linear_interp(Type v0, Type v1, double dist){

@@ -8,7 +8,7 @@ Type linear_interp(Type v0, Type v1, double dist){
 	return v0 + (v1 - v0) * dist;
 }
 
-using namespace DataJockey;
+using namespace DataJockey::Internal;
 
 AudioBuffer::AudioBuffer(std::string soundfileLocation) 
 	throw(std::runtime_error){

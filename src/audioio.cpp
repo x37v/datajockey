@@ -21,7 +21,7 @@
 #include <jack/transport.h>
 #include "audioio.hpp"
 
-using namespace DataJockey;
+using namespace DataJockey::Internal;
 
 AudioIO * AudioIO::cInstance = NULL;
 

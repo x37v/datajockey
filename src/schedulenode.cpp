@@ -1,5 +1,6 @@
 #include "schedulenode.hpp"
-using namespace DataJockey;
+
+using namespace DataJockey::Internal;
 
 ScheduleNode::ScheduleNode(Command * c, const TimePoint& t){
 	next = prev = NULL;

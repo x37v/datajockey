@@ -1,5 +1,6 @@
 #include "command.hpp"
-using namespace DataJockey;
+
+using namespace DataJockey::Internal;
 
 Command::~Command(){
 }
