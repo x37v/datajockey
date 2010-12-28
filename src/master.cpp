@@ -80,6 +80,10 @@ void Master::setup_audio(
 		sampleBuffer[0] = new float[maxBufferLen];
 		sampleBuffer[1] = new float[maxBufferLen];
 		mPlayers[i]->setup_audio(sampleRate, maxBufferLen);
+      for(unsigned int j = 0; j < maxBufferLen; j++) {
+         sampleBuffer[0][j] = 0.0f;
+         sampleBuffer[1][j] = 0.0f;
+      }
 		mPlayerBuffers.push_back(sampleBuffer);
 	}
 	if(mMasterVolumeBuffer)
