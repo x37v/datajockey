@@ -1,0 +1,67 @@
+#just setting it to the version I have
+cmake_minimum_required(VERSION 2.8)
+
+project(datajockey)
+
+# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules )
+include (MacroOptionalAddBindings)
+
+set(COMPILE_RUBY FALSE CACHE INTERNAL "")
+
+find_package(Ruby REQUIRED)
+
+if (RUBY_LIBRARY AND RUBY_INCLUDE_DIRS AND RUBY_EXECUTABLE)
+    set(COMPILE_RUBY TRUE CACHE INTERNAL "")
+endif (RUBY_LIBRARY AND RUBY_INCLUDE_DIRS AND RUBY_EXECUTABLE)
+
+#macro_log_feature(COMPILE_RUBY "Ruby" "Ruby interpreter and libraries" "http://www.ruby-lang.org" FALSE "" "Needed to compile the Ruby bindings")
+
+if (NOT COMPILE_RUBY)
+    return()
+endif (NOT COMPILE_RUBY)
+
+SET(CUSTOM_RUBY_SITE_ARCH_DIR ${RUBY_SITEARCH_DIR} CACHE DIR "custom installation directory for ruby binary extension" )
+SET(CUSTOM_RUBY_SITE_LIB_DIR ${RUBY_SITELIB_DIR} CACHE DIR "custom installation directory for ruby extension" )
+
+SET(QT_INCLUDE_DIR /usr/include/qt4)
+include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore/ ${QT_INCLUDE_DIR}/Qt/ ${QT_INCLUDE_DIR}/QtGui/ /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ../include/ .)
+
+link_directories(/home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/lib/1.9/)
+set(rubydatajockey_LIBRARY_SRC 
+   datajockey.cpp 
+	../src/audiobuffer.cpp
+	../src/audioio.cpp
+	../src/audiomodel.cpp
+	../moc/moc_audiomodel.cpp
+	../src/beatbuffer.cpp
+	../src/command.cpp
+	../src/master.cpp
+	../src/player.cpp
+	../src/scheduler.cpp
+	../src/schedulenode.cpp
+	../src/soundfile.cpp
+	../src/timepoint.cpp
+	../src/transport.cpp
+   smoke/smokedata.cpp
+   smoke/x_1.cpp smoke/x_2.cpp)
+add_library(rubydatajockey MODULE ${rubydatajockey_LIBRARY_SRC})
+target_link_libraries(rubydatajockey
+   #${PHONON_LIBS}
+    #smokedatajockey
+    qtruby4shared
+    sndfile
+    vorbisfile
+    mad
+    jack
+    jackcpp
+    rubberband
+)
+set_target_properties(rubydatajockey PROPERTIES PREFIX "" OUTPUT_NAME datajockey)
+
+install(TARGETS rubydatajockey DESTINATION ${CUSTOM_RUBY_SITE_ARCH_DIR})
+install(FILES datajockey.rb DESTINATION ${CUSTOM_RUBY_SITE_LIB_DIR}/datajockey)
+
+if (Q_WS_MAC)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey.so\"  \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey.bundle\" )" )
+endif (Q_WS_MAC)

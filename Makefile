@@ -15,7 +15,7 @@ SRC = \
 		src/schedulenode.cpp \
 		src/soundfile.cpp \
 		src/timepoint.cpp \
-		src/transport.cpp \
+		src/transport.cpp
 
 OBJ = ${SRC:.cpp=.o}
 

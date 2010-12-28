@@ -1,6 +1,6 @@
 #include "timepoint.hpp"
 
-using namespace DataJockey::Internal;
+using namespace DataJockey;
 
 TimePoint::TimePoint(time_type t ){
 	mType = t;

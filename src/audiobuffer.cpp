@@ -8,10 +8,11 @@ Type linear_interp(Type v0, Type v1, double dist){
 	return v0 + (v1 - v0) * dist;
 }
 
-using namespace DataJockey::Internal;
+using namespace DataJockey;
 
-AudioBuffer::AudioBuffer(std::string soundfileLocation) 
+AudioBuffer::AudioBuffer(std::string soundfileLocation, AudioBuffer::progress_callback_t progress_callback) 
 	throw(std::runtime_error){
+      mProgressCallback = progress_callback;
 		load(soundfileLocation);
 }
 
@@ -72,6 +73,8 @@ void AudioBuffer::load(std::string soundfileLocation)
 	//we must resize the audio buffer because we want to make sure that
 	//we can do mAudioData[i].push_back
 	mAudioData.resize(chans);
+   double num_frames = (double)sndFile.frames();
+   unsigned int total_read = 0;
 
 	while((frames_read = sndFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
 		for(unsigned int i = 0; i < frames_read; i++){
@@ -79,6 +82,15 @@ void AudioBuffer::load(std::string soundfileLocation)
 				mAudioData[j].push_back(inbuf[i * chans + j]);
 			}
 		}
+
+      //report progress
+      if (mProgressCallback && num_frames != 0) {
+         total_read += frames_read;
+         mProgressCallback((double)(100 * total_read) / num_frames, NULL);
+      }
 	}
 	delete [] inbuf;
+   if (mProgressCallback) {
+      mProgressCallback(100, NULL);
+   }
 }

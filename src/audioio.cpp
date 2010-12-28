@@ -58,6 +58,7 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
 		// A vector of pointers to each output port.
 		audioBufVector outBufs){
 	mMaster->audio_compute_and_fill(outBufs, nframes);
+
 	/*
 	jack_position_t pos;
 	jack_transport_state_t state = jack_transport_query (client(), &pos);

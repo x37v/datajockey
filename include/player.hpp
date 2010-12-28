@@ -7,7 +7,7 @@
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
-#include "RubberBandStretcher.h"
+#include "rubberband/RubberBandStretcher.h"
 
 namespace DataJockey {
    namespace Internal {

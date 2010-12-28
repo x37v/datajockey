@@ -4,6 +4,7 @@
 #define RUBBERBAND_WINDOW_SIZE 64
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
+using namespace DataJockey;
 using namespace DataJockey::Internal;
 
 Player::Player(){

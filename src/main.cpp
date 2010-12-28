@@ -18,34 +18,40 @@ int main(int argc, char * argv[]){
 	//DataJockey::Internal::BeatBuffer beatBuffer2("/home/alex/.datajockey/annotation/2.yaml");
 	//DataJockey::Internal::AudioBuffer buffer("/mp3/new_order/movement/01-dreams_never_end.flac");
 	//DataJockey::Internal::BeatBuffer beatBuffer("/home/alex/.datajockey/annotation/2186.yaml");
-	DataJockey::Internal::AudioBuffer buffer(argv[1]);
+	DataJockey::AudioBuffer buffer(argv[1]);
 	//DataJockey::Internal::BeatBuffer beatBuffer("/home/alex/music/annotation/377.yaml");
-	DataJockey::Internal::AudioBuffer buffer2(argv[2]);
+	DataJockey::AudioBuffer buffer2(argv[2]);
 	//DataJockey::Internal::BeatBuffer beatBuffer2("/home/alex/music/annotation/441.yaml");
 	DataJockey::Internal::Master * master = DataJockey::Internal::Master::instance();
 	master->add_player();
 	master->add_player();
 
-	master->players()[0]->audio_buffer(&buffer);
+	//master->players()[0]->audio_buffer(&buffer);
 	//master->players()[0]->beat_buffer(&beatBuffer);
 	master->players()[0]->play_state(DataJockey::Internal::Player::PLAY);
+   master->players()[0]->out_state(DataJockey::Internal::Player::MAIN_MIX);
 	master->players()[0]->play_speed(0.95);
 	master->players()[0]->sync(true);
 
 
-	master->players()[1]->audio_buffer(&buffer2);
+	//master->players()[1]->audio_buffer(&buffer2);
 	//master->players()[1]->beat_buffer(&beatBuffer2);
 	master->players()[1]->play_state(DataJockey::Internal::Player::PLAY);
 	master->players()[1]->play_speed(1.5);
+   master->players()[1]->out_state(DataJockey::Internal::Player::MAIN_MIX);
 	master->players()[1]->sync(true);
 
 	cout << "starting" << endl;
 	audioio->start();
 	audioio->connectToPhysical(0,0);
 	audioio->connectToPhysical(1,1);
+
+   sleep(20);
+   exit(0);
+
 	{
 		using namespace DataJockey::Internal;
-		TimePoint pos;
+      DataJockey::TimePoint pos;
 		pos.at_bar(10);
 		//cout << "ending loop" << endl;
 		//this is pointless but I just want to make sure it works
@@ -63,7 +69,7 @@ int main(int argc, char * argv[]){
 
 	{
 		using namespace DataJockey::Internal;
-		TimePoint pos;
+      DataJockey::TimePoint pos;
 		unsigned int i;
 		for(i = 0; i < 16; i++){
 			pos.at_bar(i / 4, i % 4);
@@ -89,7 +95,7 @@ int main(int argc, char * argv[]){
 
 	{
       using namespace DataJockey::Internal;
-		TimePoint pos;
+      DataJockey::TimePoint pos;
 
 		//player 0
 		pos.at_bar(1, 0);

@@ -350,6 +350,19 @@ void SoundFile::synthMadFrame(){
 	} while(true);
 }
 
+unsigned int SoundFile::frames() {
+   switch(mType) {
+      case SNDFILE:
+         return (unsigned int)mSndFile.frames();
+      case OGG:
+      case MP3:
+         //TODO
+      default:
+      case UNSUPPORTED:
+         return 0;
+   }
+}
+
 //MAD stuff
 static inline signed int madScale(mad_fixed_t sample) {
   /* round */
