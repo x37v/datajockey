@@ -21,8 +21,10 @@
     </exclude>
     <classList>
         <class>DataJockey</class>
+        <!--
         <class>DataJockey::AudioBuffer</class>
         <class>DataJockey::BeatBuffer</class>
+        -->
         <class>DataJockey::AudioModel</class>
         <class>DataJockey::TimePoint</class>
     </classList>
