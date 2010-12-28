@@ -124,7 +124,14 @@ void AudioModel::set_player_loop(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   //TODO
+   Command * cmd = NULL;
+   if (val)
+      cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
+            DataJockey::Internal::PlayerStateCommand::LOOP);
+   else
+      cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
+            DataJockey::Internal::PlayerStateCommand::NO_LOOP);
+   queue_command(cmd);
 }
 
 void AudioModel::set_player_volume(int player_index, int val){

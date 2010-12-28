@@ -14,8 +14,10 @@ Master * Master::instance(){
 
 Master::Master(){
 	mCueBuffer = NULL;
+   /*
 	for(unsigned int i = 0; i < DEFAULT_NUM_PLAYERS; i++)
 		add_player();
+      */
 	mMasterVolume = 1.0;
 	mCueVolume = 1.0;
 	mCueBuffer = NULL;
