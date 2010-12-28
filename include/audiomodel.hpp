@@ -45,6 +45,7 @@ namespace DataJockey {
          friend class Internal::AudioLoaderThread;
       public slots:
          void set_player_pause(int player_index, bool pause);
+         void set_player_cue(int player_index, bool val);
          //void set_player_out_state(int player_index, Internal::Player::out_state_t val);
          //void set_player_stretch_method(int player_index, Internal::Player::stretch_method_t val);
          void set_player_mute(int player_index, bool val);
@@ -61,6 +62,12 @@ namespace DataJockey {
          void set_player_beat_buffer(int player_index, BeatBuffer * buf);
 
          void set_player_audio_file(int player_index, QString location);
+
+         void set_master_volume(int val);
+         void set_master_cue_volume(int val);
+         void set_master_cross_fade_enable(bool enable);
+         void set_master_cross_fade_position(int val);
+         void set_master_cross_fade_players(int left, int right);
 
       signals:
          void player_audio_file_load_progress(int player_index, int percent);

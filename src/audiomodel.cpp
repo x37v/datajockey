@@ -65,6 +65,18 @@ void AudioModel::set_player_pause(int player_index, bool pause){
    queue_command(cmd);
 }
 
+void AudioModel::set_player_cue(int player_index, bool val){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   Command * cmd = NULL;
+   if (val)
+      cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::OUT_CUE);
+   else
+      cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::OUT_MAIN);
+   queue_command(cmd);
+}
+
 /*
 void AudioModel::set_player_out_state(int player_index, Player::out_state_t val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
@@ -201,5 +213,37 @@ void AudioModel::queue_command(DataJockey::Internal::Command * cmd){
 
 void AudioModel::relay_player_audio_file_load_progress(int player_index, int percent){
    emit(player_audio_file_load_progress(player_index, percent));
+}
+
+void AudioModel::set_master_volume(int val){
+}
+
+void AudioModel::set_master_cue_volume(int val){
+}
+
+void AudioModel::set_master_cross_fade_enable(bool enable){
+   Command * cmd = NULL;
+   if(enable)
+      cmd = new MasterBoolCommand(MasterBoolCommand::XFADE);
+   else
+      cmd = new MasterBoolCommand(MasterBoolCommand::NO_XFADE);
+   queue_command(cmd);
+}
+
+void AudioModel::set_master_cross_fade_position(int val){
+   double dval = (double)val / (double)one_scale;
+   if (dval > 1.0)
+      dval = 1.0;
+   else if(dval < 0.0)
+      dval = 0.0;
+   queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
+}
+
+void AudioModel::set_master_cross_fade_players(int left, int right){
+   if (left < 0 || left >= (int)mNumPlayers)
+      return;
+   if (right < 0 || right >= (int)mNumPlayers)
+      return;
+   queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
 }
 
