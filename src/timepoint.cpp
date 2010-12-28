@@ -2,11 +2,23 @@
 
 using namespace DataJockey;
 
-TimePoint::TimePoint(time_type t ){
+TimePoint::TimePoint(time_type t){
 	mType = t;
 	//default type is 4/4
 	mBeatsPerBar = mBeatType = 4;
 	invalidate();
+}
+
+TimePoint::TimePoint(double sec) {
+   mType = SECONDS;
+   seconds(sec);
+}
+
+TimePoint::TimePoint(unsigned int bar, unsigned int beat, double pos_in_beat) {
+	//default type is 4/4
+	mBeatsPerBar = mBeatType = 4;
+   mType = BEAT_BAR;
+   at_bar(bar, beat, pos_in_beat);
 }
 
 //getters
