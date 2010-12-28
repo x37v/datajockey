@@ -22,12 +22,15 @@ void ConsumeThread::run() {
 }
 
 const unsigned int DataJockey::AudioModel::one_scale = 1000;
+AudioModel * AudioModel::cInstance = NULL;
 
-AudioModel::AudioModel(unsigned int num_players) :
+AudioModel::AudioModel() :
    QObject()
 {
-	mAudioIO = DataJockey::Internal::AudioIO::instance();
-	mMaster = DataJockey::Internal::Master::instance();
+   unsigned int num_players = 2;
+
+   mAudioIO = DataJockey::Internal::AudioIO::instance();
+   mMaster = DataJockey::Internal::Master::instance();
 
    mNumPlayers = num_players;
    for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -42,12 +45,18 @@ AudioModel::AudioModel(unsigned int num_players) :
    }
 
    mAudioIO->start();
-	mAudioIO->connectToPhysical(0,0);
-	mAudioIO->connectToPhysical(1,1);
+   mAudioIO->connectToPhysical(0,0);
+   mAudioIO->connectToPhysical(1,1);
 
    //hook up and start the consume thread
    mConsumeThread = new Internal::ConsumeThread(mMaster->scheduler());
    mConsumeThread->start();
+}
+
+AudioModel * AudioModel::instance(){
+   if (!cInstance)
+      cInstance = new AudioModel();
+   return cInstance;
 }
 
 AudioModel::~AudioModel() {

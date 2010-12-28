@@ -35,9 +35,15 @@ namespace DataJockey {
 
    class AudioModel : public QObject {
       Q_OBJECT
+      private:
+         //singleton
+         AudioModel();
+         AudioModel(const AudioModel&);
+         AudioModel& operator=(const AudioModel&);
+         ~AudioModel();
+         static AudioModel * cInstance;
       public:
-         AudioModel(unsigned int num_players = 2);
-         virtual ~AudioModel();
+         static AudioModel * instance();
          //this is the value we use to scale from an int to a double, this
          //represents 'one' as a double in int terms.
          const static unsigned int one_scale;
