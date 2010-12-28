@@ -1,0 +1,9 @@
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+datajockey.so
+smoke/smokedata.cpp
+smoke/x_1.cpp
+smoke/x_2.cpp
+smoke/generator.log
