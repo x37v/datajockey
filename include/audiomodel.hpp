@@ -85,10 +85,11 @@ namespace DataJockey {
          friend class PlayerClearBuffersCommand;
          void decrement_audio_file_reference(QString fileName);
       private:
+         //pointers to other internal singletons
          DataJockey::Internal::AudioIO * mAudioIO;
          DataJockey::Internal::Master * mMaster;
+
          unsigned int mNumPlayers;
-         void queue_command(DataJockey::Internal::Command * cmd);
          std::vector<Internal::AudioLoaderThread *> mThreadPool;
 
          //execute/consume the scheduler's done actions
@@ -104,6 +105,11 @@ namespace DataJockey {
          //filename => [refcount, buffer pointer]
          QMap<QString, QPair<int, DataJockey::AudioBuffer *> > mAudioBufferManager;
 
+         //**** private methods
+         
          void relay_player_audio_file_load_progress(int player_index, int percent);
+
+         //convenience method for executing commands in the master's scheduler
+         void queue_command(DataJockey::Internal::Command * cmd);
    };
 }
