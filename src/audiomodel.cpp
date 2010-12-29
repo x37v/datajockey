@@ -43,16 +43,19 @@ AudioLoaderThread::AudioLoaderThread(AudioModel * model, unsigned int player_ind
 void AudioLoaderThread::run() {
 }
 
-ConsumeThread::ConsumeThread(Scheduler * scheduler) :
-   mScheduler(scheduler)
-{ }
+class DataJockey::AudioModel::ConsumeThread : public QThread {
+   private:
+      Scheduler * mScheduler;
+   public:
+      ConsumeThread(Scheduler * scheduler) : mScheduler(scheduler) { }
 
-void ConsumeThread::run() {
-   while(true) {
-      mScheduler->execute_done_actions();
-      msleep(10);
-   }
-}
+      void run() {
+         while(true) {
+            mScheduler->execute_done_actions();
+            msleep(10);
+         }
+      }
+};
 
 class DataJockey::AudioModel::PlayerState {
    public:
@@ -92,7 +95,7 @@ AudioModel::AudioModel() :
    mAudioIO->connectToPhysical(1,1);
 
    //hook up and start the consume thread
-   mConsumeThread = new Internal::ConsumeThread(mMaster->scheduler());
+   mConsumeThread = new ConsumeThread(mMaster->scheduler());
    mConsumeThread->start();
 }
 

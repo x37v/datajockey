@@ -26,14 +26,6 @@ namespace DataJockey {
             unsigned int mPlayerIndex;
       };
 
-      //run thread to execute done actions
-      class ConsumeThread : public QThread {
-         public:
-            ConsumeThread(Scheduler * scheduler);
-            void run();
-         private:
-            Scheduler * mScheduler;
-      };
    }
 
    class AudioModel : public QObject {
@@ -42,6 +34,7 @@ namespace DataJockey {
          //forward declarations
          class PlayerClearBuffersCommand;
          class PlayerState;
+         class ConsumeThread;
 
          //singleton
          AudioModel();
@@ -97,7 +90,7 @@ namespace DataJockey {
          unsigned int mNumPlayers;
          void queue_command(DataJockey::Internal::Command * cmd);
          std::vector<Internal::AudioLoaderThread *> mThreadPool;
-         Internal::ConsumeThread * mConsumeThread;
+         ConsumeThread * mConsumeThread;
          std::vector<PlayerState *> mPlayerStates;
          QMutex mPlayerStatesMutex;
          //filename => [refcount, buffer pointer]
