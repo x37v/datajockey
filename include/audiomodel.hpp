@@ -90,9 +90,17 @@ namespace DataJockey {
          unsigned int mNumPlayers;
          void queue_command(DataJockey::Internal::Command * cmd);
          std::vector<Internal::AudioLoaderThread *> mThreadPool;
+
+         //execute/consume the scheduler's done actions
          ConsumeThread * mConsumeThread;
+
+         //maintain player state information
          std::vector<PlayerState *> mPlayerStates;
+
+         //make sure that player states/audio buffer manager access is thread safe
          QMutex mPlayerStatesMutex;
+
+         //manage audio buffers
          //filename => [refcount, buffer pointer]
          QMap<QString, QPair<int, DataJockey::AudioBuffer *> > mAudioBufferManager;
 
