@@ -1,6 +1,9 @@
 #include <QObject>
 #include <QString>
 #include <QThread>
+#include <QMutex>
+#include <QMap>
+#include <QPair>
 #include "master.hpp"
 #include "audioio.hpp"
 #include "timepoint.hpp"
@@ -36,6 +39,12 @@ namespace DataJockey {
    class AudioModel : public QObject {
       Q_OBJECT
       private:
+         class PlayerClearBuffersCommand;
+         class PlayerState {
+            public:
+               PlayerState();
+               QString mFileName;
+         };
          //singleton
          AudioModel();
          AudioModel(const AudioModel&);
@@ -68,6 +77,7 @@ namespace DataJockey {
          void set_player_beat_buffer(int player_index, BeatBuffer * buf);
 
          void set_player_audio_file(int player_index, QString location);
+         void set_player_clear_buffers(int player_index);
 
          void set_master_volume(int val);
          void set_master_cue_volume(int val);
@@ -77,6 +87,10 @@ namespace DataJockey {
 
       signals:
          void player_audio_file_load_progress(int player_index, int percent);
+
+      protected:
+         friend class PlayerClearBuffersCommand;
+         void decrement_audio_file_reference(QString fileName);
       private:
          DataJockey::Internal::AudioIO * mAudioIO;
          DataJockey::Internal::Master * mMaster;
@@ -84,6 +98,10 @@ namespace DataJockey {
          void queue_command(DataJockey::Internal::Command * cmd);
          std::vector<Internal::AudioLoaderThread *> mThreadPool;
          Internal::ConsumeThread * mConsumeThread;
+         std::vector<PlayerState *> mPlayerStates;
+         QMutex mPlayerStatesMutex;
+         //filename => [refcount, buffer pointer]
+         QMap<QString, QPair<int, DataJockey::AudioBuffer *> > mAudioBufferManager;
 
          void relay_player_audio_file_load_progress(int player_index, int percent);
    };

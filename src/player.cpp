@@ -107,10 +107,11 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
 //syncing to the transport if mSync == true
 void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer, 
 		const Transport& transport, bool inbeat){
-	if(!mAudioBuffer)
-		return;
 	//zero out the frame;
 	mixBuffer[0][frame] = mixBuffer[1][frame] = 0.0;
+
+	if(!mAudioBuffer)
+		return;
 	//compute the volume
 	mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
