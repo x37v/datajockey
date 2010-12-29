@@ -64,8 +64,6 @@ namespace DataJockey {
          void set_player_end_position(int player_index, const TimePoint &val);
          void set_player_loop_start_position(int player_index, const TimePoint &val);
          void set_player_loop_end_position(int player_index, const TimePoint &val);
-         void set_player_audio_buffer(int player_index, AudioBuffer * buf);
-         void set_player_beat_buffer(int player_index, BeatBuffer * buf);
 
          void set_player_audio_file(int player_index, QString location);
          void set_player_clear_buffers(int player_index);
@@ -77,6 +75,14 @@ namespace DataJockey {
          void set_master_cross_fade_players(int left, int right);
 
       signals:
+         void player_pause_changed(int player_index, bool pause);
+         void player_cue_changed(int player_index, bool val);
+         void player_mute_changed(int player_index, bool val);
+         void player_sync_changed(int player_index, bool val);
+         void player_loop_changed(int player_index, bool val);
+         void player_volume_changed(int player_index, int val);
+         void player_play_speed_changed(int player_index, int val);
+         void player_position_changed(int player_index, const TimePoint &val);
          void player_audio_file_load_progress(int player_index, int percent);
          void player_audio_file_cleared(int player_index);
          void player_audio_file_changed(int player_index, QString location);
@@ -111,5 +117,8 @@ namespace DataJockey {
 
          //convenience method for executing commands in the master's scheduler
          void queue_command(DataJockey::Internal::Command * cmd);
+
+         void set_player_audio_buffer(int player_index, AudioBuffer * buf);
+         void set_player_beat_buffer(int player_index, BeatBuffer * buf);
    };
 }
