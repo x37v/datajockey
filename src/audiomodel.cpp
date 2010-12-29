@@ -269,6 +269,9 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       //clear out the old buffers
       set_player_clear_buffers(player_index);
 
+      //notify
+      emit(player_audio_file_changed(player_index, location));
+
       if (!mAudioBufferManager.contains(location)) {
          buf = new AudioBuffer(location.toStdString());
          set_player_audio_buffer(player_index, buf);
@@ -289,6 +292,8 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
          //update player state
          mPlayerStates[player_index]->mFileName = location;
 
+         //notify
+         //XXX what if the file isn't actually all the way loaded?
          emit(player_audio_file_load_progress(player_index, 100));
       }
    } else {
@@ -307,6 +312,8 @@ void AudioModel::set_player_clear_buffers(int player_index) {
       //this command will clear out the buffers and decrement the reference to the audio buffer
       queue_command(new PlayerClearBuffersCommand(player_index, this, oldFileName));
       mPlayerStates[player_index]->mFileName.clear();
+      //notify
+      emit(player_audio_file_cleared(player_index));
    }
 }
 

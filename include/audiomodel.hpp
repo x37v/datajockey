@@ -87,6 +87,8 @@ namespace DataJockey {
 
       signals:
          void player_audio_file_load_progress(int player_index, int percent);
+         void player_audio_file_cleared(int player_index);
+         void player_audio_file_changed(int player_index, QString location);
 
       protected:
          friend class PlayerClearBuffersCommand;
