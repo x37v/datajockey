@@ -54,9 +54,12 @@ void ConsumeThread::run() {
    }
 }
 
-DataJockey::AudioModel::PlayerState::PlayerState() :
-   mFileName() {
-}
+class DataJockey::AudioModel::PlayerState {
+   public:
+      PlayerState() :
+         mFileName() { }
+      QString mFileName;
+};
 
 const unsigned int DataJockey::AudioModel::one_scale = 1000;
 AudioModel * AudioModel::cInstance = NULL;

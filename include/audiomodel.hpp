@@ -39,12 +39,10 @@ namespace DataJockey {
    class AudioModel : public QObject {
       Q_OBJECT
       private:
+         //forward declarations
          class PlayerClearBuffersCommand;
-         class PlayerState {
-            public:
-               PlayerState();
-               QString mFileName;
-         };
+         class PlayerState;
+
          //singleton
          AudioModel();
          AudioModel(const AudioModel&);
