@@ -39,7 +39,7 @@ class AudioModel::PlayerClearBuffersCommand : public DataJockey::Internal::Playe
 };
 
 AudioLoaderThread::AudioLoaderThread(AudioModel * model, unsigned int player_index) 
-: mAudioModel(model), mPlayerIndex(player_index), mAudioBuffer(NULL){ }
+: mAudioModel(model), mPlayerIndex(player_index), mAudioBuffer(NULL), mMutex() { }
 
 void AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
@@ -50,18 +50,40 @@ void AudioLoaderThread::progress_callback(int percent, void *objPtr) {
          Q_ARG(int, percent));
 }
 
+void AudioLoaderThread::abort() {
+   QMutexLocker lock(&mMutex);
+   if (mAudioBuffer)
+      mAudioBuffer->abort_load();
+   mAborted = true;
+}
+
+AudioBuffer * AudioLoaderThread::audio_buffer() { return mAudioBuffer; }
+
 AudioBuffer * AudioLoaderThread::load(QString location){
+   QMutexLocker lock(&mMutex);
+   mAborted = false;
+
+   if (isRunning()) {
+      abort();
+      wait();
+      //TODO what if it is loading?  how do we deal with a hanging reference?
+   }
+   mFileName = location;
+
+   try {
+      mAudioBuffer = new DataJockey::AudioBuffer(location.toStdString());
+      start();
+   } catch (...){ return NULL; }
+   return mAudioBuffer;
 }
 
 void AudioLoaderThread::run() {
-   /*
-   //finalize
-   QMetaObject::invokeMethod(mAudioModel,
-         "relay_player_audio_file_load_progress",
-         Qt::QueuedConnection, 
-         Q_ARG(int, (int)mPlayerIndex),
-         Q_ARG(int, 100));
-         */
+   if (mAudioBuffer) {
+      QMutexLocker lock(&mMutex);
+      mAudioBuffer->load(AudioLoaderThread::progress_callback, this);
+      if (!mAborted)
+         model()->player_audio_file_load_complete(player_index(), mFileName, mAudioBuffer);
+   }
 }
 
 AudioModel * AudioLoaderThread::model() {
@@ -357,22 +379,14 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       AudioBuffer * buf = NULL;
 
       //clear out the old buffers
+      if (mThreadPool[player_index]->isRunning()) {
+         mThreadPool[player_index]->abort();
+         mThreadPool[player_index]->wait();
+      }
       set_player_clear_buffers(player_index);
 
-      //notify
-      emit(player_audio_file_changed(player_index, location));
-
       if (!mAudioBufferManager.contains(location)) {
-         //TODO start up loader thread
-         buf = new AudioBuffer(location.toStdString());
-         buf->load();
-         set_player_audio_buffer(player_index, buf);
-
-         //update the manager
-         mAudioBufferManager[location] = QPair<int, AudioBuffer *>(1, buf);
-
-         //update player state
-         mPlayerStates[player_index]->mFileName = location;
+         mThreadPool[player_index]->load(location);
       } else {
          //increase the reference count
          mAudioBufferManager[location].first += 1;
@@ -423,6 +437,30 @@ void AudioModel::decrement_audio_file_reference(QString fileName) {
 
 void AudioModel::relay_player_audio_file_load_progress(int player_index, int percent){
    emit(player_audio_file_load_progress(player_index, percent));
+}
+
+void AudioModel::player_audio_file_load_complete(int player_index, QString fileName, DataJockey::AudioBuffer * buffer){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   QMutexLocker lock(&mPlayerStatesMutex);
+
+   if (!buffer || !buffer->loaded())
+      return;
+
+   //update the manager
+   mAudioBufferManager[fileName] = QPair<int, AudioBuffer *>(1, buffer);
+
+   //update player state
+   mPlayerStates[player_index]->mFileName = fileName;
+
+   set_player_audio_buffer(player_index, buffer);
+
+   //reset player position
+   set_player_position(player_index, TimePoint(0.0));
+
+   //TODO
+   //emit(player_audio_file_changed(player_index, location));
 }
 
 void AudioModel::set_master_volume(int val){

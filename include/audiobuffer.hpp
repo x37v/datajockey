@@ -11,7 +11,9 @@ namespace DataJockey {
          typedef void (* progress_callback_t)(int percent, void * user_data);
 
          AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
-         void load(progress_callback_t progress_callback = NULL, void * user_data = NULL);
+         //returns true if completely loaded
+         bool load(progress_callback_t progress_callback = NULL, void * user_data = NULL);
+         void abort_load();
 
          //getters
          unsigned int sample_rate();
@@ -26,6 +28,7 @@ namespace DataJockey {
          std::vector<std::vector<float> > mAudioData;
          unsigned int mSampleRate;
          bool mLoaded;
+         bool mAbort;
    };
 }
 

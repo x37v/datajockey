@@ -12,7 +12,8 @@ using namespace DataJockey;
 AudioBuffer::AudioBuffer(std::string soundfileLocation)
    throw(std::runtime_error) :
    mSoundFile(soundfileLocation.c_str()),
-   mLoaded(false)
+   mLoaded(false),
+   mAbort(false)
 {
    //check to make sure soundfile exists
    if(!mSoundFile){
@@ -65,12 +66,13 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
 		return linear_interp(mAudioData[channel][index], mAudioData[channel][index + 1], subsample);
 }
 
-void AudioBuffer::load(progress_callback_t progress_callback, void * user_data) {
+bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) {
+   mAbort = false;
    //if it is loaded then simply report that and return
    if (mLoaded) {
       if (progress_callback)
          progress_callback(100, user_data);
-      return;
+      return true;
    }
 
 	float * inbuf = NULL;
@@ -83,7 +85,7 @@ void AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
    double num_frames = (double)mSoundFile.frames();
    unsigned int total_read = 0;
 
-	while((frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
+	while(!mAbort && (frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
 		for(unsigned int i = 0; i < frames_read; i++){
 			for(unsigned int j = 0; j < chans; j++){
 				mAudioData[j].push_back(inbuf[i * chans + j]);
@@ -97,7 +99,13 @@ void AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
       }
 	}
 	delete [] inbuf;
-   mLoaded = true;
-   if (progress_callback)
-      progress_callback(100, user_data);
+   if (!mAbort) {
+      mLoaded = true;
+      if (progress_callback)
+         progress_callback(100, user_data);
+      return true;
+   }
+   return false;
 }
+
+void AudioBuffer::abort_load(){ mAbort = true; }
