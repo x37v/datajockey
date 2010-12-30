@@ -38,15 +38,15 @@ class AudioModel::PlayerClearBuffersCommand : public DataJockey::Internal::Playe
       QString mOldFileName;
 };
 
-AudioLoaderThread::AudioLoaderThread(AudioModel * model, unsigned int player_index) 
-: mAudioModel(model), mPlayerIndex(player_index), mAudioBuffer(NULL), mMutex() { }
+AudioLoaderThread::AudioLoaderThread(AudioModel * model)
+: mAudioModel(model), mFileName(), mAudioBuffer(NULL), mMutex(QMutex::Recursive) { }
 
 void AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
    QMetaObject::invokeMethod(self->model(),
          "relay_player_audio_file_load_progress",
          Qt::QueuedConnection, 
-         Q_ARG(int, self->player_index()),
+         Q_ARG(QString, self->file_name()),
          Q_ARG(int, percent));
 }
 
@@ -57,7 +57,10 @@ void AudioLoaderThread::abort() {
    mAborted = true;
 }
 
-AudioBuffer * AudioLoaderThread::audio_buffer() { return mAudioBuffer; }
+const QString& AudioLoaderThread::file_name() {
+   QMutexLocker lock(&mMutex);
+   return mFileName;
+}
 
 AudioBuffer * AudioLoaderThread::load(QString location){
    QMutexLocker lock(&mMutex);
@@ -79,19 +82,25 @@ AudioBuffer * AudioLoaderThread::load(QString location){
 
 void AudioLoaderThread::run() {
    if (mAudioBuffer) {
-      QMutexLocker lock(&mMutex);
       mAudioBuffer->load(AudioLoaderThread::progress_callback, this);
-      if (!mAborted)
-         model()->player_audio_file_load_complete(player_index(), mFileName, mAudioBuffer);
+      {
+         QMutexLocker lock(&mMutex);
+         if (!mAborted) {
+            //tell the model that the load is complete.
+            //if it doesn't use the buffer then delete it
+            if (!model()->audio_file_load_complete(mFileName, mAudioBuffer))
+               delete mAudioBuffer;
+         } else
+            delete mAudioBuffer;
+         //cleanup
+         mAudioBuffer = NULL;
+         mFileName = QString();
+      }
    }
 }
 
 AudioModel * AudioLoaderThread::model() {
    return mAudioModel;
-}
-
-int AudioLoaderThread::player_index() {
-   return mPlayerIndex;
 }
 
 class DataJockey::AudioModel::ConsumeThread : public QThread {
@@ -139,7 +148,7 @@ AudioModel::AudioModel() :
    for(unsigned int i = 0; i < mNumPlayers; i++) {
       mMaster->add_player();
       mPlayerStates.push_back(new PlayerState());
-      mThreadPool.push_back(new AudioLoaderThread(this, i));
+      mThreadPool.push_back(new AudioLoaderThread(this));
    }
 
    for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -379,14 +388,30 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       AudioBuffer * buf = NULL;
 
       //clear out the old buffers
-      if (mThreadPool[player_index]->isRunning()) {
-         mThreadPool[player_index]->abort();
-         mThreadPool[player_index]->wait();
-      }
       set_player_clear_buffers(player_index);
 
       if (!mAudioBufferManager.contains(location)) {
-         mThreadPool[player_index]->load(location);
+         bool loading = false;
+
+         //see if a thread is already loading it
+         for(unsigned int i = 0; i < mThreadPool.size(); i++) {
+            if (mThreadPool[i]->file_name() == location) {
+               loading = true;
+               break;
+            }
+         }
+
+         //if the file isn't already loading then start up our thread and load it
+         if (!loading) {
+            if (mThreadPool[player_index]->isRunning()) {
+               mThreadPool[player_index]->abort();
+               mThreadPool[player_index]->wait();
+            }
+            mThreadPool[player_index]->load(location);
+         }
+
+         //update player state
+         mPlayerStates[player_index]->mFileName = location;
       } else {
          //increase the reference count
          mAudioBufferManager[location].first += 1;
@@ -439,28 +464,39 @@ void AudioModel::relay_player_audio_file_load_progress(int player_index, int per
    emit(player_audio_file_load_progress(player_index, percent));
 }
 
-void AudioModel::player_audio_file_load_complete(int player_index, QString fileName, DataJockey::AudioBuffer * buffer){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-
+bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer){
    QMutexLocker lock(&mPlayerStatesMutex);
 
    if (!buffer || !buffer->loaded())
-      return;
+      return false;
 
-   //update the manager
-   mAudioBufferManager[fileName] = QPair<int, AudioBuffer *>(1, buffer);
+   //we want to see if any player loaded it
+   bool loaded_into_a_player = false;
 
-   //update player state
-   mPlayerStates[player_index]->mFileName = fileName;
+   for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
+      //operate only on the players which are loading this file
+      if (mPlayerStates[player_index]->mFileName != fileName)
+         continue;
 
-   set_player_audio_buffer(player_index, buffer);
+      //update the manager
+      if (mAudioBufferManager.contains(fileName))
+         mAudioBufferManager[fileName].first += 1;
+      else
+         mAudioBufferManager[fileName] = QPair<int, AudioBuffer *>(1, buffer);
+      loaded_into_a_player = true;
 
-   //reset player position
-   set_player_position(player_index, TimePoint(0.0));
+      set_player_audio_buffer(player_index, buffer);
 
-   //TODO
-   //emit(player_audio_file_changed(player_index, location));
+      //reset player position
+      set_player_position(player_index, TimePoint(0.0));
+
+      //TODO
+      //emit(player_audio_file_changed(player_index, location));
+   }
+
+   if (!loaded_into_a_player)
+      return false;
+   return true;
 }
 
 void AudioModel::set_master_volume(int val){

@@ -19,20 +19,18 @@ namespace DataJockey {
    namespace Internal {
       class AudioLoaderThread : public QThread {
          public:
-            AudioLoaderThread(AudioModel * model, unsigned int player_index);
+            AudioLoaderThread(AudioModel * model);
             AudioBuffer * load(QString location);
             void run();
             static void progress_callback(int percent, void *objPtr);
             void abort();
-            AudioBuffer * audio_buffer();
+            const QString& file_name();
          protected:
             AudioBuffer * mAudioBuffer;
             AudioModel * model();
-            int player_index();
          private:
             QString mFileName;
             AudioModel * mAudioModel;
-            unsigned int mPlayerIndex;
             QMutex mMutex;
             bool mAborted;
       };
@@ -125,7 +123,8 @@ namespace DataJockey {
          //**** private methods
          
          void relay_player_audio_file_load_progress(int player_index, int percent);
-         void player_audio_file_load_complete(int player_index, QString fileName, DataJockey::AudioBuffer * buffer);
+         //returns true if the buffer is actually loaded anywhere
+         bool audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer);
 
          //convenience method for executing commands in the master's scheduler
          void queue_command(DataJockey::Internal::Command * cmd);
