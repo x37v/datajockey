@@ -10,7 +10,7 @@
 #include "rubberband/RubberBandStretcher.h"
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class Player {
          public:
             //internal types

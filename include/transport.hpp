@@ -5,7 +5,7 @@
 #include "command.hpp"
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class Transport {
          public:
             Transport();

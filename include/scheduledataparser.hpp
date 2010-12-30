@@ -5,7 +5,7 @@
 #include "schedulenode.hpp"
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       namespace ScheduleDataParser {
          /**
           * register_command_parser registers a command parser. 

@@ -5,7 +5,7 @@
 #include "timepoint.hpp"
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class ScheduleNode {
          public:
             ScheduleNode(Command * c, const TimePoint& t);
@@ -17,6 +17,5 @@ namespace DataJockey {
       };
    }
 }
-
 
 #endif

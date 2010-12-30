@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class AudioIO : public JackCpp::AudioIO {
          private:
             AudioIO();

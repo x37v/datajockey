@@ -8,7 +8,7 @@
 #include <map>
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class Scheduler {
          public:
             typedef unsigned long node_id_t;

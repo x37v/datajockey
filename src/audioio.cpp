@@ -21,53 +21,53 @@
 #include <jack/transport.h>
 #include "audioio.hpp"
 
-using namespace DataJockey::Internal;
+using namespace DataJockey::Audio;
 
 AudioIO * AudioIO::cInstance = NULL;
 
 AudioIO::AudioIO() : 
-	JackCpp::AudioIO("datajockey", 0, 0){
-		addOutPort("output0");
-		addOutPort("output1");
-		addOutPort("cue0");
-		addOutPort("cue1");
-		mMaster = Master::instance();
-}
+   JackCpp::AudioIO("datajockey", 0, 0){
+      addOutPort("output0");
+      addOutPort("output1");
+      addOutPort("cue0");
+      addOutPort("cue1");
+      mMaster = Master::instance();
+   }
 
 AudioIO::~AudioIO(){
 }
 
-AudioIO * AudioIO::instance(){
-	if(cInstance == NULL)
-		cInstance = new AudioIO;
-	return cInstance;
-}
+   AudioIO * AudioIO::instance(){
+      if(cInstance == NULL)
+         cInstance = new AudioIO;
+      return cInstance;
+   }
 
 Master * AudioIO::master(){
-	return mMaster;
+   return mMaster;
 }
 
 void AudioIO::start(){
-	mMaster->setup_audio(getSampleRate(), getBufferSize());
-	JackCpp::AudioIO::start();
+   mMaster->setup_audio(getSampleRate(), getBufferSize());
+   JackCpp::AudioIO::start();
 }
 
 int AudioIO::audioCallback(jack_nframes_t nframes, 
-		// A vector of pointers to each input port.
-		audioBufVector inBufs,
-		// A vector of pointers to each output port.
-		audioBufVector outBufs){
-	mMaster->audio_compute_and_fill(outBufs, nframes);
+      // A vector of pointers to each input port.
+      audioBufVector inBufs,
+      // A vector of pointers to each output port.
+      audioBufVector outBufs){
+   mMaster->audio_compute_and_fill(outBufs, nframes);
 
-	/*
-	jack_position_t pos;
-	jack_transport_state_t state = jack_transport_query (client(), &pos);
-	if(state == JackTransportRolling && pos.valid & JackTransportBBT){
-		cout << pos.tick << " / " << 
-			pos.ticks_per_beat << " = " << 
-			(double)pos.tick / pos.ticks_per_beat << endl;
-	}
-	*/
-	//return 0 on success
-	return 0;
+   /*
+      jack_position_t pos;
+      jack_transport_state_t state = jack_transport_query (client(), &pos);
+      if(state == JackTransportRolling && pos.valid & JackTransportBBT){
+      cout << pos.tick << " / " << 
+      pos.ticks_per_beat << " = " << 
+      (double)pos.tick / pos.ticks_per_beat << endl;
+      }
+      */
+   //return 0 on success
+   return 0;
 }

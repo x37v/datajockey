@@ -5,7 +5,7 @@
 #include "types.hpp"
 
 namespace DataJockey {
-   namespace Internal {
+   namespace Audio {
       class Command {
          public:
             virtual ~Command();

@@ -6,30 +6,32 @@
 #include "soundfile.hpp"
 
 namespace DataJockey {
-   class AudioBuffer {
-      public:
-         typedef void (* progress_callback_t)(int percent, void * user_data);
+   namespace Audio {
+      class AudioBuffer {
+         public:
+            typedef void (* progress_callback_t)(int percent, void * user_data);
 
-         AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
-         //returns true if completely loaded
-         bool load(progress_callback_t progress_callback = NULL, void * user_data = NULL);
-         void abort_load();
+            AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
+            //returns true if completely loaded
+            bool load(progress_callback_t progress_callback = NULL, void * user_data = NULL);
+            void abort_load();
 
-         //getters
-         unsigned int sample_rate();
-         unsigned int channels();
-         unsigned int length();
-         bool loaded();
-         //grab a sample
-         float sample(unsigned int channel, unsigned int index);
-         float sample(unsigned int channel, unsigned int index, double subsample);
-      private:
-         SoundFile mSoundFile;
-         std::vector<std::vector<float> > mAudioData;
-         unsigned int mSampleRate;
-         bool mLoaded;
-         bool mAbort;
-   };
+            //getters
+            unsigned int sample_rate();
+            unsigned int channels();
+            unsigned int length();
+            bool loaded();
+            //grab a sample
+            float sample(unsigned int channel, unsigned int index);
+            float sample(unsigned int channel, unsigned int index, double subsample);
+         private:
+            SoundFile mSoundFile;
+            std::vector<std::vector<float> > mAudioData;
+            unsigned int mSampleRate;
+            bool mLoaded;
+            bool mAbort;
+      };
+   }
 }
 
 #endif
