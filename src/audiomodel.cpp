@@ -390,6 +390,8 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       //clear out the old buffers
       set_player_clear_buffers(player_index);
 
+      //once the manager contains the location we know that it is full loaded
+      //but, if not it could actually be in progress
       if (!mAudioBufferManager.contains(location)) {
          bool loading = false;
 
@@ -412,6 +414,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
 
          //update player state
          mPlayerStates[player_index]->mFileName = location;
+
       } else {
          //increase the reference count
          mAudioBufferManager[location].first += 1;
@@ -424,7 +427,6 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
          mPlayerStates[player_index]->mFileName = location;
 
          //notify
-         //XXX what if the file isn't actually all the way loaded?
          emit(player_audio_file_load_progress(player_index, 100));
       }
    } else {
@@ -468,6 +470,11 @@ void AudioModel::relay_player_audio_file_load_progress(QString fileName, int per
    }
 }
 
+void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName) {
+   emit(player_audio_file_changed(player_index, fileName));
+}
+
+//called from another thread
 bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer){
    QMutexLocker lock(&mPlayerStatesMutex);
 
@@ -494,8 +501,11 @@ bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuf
       //reset player position
       set_player_position(player_index, TimePoint(0.0));
 
-      //TODO
-      //emit(player_audio_file_changed(player_index, location));
+      QMetaObject::invokeMethod(this,
+            "relay_player_audio_file_changed",
+            Qt::QueuedConnection, 
+            Q_ARG(int, player_index),
+            Q_ARG(QString, fileName));
    }
 
    if (!loaded_into_a_player)

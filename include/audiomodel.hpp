@@ -122,8 +122,13 @@ namespace DataJockey {
 
          //**** private methods
          
+         //relay methods are called with queued connections across threads so that
+         //they relay signals into the main thread, they simply emit signals
          void relay_player_audio_file_load_progress(QString fileName, int percent);
+         void relay_player_audio_file_changed(int player_index, QString fileName);
+
          //returns true if the buffer is actually loaded anywhere
+         //this is called from one of many audio loader threads
          bool audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer);
 
          //convenience method for executing commands in the master's scheduler
