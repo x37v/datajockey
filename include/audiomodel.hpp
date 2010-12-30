@@ -20,7 +20,13 @@ namespace DataJockey {
       class AudioLoaderThread : public QThread {
          public:
             AudioLoaderThread(AudioModel * model, unsigned int player_index);
+            AudioBuffer * load(QString location);
             void run();
+            static void progress_callback(int percent, void *objPtr);
+         protected:
+            AudioBuffer * mAudioBuffer;
+            AudioModel * model();
+            int player_index();
          private:
             AudioModel * mAudioModel;
             unsigned int mPlayerIndex;

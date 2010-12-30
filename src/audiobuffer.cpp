@@ -1,5 +1,4 @@
 #include "audiobuffer.hpp"
-#include "soundfile.hpp"
 
 #define READ_FRAME_SIZE 2048
 
@@ -10,10 +9,22 @@ Type linear_interp(Type v0, Type v1, double dist){
 
 using namespace DataJockey;
 
-AudioBuffer::AudioBuffer(std::string soundfileLocation, AudioBuffer::progress_callback_t progress_callback) 
-	throw(std::runtime_error){
-      mProgressCallback = progress_callback;
-		load(soundfileLocation);
+AudioBuffer::AudioBuffer(std::string soundfileLocation)
+   throw(std::runtime_error) :
+   mSoundFile(soundfileLocation.c_str()),
+   mLoaded(false)
+{
+   //check to make sure soundfile exists
+   if(!mSoundFile){
+      std::string str("cannot open soundfile: ");
+      str.append(soundfileLocation);
+      throw std::runtime_error(str);
+   }
+	mAudioData.clear();
+	mSampleRate = mSoundFile.samplerate();
+	//we must resize the audio buffer because we want to make sure that
+	//we can do mAudioData[i].push_back
+	mAudioData.resize(mSoundFile.channels());
 }
 
 //getters
@@ -31,6 +42,8 @@ unsigned int AudioBuffer::length(){
 	else
 		return 0;
 }
+
+bool AudioBuffer::loaded() { return mLoaded; }
 
 float AudioBuffer::sample(unsigned int channel, unsigned int index){
 	//make sure we're in range
@@ -52,31 +65,25 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
 		return linear_interp(mAudioData[channel][index], mAudioData[channel][index + 1], subsample);
 }
 
-void AudioBuffer::load(std::string soundfileLocation) 
-	throw(std::runtime_error){
+void AudioBuffer::load(progress_callback_t progress_callback, void * user_data) {
+   //if it is loaded then simply report that and return
+   if (mLoaded) {
+      if (progress_callback)
+         progress_callback(100, user_data);
+      return;
+   }
+
 	float * inbuf = NULL;
 	unsigned int frames_read;
 	unsigned int chans;
-	SoundFile sndFile(soundfileLocation.c_str());
-	mAudioData.clear();
 
-	//check to make sure soundfile exists
-	if(!sndFile){
-		std::string str("cannot open soundfile: ");
-		str.append(soundfileLocation);
-		throw std::runtime_error(str);
-	}
 	//read in the audio data
-	inbuf = new float[READ_FRAME_SIZE * sndFile.channels()];
-	chans = sndFile.channels();
-	mSampleRate = sndFile.samplerate();
-	//we must resize the audio buffer because we want to make sure that
-	//we can do mAudioData[i].push_back
-	mAudioData.resize(chans);
-   double num_frames = (double)sndFile.frames();
+	inbuf = new float[READ_FRAME_SIZE * mSoundFile.channels()];
+	chans = mSoundFile.channels();
+   double num_frames = (double)mSoundFile.frames();
    unsigned int total_read = 0;
 
-	while((frames_read = sndFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
+	while((frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
 		for(unsigned int i = 0; i < frames_read; i++){
 			for(unsigned int j = 0; j < chans; j++){
 				mAudioData[j].push_back(inbuf[i * chans + j]);
@@ -84,13 +91,13 @@ void AudioBuffer::load(std::string soundfileLocation)
 		}
 
       //report progress
-      if (mProgressCallback && num_frames != 0) {
+      if (progress_callback && num_frames != 0) {
          total_read += frames_read;
-         mProgressCallback((double)(100 * total_read) / num_frames, NULL);
+         progress_callback((double)(100 * total_read) / num_frames, user_data);
       }
 	}
 	delete [] inbuf;
-   if (mProgressCallback) {
-      mProgressCallback(100, NULL);
-   }
+   mLoaded = true;
+   if (progress_callback)
+      progress_callback(100, user_data);
 }

@@ -1,5 +1,6 @@
 #include "audiomodel.hpp"
 #include <QMutexLocker>
+#include <QMetaObject>
 
 using namespace DataJockey;
 using namespace DataJockey::Internal;
@@ -38,9 +39,37 @@ class AudioModel::PlayerClearBuffersCommand : public DataJockey::Internal::Playe
 };
 
 AudioLoaderThread::AudioLoaderThread(AudioModel * model, unsigned int player_index) 
-: mAudioModel(model), mPlayerIndex(player_index){ }
+: mAudioModel(model), mPlayerIndex(player_index), mAudioBuffer(NULL){ }
+
+void AudioLoaderThread::progress_callback(int percent, void *objPtr) {
+   AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
+   QMetaObject::invokeMethod(self->model(),
+         "relay_player_audio_file_load_progress",
+         Qt::QueuedConnection, 
+         Q_ARG(int, self->player_index()),
+         Q_ARG(int, percent));
+}
+
+AudioBuffer * AudioLoaderThread::load(QString location){
+}
 
 void AudioLoaderThread::run() {
+   /*
+   //finalize
+   QMetaObject::invokeMethod(mAudioModel,
+         "relay_player_audio_file_load_progress",
+         Qt::QueuedConnection, 
+         Q_ARG(int, (int)mPlayerIndex),
+         Q_ARG(int, 100));
+         */
+}
+
+AudioModel * AudioLoaderThread::model() {
+   return mAudioModel;
+}
+
+int AudioLoaderThread::player_index() {
+   return mPlayerIndex;
 }
 
 class DataJockey::AudioModel::ConsumeThread : public QThread {
@@ -336,6 +365,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       if (!mAudioBufferManager.contains(location)) {
          //TODO start up loader thread
          buf = new AudioBuffer(location.toStdString());
+         buf->load();
          set_player_audio_buffer(player_index, buf);
 
          //update the manager
@@ -396,9 +426,11 @@ void AudioModel::relay_player_audio_file_load_progress(int player_index, int per
 }
 
 void AudioModel::set_master_volume(int val){
+   //TODO
 }
 
 void AudioModel::set_master_cue_volume(int val){
+   //TODO
 }
 
 void AudioModel::set_master_cross_fade_enable(bool enable){
