@@ -45,11 +45,11 @@ namespace DataJockey {
          void set_player_loop(int player_index, bool val);
          void set_player_volume(int player_index, int val);
          void set_player_play_speed(int player_index, int val);
-         void set_player_position(int player_index, const TimePoint &val);
-         void set_player_start_position(int player_index, const TimePoint &val);
-         void set_player_end_position(int player_index, const TimePoint &val);
-         void set_player_loop_start_position(int player_index, const TimePoint &val);
-         void set_player_loop_end_position(int player_index, const TimePoint &val);
+         void set_player_position(int player_index, const DataJockey::TimePoint &val);
+         void set_player_start_position(int player_index, const DataJockey::TimePoint &val);
+         void set_player_end_position(int player_index, const DataJockey::TimePoint &val);
+         void set_player_loop_start_position(int player_index, const DataJockey::TimePoint &val);
+         void set_player_loop_end_position(int player_index, const DataJockey::TimePoint &val);
 
          void set_player_audio_file(int player_index, QString location);
          void set_player_clear_buffers(int player_index);
@@ -68,7 +68,7 @@ namespace DataJockey {
          void player_loop_changed(int player_index, bool val);
          void player_volume_changed(int player_index, int val);
          void player_play_speed_changed(int player_index, int val);
-         void player_position_changed(int player_index, const TimePoint &val);
+         void player_position_changed(int player_index, const DataJockey::TimePoint &val);
          void player_audio_file_cleared(int player_index);
          void player_audio_file_load_progress(int player_index, int percent);
          void player_audio_file_changed(int player_index, QString location);
