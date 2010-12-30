@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'audiomodel.hpp'
 **
-** Created: Wed Dec 29 13:00:12 2010
+** Created: Thu Dec 30 09:20:05 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -39,8 +39,8 @@ static const uint qt_meta_data_DataJockey__AudioModel[] = {
      210,   74,   23,   23, 0x05,
      241,   74,   23,   23, 0x05,
      276,   74,   23,   23, 0x05,
-     336,  315,   23,   23, 0x05,
-     390,  377,   23,   23, 0x05,
+     328,  315,   23,   23, 0x05,
+     380,  359,   23,   23, 0x05,
      443,  421,   23,   23, 0x05,
 
  // slots: signature, parameters, type, tag, flags
@@ -57,7 +57,7 @@ static const uint qt_meta_data_DataJockey__AudioModel[] = {
      785,   74,   23,   23, 0x0a,
      831,   74,   23,   23, 0x0a,
      875,  421,   23,   23, 0x0a,
-     910,  377,   23,   23, 0x0a,
+     910,  315,   23,   23, 0x0a,
      944,  940,   23,   23, 0x0a,
      967,  940,   23,   23, 0x0a,
     1001,  994,   23,   23, 0x0a,
@@ -77,9 +77,9 @@ static const char qt_meta_stringdata_DataJockey__AudioModel[] = {
     "player_volume_changed(int,int)\0"
     "player_play_speed_changed(int,int)\0"
     "player_position_changed(int,TimePoint)\0"
+    "player_index\0player_audio_file_cleared(int)\0"
     "player_index,percent\0"
     "player_audio_file_load_progress(int,int)\0"
-    "player_index\0player_audio_file_cleared(int)\0"
     "player_index,location\0"
     "player_audio_file_changed(int,QString)\0"
     "set_player_pause(int,bool)\0"
@@ -140,8 +140,8 @@ int DataJockey::AudioModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a
         case 5: player_volume_changed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 6: player_play_speed_changed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 7: player_position_changed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const TimePoint(*)>(_a[2]))); break;
-        case 8: player_audio_file_load_progress((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 9: player_audio_file_cleared((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 8: player_audio_file_cleared((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 9: player_audio_file_load_progress((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 10: player_audio_file_changed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 11: set_player_pause((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
         case 12: set_player_cue((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
@@ -226,16 +226,16 @@ void DataJockey::AudioModel::player_position_changed(int _t1, const TimePoint & 
 }
 
 // SIGNAL 8
-void DataJockey::AudioModel::player_audio_file_load_progress(int _t1, int _t2)
+void DataJockey::AudioModel::player_audio_file_cleared(int _t1)
 {
-    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 8, _a);
 }
 
 // SIGNAL 9
-void DataJockey::AudioModel::player_audio_file_cleared(int _t1)
+void DataJockey::AudioModel::player_audio_file_load_progress(int _t1, int _t2)
 {
-    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 9, _a);
 }
 

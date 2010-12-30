@@ -1,6 +1,5 @@
 #include <QObject>
 #include <QString>
-#include <QThread>
 #include <QMutex>
 #include <QMap>
 #include <QPair>
@@ -11,32 +10,10 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "scheduler.hpp"
+#include "audioloaderthread.hpp"
 #include <vector>
 
 namespace DataJockey {
-   class AudioModel;
-
-   namespace Internal {
-      class AudioLoaderThread : public QThread {
-         public:
-            AudioLoaderThread(AudioModel * model);
-            AudioBuffer * load(QString location);
-            void run();
-            static void progress_callback(int percent, void *objPtr);
-            void abort();
-            const QString& file_name();
-         protected:
-            AudioBuffer * mAudioBuffer;
-            AudioModel * model();
-         private:
-            QString mFileName;
-            AudioModel * mAudioModel;
-            QMutex mMutex;
-            bool mAborted;
-      };
-
-   }
-
    class AudioModel : public QObject {
       Q_OBJECT
       private:
