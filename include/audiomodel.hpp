@@ -92,8 +92,8 @@ namespace DataJockey {
          void player_volume_changed(int player_index, int val);
          void player_play_speed_changed(int player_index, int val);
          void player_position_changed(int player_index, const TimePoint &val);
-         void player_audio_file_load_progress(int player_index, int percent);
          void player_audio_file_cleared(int player_index);
+         void player_audio_file_load_progress(int player_index, int percent);
          void player_audio_file_changed(int player_index, QString location);
 
       protected:
