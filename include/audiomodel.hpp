@@ -122,7 +122,7 @@ namespace DataJockey {
 
          //**** private methods
          
-         void relay_player_audio_file_load_progress(int player_index, int percent);
+         void relay_player_audio_file_load_progress(QString fileName, int percent);
          //returns true if the buffer is actually loaded anywhere
          bool audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer);
 

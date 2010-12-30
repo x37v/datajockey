@@ -460,8 +460,12 @@ void AudioModel::decrement_audio_file_reference(QString fileName) {
    }
 }
 
-void AudioModel::relay_player_audio_file_load_progress(int player_index, int percent){
-   emit(player_audio_file_load_progress(player_index, percent));
+void AudioModel::relay_player_audio_file_load_progress(QString fileName, int percent){
+   QMutexLocker lock(&mPlayerStatesMutex);
+   for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
+      if (mPlayerStates[player_index]->mFileName == fileName)
+         emit(player_audio_file_load_progress(player_index, percent));
+   }
 }
 
 bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer){
