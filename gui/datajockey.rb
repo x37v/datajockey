@@ -49,6 +49,12 @@ audio_controller.on(:player_audio_file_changed, ["int", "QString"]) do |player_i
   end
 end
 
+audio_controller.on(:player_volume_changed) do |player_index, value|
+  if (player = mixer_panel.players[player_index])
+    player.volume_slider.value = value
+  end
+end
+
 app.on(:about_to_quit) do
   audio_controller.stop_audio
 end
