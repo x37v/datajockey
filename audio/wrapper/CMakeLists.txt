@@ -26,8 +26,7 @@ endif (NOT COMPILE_RUBY)
 SET(CUSTOM_RUBY_SITE_ARCH_DIR ${RUBY_SITEARCH_DIR} CACHE DIR "custom installation directory for ruby binary extension" )
 SET(CUSTOM_RUBY_SITE_LIB_DIR ${RUBY_SITELIB_DIR} CACHE DIR "custom installation directory for ruby extension" )
 
-SET(QT_INCLUDE_DIR /usr/include/qt4)
-include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore/ ${QT_INCLUDE_DIR}/Qt/ ${QT_INCLUDE_DIR}/QtGui/ /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ../include/ ./include/ .)
+include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDES} /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ./include/ ../include/ .)
 
 SET(datajockey_MOC_HEADERS
    include/audiocontroller.hpp
