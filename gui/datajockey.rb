@@ -14,6 +14,7 @@ mixer_panel = View::MixerPanel.new
 mixer_panel.show()
 
 audio_controller = Audio::AudioController.instance
+#set the parent otherwise queued connections are lost
 audio_controller.set_parent(app)
 
 if File.exists?(STYLE_SHEET_FILE)
