@@ -2,7 +2,7 @@ CMakeCache.txt
 CMakeFiles/
 Makefile
 cmake_install.cmake
-datajockey.so
+*.so
 smoke/generator.log
 smoke/smokedata.cpp
 smoke/x_1.cpp

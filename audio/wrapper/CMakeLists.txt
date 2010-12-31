@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 project(datajockey_audio)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules )
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/../../cmake/modules )
 include (MacroOptionalAddBindings)
 
 find_package(Qt4 REQUIRED)
