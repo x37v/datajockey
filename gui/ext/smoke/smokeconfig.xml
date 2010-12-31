@@ -1,0 +1,27 @@
+<config>
+    <moduleName>datajockey_view</moduleName>
+    <parentModules>
+        <module>qtcore</module>
+        <module>qtgui</module>
+    </parentModules>
+    <parts>2</parts>
+    <scalarTypes>
+        <!-- QString is a class, but represented as a scalar (#) in munged names -->
+        <typeName>QString</typeName>
+    </scalarTypes>
+    <voidpTypes>
+        <!-- both are classes, but they are represented as Smoke::t_voidp -->
+        <typeName>QStringList</typeName>
+        <typeName>QString</typeName>
+    </voidpTypes>
+    <exclude>
+        <!-- private stuff -->
+        <signature>.*DataJockey::.*::k_ptr</signature>
+        <signature>.*DataJockey::.*::d_ptr</signature>
+        <signature>.*DataJockey::.*::d</signature>
+    </exclude>
+    <classList>
+        <class>DataJockey::View</class>
+        <class>DataJockey::View::WaveFormView</class>
+    </classList>
+</config>
