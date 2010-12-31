@@ -345,6 +345,11 @@ void AudioController::set_player_position(int player_index, const TimePoint &val
    queue_command(cmd);
 }
 
+void AudioController::set_player_position_relative(int player_index, const DataJockey::Audio::TimePoint &val) {
+   set_player_position(player_index, val, false);
+}
+
+
 void AudioController::set_player_position_frame(int player_index, unsigned long frame, bool absolute) {
 }
 

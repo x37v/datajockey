@@ -6,7 +6,9 @@
 
 using namespace DataJockey::Audio;
 
-Player::Player(){
+Player::Player() : 
+   mPosition(0.0)
+{
    //states
    mPlayState = PAUSE;
    mOutState = CUE;
@@ -166,8 +168,15 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
                      mPosition >= mLoopEndPosition) {
                   position(mLoopStartPosition);
                }
+            } else {
+               //XXX deal with position if there is no beat buffer
+               if (mPosition.type() == TimePoint::SECONDS) {
+                  double seconds = ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate;
+                  mPosition.seconds(seconds);
+               } else {
+                  //TODO what?
+               }
             }
-            //XXX deal with position if there is no beat buffer
             break;
          case RUBBER_BAND:
             float *tmp[2], vals[2];
@@ -314,13 +323,20 @@ void Player::loop_end_position(const TimePoint &val){
 void Player::audio_buffer(AudioBuffer * buf){
    mAudioBuffer = buf;
    //set at the start
-   mPosition = mStartPosition;
+   //TODO what if the start position's type is not the same as the position type?
+   //mPosition = mStartPosition;
 }
 
 void Player::beat_buffer(BeatBuffer * buf){
    mBeatBuffer = buf;
    //set at the start
-   mPosition = mStartPosition;
+   //TODO what if the start position's type is not the same as the position type?
+   if (mBeatBuffer)
+      mPosition = mStartPosition;
+   else {
+      mPosition.type(TimePoint::SECONDS);
+      mPosition.seconds(0.0);
+   }
 }
 
 
@@ -329,8 +345,12 @@ void Player::position_relative(TimePoint amt){
    position(mPosition + amt);
 }
 
-void Player::position_at_frame_relative(unsigned long offset){
-   position_at_frame(mSampleIndex + offset);
+void Player::position_at_frame_relative(long offset){
+   long frame = mSampleIndex + offset;
+   if (frame > 0)
+      position_at_frame(frame);
+   else
+      position_at_frame(0);
 }
 
 void Player::play_speed_relative(double amt){
@@ -553,11 +573,10 @@ bool PlayerLoadCommand::store(CommandIOData& data) const{
 
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
       position_t target, const TimePoint & timepoint) : 
-   PlayerCommand(idx)
-{
-   mTimePoint = timepoint;
-   mTarget = target;
-}
+   PlayerCommand(idx),
+   mTimePoint(timepoint),
+   mTarget(target)
+{ }
 
 void PlayerPositionCommand::execute(){
    Player * p = player(); 

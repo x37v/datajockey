@@ -67,6 +67,7 @@ namespace DataJockey {
             void set_player_volume(int player_index, int val);
             void set_player_play_speed(int player_index, int val);
             void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
+            void set_player_position_relative(int player_index, const DataJockey::Audio::TimePoint &val);
             void set_player_position_frame(int player_index, unsigned long frame, bool absolute = true);
             void set_player_start_position(int player_index, const DataJockey::Audio::TimePoint &val);
             void set_player_end_position(int player_index, const DataJockey::Audio::TimePoint &val);

@@ -21,6 +21,27 @@ TimePoint::TimePoint(unsigned int bar, unsigned int beat, double pos_in_beat) {
    at_bar(bar, beat, pos_in_beat);
 }
 
+TimePoint::TimePoint(const TimePoint& source) {
+   mType = source.mType;
+   mBar = source.mBar;
+   mBeat = source.mBeat;
+   mPosInBeat = source.mPosInBeat;
+   mBeatsPerBar = source.mBeatsPerBar;
+   mBeatType = source.mBeatType;
+   mSeconds = source.mSeconds;
+}
+
+TimePoint& TimePoint::operator=(const TimePoint& source) {
+   mType = source.mType;
+   mBar = source.mBar;
+   mBeat = source.mBeat;
+   mPosInBeat = source.mPosInBeat;
+   mBeatsPerBar = source.mBeatsPerBar;
+   mBeatType = source.mBeatType;
+   mSeconds = source.mSeconds;
+   return *this;
+}
+
 //getters
 TimePoint::time_type TimePoint::type() const { return mType; }
 unsigned int TimePoint::bar() const { return mBar; }
@@ -197,10 +218,10 @@ bool TimePoint::operator>=(const TimePoint &other) const {
 }
 
 const TimePoint TimePoint::operator+(const TimePoint &other) const {
-   TimePoint ret = *this;
+   TimePoint ret(*this);
    if (other.type() == type()) {
       if (type() == SECONDS) {
-         double sec = ret.seconds() + other.seconds(); 
+         double sec = seconds() + other.seconds(); 
          if (sec < 0.0)
             sec = 0.0;
          ret.seconds(sec);

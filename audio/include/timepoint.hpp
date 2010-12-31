@@ -9,6 +9,8 @@ namespace DataJockey {
             TimePoint(time_type t = BEAT_BAR);
             TimePoint(double sec);
             TimePoint(unsigned int bar, unsigned int beat, double pos_in_beat = 0.0);
+            TimePoint(const TimePoint& other);
+            TimePoint& operator=(const TimePoint& other);
             //getters
             time_type type() const;
             unsigned int bar() const;
