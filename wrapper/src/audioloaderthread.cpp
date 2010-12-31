@@ -1,36 +1,34 @@
 #include "audioloaderthread.hpp"
-#include "audiomodel.hpp"
-#include "audiobuffer.hpp"
 #include <QMetaObject>
 #include <QMutexLocker>
 
-using namespace DataJockey::Internal;
+using namespace DataJockey::Audio;
 
-AudioLoaderThread::AudioLoaderThread(AudioModel * model)
-: mAudioModel(model), mFileName(), mAudioBuffer(NULL), mMutex(QMutex::Recursive) { }
+AudioController::AudioLoaderThread::AudioLoaderThread(AudioController * controller)
+: mAudioController(controller), mFileName(), mAudioBuffer(NULL), mMutex(QMutex::Recursive) { }
 
-void AudioLoaderThread::progress_callback(int percent, void *objPtr) {
+void AudioController::AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
-   QMetaObject::invokeMethod(self->model(),
+   QMetaObject::invokeMethod(self->controller(),
          "relay_player_audio_file_load_progress",
          Qt::QueuedConnection, 
          Q_ARG(QString, self->file_name()),
          Q_ARG(int, percent));
 }
 
-void AudioLoaderThread::abort() {
+void AudioController::AudioLoaderThread::abort() {
    QMutexLocker lock(&mMutex);
    if (mAudioBuffer)
       mAudioBuffer->abort_load();
    mAborted = true;
 }
 
-const QString& AudioLoaderThread::file_name() {
+const QString& AudioController::AudioLoaderThread::file_name() {
    QMutexLocker lock(&mMutex);
    return mFileName;
 }
 
-DataJockey::AudioBuffer * AudioLoaderThread::load(QString location){
+DataJockey::Audio::AudioBuffer * AudioController::AudioLoaderThread::load(QString location){
    QMutexLocker lock(&mMutex);
    mAborted = false;
 
@@ -42,21 +40,21 @@ DataJockey::AudioBuffer * AudioLoaderThread::load(QString location){
    mFileName = location;
 
    try {
-      mAudioBuffer = new DataJockey::AudioBuffer(location.toStdString());
+      mAudioBuffer = new DataJockey::Audio::AudioBuffer(location.toStdString());
       start();
    } catch (...){ return NULL; }
    return mAudioBuffer;
 }
 
-void AudioLoaderThread::run() {
+void AudioController::AudioLoaderThread::run() {
    if (mAudioBuffer) {
       mAudioBuffer->load(AudioLoaderThread::progress_callback, this);
       {
          QMutexLocker lock(&mMutex);
          if (!mAborted) {
-            //tell the model that the load is complete.
+            //tell the controller that the load is complete.
             //if it doesn't use the buffer then delete it
-            if (!model()->audio_file_load_complete(mFileName, mAudioBuffer))
+            if (!controller()->audio_file_load_complete(mFileName, mAudioBuffer))
                delete mAudioBuffer;
          } else
             delete mAudioBuffer;
@@ -67,7 +65,7 @@ void AudioLoaderThread::run() {
    }
 }
 
-DataJockey::AudioModel * AudioLoaderThread::model() {
-   return mAudioModel;
+AudioController * AudioController::AudioLoaderThread::controller() {
+   return mAudioController;
 }
 

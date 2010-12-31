@@ -4,27 +4,26 @@
 #include <QThread>
 #include <QMutex>
 #include <QString>
+#include "audiocontroller.hpp"
 
 namespace DataJockey {
-   //forward declarations
-   class AudioModel;
-   class AudioBuffer;
+   namespace Audio {
 
-   namespace Internal {
-      class AudioLoaderThread : public QThread {
+      class AudioBuffer;
+      class AudioController::AudioLoaderThread : public QThread {
          public:
-            AudioLoaderThread(AudioModel * model);
-            DataJockey::AudioBuffer * load(QString location);
+            AudioLoaderThread(AudioController * controller);
+            DataJockey::Audio::AudioBuffer * load(QString location);
             void run();
             static void progress_callback(int percent, void *objPtr);
             void abort();
             const QString& file_name();
          protected:
-            DataJockey::AudioBuffer * mAudioBuffer;
-            AudioModel * model();
+            DataJockey::Audio::AudioBuffer * mAudioBuffer;
+            AudioController * controller();
          private:
             QString mFileName;
-            AudioModel * mAudioModel;
+            AudioController * mAudioController;
             QMutex mMutex;
             bool mAborted;
       };

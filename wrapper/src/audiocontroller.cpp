@@ -1,21 +1,22 @@
-#include "audiomodel.hpp"
+#include "audiocontroller.hpp"
+#include "audioloaderthread.hpp"
 #include <QMutexLocker>
 #include <QMetaObject>
 
 using namespace DataJockey;
-using namespace DataJockey::Internal;
+using namespace DataJockey::Audio;
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
-class AudioModel::PlayerClearBuffersCommand : public DataJockey::Internal::PlayerCommand {
+class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::PlayerCommand {
    public:
       PlayerClearBuffersCommand(unsigned int idx,
-            AudioModel * model,
+            AudioController * controller,
             QString oldFileName = QString()) :
-         DataJockey::Internal::PlayerCommand(idx),
-         mAudioModel(model),
+         DataJockey::Audio::PlayerCommand(idx),
+         mAudioController(controller),
          mOldFileName(oldFileName) { }
       virtual ~PlayerClearBuffersCommand() { }
       virtual void execute() {
@@ -26,19 +27,19 @@ class AudioModel::PlayerClearBuffersCommand : public DataJockey::Internal::Playe
          }
       }
       virtual void execute_done() {
-         if (!mOldFileName.isEmpty() && mAudioModel != NULL)
-            mAudioModel->decrement_audio_file_reference(mOldFileName);
+         if (!mOldFileName.isEmpty() && mAudioController != NULL)
+            mAudioController->decrement_audio_file_reference(mOldFileName);
       }
       virtual bool store(CommandIOData& data) const {
          //TODO
          return false;
       }
    private:
-      AudioModel * mAudioModel;
+      AudioController * mAudioController;
       QString mOldFileName;
 };
 
-class DataJockey::AudioModel::ConsumeThread : public QThread {
+class AudioController::ConsumeThread : public QThread {
    private:
       Scheduler * mScheduler;
    public:
@@ -52,7 +53,7 @@ class DataJockey::AudioModel::ConsumeThread : public QThread {
       }
 };
 
-class DataJockey::AudioModel::PlayerState {
+class AudioController::PlayerState {
    public:
       PlayerState() :
          mFileName() { }
@@ -66,18 +67,18 @@ class DataJockey::AudioModel::PlayerState {
       bool mPause;
 };
 
-const unsigned int DataJockey::AudioModel::one_scale = 1000;
-AudioModel * AudioModel::cInstance = NULL;
+const unsigned int DataJockey::Audio::AudioController::one_scale = 1000;
+AudioController * AudioController::cInstance = NULL;
 
-AudioModel::AudioModel() :
+AudioController::AudioController() :
    QObject(),
    mPlayerStates(),
    mPlayerStatesMutex(QMutex::Recursive)
 {
    unsigned int num_players = 2;
 
-   mAudioIO = DataJockey::Internal::AudioIO::instance();
-   mMaster = DataJockey::Internal::Master::instance();
+   mAudioIO = DataJockey::Audio::AudioIO::instance();
+   mMaster = DataJockey::Audio::Master::instance();
 
    mNumPlayers = num_players;
    for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -87,7 +88,7 @@ AudioModel::AudioModel() :
    }
 
    for(unsigned int i = 0; i < mNumPlayers; i++) {
-      DataJockey::Internal::Player * player = mMaster->players()[i];
+      DataJockey::Audio::Player * player = mMaster->players()[i];
       player->sync(false);
       player->out_state(Player::MAIN_MIX);
       player->play_state(Player::PLAY);
@@ -97,8 +98,8 @@ AudioModel::AudioModel() :
       mPlayerStates[i]->mMute = player->muted();
       mPlayerStates[i]->mSync = player->syncing();
       mPlayerStates[i]->mLoop = player->looping();
-      mPlayerStates[i]->mCue = (player->out_state() == DataJockey::Internal::Player::CUE);
-      mPlayerStates[i]->mPause = (player->play_state() == DataJockey::Internal::Player::PAUSE);
+      mPlayerStates[i]->mCue = (player->out_state() == DataJockey::Audio::Player::CUE);
+      mPlayerStates[i]->mPause = (player->play_state() == DataJockey::Audio::Player::PAUSE);
 
       //int
       mPlayerStates[i]->mVolume = one_scale * player->volume();
@@ -114,16 +115,16 @@ AudioModel::AudioModel() :
    mConsumeThread->start();
 }
 
-AudioModel * AudioModel::instance(){
+AudioController * AudioController::instance(){
    if (!cInstance)
-      cInstance = new AudioModel();
+      cInstance = new AudioController();
    return cInstance;
 }
 
-AudioModel::~AudioModel() {
+AudioController::~AudioController() {
 }
 
-void AudioModel::set_player_pause(int player_index, bool pause){
+void AudioController::set_player_pause(int player_index, bool pause){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -131,16 +132,16 @@ void AudioModel::set_player_pause(int player_index, bool pause){
    if (mPlayerStates[player_index]->mPause != pause) {
       Command * cmd = NULL;
       if (pause)
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::PAUSE);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PAUSE);
       else
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::PLAY);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY);
       queue_command(cmd);
       mPlayerStates[player_index]->mPause = pause;
       emit(player_pause_changed(player_index, pause));
    }
 }
 
-void AudioModel::set_player_cue(int player_index, bool val){
+void AudioController::set_player_cue(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -148,9 +149,9 @@ void AudioModel::set_player_cue(int player_index, bool val){
    if (mPlayerStates[player_index]->mCue != val) {
       Command * cmd = NULL;
       if (val)
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::OUT_CUE);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::OUT_CUE);
       else
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, PlayerStateCommand::OUT_MAIN);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::OUT_MAIN);
       queue_command(cmd);
       mPlayerStates[player_index]->mCue = val;
       emit(player_cue_changed(player_index, val));
@@ -158,13 +159,13 @@ void AudioModel::set_player_cue(int player_index, bool val){
 }
 
 /*
-void AudioModel::set_player_out_state(int player_index, Player::out_state_t val){
+void AudioController::set_player_out_state(int player_index, Player::out_state_t val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    //TODO
 }
 
-void AudioModel::set_player_stretch_method(int player_index, Player::stretch_method_t val){
+void AudioController::set_player_stretch_method(int player_index, Player::stretch_method_t val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -172,7 +173,7 @@ void AudioModel::set_player_stretch_method(int player_index, Player::stretch_met
 }
 */
 
-void AudioModel::set_player_mute(int player_index, bool val){
+void AudioController::set_player_mute(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -180,18 +181,18 @@ void AudioModel::set_player_mute(int player_index, bool val){
    if (mPlayerStates[player_index]->mMute != val) {
       Command * cmd = NULL;
       if (val)
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::MUTE);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::MUTE);
       else
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::NO_MUTE);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::NO_MUTE);
       queue_command(cmd);
       mPlayerStates[player_index]->mMute = val;
       emit(player_mute_changed(player_index, val));
    }
 }
 
-void AudioModel::set_player_sync(int player_index, bool val){
+void AudioController::set_player_sync(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -199,18 +200,18 @@ void AudioModel::set_player_sync(int player_index, bool val){
    if (mPlayerStates[player_index]->mSync != val) {
       Command * cmd = NULL;
       if (val)
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::SYNC);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::SYNC);
       else
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::NO_SYNC);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::NO_SYNC);
       queue_command(cmd);
       mPlayerStates[player_index]->mSync = val;
       emit(player_sync_changed(player_index, val));
    }
 }
 
-void AudioModel::set_player_loop(int player_index, bool val){
+void AudioController::set_player_loop(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -218,100 +219,100 @@ void AudioModel::set_player_loop(int player_index, bool val){
    if (mPlayerStates[player_index]->mLoop != val) {
       Command * cmd = NULL;
       if (val)
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::LOOP);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::LOOP);
       else
-         cmd = new DataJockey::Internal::PlayerStateCommand(player_index, 
-               DataJockey::Internal::PlayerStateCommand::NO_LOOP);
+         cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
+               DataJockey::Audio::PlayerStateCommand::NO_LOOP);
       queue_command(cmd);
       mPlayerStates[player_index]->mLoop = val;
       emit(player_loop_changed(player_index, val));
    }
 }
 
-void AudioModel::set_player_volume(int player_index, int val){
+void AudioController::set_player_volume(int player_index, int val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    QMutexLocker lock(&mPlayerStatesMutex);
    if (mPlayerStates[player_index]->mVolume != val) {
       double volume = (double)val / double(one_scale);
-      queue_command(new DataJockey::Internal::PlayerDoubleCommand(player_index, 
-               DataJockey::Internal::PlayerDoubleCommand::VOLUME, volume));
+      queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, 
+               DataJockey::Audio::PlayerDoubleCommand::VOLUME, volume));
       mPlayerStates[player_index]->mVolume = val;
       emit(player_volume_changed(player_index, val));
    }
 }
 
-void AudioModel::set_player_play_speed(int player_index, int val){
+void AudioController::set_player_play_speed(int player_index, int val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    
    QMutexLocker lock(&mPlayerStatesMutex);
    if (mPlayerStates[player_index]->mPlaySpeed != val) {
       double speed = (double)val / double(one_scale);
-      queue_command(new DataJockey::Internal::PlayerDoubleCommand(player_index, 
-               DataJockey::Internal::PlayerDoubleCommand::PLAY_SPEED, speed));
+      queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, 
+               DataJockey::Audio::PlayerDoubleCommand::PLAY_SPEED, speed));
       mPlayerStates[player_index]->mPlaySpeed = val;
       emit(player_play_speed_changed(player_index, val));
    }
 }
 
-void AudioModel::set_player_position(int player_index, const TimePoint &val){
+void AudioController::set_player_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Internal::PlayerPositionCommand(
+   queue_command(new DataJockey::Audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::PLAY, val));
 }
 
-void AudioModel::set_player_start_position(int player_index, const TimePoint &val){
+void AudioController::set_player_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Internal::PlayerPositionCommand(
+   queue_command(new DataJockey::Audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::START, val));
 }
 
-void AudioModel::set_player_end_position(int player_index, const TimePoint &val){
+void AudioController::set_player_end_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Internal::PlayerPositionCommand(
+   queue_command(new DataJockey::Audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::END, val));
 }
 
-void AudioModel::set_player_loop_start_position(int player_index, const TimePoint &val){
+void AudioController::set_player_loop_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Internal::PlayerPositionCommand(
+   queue_command(new DataJockey::Audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::LOOP_START, val));
 }
 
-void AudioModel::set_player_loop_end_position(int player_index, const TimePoint &val){
+void AudioController::set_player_loop_end_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Internal::PlayerPositionCommand(
+   queue_command(new DataJockey::Audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::LOOP_END, val));
 }
 
-void AudioModel::set_player_audio_buffer(int player_index, AudioBuffer * buf){
+void AudioController::set_player_audio_buffer(int player_index, AudioBuffer * buf){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    queue_command(new PlayerLoadCommand(player_index, buf));
 }
 
-void AudioModel::set_player_beat_buffer(int player_index, BeatBuffer * buf){
+void AudioController::set_player_beat_buffer(int player_index, BeatBuffer * buf){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    //TODO
 }
 
-void AudioModel::set_player_audio_file(int player_index, QString location){
+void AudioController::set_player_audio_file(int player_index, QString location){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -370,7 +371,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
    }
 }
 
-void AudioModel::set_player_clear_buffers(int player_index) {
+void AudioController::set_player_clear_buffers(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -385,7 +386,7 @@ void AudioModel::set_player_clear_buffers(int player_index) {
    }
 }
 
-void AudioModel::decrement_audio_file_reference(QString fileName) {
+void AudioController::decrement_audio_file_reference(QString fileName) {
    QMutexLocker lock(&mPlayerStatesMutex);
 
    if (mAudioBufferManager.contains(fileName)) {
@@ -397,7 +398,7 @@ void AudioModel::decrement_audio_file_reference(QString fileName) {
    }
 }
 
-void AudioModel::relay_player_audio_file_load_progress(QString fileName, int percent){
+void AudioController::relay_player_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
       if (mPlayerStates[player_index]->mFileName == fileName)
@@ -405,12 +406,12 @@ void AudioModel::relay_player_audio_file_load_progress(QString fileName, int per
    }
 }
 
-void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName) {
+void AudioController::relay_player_audio_file_changed(int player_index, QString fileName) {
    emit(player_audio_file_changed(player_index, fileName));
 }
 
 //called from another thread
-bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuffer * buffer){
+bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * buffer){
    QMutexLocker lock(&mPlayerStatesMutex);
 
    if (!buffer || !buffer->loaded())
@@ -448,15 +449,15 @@ bool AudioModel::audio_file_load_complete(QString fileName, DataJockey::AudioBuf
    return true;
 }
 
-void AudioModel::set_master_volume(int val){
+void AudioController::set_master_volume(int val){
    //TODO
 }
 
-void AudioModel::set_master_cue_volume(int val){
+void AudioController::set_master_cue_volume(int val){
    //TODO
 }
 
-void AudioModel::set_master_cross_fade_enable(bool enable){
+void AudioController::set_master_cross_fade_enable(bool enable){
    Command * cmd = NULL;
    if(enable)
       cmd = new MasterBoolCommand(MasterBoolCommand::XFADE);
@@ -465,7 +466,7 @@ void AudioModel::set_master_cross_fade_enable(bool enable){
    queue_command(cmd);
 }
 
-void AudioModel::set_master_cross_fade_position(int val){
+void AudioController::set_master_cross_fade_position(int val){
    double dval = (double)val / (double)one_scale;
    if (dval > 1.0)
       dval = 1.0;
@@ -474,7 +475,7 @@ void AudioModel::set_master_cross_fade_position(int val){
    queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
 }
 
-void AudioModel::set_master_cross_fade_players(int left, int right){
+void AudioController::set_master_cross_fade_players(int left, int right){
    if (left < 0 || left >= (int)mNumPlayers)
       return;
    if (right < 0 || right >= (int)mNumPlayers)
@@ -482,7 +483,7 @@ void AudioModel::set_master_cross_fade_players(int left, int right){
    queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
 }
 
-void AudioModel::queue_command(DataJockey::Internal::Command * cmd){
+void AudioController::queue_command(DataJockey::Audio::Command * cmd){
    mMaster->scheduler()->execute(cmd);
 }
 

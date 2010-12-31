@@ -1,5 +1,5 @@
 <config>
-    <moduleName>datajockey</moduleName>
+    <moduleName>datajockey_audio</moduleName>
     <parentModules>
         <module>qtcore</module>
     </parentModules>
@@ -20,12 +20,8 @@
         <signature>.*DataJockey::.*::d</signature>
     </exclude>
     <classList>
-        <class>DataJockey</class>
-        <!--
-        <class>DataJockey::AudioBuffer</class>
-        <class>DataJockey::BeatBuffer</class>
-        -->
-        <class>DataJockey::AudioModel</class>
-        <class>DataJockey::TimePoint</class>
+        <class>DataJockey::Audio</class>
+        <class>DataJockey::Audio::AudioController</class>
+        <class>DataJockey::Audio::TimePoint</class>
     </classList>
 </config>

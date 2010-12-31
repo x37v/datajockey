@@ -1,7 +1,7 @@
 #just setting it to the version I have
 cmake_minimum_required(VERSION 2.8)
 
-project(datajockey)
+project(datajockey_audio)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules )
@@ -28,13 +28,13 @@ SET(QT_INCLUDE_DIR /usr/include/qt4)
 include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore/ ${QT_INCLUDE_DIR}/Qt/ ${QT_INCLUDE_DIR}/QtGui/ /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ../include/ ./include/ .)
 
 link_directories(/home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/lib/1.9/)
-set(rubydatajockey_LIBRARY_SRC 
-   src/datajockey.cpp 
+set(rubydatajockey_audio_LIBRARY_SRC 
+   src/datajockey_audio.cpp 
 	../src/audiobuffer.cpp
 	../src/audioio.cpp
-	src/audiomodel.cpp
+	src/audiocontroller.cpp
 	src/audioloaderthread.cpp
-	moc/moc_audiomodel.cpp
+	moc/moc_audiocontroller.cpp
 	../src/beatbuffer.cpp
 	../src/command.cpp
 	../src/master.cpp
@@ -46,8 +46,8 @@ set(rubydatajockey_LIBRARY_SRC
 	../src/transport.cpp
    smoke/smokedata.cpp
    smoke/x_1.cpp smoke/x_2.cpp)
-add_library(rubydatajockey MODULE ${rubydatajockey_LIBRARY_SRC})
-target_link_libraries(rubydatajockey
+add_library(rubydatajockey_audio MODULE ${rubydatajockey_audio_LIBRARY_SRC})
+target_link_libraries(rubydatajockey_audio
    #${PHONON_LIBS}
     #smokedatajockey
     qtruby4shared
@@ -58,11 +58,11 @@ target_link_libraries(rubydatajockey
     jackcpp
     rubberband
 )
-set_target_properties(rubydatajockey PROPERTIES PREFIX "" OUTPUT_NAME datajockey)
+set_target_properties(rubydatajockey_audio PROPERTIES PREFIX "" OUTPUT_NAME datajockey_audio)
 
-install(TARGETS rubydatajockey DESTINATION ${CUSTOM_RUBY_SITE_ARCH_DIR})
-install(FILES datajockey.rb DESTINATION ${CUSTOM_RUBY_SITE_LIB_DIR}/datajockey)
+install(TARGETS rubydatajockey_audio DESTINATION ${CUSTOM_RUBY_SITE_ARCH_DIR})
+install(FILES datajockey_audio_internal.rb DESTINATION ${CUSTOM_RUBY_SITE_LIB_DIR}/datajockey)
 
 if (Q_WS_MAC)
-    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey.so\"  \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey.bundle\" )" )
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey_audio.so\"  \"${CUSTOM_RUBY_SITE_ARCH_DIR}/datajockey_audio.bundle\" )" )
 endif (Q_WS_MAC)
