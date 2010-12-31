@@ -19,9 +19,9 @@ class DataJockey::View::Player < Qt::Widget
 
     @buttons = {
       :load => Qt::PushButton.new('load'),
-      :pause => Qt::PushButton.new('pause') { |b| 
-        b.set_checkable(true) 
-      }
+      :pause => Qt::PushButton.new('pause') { set_checkable(true) },
+      :seek_back => Qt::PushButton.new('<<') { set_auto_repeat(true) },
+      :seek_forward => Qt::PushButton.new('>>') { set_auto_repeat(true) }
     }
     @buttons.each do |key, btn|
       btn.set_tool_tip(key.to_s)

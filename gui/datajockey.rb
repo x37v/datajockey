@@ -43,6 +43,12 @@ mixer_panel.players.each_with_index do |player, index|
       audio_controller.set_player_audio_file(index, files.first) if files.size > 0
     end
   end
+  player.buttons[:seek_back].on(:pressed) do
+    audio_controller.set_player_position(index, Audio::TimePoint.new(-0.2), false)
+  end
+  player.buttons[:seek_forward].on(:pressed) do
+    audio_controller.set_player_position(index, Audio::TimePoint.new(0.2), false)
+  end
 end
 
 audio_controller.on(:player_audio_file_load_progress, ["int", "int"]) do |player_index, percent|
