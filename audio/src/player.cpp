@@ -585,6 +585,7 @@ void PlayerPositionCommand::execute(){
             p->loop_end_position(mTimePoint);
             break;
       };
+      //TODO shouldn't it update the position if dirty?
    }
 }
 
