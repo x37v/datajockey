@@ -1,6 +1,6 @@
 #include <ruby.h>
 
-//#include <QtDebug>
+#include <QtDebug>
 #include <qtruby.h>
 
 #include "smoke/datajockey_audio_smoke.h"
@@ -23,8 +23,6 @@ resolve_classname_datajockey_audio(smokeruby_object * o)
     return qtruby_modules[o->smoke].binding->className(o->classId);
 }
 
-//extern TypeHandler Phonon_handlers[];
-
 extern "C" {
 
 VALUE datajockey_module;
@@ -44,8 +42,6 @@ Init_datajockey_audio()
 
     QtRubyModule module = { "DataJockey::Audio", resolve_classname_datajockey_audio, 0, &binding };
     qtruby_modules[datajockey_audio_Smoke] = module;
-
-    //install_handlers(Phonon_handlers);
 
     datajockey_module = rb_define_module("DataJockey");
     datajockey_audio_module = rb_define_module_under(datajockey_module, "Audio");
