@@ -1,9 +1,11 @@
 $LOAD_PATH << File.dirname(__FILE__)
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'audio', 'wrapper')
+$LOAD_PATH << File.join(File.dirname(__FILE__), 'ext')
 STYLE_SHEET_FILE = 'style.css'
 
 require 'view/mixerpanel'
 require 'datajockey_audio'
+require 'datajockey_view'
 
 include DataJockey
 

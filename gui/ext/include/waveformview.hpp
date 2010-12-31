@@ -4,6 +4,7 @@
 #include <QGraphicsItem>
 #include <QRectF>
 #include <QVariant>
+#include <QPen>
 
 class QPainter;
 class QStyleOptionGraphicsItem;
@@ -17,8 +18,12 @@ namespace DataJockey {
             virtual ~WaveFormView();
             virtual QRectF boundingRect() const;
             virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0);
+            void setPen(const QPen& pen);
          protected:
             virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value);
+         private:
+            QPen mPen;
+
       };
    }
 }
