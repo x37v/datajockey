@@ -21,6 +21,11 @@ if File.exists?(STYLE_SHEET_FILE)
   app.set_style_sheet(File.read(STYLE_SHEET_FILE))
 end
 
+load_dialog = Qt::FileDialog.new(mixer_panel, 'load audio file') {
+  file_mode = Qt::FileDialog::ExistingFile
+  set_name_filter = 'Audio Files (*.flac *.ogg *.mp3 *.wav)'
+}
+
 mixer_panel.players.each_with_index do |player, index|
   player.buttons[:pause].on(:toggled) do |t|
     audio_controller.set_player_pause(index, t)
@@ -29,9 +34,9 @@ mixer_panel.players.each_with_index do |player, index|
     audio_controller.set_player_volume(index, v)
   end
   player.buttons[:load].on(:released) do |t|
-    filename = Qt::FileDialog.get_open_file_name(mixer_panel, "load audio file", "/home/alex/music/new/martial_canterel/confusing_outsides/", "Audio Files (*.flac *.ogg *.mp3 *.wav)")
-    if filename and not filename.empty?
-      audio_controller.set_player_audio_file(index, filename)
+    if load_dialog.exec == Qt::Dialog::Accepted
+      files = load_dialog.selected_files
+      audio_controller.set_player_audio_file(index, files.first) if files.size > 0
     end
   end
 end
@@ -59,7 +64,6 @@ app.on(:about_to_quit) do
   audio_controller.stop_audio
 end
 
-#TODO
 audio_controller.start_audio
 app.exec()
 
