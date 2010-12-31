@@ -38,6 +38,24 @@ namespace DataJockey {
             //represents 'one' as a double in int terms.
             const static unsigned int one_scale;
 
+            //getters
+            //player
+            bool player_pause(int player_index);
+            bool player_cue(int player_index);
+            //void player_out_state(int player_index, Audio::Player::out_state_t val);
+            //void player_stretch_method(int player_index, Audio::Player::stretch_method_t val);
+            bool player_mute(int player_index);
+            bool player_sync(int player_index);
+            bool player_loop(int player_index);
+            int player_volume(int player_index);
+            int player_play_speed(int player_index);
+            //void player_position(int player_index);
+            //void player_start_position(int player_index);
+            //void player_end_position(int player_index);
+            //void player_loop_start_position(int player_index);
+            //void player_loop_end_position(int player_index);
+            QString player_audio_file(int player_index);
+
          public slots:
             void set_player_pause(int player_index, bool pause);
             void set_player_cue(int player_index, bool val);

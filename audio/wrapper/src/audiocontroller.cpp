@@ -119,14 +119,83 @@ AudioController::AudioController() :
          Qt::QueuedConnection);
 }
 
+AudioController::~AudioController() {
+}
+
 AudioController * AudioController::instance(){
    if (!cInstance)
       cInstance = new AudioController();
    return cInstance;
 }
 
-AudioController::~AudioController() {
+//*************** getters
+
+bool AudioController::player_pause(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return false;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mPause;
 }
+
+bool AudioController::player_cue(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return false;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mCue;
+}
+
+//void AudioController::player_out_state(int player_index, Audio::Player::out_state_t val){ } 
+//void AudioController::player_stretch_method(int player_index, Audio::Player::stretch_method_t val){ }
+
+bool AudioController::player_mute(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return false;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mMute;
+}
+
+bool AudioController::player_sync(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return false;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mSync;
+}
+
+bool AudioController::player_loop(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return false;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mLoop;
+}
+
+int AudioController::player_volume(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return 0;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mVolume;
+}
+
+int AudioController::player_play_speed(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return 0;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mPlaySpeed;
+}
+
+//void AudioController::player_position(int player_index){ }
+//void AudioController::player_start_position(int player_index){ }
+//void AudioController::player_end_position(int player_index){ }
+//void AudioController::player_loop_start_position(int player_index){ }
+//void AudioController::player_loop_end_position(int player_index){ }
+
+QString AudioController::player_audio_file(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return QString();
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mFileName;
+}
+
+//****************** setters/slots
 
 void AudioController::set_player_pause(int player_index, bool pause){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
