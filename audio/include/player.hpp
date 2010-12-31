@@ -70,6 +70,7 @@ namespace DataJockey {
             void volume(double val);
             void play_speed(double val);
             void position(const TimePoint &val);
+            void position_at_frame(unsigned long frame);
             void start_position(const TimePoint &val);
             void end_position(const TimePoint &val);
             void loop_start_position(const TimePoint &val);
@@ -79,6 +80,7 @@ namespace DataJockey {
 
             //misc
             void position_relative(TimePoint amt); //go to a position relative to the current position
+            void position_at_frame_relative(unsigned long offset);
             void play_speed_relative(double amt); //increment or decrement the current play speed by amt
             void volume_relative(double amt); //increment or decrement the current volume
 

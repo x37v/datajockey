@@ -279,7 +279,7 @@ void Player::position(const TimePoint &val){
    //otherwise we grab the time from the beat buffer!
    mPositionDirty = false;
    if(mPosition.type() == TimePoint::SECONDS){
-      mSampleIndex = mSampleRate * mPosition.seconds();
+      mSampleIndex = (double)mSampleRate * mPosition.seconds();
       mSampleIndexResidual = 0;
    } else if(mBeatBuffer){
       mSampleIndex = mSampleRate * mBeatBuffer->time_at_position(mPosition);
@@ -287,6 +287,12 @@ void Player::position(const TimePoint &val){
    } else
       mPositionDirty = true;
 
+}
+
+void Player::position_at_frame(unsigned long frame) {
+   mSampleIndex = frame;
+   mSampleIndexResidual = 0;
+   mPositionDirty = true;
 }
 
 void Player::start_position(const TimePoint &val){
@@ -320,6 +326,11 @@ void Player::beat_buffer(BeatBuffer * buf){
 
 //misc
 void Player::position_relative(TimePoint amt){
+   position(mPosition + amt);
+}
+
+void Player::position_at_frame_relative(unsigned long offset){
+   position_at_frame(mSampleIndex + offset);
 }
 
 void Player::play_speed_relative(double amt){

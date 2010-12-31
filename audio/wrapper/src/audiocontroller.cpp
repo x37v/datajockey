@@ -331,12 +331,21 @@ void AudioController::set_player_play_speed(int player_index, int val){
    }
 }
 
-void AudioController::set_player_position(int player_index, const TimePoint &val){
+void AudioController::set_player_position(int player_index, const TimePoint &val, bool absolute){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   queue_command(new DataJockey::Audio::PlayerPositionCommand(
-            player_index, PlayerPositionCommand::PLAY, val));
+   Command * cmd = NULL;
+   if (absolute)
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY, val);
+   else
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY_RELATIVE, val);
+   queue_command(cmd);
+}
+
+void AudioController::set_player_position_frame(int player_index, unsigned long frame, bool absolute) {
 }
 
 void AudioController::set_player_start_position(int player_index, const TimePoint &val){

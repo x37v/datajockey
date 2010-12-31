@@ -196,3 +196,20 @@ bool TimePoint::operator>=(const TimePoint &other) const {
    return ((*this > other) || (*this == other));
 }
 
+const TimePoint TimePoint::operator+(const TimePoint &other) const {
+   TimePoint ret = *this;
+   if (other.type() == type()) {
+      if (type() == SECONDS) {
+         double sec = ret.seconds() + other.seconds(); 
+         if (sec < 0.0)
+            sec = 0.0;
+         ret.seconds(sec);
+      } else {
+         //TODO
+      }
+   } else {
+      //TODO
+   }
+   return ret;
+}
+
