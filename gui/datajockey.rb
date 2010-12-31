@@ -37,6 +37,9 @@ mixer_panel.players.each_with_index do |player, index|
   player.volume_slider.on(:value_changed) do |v|
     audio_controller.set_player_volume(index, v)
   end
+  player.speed_slider.on(:value_changed) do |v|
+    audio_controller.set_player_play_speed(index, v + 1000)
+  end
   player.buttons[:load].on(:released) do |t|
     if load_dialog.exec == Qt::Dialog::Accepted
       files = load_dialog.selected_files

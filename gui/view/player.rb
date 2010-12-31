@@ -2,7 +2,7 @@ require 'view/base'
 require 'view/eq'
 
 class DataJockey::View::Player < Qt::Widget
-  attr_reader :buttons, :eq, :volume_slider, :progress
+  attr_reader :buttons, :eq, :volume_slider, :speed_slider, :progress
   RANGE_HEADROOM = DataJockey::View::INT_MULT / 3
   VOLUME_MAX = RANGE_HEADROOM + DataJockey::View::INT_MULT
 
@@ -39,8 +39,18 @@ class DataJockey::View::Player < Qt::Widget
     @eq = View::Eq.new
     @top_layout << @eq
 
+    @speed_slider = Qt::Slider.new(Qt::Horizontal) { |s|
+      s.set_range(-300, 300)
+      s.set_tick_position(Qt::Slider::TicksBelow)
+      s.tick_interval = 50
+    }
+
+    @top_layout << @speed_slider
+
     @volume_slider = Qt::Slider.new { |s|
       s.set_range(0, VOLUME_MAX)
+      s.set_tick_position(Qt::Slider::TicksLeft)
+      s.tick_interval = 100
     }
     @slider_layout = Qt::HBoxLayout.new { |l|
       l.add_stretch
