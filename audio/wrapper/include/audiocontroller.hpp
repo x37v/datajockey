@@ -63,6 +63,10 @@ namespace DataJockey {
             void set_master_cross_fade_position(int val);
             void set_master_cross_fade_players(int left, int right);
 
+            //start and stop the audio processing
+            void start_audio();
+            void stop_audio();
+
          signals:
             void player_pause_changed(int player_index, bool pause);
             void player_cue_changed(int player_index, bool val);

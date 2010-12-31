@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'audiocontroller.hpp'
 **
-** Created: Thu Dec 30 20:56:53 2010
+** Created: Thu Dec 30 21:18:13 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_DataJockey__Audio__AudioController[] = {
        4,       // revision
        0,       // classname
        0,    0, // classinfo
-      32,   14, // methods
+      34,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -64,7 +64,9 @@ static const uint qt_meta_data_DataJockey__Audio__AudioController[] = {
     1174, 1167,   35,   35, 0x0a,
     1209, 1113,   35,   35, 0x0a,
     1256, 1245,   35,   35, 0x0a,
-    1312, 1295,   35,   35, 0x09,
+    1295,   35,   35,   35, 0x0a,
+    1309,   35,   35,   35, 0x0a,
+    1339, 1322,   35,   35, 0x09,
 
        0        // eod
 };
@@ -104,7 +106,7 @@ static const char qt_meta_stringdata_DataJockey__Audio__AudioController[] = {
     "set_master_cross_fade_enable(bool)\0"
     "set_master_cross_fade_position(int)\0"
     "left,right\0set_master_cross_fade_players(int,int)\0"
-    "fileName,percent\0"
+    "start_audio()\0stop_audio()\0fileName,percent\0"
     "relay_audio_file_load_progress(QString,int)\0"
 };
 
@@ -168,10 +170,12 @@ int DataJockey::Audio::AudioController::qt_metacall(QMetaObject::Call _c, int _i
         case 28: set_master_cross_fade_enable((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 29: set_master_cross_fade_position((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 30: set_master_cross_fade_players((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 31: relay_audio_file_load_progress((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 31: start_audio(); break;
+        case 32: stop_audio(); break;
+        case 33: relay_audio_file_load_progress((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
-        _id -= 32;
+        _id -= 34;
     }
     return _id;
 }

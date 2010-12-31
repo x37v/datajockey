@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'audioloaderthread.hpp'
 **
-** Created: Thu Dec 30 20:56:53 2010
+** Created: Thu Dec 30 21:18:13 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!

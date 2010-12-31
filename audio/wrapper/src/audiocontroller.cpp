@@ -109,10 +109,6 @@ AudioController::AudioController() :
       mPlayerStates[i]->mPlaySpeed = one_scale * player->play_speed();
    }
 
-   mAudioIO->start();
-   mAudioIO->connectToPhysical(0,0);
-   mAudioIO->connectToPhysical(1,1);
-
    //hook up and start the consume thread
    mConsumeThread = new ConsumeThread(mMaster->scheduler());
    mConsumeThread->start();
@@ -479,6 +475,16 @@ void AudioController::set_master_cross_fade_players(int left, int right){
    if (right < 0 || right >= (int)mNumPlayers)
       return;
    queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
+}
+
+void AudioController::start_audio() {
+   mAudioIO->start();
+   mAudioIO->connectToPhysical(0,0);
+   mAudioIO->connectToPhysical(1,1);
+}
+
+void AudioController::stop_audio() {
+   mAudioIO->stop();
 }
 
 void AudioController::queue_command(DataJockey::Audio::Command * cmd){

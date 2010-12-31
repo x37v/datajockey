@@ -49,7 +49,11 @@ audio_controller.on(:player_audio_file_changed, ["int", "QString"]) do |player_i
   end
 end
 
+app.on(:about_to_quit) do
+  audio_controller.stop_audio
+end
+
 #TODO
-#audio_controller.start
+audio_controller.start_audio
 app.exec()
 
