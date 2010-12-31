@@ -56,8 +56,6 @@ set(rubydatajockey_audio_LIBRARY_SRC
    smoke/x_1.cpp smoke/x_2.cpp)
 add_library(rubydatajockey_audio MODULE ${rubydatajockey_audio_LIBRARY_SRC})
 target_link_libraries(rubydatajockey_audio
-   #${PHONON_LIBS}
-    #smokedatajockey
     qtruby4shared
     sndfile
     vorbisfile
