@@ -27,6 +27,10 @@ load_dialog = Qt::FileDialog.new(mixer_panel, 'load audio file') {
 }
 
 mixer_panel.players.each_with_index do |player, index|
+  #grab current state
+  player.volume = audio_controller.player_volume(index)
+
+  #work with state changes
   player.buttons[:pause].on(:toggled) do |t|
     audio_controller.set_player_pause(index, t)
   end
