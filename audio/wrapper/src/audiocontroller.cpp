@@ -1,7 +1,6 @@
 #include "audiocontroller.hpp"
 #include "audioloaderthread.hpp"
 #include <QMutexLocker>
-#include <QMetaObject>
 
 using namespace DataJockey;
 using namespace DataJockey::Audio;
@@ -84,7 +83,11 @@ AudioController::AudioController() :
    for(unsigned int i = 0; i < mNumPlayers; i++) {
       mMaster->add_player();
       mPlayerStates.push_back(new PlayerState());
-      mThreadPool.push_back(new AudioLoaderThread(this));
+      AudioLoaderThread * newThread = new AudioLoaderThread(this);
+      mThreadPool.push_back(newThread);
+      QObject::connect(newThread, SIGNAL(load_progress(QString, int)),
+            this, SLOT(relay_audio_file_load_progress(QString, int)),
+            Qt::QueuedConnection);
    }
 
    for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -113,6 +116,11 @@ AudioController::AudioController() :
    //hook up and start the consume thread
    mConsumeThread = new ConsumeThread(mMaster->scheduler());
    mConsumeThread->start();
+
+   //internal signal connections
+   QObject::connect(this, SIGNAL(player_audio_file_changed_relay(int, QString)),
+         this, SIGNAL(player_audio_file_changed(int, QString)),
+         Qt::QueuedConnection);
 }
 
 AudioController * AudioController::instance(){
@@ -363,11 +371,8 @@ void AudioController::set_player_audio_file(int player_index, QString location){
          mPlayerStates[player_index]->mFileName = location;
 
          //notify
-         emit(player_audio_file_load_progress(player_index, 100));
+         emit(player_audio_file_changed(player_index, location));
       }
-   } else {
-      //XXX what if the file isn't actually all the way loaded?
-      emit(player_audio_file_load_progress(player_index, 100));
    }
 }
 
@@ -398,16 +403,12 @@ void AudioController::decrement_audio_file_reference(QString fileName) {
    }
 }
 
-void AudioController::relay_player_audio_file_load_progress(QString fileName, int percent){
+void AudioController::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
       if (mPlayerStates[player_index]->mFileName == fileName)
          emit(player_audio_file_load_progress(player_index, percent));
    }
-}
-
-void AudioController::relay_player_audio_file_changed(int player_index, QString fileName) {
-   emit(player_audio_file_changed(player_index, fileName));
 }
 
 //called from another thread
@@ -437,11 +438,8 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
       //reset player position
       set_player_position(player_index, TimePoint(0.0));
 
-      QMetaObject::invokeMethod(this,
-            "relay_player_audio_file_changed",
-            Qt::QueuedConnection, 
-            Q_ARG(int, player_index),
-            Q_ARG(QString, fileName));
+      //calling from another thread, emit a signal which will then be passed along
+      emit(player_audio_file_changed_relay(player_index, fileName));
    }
 
    if (!loaded_into_a_player)

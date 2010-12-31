@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'audiocontroller.hpp'
 **
-** Created: Thu Dec 30 15:33:44 2010
+** Created: Thu Dec 30 20:56:53 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,12 +23,12 @@ static const uint qt_meta_data_DataJockey__Audio__AudioController[] = {
        4,       // revision
        0,       // classname
        0,    0, // classinfo
-      30,   14, // methods
+      32,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-      11,       // signalCount
+      12,       // signalCount
 
  // signals: signature, parameters, type, tag, flags
       55,   36,   35,   35, 0x05,
@@ -42,27 +42,29 @@ static const uint qt_meta_data_DataJockey__Audio__AudioController[] = {
      359,  346,   35,   35, 0x05,
      411,  390,   35,   35, 0x05,
      474,  452,   35,   35, 0x05,
+     515,  513,   35,   35, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-     513,   36,   35,   35, 0x0a,
-     540,   86,   35,   35, 0x0a,
-     565,   86,   35,   35, 0x0a,
-     591,   86,   35,   35, 0x0a,
-     617,   86,   35,   35, 0x0a,
-     643,   86,   35,   35, 0x0a,
-     670,   86,   35,   35, 0x0a,
-     701,   86,   35,   35, 0x0a,
-     755,   86,   35,   35, 0x0a,
-     815,   86,   35,   35, 0x0a,
-     873,   86,   35,   35, 0x0a,
-     938,   86,   35,   35, 0x0a,
-    1001,  452,   35,   35, 0x0a,
-    1036,  346,   35,   35, 0x0a,
-    1070, 1066,   35,   35, 0x0a,
-    1093, 1066,   35,   35, 0x0a,
-    1127, 1120,   35,   35, 0x0a,
-    1162, 1066,   35,   35, 0x0a,
-    1209, 1198,   35,   35, 0x0a,
+     560,   36,   35,   35, 0x0a,
+     587,   86,   35,   35, 0x0a,
+     612,   86,   35,   35, 0x0a,
+     638,   86,   35,   35, 0x0a,
+     664,   86,   35,   35, 0x0a,
+     690,   86,   35,   35, 0x0a,
+     717,   86,   35,   35, 0x0a,
+     748,   86,   35,   35, 0x0a,
+     802,   86,   35,   35, 0x0a,
+     862,   86,   35,   35, 0x0a,
+     920,   86,   35,   35, 0x0a,
+     985,   86,   35,   35, 0x0a,
+    1048,  452,   35,   35, 0x0a,
+    1083,  346,   35,   35, 0x0a,
+    1117, 1113,   35,   35, 0x0a,
+    1140, 1113,   35,   35, 0x0a,
+    1174, 1167,   35,   35, 0x0a,
+    1209, 1113,   35,   35, 0x0a,
+    1256, 1245,   35,   35, 0x0a,
+    1312, 1295,   35,   35, 0x09,
 
        0        // eod
 };
@@ -82,6 +84,7 @@ static const char qt_meta_stringdata_DataJockey__Audio__AudioController[] = {
     "player_audio_file_load_progress(int,int)\0"
     "player_index,location\0"
     "player_audio_file_changed(int,QString)\0"
+    ",\0player_audio_file_changed_relay(int,QString)\0"
     "set_player_pause(int,bool)\0"
     "set_player_cue(int,bool)\0"
     "set_player_mute(int,bool)\0"
@@ -101,6 +104,8 @@ static const char qt_meta_stringdata_DataJockey__Audio__AudioController[] = {
     "set_master_cross_fade_enable(bool)\0"
     "set_master_cross_fade_position(int)\0"
     "left,right\0set_master_cross_fade_players(int,int)\0"
+    "fileName,percent\0"
+    "relay_audio_file_load_progress(QString,int)\0"
 };
 
 const QMetaObject DataJockey::Audio::AudioController::staticMetaObject = {
@@ -143,28 +148,30 @@ int DataJockey::Audio::AudioController::qt_metacall(QMetaObject::Call _c, int _i
         case 8: player_audio_file_cleared((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 9: player_audio_file_load_progress((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 10: player_audio_file_changed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 11: set_player_pause((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 12: set_player_cue((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 13: set_player_mute((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 14: set_player_sync((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 15: set_player_loop((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 16: set_player_volume((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 17: set_player_play_speed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 18: set_player_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
-        case 19: set_player_start_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
-        case 20: set_player_end_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
-        case 21: set_player_loop_start_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
-        case 22: set_player_loop_end_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
-        case 23: set_player_audio_file((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 24: set_player_clear_buffers((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 25: set_master_volume((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 26: set_master_cue_volume((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 27: set_master_cross_fade_enable((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 28: set_master_cross_fade_position((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 29: set_master_cross_fade_players((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 11: player_audio_file_changed_relay((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 12: set_player_pause((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 13: set_player_cue((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 14: set_player_mute((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 15: set_player_sync((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 16: set_player_loop((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 17: set_player_volume((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 18: set_player_play_speed((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 19: set_player_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
+        case 20: set_player_start_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
+        case 21: set_player_end_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
+        case 22: set_player_loop_start_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
+        case 23: set_player_loop_end_position((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const DataJockey::Audio::TimePoint(*)>(_a[2]))); break;
+        case 24: set_player_audio_file((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 25: set_player_clear_buffers((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 26: set_master_volume((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 27: set_master_cue_volume((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 28: set_master_cross_fade_enable((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 29: set_master_cross_fade_position((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 30: set_master_cross_fade_players((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 31: relay_audio_file_load_progress((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
-        _id -= 30;
+        _id -= 32;
     }
     return _id;
 }
@@ -244,5 +251,12 @@ void DataJockey::Audio::AudioController::player_audio_file_changed(int _t1, QStr
 {
     void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 10, _a);
+}
+
+// SIGNAL 11
+void DataJockey::Audio::AudioController::player_audio_file_changed_relay(int _t1, QString _t2)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 11, _a);
 }
 QT_END_MOC_NAMESPACE

@@ -35,6 +35,7 @@ set(rubydatajockey_audio_LIBRARY_SRC
 	src/audiocontroller.cpp
 	src/audioloaderthread.cpp
 	moc/moc_audiocontroller.cpp
+	moc/moc_audioloaderthread.cpp
 	../src/beatbuffer.cpp
 	../src/command.cpp
 	../src/master.cpp

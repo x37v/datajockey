@@ -1,5 +1,4 @@
 #include "audioloaderthread.hpp"
-#include <QMetaObject>
 #include <QMutexLocker>
 
 using namespace DataJockey::Audio;
@@ -9,11 +8,7 @@ AudioController::AudioLoaderThread::AudioLoaderThread(AudioController * controll
 
 void AudioController::AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
-   QMetaObject::invokeMethod(self->controller(),
-         "relay_player_audio_file_load_progress",
-         Qt::QueuedConnection, 
-         Q_ARG(QString, self->file_name()),
-         Q_ARG(int, percent));
+   self->relay_load_progress(self->file_name(), percent);
 }
 
 void AudioController::AudioLoaderThread::abort() {
@@ -26,6 +21,10 @@ void AudioController::AudioLoaderThread::abort() {
 const QString& AudioController::AudioLoaderThread::file_name() {
    QMutexLocker lock(&mMutex);
    return mFileName;
+}
+
+void AudioController::AudioLoaderThread::relay_load_progress(QString fileName, int percent) {
+   emit(load_progress(fileName, percent));
 }
 
 DataJockey::Audio::AudioBuffer * AudioController::AudioLoaderThread::load(QString location){

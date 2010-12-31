@@ -37,12 +37,12 @@ unsigned int AudioBuffer::channels(){
    return mAudioData.size();
 }
 
-   unsigned int AudioBuffer::length(){
-      if(mAudioData.size() > 0)
-         return mAudioData[0].size();
-      else
-         return 0;
-   }
+unsigned int AudioBuffer::length(){
+   if(mAudioData.size() > 0)
+      return mAudioData[0].size();
+   else
+      return 0;
+}
 
 bool AudioBuffer::loaded() { return mLoaded; }
 
@@ -84,6 +84,10 @@ bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
    chans = mSoundFile.channels();
    double num_frames = (double)mSoundFile.frames();
    unsigned int total_read = 0;
+   unsigned int percent_last = 0;
+
+   if (progress_callback)
+      progress_callback(0, user_data);
 
    while(!mAbort && (frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
       for(unsigned int i = 0; i < frames_read; i++){
@@ -95,7 +99,11 @@ bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
       //report progress
       if (progress_callback && num_frames != 0) {
          total_read += frames_read;
-         progress_callback((double)(100 * total_read) / num_frames, user_data);
+         unsigned int new_percent = (double)(100 * total_read) / num_frames;
+         if (new_percent != percent_last) {
+            percent_last = new_percent;
+            progress_callback(percent_last, user_data);
+         }
       }
    }
    delete [] inbuf;

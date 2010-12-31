@@ -76,6 +76,14 @@ namespace DataJockey {
             void player_audio_file_load_progress(int player_index, int percent);
             void player_audio_file_changed(int player_index, QString location);
 
+            //only for internal use
+            void player_audio_file_changed_relay(int, QString);
+
+         protected slots:
+            //relay methods are called with queued connections across threads so that
+            //they relay signals into the main thread, they simply emit signals
+            void relay_audio_file_load_progress(QString fileName, int percent);
+
          protected:
             friend class PlayerClearBuffersCommand;
             friend class AudioLoaderThread;
@@ -102,11 +110,6 @@ namespace DataJockey {
             QMap<QString, QPair<int, DataJockey::Audio::AudioBuffer *> > mAudioBufferManager;
 
             //**** private methods
-
-            //relay methods are called with queued connections across threads so that
-            //they relay signals into the main thread, they simply emit signals
-            void relay_player_audio_file_load_progress(QString fileName, int percent);
-            void relay_player_audio_file_changed(int player_index, QString fileName);
 
             //returns true if the buffer is actually loaded anywhere
             //this is called from one of many audio loader threads
