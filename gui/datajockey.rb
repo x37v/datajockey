@@ -47,10 +47,10 @@ mixer_panel.players.each_with_index do |player, index|
     end
   end
   player.buttons[:seek_back].on(:pressed) do
-    audio_controller.set_player_position(index, Audio::TimePoint.new(-0.2), false)
+    audio_controller.set_player_position_relative(index, Audio::TimePoint.new(-0.4))
   end
   player.buttons[:seek_forward].on(:pressed) do
-    audio_controller.set_player_position(index, Audio::TimePoint.new(0.2), false)
+    audio_controller.set_player_position_relative(index, Audio::TimePoint.new(0.2))
   end
 end
 
@@ -78,5 +78,6 @@ app.on(:about_to_quit) do
 end
 
 audio_controller.start_audio
+audio_controller.set_player_audio_file(0, '/home/alex/backup/alex_big_harddrive/alex/music-backup/acid_horse/no_name_no_slogan/01-no_name_no_slogan.flac')
 app.exec()
 
