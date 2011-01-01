@@ -1,5 +1,7 @@
 #include "audiocontroller.hpp"
 #include "audioloaderthread.hpp"
+#include "audiobufferreference.hpp"
+
 #include <QMutexLocker>
 
 using namespace DataJockey;
@@ -195,10 +197,6 @@ QString AudioController::player_audio_file(int player_index){
       return QString();
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mFileName;
-}
-
-AudioBufferReference AudioController::audio_buffer_reference(QString fileName) {
-   return AudioBufferReference(fileName);
 }
 
 //****************** setters/slots

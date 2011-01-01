@@ -5,10 +5,6 @@
 
 using namespace DataJockey::Audio;
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
 //class objects
 AudioBufferReference::manager_map_t AudioBufferReference::mBufferManager;
 QMutex AudioBufferReference::mMutex;
@@ -26,7 +22,6 @@ void AudioBufferReference::decrement_count(const QString& fileName) {
       i.value().first -= 1;
       //if we have reached zero reference count then destroy it
       if (i.value().first < 1) {
-         cout << "deleting " << fileName.toStdString() << endl;
          delete i.value().second;
          mBufferManager.erase(i);
       }
