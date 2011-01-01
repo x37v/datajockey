@@ -35,8 +35,8 @@ namespace DataJockey {
             ~AudioBufferReference();
             void reset(const QString& newFileName);
             void release();
-            DataJockey::Audio::AudioBuffer * buffer();
             bool valid();
+            DataJockey::Audio::AudioBuffer * operator()() const;
          private:
             AudioBuffer * mAudioBuffer;
             QString mFileName;

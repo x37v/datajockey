@@ -92,7 +92,7 @@ void AudioBufferReference::release() {
    mFileName.clear();
 }
 
-AudioBuffer * AudioBufferReference::buffer() {
+AudioBuffer * AudioBufferReference::operator()() const {
    return mAudioBuffer;
 }
 
