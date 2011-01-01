@@ -117,3 +117,7 @@ bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
 }
 
 void AudioBuffer::abort_load(){ mAbort = true; }
+
+const AudioBuffer::data_buffer_t& AudioBuffer::raw_buffer() {
+   return mAudioData;
+}

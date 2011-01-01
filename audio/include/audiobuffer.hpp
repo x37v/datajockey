@@ -9,6 +9,7 @@ namespace DataJockey {
    namespace Audio {
       class AudioBuffer {
          public:
+            typedef std::vector<std::vector<float> > data_buffer_t; 
             typedef void (* progress_callback_t)(int percent, void * user_data);
 
             AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
@@ -24,9 +25,12 @@ namespace DataJockey {
             //grab a sample
             float sample(unsigned int channel, unsigned int index);
             float sample(unsigned int channel, unsigned int index, double subsample);
+
+            //get the data buffer
+            const data_buffer_t& raw_buffer();
          private:
             SoundFile mSoundFile;
-            std::vector<std::vector<float> > mAudioData;
+            data_buffer_t mAudioData;
             unsigned int mSampleRate;
             bool mLoaded;
             bool mAbort;
