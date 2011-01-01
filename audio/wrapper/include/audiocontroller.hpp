@@ -13,6 +13,7 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "scheduler.hpp"
+#include "audiobufferreference.hpp"
 #include <vector>
 
 namespace DataJockey {
@@ -55,6 +56,9 @@ namespace DataJockey {
             //void player_loop_start_position(int player_index);
             //void player_loop_end_position(int player_index);
             QString player_audio_file(int player_index);
+
+            //grab a pointer to the buffer and increment its reference
+            AudioBufferReference audio_buffer_reference(QString fileName);
 
          public slots:
             void set_player_pause(int player_index, bool pause);
@@ -108,11 +112,14 @@ namespace DataJockey {
             //they relay signals into the main thread, they simply emit signals
             void relay_audio_file_load_progress(QString fileName, int percent);
 
-         protected:
+         private:
             friend class PlayerClearBuffersCommand;
             friend class AudioLoaderThread;
-            void decrement_audio_file_reference(QString fileName);
-         private:
+            friend class AudioBufferReference;
+
+            AudioBuffer * get_audio_buffer_and_increment_reference(const QString& fileName);
+            void decrement_audio_file_reference(const QString& fileName);
+
             //pointers to other internal singletons
             DataJockey::Audio::AudioIO * mAudioIO;
             DataJockey::Audio::Master * mMaster;
@@ -128,10 +135,6 @@ namespace DataJockey {
 
             //make sure that player states/audio buffer manager access is thread safe
             QMutex mPlayerStatesMutex;
-
-            //manage audio buffers
-            //filename => [refcount, buffer pointer]
-            QMap<QString, QPair<int, DataJockey::Audio::AudioBuffer *> > mAudioBufferManager;
 
             //**** private methods
 

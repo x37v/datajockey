@@ -26,8 +26,10 @@ class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::Pla
          }
       }
       virtual void execute_done() {
-         if (!mOldFileName.isEmpty() && mAudioController != NULL)
-            mAudioController->decrement_audio_file_reference(mOldFileName);
+         if (!mOldFileName.isEmpty()) {
+            //low level, decrement reference
+            AudioBufferReference::decrement_count(mOldFileName);
+         }
       }
       virtual bool store(CommandIOData& data) const {
          //TODO
@@ -193,6 +195,10 @@ QString AudioController::player_audio_file(int player_index){
       return QString();
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mFileName;
+}
+
+AudioBufferReference AudioController::audio_buffer_reference(QString fileName) {
+   return AudioBufferReference(fileName);
 }
 
 //****************** setters/slots
@@ -408,14 +414,15 @@ void AudioController::set_player_audio_file(int player_index, QString location){
    //only update if new
    QString oldfile = mPlayerStates[player_index]->mFileName;
    if (oldfile != location) {
-      AudioBuffer * buf = NULL;
+      //use the low level method because we're passing through the lock free buffer
+      AudioBuffer * buf = AudioBufferReference::get_and_increment_count(location);
 
       //clear out the old buffers
       set_player_clear_buffers(player_index);
 
       //once the manager contains the location we know that it is full loaded
       //but, if not it could actually be in progress
-      if (!mAudioBufferManager.contains(location)) {
+      if (buf == NULL) {
          bool loading = false;
 
          //see if a thread is already loading it
@@ -439,10 +446,6 @@ void AudioController::set_player_audio_file(int player_index, QString location){
          mPlayerStates[player_index]->mFileName = location;
 
       } else {
-         //increase the reference count
-         mAudioBufferManager[location].first += 1;
-         buf = mAudioBufferManager[location].second;
-
          //send the stored buf
          set_player_audio_buffer(player_index, buf);
 
@@ -470,18 +473,6 @@ void AudioController::set_player_clear_buffers(int player_index) {
    }
 }
 
-void AudioController::decrement_audio_file_reference(QString fileName) {
-   QMutexLocker lock(&mPlayerStatesMutex);
-
-   if (mAudioBufferManager.contains(fileName)) {
-      mAudioBufferManager[fileName].first -= 1;
-      if (mAudioBufferManager[fileName].first < 1) {
-         delete mAudioBufferManager[fileName].second;
-         mAudioBufferManager.remove(fileName);
-      }
-   }
-}
-
 void AudioController::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
@@ -506,10 +497,7 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
          continue;
 
       //update the manager
-      if (mAudioBufferManager.contains(fileName))
-         mAudioBufferManager[fileName].first += 1;
-      else
-         mAudioBufferManager[fileName] = QPair<int, AudioBuffer *>(1, buffer);
+      AudioBufferReference::set_or_increment_count(fileName, buffer);
       loaded_into_a_player = true;
 
       set_player_audio_buffer(player_index, buffer);
