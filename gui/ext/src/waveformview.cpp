@@ -6,21 +6,25 @@
 #include "waveformview.hpp"
 #include <math.h>
 #include <iostream>
+#include "audiobuffer.hpp"
+#include "audiocontroller.hpp"
+
 
 using std::cout;
 using std::endl;
 using namespace DataJockey::View;
 
-#define WIDTH (20 * 44100)
+#define WIDTH 12 * 1024
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
 WaveFormView::WaveFormView(QGraphicsItem * parent) : 
-   QGraphicsItem(parent), mPen()
+   QGraphicsItem(parent), mPen(), mAudioBufferReference(), mBoundingRect(0, -100, 1, 200)
 {
    setFlag(QGraphicsItem::ItemIsMovable, false);
    setFlag(QGraphicsItem::ItemIsSelectable, false);
    setFlag(QGraphicsItem::ItemUsesExtendedStyleOption, true);
+   setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
    setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 }
 
@@ -28,25 +32,25 @@ WaveFormView::~WaveFormView(){
 }
 
 QRectF WaveFormView::boundingRect() const {
-   return QRectF(0, -100, WIDTH, 200);
+   return mBoundingRect;
 }
 
 void WaveFormView::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
-   painter->drawLine(0, 0, 1024, 0);
-   /*
-   qreal zoom = option->levelOfDetailFromTransform(painter->worldTransform());
-   cout << "zoom: " << zoom << endl;
-   */
+   //keep a local copy of the reference just in case it is swapped out while we're drawing
+   Audio::AudioBufferReference bufRef = mAudioBufferReference;
 
-//   cout << "exposed rect: " << option->exposedRect.left() << " " << option->exposedRect.right() << endl;
+   if (!bufRef.valid())
+      return;
+
+   //cout << "exposed rect: " << option->exposedRect.left() << " " << option->exposedRect.right() << endl;
 
    unsigned int bottom = MAX(0, option->exposedRect.left());
-   unsigned int top = MIN(option->exposedRect.right(), WIDTH);
+   unsigned int top = MIN(option->exposedRect.right(), bufRef()->length());
 
    painter->setPen(mPen);
    for(unsigned int i = bottom; i < top; i++) {
-      int x = -100.0 * sin((3.14f * 2.0 * i) / 44100.0);
-      painter->drawLine(i, 0, i, x);
+      unsigned int sample = 100.0 * bufRef()->raw_buffer()[0][i];
+      painter->drawLine(i, -sample, i, sample);
    }
 }
 
@@ -57,4 +61,19 @@ QVariant WaveFormView::itemChange(QGraphicsItem::GraphicsItemChange change, cons
 
 void WaveFormView::setPen(const QPen& pen) {
    mPen = pen;
+}
+
+void WaveFormView::setAudioFile(const QString& fileName) {
+   mAudioBufferReference.reset(fileName);
+   if (mAudioBufferReference.valid())
+      mBoundingRect.setWidth(mAudioBufferReference()->length());
+   else
+      mBoundingRect.setWidth(0);
+   prepareGeometryChange();
+}
+
+void WaveFormView::clearAudioFile(){
+   mAudioBufferReference.release();
+   mBoundingRect.setWidth(0);
+   prepareGeometryChange();
 }

@@ -5,6 +5,8 @@
 #include <QRectF>
 #include <QVariant>
 #include <QPen>
+#include <QString>
+#include "audiobufferreference.hpp"
 
 class QPainter;
 class QStyleOptionGraphicsItem;
@@ -19,11 +21,14 @@ namespace DataJockey {
             virtual QRectF boundingRect() const;
             virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0);
             void setPen(const QPen& pen);
+            void setAudioFile(const QString& fileName);
+            void clearAudioFile();
          protected:
             virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value);
          private:
             QPen mPen;
-
+            QRectF mBoundingRect;
+            Audio::AudioBufferReference mAudioBufferReference;
       };
    }
 }
