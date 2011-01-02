@@ -9,26 +9,27 @@ require 'lib/qt'
 app = Qt::Application.new(ARGV)
 
 require 'datajockey_audio'
+require 'datajockey_view'
 
 audio_controller = DataJockey::Audio::AudioController.instance
 audio_controller.set_player_audio_file(0, '/home/alex/music/new/martial_canterel/confusing_outsides/02-confusing_outsides.flac')
 
-require 'datajockey_view'
+audio_controller.set_parent(app)
 
 w = DataJockey::View::WaveFormView.new {
   set_pen(Qt::Pen.new(Qt::Color.new(255,0,0)))
+  set_zoom(80)
 }
 
 s = Qt::GraphicsScene.new
 s.add_item(w)
-#cursor = Qt::GraphicsLineItem.new(0, -100, 0, 100) {
-#  set_pen(Qt::Pen.new(Qt::Color.new(0,255,0)))
-#}
-#s.add_item(cursor)
+cursor = Qt::GraphicsLineItem.new(0, -100, 0, 100) {
+  set_pen(Qt::Pen.new(Qt::Color.new(0,255,0)))
+}
+s.add_item(cursor)
 v = Qt::GraphicsView.new(s)
 
 #timer = Qt::Timer.every(10) {
-#  cursor.move_by(441, 0)
 #  v.center_on(cursor)
 #}
 
@@ -41,7 +42,14 @@ top.set_layout layout
 audio_controller.on(:player_audio_file_changed, ["int", "QString"]) do |player_index, file|
   w.set_audio_file(file)
 end
-sleep(4)
+
+audio_controller.on(:player_position_changed, ["int", "int"]) do |player_index, pos|
+  if player_index == 0
+    x = pos / w.zoom
+    v.center_on(x, 0)
+    cursor.set_pos(x, 0)
+  end
+end
 
 =begin
 t = Qt::Timer.in(500) do 

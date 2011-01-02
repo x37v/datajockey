@@ -100,3 +100,8 @@ void WaveFormView::setZoom(int level){
       prepareGeometryChange();
    }
 }
+
+int WaveFormView::zoom() const {
+   return mZoom;
+}
+
