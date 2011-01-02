@@ -59,6 +59,7 @@ namespace DataJockey {
             const TimePoint& end_position();
             const TimePoint& loop_start_position();
             const TimePoint& loop_end_position();
+            unsigned long current_frame() const;
 
             //setters
             void play_state(play_state_t val);

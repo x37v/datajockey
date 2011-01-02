@@ -3,6 +3,7 @@
 #include "audiobufferreference.hpp"
 
 #include <QMutexLocker>
+#include <vector>
 
 using namespace DataJockey;
 using namespace DataJockey::Audio;
@@ -42,24 +43,10 @@ class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::Pla
       QString mOldFileName;
 };
 
-class AudioController::ConsumeThread : public QThread {
-   private:
-      Scheduler * mScheduler;
-   public:
-      ConsumeThread(Scheduler * scheduler) : mScheduler(scheduler) { }
-
-      void run() {
-         while(true) {
-            mScheduler->execute_done_actions();
-            msleep(10);
-         }
-      }
-};
-
 class AudioController::PlayerState {
    public:
       PlayerState() :
-         mFileName() { }
+         mFileName(), mCurrentFrame(0) { }
       QString mFileName;
       unsigned int mVolume;
       unsigned int mPlaySpeed;
@@ -68,6 +55,54 @@ class AudioController::PlayerState {
       bool mLoop;
       bool mCue;
       bool mPause;
+      unsigned int mCurrentFrame;
+};
+
+//TODO how to get it to run at the end of the frame?
+class AudioController::QueryPlayerStates : public MasterCommand {
+   private:
+      AudioController * mAudioController;
+   public:
+      std::vector<AudioController::PlayerState* > mStates;
+      unsigned int mNumPlayers;
+
+      QueryPlayerStates(AudioController * controller) : mAudioController(controller) {
+         mNumPlayers = mAudioController->player_count();
+         for(unsigned int i = 0; i < mNumPlayers; i++)
+            mStates.push_back(new AudioController::PlayerState);
+         mStates.resize(mNumPlayers);
+      }
+      virtual ~QueryPlayerStates() {
+         for(unsigned int i = 0; i < mNumPlayers; i++)
+            delete mStates[i];
+      }
+      virtual void execute(){
+         for(unsigned int i = 0; i < mNumPlayers; i++)
+            mStates[i]->mCurrentFrame = master()->players()[i]->current_frame();
+      }
+      virtual void execute_done() {
+         for(unsigned int i = 0; i < mNumPlayers; i++)
+            mAudioController->update_player_state(i, mStates[i]);
+      }
+      //this command shouldn't be stored
+      virtual bool store(CommandIOData& data) const { return false; }
+};
+
+class AudioController::ConsumeThread : public QThread {
+   private:
+      Scheduler * mScheduler;
+      AudioController * mController;
+   public:
+      ConsumeThread(AudioController * controller, Scheduler * scheduler) : mScheduler(scheduler), mController(controller) { }
+
+      void run() {
+         while(true) {
+            AudioController::QueryPlayerStates * cmd = new AudioController::QueryPlayerStates(mController);
+            mScheduler->execute(cmd);
+            mScheduler->execute_done_actions();
+            msleep(10);
+         }
+      }
 };
 
 const unsigned int DataJockey::Audio::AudioController::one_scale = 1000;
@@ -114,12 +149,16 @@ AudioController::AudioController() :
    }
 
    //hook up and start the consume thread
-   mConsumeThread = new ConsumeThread(mMaster->scheduler());
+   mConsumeThread = new ConsumeThread(this, mMaster->scheduler());
    mConsumeThread->start();
 
    //internal signal connections
    QObject::connect(this, SIGNAL(player_audio_file_changed_relay(int, QString)),
          this, SIGNAL(player_audio_file_changed(int, QString)),
+         Qt::QueuedConnection);
+
+   QObject::connect(this, SIGNAL(player_position_changed_relay(int, int)),
+         this, SIGNAL(player_position_changed(int, int)),
          Qt::QueuedConnection);
 }
 
@@ -134,6 +173,7 @@ AudioController * AudioController::instance(){
 
 //*************** getters
 
+unsigned int AudioController::player_count() const { return mNumPlayers; }
 bool AudioController::player_pause(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
@@ -401,6 +441,18 @@ void AudioController::set_player_beat_buffer(int player_index, BeatBuffer * buf)
       return;
 
    //TODO
+}
+
+void AudioController::update_player_state(int player_index, PlayerState * state){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   QMutexLocker lock(&mPlayerStatesMutex);
+   int frame = state->mCurrentFrame;
+   if (frame != mPlayerStates[player_index]->mCurrentFrame) {
+      mPlayerStates[player_index]->mCurrentFrame = frame;
+      emit(player_position_changed_relay(player_index, frame));
+   }
 }
 
 void AudioController::set_player_audio_file(int player_index, QString location){

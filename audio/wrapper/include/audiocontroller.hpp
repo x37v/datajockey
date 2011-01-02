@@ -23,6 +23,7 @@ namespace DataJockey {
             class PlayerState;
             class ConsumeThread;
             class AudioLoaderThread;
+            class QueryPlayerStates;
 
             //singleton
             AudioController();
@@ -38,6 +39,7 @@ namespace DataJockey {
 
             //getters
             //player
+            unsigned int player_count() const;
             bool player_pause(int player_index);
             bool player_cue(int player_index);
             //void player_out_state(int player_index, Audio::Player::out_state_t val);
@@ -94,12 +96,14 @@ namespace DataJockey {
             void player_volume_changed(int player_index, int val);
             void player_play_speed_changed(int player_index, int val);
             void player_position_changed(int player_index, const DataJockey::Audio::TimePoint &val);
+            void player_position_changed(int player_index, int frame_index);
             void player_audio_file_cleared(int player_index);
             void player_audio_file_load_progress(int player_index, int percent);
             void player_audio_file_changed(int player_index, QString location);
 
             //only for internal use
             void player_audio_file_changed_relay(int, QString);
+            void player_position_changed_relay(int, int);
 
          protected slots:
             //relay methods are called with queued connections across threads so that
@@ -137,6 +141,8 @@ namespace DataJockey {
 
             void set_player_audio_buffer(int player_index, DataJockey::Audio::AudioBuffer * buf);
             void set_player_beat_buffer(int player_index, DataJockey::Audio::BeatBuffer * buf);
+
+            void update_player_state(int player_index, PlayerState * state);
       };
    }
 }

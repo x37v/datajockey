@@ -237,6 +237,7 @@ const TimePoint& Player::start_position(){ return mStartPosition; }
 const TimePoint& Player::end_position(){ return mEndPosition; }
 const TimePoint& Player::loop_start_position(){ return mLoopStartPosition; }
 const TimePoint& Player::loop_end_position(){ return mLoopEndPosition; }
+unsigned long Player::current_frame() const { return mSampleIndex; }
 
 //setters
 void Player::play_state(play_state_t val){
