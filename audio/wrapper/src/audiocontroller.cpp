@@ -4,6 +4,7 @@
 
 #include <QMutexLocker>
 #include <vector>
+#include <QMetaObject>
 
 using namespace DataJockey;
 using namespace DataJockey::Audio;
@@ -153,13 +154,15 @@ AudioController::AudioController() :
    mConsumeThread->start();
 
    //internal signal connections
-   QObject::connect(this, SIGNAL(player_audio_file_changed_relay(int, QString)),
+   /*
+   QObject::connect(this, SIGNAL(relay_player_audio_file_changed(int, QString)),
          this, SIGNAL(player_audio_file_changed(int, QString)),
          Qt::QueuedConnection);
 
-   QObject::connect(this, SIGNAL(player_position_changed_relay(int, int)),
+   QObject::connect(this, SIGNAL(relay_player_position_changed(int, int)),
          this, SIGNAL(player_position_changed(int, int)),
          Qt::QueuedConnection);
+         */
 }
 
 AudioController::~AudioController() {
@@ -174,6 +177,7 @@ AudioController * AudioController::instance(){
 //*************** getters
 
 unsigned int AudioController::player_count() const { return mNumPlayers; }
+
 bool AudioController::player_pause(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
@@ -393,6 +397,25 @@ void AudioController::set_player_position_relative(int player_index, const DataJ
    set_player_position(player_index, val, false);
 }
 
+void AudioController::set_player_position(int player_index, double seconds, bool absolute) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   TimePoint timepoint(seconds);
+
+   Command * cmd = NULL;
+   if (absolute)
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY, timepoint);
+   else
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY_RELATIVE, timepoint);
+   queue_command(cmd);
+}
+
+void AudioController::set_player_position_relative(int player_index, double seconds) {
+   set_player_position(player_index, seconds, false);
+}
 
 void AudioController::set_player_position_frame(int player_index, unsigned long frame, bool absolute) {
 }
@@ -451,7 +474,11 @@ void AudioController::update_player_state(int player_index, PlayerState * state)
    int frame = state->mCurrentFrame;
    if (frame != mPlayerStates[player_index]->mCurrentFrame) {
       mPlayerStates[player_index]->mCurrentFrame = frame;
-      emit(player_position_changed_relay(player_index, frame));
+      //emit(relay_player_position_changed(player_index, frame));
+      QMetaObject::invokeMethod(this, "relay_player_position_changed", 
+            Qt::QueuedConnection,
+            Q_ARG(int, player_index),
+            Q_ARG(int, frame));
    }
 }
 
@@ -523,6 +550,14 @@ void AudioController::set_player_clear_buffers(int player_index) {
    }
 }
 
+void AudioController::relay_player_audio_file_changed(int player_index, QString fileName){
+   emit(player_audio_file_changed(player_index, fileName));
+}
+
+void AudioController::relay_player_position_changed(int player_index, int frame_index){
+   emit(player_position_changed(player_index, frame_index));
+}
+
 void AudioController::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
@@ -556,7 +591,11 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
       set_player_position(player_index, TimePoint(0.0));
 
       //calling from another thread, emit a signal which will then be passed along
-      emit(player_audio_file_changed_relay(player_index, fileName));
+      //emit(relay_player_audio_file_changed(player_index, fileName));
+      QMetaObject::invokeMethod(this, "relay_player_audio_file_changed", 
+            Qt::QueuedConnection,
+            Q_ARG(int, player_index),
+            Q_ARG(QString, fileName));
    }
 
    if (!loaded_into_a_player)

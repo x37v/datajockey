@@ -8,3 +8,5 @@ smoke/x_1.cpp
 smoke/x_2.cpp
 smoke/generator.log
 include/moc_*
+moc/
+datajockey_audio_server
