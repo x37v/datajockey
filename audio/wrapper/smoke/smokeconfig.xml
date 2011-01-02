@@ -18,6 +18,7 @@
         <signature>.*DataJockey::.*::k_ptr</signature>
         <signature>.*DataJockey::.*::d_ptr</signature>
         <signature>.*DataJockey::.*::d</signature>
+        <signature>.*DataJockey::Audio::AudioController::relay.*\(.*\)</signature>
     </exclude>
     <classList>
         <class>DataJockey::Audio</class>
