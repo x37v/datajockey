@@ -23,12 +23,15 @@ namespace DataJockey {
             void setPen(const QPen& pen);
             void setAudioFile(const QString& fileName);
             void clearAudioFile();
+            //zoom is #of frames per pixel, so 100 would mean we take the max of 100 frames per 1 unit in the horizontal
+            void setZoom(int level);
          protected:
             virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value);
          private:
             QPen mPen;
             QRectF mBoundingRect;
             Audio::AudioBufferReference mAudioBufferReference;
+            unsigned int mZoom;
       };
    }
 }
