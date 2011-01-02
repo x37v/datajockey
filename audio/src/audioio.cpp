@@ -54,7 +54,7 @@ void AudioIO::start(){
 
 int AudioIO::audioCallback(jack_nframes_t nframes, 
       // A vector of pointers to each input port.
-      audioBufVector inBufs,
+      audioBufVector /*inBufs*/,
       // A vector of pointers to each output port.
       audioBufVector outBufs){
    mMaster->audio_compute_and_fill(outBufs, nframes);

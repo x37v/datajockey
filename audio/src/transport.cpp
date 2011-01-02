@@ -70,7 +70,7 @@ void TransportPositionCommand::execute(){
       transport()->position(mTimePoint);
 }
 
-bool TransportPositionCommand::store(CommandIOData& data) const{
+bool TransportPositionCommand::store(CommandIOData& /*data*/) const{
    //XXX TODO
    return false;
 }
@@ -85,7 +85,7 @@ void TransportBPMCommand::execute(){
    transport()->bpm(mBPM);
 }
 
-bool TransportBPMCommand::store(CommandIOData& data) const{
+bool TransportBPMCommand::store(CommandIOData& /*data*/) const{
    //XXX TODO
    return false;
 }

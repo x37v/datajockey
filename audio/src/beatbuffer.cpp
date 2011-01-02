@@ -29,10 +29,10 @@ BeatBuffer::BeatBuffer(std::string dataLocation)
                return 0.0;
             else if(beat < 0)
                return 0.0;
-            else if(beat >= size)
+            else if((unsigned int)beat >= size)
                return mBeatData.back();
             else if (position.pos_in_beat() <= 0 || 
-                  (position.pos_in_beat() > 0 && beat + 1 >= size))
+                  (position.pos_in_beat() > 0 && (unsigned int)beat + 1 >= size))
                return mBeatData[beat];
             else
                return linear_interp(mBeatData[beat], 
@@ -88,10 +88,10 @@ TimePoint BeatBuffer::end() const {
    beats = mBeatData.size() - mStartBeat;
    pos.type(TimePoint::BEAT_BAR);
    pos.at_bar(beats / 4, beats % 4);
+   return pos;
 }
 
-   void BeatBuffer::load(std::string dataLocation)
-throw(std::runtime_error)
+void BeatBuffer::load(std::string /*dataLocation*/) throw(std::runtime_error)
 {
    mBeatData.clear();
 #if 0

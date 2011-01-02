@@ -84,7 +84,7 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
       if(mPlayState == PLAY){
          //XXX SYNC not implemented yet!
          mRubberBandStretcher->setTimeRatio(1.0 / mPlaySpeed);
-         while(mRubberBandStretcher->available() < numFrames){
+         while(mRubberBandStretcher->available() < (int)numFrames){
             unsigned int winSize = MIN(RUBBERBAND_WINDOW_SIZE, numFrames);
             for(unsigned int i = 0; i < 2; i++){
                for(unsigned int j = 0; j < winSize; j++){
@@ -196,7 +196,7 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 }
 
 //finalize audio computation, apply effects, etc.
-   void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
+   void Player::audio_post_compute(unsigned int /*numFrames*/, float ** /*mixBuffer*/){
       if(!mAudioBuffer)
          return;
    }
@@ -248,7 +248,7 @@ void Player::out_state(out_state_t val){
    mOutState = val;
 }
 
-void Player::stretch_method(stretch_method_t val){
+void Player::stretch_method(stretch_method_t /*val*/){
 }
 
 void Player::mute(bool val){

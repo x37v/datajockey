@@ -182,8 +182,8 @@ namespace DataJockey {
             virtual void execute();
             virtual bool store(CommandIOData& data) const;
          private:
-            position_t mTarget;
             TimePoint mTimePoint;
+            position_t mTarget;
       };
    }
 }

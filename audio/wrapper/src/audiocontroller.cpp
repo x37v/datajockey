@@ -35,7 +35,7 @@ class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::Pla
             AudioBufferReference::decrement_count(mOldFileName);
          }
       }
-      virtual bool store(CommandIOData& data) const {
+      virtual bool store(CommandIOData& /*data*/) const {
          //TODO
          return false;
       }
@@ -86,7 +86,7 @@ class AudioController::QueryPlayerStates : public MasterCommand {
             mAudioController->update_player_state(i, mStates[i]);
       }
       //this command shouldn't be stored
-      virtual bool store(CommandIOData& data) const { return false; }
+      virtual bool store(CommandIOData& /* data */) const { return false; }
 };
 
 class AudioController::ConsumeThread : public QThread {
@@ -417,7 +417,7 @@ void AudioController::set_player_position_relative(int player_index, double seco
    set_player_position(player_index, seconds, false);
 }
 
-void AudioController::set_player_position_frame(int player_index, unsigned long frame, bool absolute) {
+void AudioController::set_player_position_frame(int /* player_index */, unsigned long /*frame*/, bool /*absolute*/) {
 }
 
 void AudioController::set_player_start_position(int player_index, const TimePoint &val){
@@ -459,7 +459,7 @@ void AudioController::set_player_audio_buffer(int player_index, AudioBuffer * bu
    queue_command(new PlayerLoadCommand(player_index, buf));
 }
 
-void AudioController::set_player_beat_buffer(int player_index, BeatBuffer * buf){
+void AudioController::set_player_beat_buffer(int player_index, BeatBuffer * /* buf */){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -603,11 +603,11 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
    return true;
 }
 
-void AudioController::set_master_volume(int val){
+void AudioController::set_master_volume(int /*val*/){
    //TODO
 }
 
-void AudioController::set_master_cue_volume(int val){
+void AudioController::set_master_cue_volume(int /*val*/){
    //TODO
 }
 

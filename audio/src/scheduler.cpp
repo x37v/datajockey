@@ -222,7 +222,7 @@ void Scheduler::AddCommand::execute(){
    scheduler()->add(mNode);
 }
 
-bool Scheduler::AddCommand::store(CommandIOData& data) const{
+bool Scheduler::AddCommand::store(CommandIOData& /*data*/) const{
    //DO NOTHING, this doesn't store shit
    return false;
 }
@@ -237,7 +237,7 @@ void Scheduler::RemoveCommand::execute(){
    scheduler()->remove(mNode);
 }
 
-bool Scheduler::RemoveCommand::store(CommandIOData& data) const{
+bool Scheduler::RemoveCommand::store(CommandIOData& /*data*/) const{
    //DO NOTHING, this doesn't store shit
    return false;
 }
