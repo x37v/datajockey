@@ -4,6 +4,10 @@
 #include <QMutexLocker>
 
 using namespace DataJockey::Audio;
+using namespace boost::interprocess;
+
+//Create a new segment with given name and size
+static managed_shared_memory segment(create_only, "DataJockeyShared", 65536);
 
 //class objects
 AudioBufferReference::manager_map_t AudioBufferReference::mBufferManager;

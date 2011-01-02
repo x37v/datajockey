@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QMap>
 #include <QPair>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 namespace DataJockey {
    namespace Audio {
@@ -38,8 +39,8 @@ namespace DataJockey {
             bool valid();
             DataJockey::Audio::AudioBuffer * operator()() const;
          private:
-            AudioBuffer * mAudioBuffer;
             QString mFileName;
+            AudioBuffer * mAudioBuffer;
       };
    }
 }

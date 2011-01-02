@@ -356,7 +356,7 @@ void AudioController::set_player_volume(int player_index, int val){
       return;
 
    QMutexLocker lock(&mPlayerStatesMutex);
-   if (mPlayerStates[player_index]->mVolume != val) {
+   if (mPlayerStates[player_index]->mVolume != (unsigned int)val) {
       double volume = (double)val / double(one_scale);
       queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, 
                DataJockey::Audio::PlayerDoubleCommand::VOLUME, volume));
@@ -370,7 +370,7 @@ void AudioController::set_player_play_speed(int player_index, int val){
       return;
    
    QMutexLocker lock(&mPlayerStatesMutex);
-   if (mPlayerStates[player_index]->mPlaySpeed != val) {
+   if (mPlayerStates[player_index]->mPlaySpeed != (unsigned int)val) {
       double speed = (double)val / double(one_scale);
       queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, 
                DataJockey::Audio::PlayerDoubleCommand::PLAY_SPEED, speed));
@@ -472,7 +472,7 @@ void AudioController::update_player_state(int player_index, PlayerState * state)
 
    QMutexLocker lock(&mPlayerStatesMutex);
    int frame = state->mCurrentFrame;
-   if (frame != mPlayerStates[player_index]->mCurrentFrame) {
+   if ((unsigned int)frame != mPlayerStates[player_index]->mCurrentFrame) {
       mPlayerStates[player_index]->mCurrentFrame = frame;
       //emit(relay_player_position_changed(player_index, frame));
       QMetaObject::invokeMethod(this, "relay_player_position_changed", 

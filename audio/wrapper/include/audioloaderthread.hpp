@@ -26,8 +26,8 @@ namespace DataJockey {
             DataJockey::Audio::AudioBuffer * mAudioBuffer;
             AudioController * controller();
          private:
-            QString mFileName;
             AudioController * mAudioController;
+            QString mFileName;
             QMutex mMutex;
             bool mAborted;
       };

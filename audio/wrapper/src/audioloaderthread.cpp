@@ -4,7 +4,7 @@
 using namespace DataJockey::Audio;
 
 AudioController::AudioLoaderThread::AudioLoaderThread(AudioController * controller)
-: mAudioController(controller), mFileName(), mAudioBuffer(NULL), mMutex(QMutex::Recursive) { }
+: mAudioBuffer(NULL), mAudioController(controller), mFileName(), mMutex(QMutex::Recursive) { }
 
 void AudioController::AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
