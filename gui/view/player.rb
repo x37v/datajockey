@@ -1,21 +1,23 @@
 require 'view/base'
 require 'view/eq'
+require 'datajockey_view'
 
 class DataJockey::View::Player < Qt::Widget
-  attr_reader :buttons, :eq, :volume_slider, :speed_slider, :progress
+  attr_reader :buttons, :eq, :volume_slider, :speed_slider, :progress, :waveform_view
   RANGE_HEADROOM = DataJockey::View::INT_MULT / 3
   VOLUME_MAX = RANGE_HEADROOM + DataJockey::View::INT_MULT
 
-  def initialize
-    super
+  def initialize(opts = {})
+    super()
 
-    @top_layout = Qt::VBoxLayout.new
-    @top_layout.set_alignment Qt::AlignCenter
-    set_layout @top_layout
+    opts = {:waveform_position => :right}.merge(opts)
+
+    @control_layout = Qt::VBoxLayout.new
+    @control_layout.set_alignment Qt::AlignCenter
 
     @button_layout = Qt::HBoxLayout.new
     @button_layout.set_alignment Qt::AlignCenter
-    @top_layout << @button_layout
+    @control_layout << @button_layout
 
     @buttons = {
       :load => Qt::PushButton.new('load'),
@@ -34,10 +36,10 @@ class DataJockey::View::Player < Qt::Widget
         p.hide
       }
     }
-    @top_layout << @progress[:load]
+    @control_layout << @progress[:load]
 
     @eq = View::Eq.new
-    @top_layout << @eq
+    @control_layout << @eq
 
     @speed_slider = Qt::Slider.new(Qt::Horizontal) { |s|
       s.set_range(-300, 300)
@@ -45,7 +47,7 @@ class DataJockey::View::Player < Qt::Widget
       s.tick_interval = 50
     }
 
-    @top_layout << @speed_slider
+    @control_layout << @speed_slider
 
     @volume_slider = Qt::Slider.new { |s|
       s.set_range(0, VOLUME_MAX)
@@ -57,7 +59,38 @@ class DataJockey::View::Player < Qt::Widget
       l.add_widget @volume_slider
       l.add_stretch
     }
-    @top_layout << @slider_layout
+    @control_layout << @slider_layout
+
+    @waveform_item = DataJockey::View::WaveFormView.new.tap { |i|
+      i.set_pen(Qt::Pen.new(Qt::Color.new(255,0,0)))
+      i.set_zoom(150)
+    }
+    @waveform_cursor = Qt::GraphicsLineItem.new(0, -100, 0, 100).tap { |i|
+      i.set_pen(Qt::Pen.new(Qt::Color.new(0,255,0)))
+    }
+
+    @waveform_scene = Qt::GraphicsScene.new { |s|
+      s.add_item(@waveform_item)
+      s.add_item(@waveform_cursor)
+    }
+
+    @waveform_view = Qt::GraphicsView.new(@waveform_scene).tap { |v|
+      v.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      v.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      v.rotate(-90)
+      v.set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
+    }
+
+    @top_layout = Qt::HBoxLayout.new
+    @top_layout << @control_layout
+    if (opts[:waveform_position] == :right)
+      @top_layout << @waveform_view
+    else
+      @top_layout.insert_widget(0, @waveform_view)
+    end
+    @waveform_view.hide
+
+    set_layout @top_layout
 
     @buttons[:pause].on(:toggled) do |t|
       @buttons[:pause].text = t ? 'play' : 'pause'
@@ -70,6 +103,29 @@ class DataJockey::View::Player < Qt::Widget
 
   def volume
     @volume_slider.value
+  end
+
+  def play_speed=(val)
+    @speed_slider.value = val - 1000
+  end
+
+  def play_speed
+    @speed_slider.value + 1000
+  end
+
+  def audio_file=(filename)
+    @waveform_view.show
+    @waveform_item.set_audio_file(filename)
+  end
+
+  def clear_audio_file
+    @waveform_view.clear_audio_file()
+  end
+
+  def audio_file_position=(frame_index)
+    x = frame_index / @waveform_item.zoom
+    @waveform_view.center_on(x, 0)
+    @waveform_cursor.set_pos(x, 0)
   end
 end
 

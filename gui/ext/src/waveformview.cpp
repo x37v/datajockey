@@ -6,9 +6,9 @@
 #include "waveformview.hpp"
 #include <math.h>
 #include <iostream>
-#include "audiobuffer.hpp"
-#include "audiocontroller.hpp"
 
+//our data is already zoomed in, so this is the minimum zoom value
+#define DATASCALE_DEFAULT 32
 
 using std::cout;
 using std::endl;
@@ -19,7 +19,7 @@ using namespace DataJockey::View;
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
 WaveFormView::WaveFormView(QGraphicsItem * parent) : 
-   QGraphicsItem(parent), mPen(), mAudioBufferReference(), mBoundingRect(0, -100, 1, 200), mZoom(10)
+   QGraphicsItem(parent), mPen(), mBoundingRect(-1, -100, 1, 200), mZoom(10), mDataScale(DATASCALE_DEFAULT)
 {
    setFlag(QGraphicsItem::ItemIsMovable, false);
    setFlag(QGraphicsItem::ItemIsSelectable, false);
@@ -29,6 +29,8 @@ WaveFormView::WaveFormView(QGraphicsItem * parent) :
 }
 
 WaveFormView::~WaveFormView(){
+   if (mSharedBuffer.isAttached())
+      mSharedBuffer.detach();
 }
 
 QRectF WaveFormView::boundingRect() const {
@@ -36,34 +38,43 @@ QRectF WaveFormView::boundingRect() const {
 }
 
 void WaveFormView::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
-   //keep a local copy of the reference just in case it is swapped out while we're drawing
-   Audio::AudioBufferReference bufRef = mAudioBufferReference;
-
-   if (!bufRef.valid())
+   if (!mSharedBuffer.isAttached())
       return;
-   Audio::AudioBuffer * buf = bufRef();
 
    //cout << "exposed rect: " << option->exposedRect.left() << " " << option->exposedRect.right() << endl;
 
-   const unsigned int zoom = mZoom;
-   const unsigned int bottom = MAX(0, option->exposedRect.left());
-   const unsigned int top = option->exposedRect.right();//MIN(option->exposedRect.right(), floor((double)buf->length() / (double)zoom));
-   const unsigned int chans = buf->channels();
-   const unsigned int length = buf->length();
+   mSharedBuffer.lock();
+   float * data = (float *)mSharedBuffer.constData();
+   if (data) {
+      double zoom = mZoom;
+      const unsigned int bottom = MAX(0, option->exposedRect.left());
+      const unsigned int top = option->exposedRect.right();//MIN(option->exposedRect.right(), floor((double)buf->length() / (double)zoom));
+      const unsigned int length = mSharedBuffer.size() / sizeof(float);
 
-   painter->setPen(mPen);
-   for(unsigned int i = bottom; i < top; i++) {
-      const unsigned int windowStart = i * zoom;
-      const unsigned int windowEnd = MIN(length, windowStart + zoom);
-      unsigned int value = 0;
-      for (unsigned int c = 0; c < chans; c++) {
-         for (unsigned int j = windowStart; j < windowEnd; j++) {
-            value = MAX(value, (100.0 * fabs(buf->raw_buffer()[c][j])));
+      painter->setPen(mPen);
+      for(unsigned int i = bottom; i < top; i++) {
+         const unsigned int windowStart = (zoom * i) / (double)mDataScale;
+         unsigned int windowEnd = MIN(length, windowStart + ((double)zoom / mDataScale));
+         if (windowEnd == windowStart && windowStart != length) {
+            windowEnd += 1;
          }
+         unsigned int value = 0;
+         for (unsigned int j = windowStart; j < windowEnd; j++) {
+            value = MAX(value, 100.0 * data[j]);
+         }
+         painter->drawLine(i, -value, i, value);
+
+         /*
+         //value = 100.0 * bufRef()->raw_buffer()[0][i];
+         if (i < length) {
+            unsigned int value = 100.0 * data[i];
+            painter->drawLine(i, -value, i, value);
+         }
+         //painter->drawLine(i, -100, i, 2 * value - 100);
+         */
       }
-      //value = 100.0 * bufRef()->raw_buffer()[0][i];
-      painter->drawLine(i, -value, i, value);
    }
+   mSharedBuffer.unlock();
 }
 
 QVariant WaveFormView::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value) {
@@ -76,32 +87,44 @@ void WaveFormView::setPen(const QPen& pen) {
 }
 
 void WaveFormView::setAudioFile(const QString& fileName) {
-   mAudioBufferReference.reset(fileName);
-   if (mAudioBufferReference.valid())
-      mBoundingRect.setWidth(mAudioBufferReference()->length() / mZoom);
-   else
+   if (mSharedBuffer.isAttached())
+      mSharedBuffer.detach();
+
+   mSharedBuffer.setKey(fileName);
+   if (mSharedBuffer.attach(QSharedMemory::ReadOnly)) {
+      mBoundingRect.setWidth(mSharedBuffer.size() * mDataScale / (sizeof(float) * mZoom));
+   } else {
+      cout << "cannot attach" << endl;
       mBoundingRect.setWidth(0);
+   }
+
    prepareGeometryChange();
 }
 
 void WaveFormView::clearAudioFile(){
-   mAudioBufferReference.release();
+   if (mSharedBuffer.isAttached())
+      mSharedBuffer.detach();
    mBoundingRect.setWidth(0);
    prepareGeometryChange();
 }
 
 void WaveFormView::setZoom(int level){
-   if (level > 0)
+   if (level > 1)
       mZoom = level;
    else
       mZoom = 1;
-   if (mAudioBufferReference.valid()) {
-      mBoundingRect.setWidth(mAudioBufferReference()->length() / mZoom);
+
+   if (mSharedBuffer.isAttached()) {
+      mBoundingRect.setWidth(mSharedBuffer.size() * mDataScale / (sizeof(float) * mZoom));
       prepareGeometryChange();
    }
 }
 
 int WaveFormView::zoom() const {
    return mZoom;
+}
+
+unsigned int WaveFormView::data_scale() {
+   return mDataScale;
 }
 

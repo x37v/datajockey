@@ -12,13 +12,13 @@ require 'datajockey_audio'
 require 'datajockey_view'
 
 audio_controller = DataJockey::Audio::AudioController.instance
-audio_controller.set_player_audio_file(0, '/home/alex/music/new/martial_canterel/confusing_outsides/02-confusing_outsides.flac')
+audio_controller.set_player_audio_file(0, '/home/alex/backup/alex_big_harddrive/alex/music-backup/absolute_body_control/lost_found/disc1/02-waving_hands.flac')
 
 audio_controller.set_parent(app)
 
 w = DataJockey::View::WaveFormView.new {
   set_pen(Qt::Pen.new(Qt::Color.new(255,0,0)))
-  set_zoom(80)
+  set_zoom(200)
 }
 
 s = Qt::GraphicsScene.new
@@ -27,7 +27,14 @@ cursor = Qt::GraphicsLineItem.new(0, -100, 0, 100) {
   set_pen(Qt::Pen.new(Qt::Color.new(0,255,0)))
 }
 s.add_item(cursor)
-v = Qt::GraphicsView.new(s)
+v = Qt::GraphicsView.new(s) { |v|
+  v.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+  v.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+  v.rotate(-90)
+}
+
+b = Qt::Brush.new(Qt::Color.new(0,0,0))
+s.set_background_brush(b)
 
 #timer = Qt::Timer.every(10) {
 #  v.center_on(cursor)

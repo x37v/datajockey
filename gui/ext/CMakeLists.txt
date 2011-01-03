@@ -28,12 +28,24 @@ SET(CUSTOM_RUBY_SITE_LIB_DIR ${RUBY_SITELIB_DIR} CACHE DIR "custom installation 
 
 SET(DATAJOCKEY_AUDIO_HEADERS ../../audio/include/ ../../audio/wrapper/include/)
 
-include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDES} /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ./include/ ../include/ . ${DATAJOCKEY_AUDIO_HEADERS})
+#SET(QTBINDINGS_INCLUDES /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ )
+SET(QTBINDINGS_INCLUDES /home/alex/.rvm/gems/ruby-1.9.2-p136/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ )
+include_directories( ${CMAKE_SOURCE_DIR}/smoke 
+   ${RUBY_INCLUDE_DIRS} 
+   ${CMAKE_SOURCE_DIR}/ruby/qtruby/src 
+   ${QT_INCLUDES} 
+   ${QTBINDINGS_INCLUDES}
+   /usr/include/ ./include/ ../include/ . ${DATAJOCKEY_AUDIO_HEADERS})
 
-link_directories(/home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/lib/1.9/)
+#set(QTBINDINGS_LIB_DIR /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/lib/1.9/)
+set(QTBINDINGS_LIB_DIR /home/alex/.rvm/gems/ruby-1.9.2-p136/gems/qtbindings-4.6.3.2/lib/1.9/)
+link_directories(${QTBINDINGS_LIB_DIR})
 set(rubydatajockey_view_LIBRARY_SRC
    src/datajockey_view.cpp
    src/waveformview.cpp
+   ../../audio/src/audiobuffer.cpp
+   ../../audio/src/soundfile.cpp
+   ../../audio/wrapper/src/audiobufferreference.cpp
    smoke/x_1.cpp
    smoke/x_2.cpp
    smoke/smokedata.cpp)
