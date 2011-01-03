@@ -1,6 +1,7 @@
 #include "audiocontroller.hpp"
 #include <QObject>
 #include <QApplication>
+#include <QPushButton>
 
 int main(int argc, char* argv[]) {
    QApplication app(argc, argv);
@@ -16,6 +17,11 @@ int main(int argc, char* argv[]) {
 
    QObject::connect(&app, SIGNAL(aboutToQuit()),
          audio_controller, SLOT(stop_audio()));
+
+   QPushButton * quit_button = new QPushButton("Quit");
+   QObject::connect(quit_button, SIGNAL(clicked()),
+         &app, SLOT(quit()));
+   quit_button->show();
 
    app.exec();
    exit(0);

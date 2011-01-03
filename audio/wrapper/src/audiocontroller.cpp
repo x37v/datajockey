@@ -644,6 +644,10 @@ void AudioController::start_audio() {
 }
 
 void AudioController::stop_audio() {
+   //there must be a better way than this!
+   for(unsigned int i = 0; i < mNumPlayers; i++)
+      set_player_clear_buffers(i);
+   sleep(1);
    mAudioIO->stop();
 }
 

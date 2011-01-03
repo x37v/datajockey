@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QMap>
 #include <QPair>
-#include <boost/interprocess/managed_shared_memory.hpp>
+#include <QSharedMemory>
 
 namespace DataJockey {
    namespace Audio {
@@ -24,7 +24,8 @@ namespace DataJockey {
             static AudioBuffer * get_and_increment_count(const QString& fileName);
             static void set_or_increment_count(const QString& fileName, AudioBuffer * buffer);
          private:
-            typedef QMap<QString, QPair<int, DataJockey::Audio::AudioBuffer *> > manager_map_t;
+            typedef QPair<DataJockey::Audio::AudioBuffer *, QSharedMemory *> buffer_shared_pair_t;
+            typedef QMap<QString, QPair<int,  buffer_shared_pair_t> > manager_map_t;
             //filename => [refcount, buffer pointer]
             static manager_map_t mBufferManager;
             static QMutex mMutex;
