@@ -1,11 +1,16 @@
 require 'view/base'
 require 'view/eq'
-require 'datajockey_view'
+require 'view/waveform'
+require 'forwardable'
 
 class DataJockey::View::Player < Qt::Widget
+  extend Forwardable
   attr_reader :buttons, :eq, :volume_slider, :speed_slider, :progress, :waveform_view
   RANGE_HEADROOM = DataJockey::View::INT_MULT / 3
   VOLUME_MAX = RANGE_HEADROOM + DataJockey::View::INT_MULT
+
+  def_delegators :@waveform_view, :audio_file=, :clear_audio_file, :audio_file_position=
+  def_delegators :@volume_slider, :audio_file=, :clear_audio_file, :audio_file_position=
 
   def initialize(opts = {})
     super()
@@ -61,25 +66,11 @@ class DataJockey::View::Player < Qt::Widget
     }
     @control_layout << @slider_layout
 
-    @waveform_item = DataJockey::View::WaveFormItem.new.tap { |i|
-      i.set_pen(Qt::Pen.new(Qt::Color.new(255,0,0)))
-      i.set_zoom(150)
-    }
-    @waveform_cursor = Qt::GraphicsLineItem.new(0, -100, 0, 100).tap { |i|
-      i.set_pen(Qt::Pen.new(Qt::Color.new(0,255,0)))
-    }
-
-    @waveform_scene = Qt::GraphicsScene.new { |s|
-      s.add_item(@waveform_item)
-      s.add_item(@waveform_cursor)
-    }
-
-    @waveform_view = Qt::GraphicsView.new(@waveform_scene).tap { |v|
-      v.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
-      v.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
-      v.rotate(-90)
-      v.set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
-    }
+    @waveform_view = View::WaveForm.new.tap do |w|
+      w.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      w.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      w.rotate(-90)
+    end
 
     @top_layout = Qt::HBoxLayout.new
     @top_layout << @control_layout
@@ -88,7 +79,6 @@ class DataJockey::View::Player < Qt::Widget
     else
       @top_layout.insert_widget(0, @waveform_view)
     end
-    @waveform_view.hide
 
     set_layout @top_layout
 
@@ -111,25 +101,6 @@ class DataJockey::View::Player < Qt::Widget
 
   def play_speed
     @speed_slider.value + 1000
-  end
-
-  def audio_file=(filename)
-    @waveform_view.show
-    @waveform_item.set_audio_file(filename)
-  end
-
-  def clear_audio_file
-    @waveform_view.clear_audio_file()
-  end
-
-  def audio_file_position=(frame_index)
-    x = frame_index / @waveform_item.zoom
-    if r = @waveform_scene.scene_rect
-      @waveform_view.center_on(x + 100, 0)
-    else
-      @waveform_view.center_on(x, 0)
-    end
-    @waveform_cursor.set_pos(x, 0)
   end
 end
 
