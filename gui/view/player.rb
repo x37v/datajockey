@@ -10,7 +10,6 @@ class DataJockey::View::Player < Qt::Widget
   VOLUME_MAX = RANGE_HEADROOM + DataJockey::View::INT_MULT
 
   def_delegators :@waveform_view, :audio_file=, :clear_audio_file, :audio_file_position=
-  def_delegators :@volume_slider, :audio_file=, :clear_audio_file, :audio_file_position=
 
   def initialize(opts = {})
     super()
