@@ -10,6 +10,8 @@ class DataJockey::View::Player < Qt::Widget
   VOLUME_MAX = RANGE_HEADROOM + DataJockey::View::INT_MULT
 
   def_delegators :@waveform_view, :audio_file=, :clear_audio_file, :audio_file_position=
+  def_delegator :@volume_slider, :value=, :volume=
+  def_delegator :@volume_slider, :value, :volume
 
   def initialize(opts = {})
     super()
@@ -84,14 +86,6 @@ class DataJockey::View::Player < Qt::Widget
     @buttons[:pause].on(:toggled) do |t|
       @buttons[:pause].text = t ? 'play' : 'pause'
     end
-  end
-
-  def volume=(val)
-    @volume_slider.value = val
-  end
-
-  def volume
-    @volume_slider.value
   end
 
   def play_speed=(val)
