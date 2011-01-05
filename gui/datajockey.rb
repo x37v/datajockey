@@ -27,9 +27,9 @@ if File.exists?(STYLE_SHEET_FILE)
   app.set_style_sheet(File.read(STYLE_SHEET_FILE))
 end
 
-load_dialog = Qt::FileDialog.new(mixer_panel, 'load audio file') {
-  file_mode = Qt::FileDialog::ExistingFile
-  set_name_filter = 'Audio Files (*.flac *.ogg *.mp3 *.wav)'
+load_dialog = Qt::FileDialog.new(mixer_panel, 'load audio file').tap { |d|
+  d.file_mode = Qt::FileDialog::ExistingFile
+  d.name_filter = 'Audio Files (*.flac *.ogg *.mp3 *.wav)'
 }
 
 mixer_panel.players.each_with_index do |player, index|
@@ -110,7 +110,7 @@ x = Qt::Timer.every(10) {
 }
 =end
 
-audio_controller.set_player_audio_file(0, '/home/alex/backup/alex_big_harddrive/alex/music-backup/drexciya/drexciya_4-the_unknown_aqua_zone/04-aquabahn.flac')
+#audio_controller.set_player_audio_file(0, '/home/alex/backup/alex_big_harddrive/alex/music-backup/drexciya/drexciya_4-the_unknown_aqua_zone/04-aquabahn.flac')
 
 trap("INT") do
   app.quit

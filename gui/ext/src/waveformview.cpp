@@ -90,11 +90,11 @@ void WaveFormView::setAudioFile(const QString& fileName) {
    if (mSharedBuffer.isAttached())
       mSharedBuffer.detach();
 
-   mSharedBuffer.setKey(fileName);
+   QString shmName = QString("dj://audio/") + fileName;
+   mSharedBuffer.setKey(shmName);
    if (mSharedBuffer.attach(QSharedMemory::ReadOnly)) {
       mBoundingRect.setWidth(mSharedBuffer.size() * mDataScale / (sizeof(float) * mZoom));
    } else {
-      cout << "cannot attach" << endl;
       mBoundingRect.setWidth(0);
    }
 

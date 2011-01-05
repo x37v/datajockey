@@ -60,33 +60,36 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
    if (i != mBufferManager.end()) {
       i.value().first += 1;
    } else {
-      QSharedMemory * shm = new QSharedMemory(fileName);
+      QString shmName = QString("dj://audio/") + fileName;
+      QSharedMemory * shm = new QSharedMemory(shmName);
       if (shm->isAttached())
          shm->detach();
 
       const unsigned int buff_size = buffer->raw_buffer().size();
-      const unsigned int num_elems = (buff_size / DIVISION);
-      const unsigned int size = sizeof(float) * num_elems;
+      unsigned int division = DIVISION;
+      unsigned int num_elems = (buff_size / division);
+      unsigned int size = sizeof(float) * num_elems;
 
-      if (shm->create(size, QSharedMemory::ReadWrite)) {
-         cout << "we want " << size << " we've got " << shm->size() << endl;
-         assert(size <= shm->size());
+      while ((shm->create(size, QSharedMemory::ReadWrite) != true) && shm->error() == QSharedMemory::InvalidSize) {
+         division *= 2;
+         num_elems /= 2;
+         size = sizeof(float) * num_elems;
+         cout << "increasing div to " << division << endl;
+      }
 
-         cout << "successfully created shared memory! size:\t" << size << fileName.toStdString() << endl;
+      if (shm->error() == QSharedMemory::NoError) {
          shm->lock();
          float * data = (float *)shm->data();
          if (data) {
             for(unsigned int j = 0; j < num_elems; j++){
                float d = 0.0;
-               unsigned int top = MIN(buff_size, (j + 1) * DIVISION);
-               for(unsigned int k = j * DIVISION; k < top; k++) {
+               unsigned int top = MIN(buff_size, (j + 1) * division);
+               for(unsigned int k = j * division; k < top; k++) {
                   d = MAX(d, fabs(buffer->raw_buffer()[k]));
                }
                data[j] = d;
             }
-         } else {
-            cout << "could not get buffer pointer though" << endl;
-         }
+         } 
          mBufferManager[fileName] = QPair<int, buffer_shared_pair_t>(1, buffer_shared_pair_t(buffer, shm));
          shm->unlock();
       } else {
