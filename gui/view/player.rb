@@ -124,7 +124,11 @@ class DataJockey::View::Player < Qt::Widget
 
   def audio_file_position=(frame_index)
     x = frame_index / @waveform_item.zoom
-    @waveform_view.center_on(x, 0)
+    if r = @waveform_scene.scene_rect
+      @waveform_view.center_on(x + 100, 0)
+    else
+      @waveform_view.center_on(x, 0)
+    end
     @waveform_cursor.set_pos(x, 0)
   end
 end
