@@ -61,7 +61,7 @@ class DataJockey::View::Player < Qt::Widget
     }
     @control_layout << @slider_layout
 
-    @waveform_item = DataJockey::View::WaveFormView.new.tap { |i|
+    @waveform_item = DataJockey::View::WaveFormItem.new.tap { |i|
       i.set_pen(Qt::Pen.new(Qt::Color.new(255,0,0)))
       i.set_zoom(150)
     }

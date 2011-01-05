@@ -22,6 +22,6 @@
     </exclude>
     <classList>
         <class>DataJockey::View</class>
-        <class>DataJockey::View::WaveFormView</class>
+        <class>DataJockey::View::WaveFormItem</class>
     </classList>
 </config>

@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QTransform>
 #include <QGraphicsScene>
-#include "waveformview.hpp"
+#include "waveformitem.hpp"
 #include <math.h>
 #include <iostream>
 
@@ -18,7 +18,7 @@ using namespace DataJockey::View;
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
-WaveFormView::WaveFormView(QGraphicsItem * parent) : 
+WaveFormItem::WaveFormItem(QGraphicsItem * parent) : 
    QGraphicsItem(parent), mPen(), mBoundingRect(-1, -100, 1, 200), mZoom(10), mDataScale(DATASCALE_DEFAULT)
 {
    setFlag(QGraphicsItem::ItemIsMovable, false);
@@ -28,16 +28,16 @@ WaveFormView::WaveFormView(QGraphicsItem * parent) :
    setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 }
 
-WaveFormView::~WaveFormView(){
+WaveFormItem::~WaveFormItem(){
    if (mSharedBuffer.isAttached())
       mSharedBuffer.detach();
 }
 
-QRectF WaveFormView::boundingRect() const {
+QRectF WaveFormItem::boundingRect() const {
    return mBoundingRect;
 }
 
-void WaveFormView::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
+void WaveFormItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget) {
    if (!mSharedBuffer.isAttached())
       return;
 
@@ -77,16 +77,16 @@ void WaveFormView::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
    mSharedBuffer.unlock();
 }
 
-QVariant WaveFormView::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value) {
+QVariant WaveFormItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value) {
    //cout << "change: " << change << " value: " << value.toString().toStdString() << endl;
    return QGraphicsItem::itemChange(change, value);
 }
 
-void WaveFormView::setPen(const QPen& pen) {
+void WaveFormItem::setPen(const QPen& pen) {
    mPen = pen;
 }
 
-void WaveFormView::setAudioFile(const QString& fileName) {
+void WaveFormItem::setAudioFile(const QString& fileName) {
    if (mSharedBuffer.isAttached())
       mSharedBuffer.detach();
 
@@ -101,14 +101,14 @@ void WaveFormView::setAudioFile(const QString& fileName) {
    prepareGeometryChange();
 }
 
-void WaveFormView::clearAudioFile(){
+void WaveFormItem::clearAudioFile(){
    if (mSharedBuffer.isAttached())
       mSharedBuffer.detach();
    mBoundingRect.setWidth(0);
    prepareGeometryChange();
 }
 
-void WaveFormView::setZoom(int level){
+void WaveFormItem::setZoom(int level){
    if (level > 1)
       mZoom = level;
    else
@@ -120,11 +120,11 @@ void WaveFormView::setZoom(int level){
    }
 }
 
-int WaveFormView::zoom() const {
+int WaveFormItem::zoom() const {
    return mZoom;
 }
 
-unsigned int WaveFormView::data_scale() {
+unsigned int WaveFormItem::data_scale() {
    return mDataScale;
 }
 

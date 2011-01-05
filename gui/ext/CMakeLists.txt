@@ -42,7 +42,7 @@ set(QTBINDINGS_LIB_DIR /home/alex/.rvm/gems/ruby-1.9.2-p136/gems/qtbindings-4.6.
 link_directories(${QTBINDINGS_LIB_DIR})
 set(rubydatajockey_view_LIBRARY_SRC
    src/datajockey_view.cpp
-   src/waveformview.cpp
+   src/waveformitem.cpp
    ../../audio/src/audiobuffer.cpp
    ../../audio/src/soundfile.cpp
    ../../audio/wrapper/src/audiobufferreference.cpp

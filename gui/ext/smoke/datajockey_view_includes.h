@@ -2,4 +2,4 @@
 #  define DATAJOCKEY_EXPORT
 #endif
 
-#include "waveformview.hpp"
+#include "waveformitem.hpp"

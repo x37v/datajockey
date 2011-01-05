@@ -1,5 +1,5 @@
-#ifndef WAVEFORM_VIEW_H
-#define WAVEFORM_VIEW_H
+#ifndef WAVEFORM_ITEM_H
+#define WAVEFORM_ITEM_H
 
 #include <QGraphicsItem>
 #include <QRectF>
@@ -14,10 +14,10 @@ class QWidget;
 
 namespace DataJockey {
    namespace View {
-      class WaveFormView : public QGraphicsItem {
+      class WaveFormItem : public QGraphicsItem {
          public:
-            WaveFormView(QGraphicsItem * parent = NULL);
-            virtual ~WaveFormView();
+            WaveFormItem(QGraphicsItem * parent = NULL);
+            virtual ~WaveFormItem();
             virtual QRectF boundingRect() const;
             virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0);
             void setPen(const QPen& pen);
