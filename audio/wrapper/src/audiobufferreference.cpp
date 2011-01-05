@@ -60,6 +60,8 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
    if (i != mBufferManager.end()) {
       i.value().first += 1;
    } else {
+
+      //TODO the shared memory stuff should probably go somewhere else
       QString shmName = QString("dj://audio/") + fileName;
       QSharedMemory * shm = new QSharedMemory(shmName);
       if (shm->isAttached())
@@ -76,6 +78,8 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
          size = sizeof(float) * num_elems;
          cout << "increasing div to " << division << endl;
       }
+
+      //TODO somehow notify if the division is not default?
 
       if (shm->error() == QSharedMemory::NoError) {
          shm->lock();
