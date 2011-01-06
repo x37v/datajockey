@@ -302,7 +302,8 @@ void Player::position(const TimePoint &val){
 void Player::position_at_frame(unsigned long frame) {
    mSampleIndex = frame;
    mSampleIndexResidual = 0;
-   mPositionDirty = true;
+   //TODO should update position.. but mPositionDirty updates sample index..
+   mPositionDirty = false;
 }
 
 void Player::start_position(const TimePoint &val){
@@ -576,7 +577,18 @@ PlayerPositionCommand::PlayerPositionCommand(unsigned int idx,
       position_t target, const TimePoint & timepoint) : 
    PlayerCommand(idx),
    mTimePoint(timepoint),
-   mTarget(target)
+   mTarget(target),
+   mFrames(0),
+   mUseFrames(false)
+{ }
+
+PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
+      position_t target, long frames) : 
+   PlayerCommand(idx),
+   mTimePoint(),
+   mTarget(target),
+   mFrames(frames),
+   mUseFrames(true)
 { }
 
 void PlayerPositionCommand::execute(){
@@ -587,12 +599,19 @@ void PlayerPositionCommand::execute(){
       //execute the action
       switch(mTarget){
          case PLAY:
-            p->position(mTimePoint);
+            if (mUseFrames)
+               p->position_at_frame(mFrames);
+            else
+               p->position(mTimePoint);
             break;
          case PLAY_RELATIVE:
-            p->position_relative(mTimePoint);
+            if (mUseFrames)
+               p->position_at_frame_relative(mFrames);
+            else
+               p->position_relative(mTimePoint);
             break;
          case START:
+            //TODO mUseFrames
             p->start_position(mTimePoint);
             break;
          case END:

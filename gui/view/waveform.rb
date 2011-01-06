@@ -1,8 +1,6 @@
 require 'datajockey_view'
-require 'forwardable'
 
 class DataJockey::View::WaveForm < Qt::GraphicsView
-  extend Forwardable
 
   def initialize
     super
@@ -23,6 +21,33 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     self.set_scene(@scene)
 
     set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
+  end
+
+  def mousePressEvent(event)
+    @pos = event.pos
+    fire :press
+  end
+
+  def mouseMoveEvent(event)
+    return unless @pos
+    cur_pos = event.pos
+
+    diff = 0
+    #we assume it is rotating -90 degrees
+    if transform.is_rotating
+      diff = cur_pos.y - @pos.y
+    else
+      diff = @pos.x - cur_pos.x
+    end
+
+    frames = @waveform.zoom * diff
+    @pos = cur_pos
+    fire :seeking => frames
+  end
+
+  def mouseReleaseEvent(event)
+    @pos = nil
+    fire :release
   end
 
   def audio_file=(filename)

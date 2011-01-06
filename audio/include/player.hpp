@@ -179,11 +179,14 @@ namespace DataJockey {
                START, END, LOOP_START, LOOP_END
             };
             PlayerPositionCommand(unsigned int idx, position_t target, const TimePoint & timepoint);
+            PlayerPositionCommand(unsigned int idx, position_t target, long frames);
             virtual void execute();
             virtual bool store(CommandIOData& data) const;
          private:
             TimePoint mTimePoint;
             position_t mTarget;
+            long mFrames;
+            bool mUseFrames;
       };
    }
 }

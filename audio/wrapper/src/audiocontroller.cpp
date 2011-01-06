@@ -417,7 +417,23 @@ void AudioController::set_player_position_relative(int player_index, double seco
    set_player_position(player_index, seconds, false);
 }
 
-void AudioController::set_player_position_frame(int /* player_index */, unsigned long /*frame*/, bool /*absolute*/) {
+void AudioController::set_player_position_frame(int player_index, int frame, bool absolute) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   Command * cmd = NULL;
+   if (absolute)
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY, frame);
+   else
+      cmd = new DataJockey::Audio::PlayerPositionCommand(
+            player_index, PlayerPositionCommand::PLAY_RELATIVE, frame);
+   queue_command(cmd);
+}
+
+void AudioController::set_player_position_frame_relative(int player_index, int frame) {
+   if (frame != 0)
+      set_player_position_frame(player_index, frame, false);
 }
 
 void AudioController::set_player_start_position(int player_index, const TimePoint &val){

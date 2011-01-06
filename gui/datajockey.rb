@@ -32,6 +32,7 @@ load_dialog = Qt::FileDialog.new(mixer_panel, 'load audio file').tap { |d|
   d.name_filter = 'Audio Files (*.flac *.ogg *.mp3 *.wav)'
 }
 
+@pausing = Hash.new
 mixer_panel.players.each_with_index do |player, index|
   #work with state changes
   player.buttons[:pause].on(:toggled) do |t|
@@ -54,6 +55,21 @@ mixer_panel.players.each_with_index do |player, index|
   end
   player.buttons[:seek_forward].on(:pressed) do
     audio_controller.set_player_position_relative(index, 0.2)
+  end
+
+  #TODO is there a way to make this less hackish?
+  @pausing[index] = audio_controller.player_pause(index)
+  player.waveform_view.on(:press) do
+    @pausing[index] = audio_controller.player_pause(index)
+    audio_controller.set_player_pause(index, true)
+  end
+  player.waveform_view.on(:release) do
+    unless @pausing[index] 
+      audio_controller.set_player_pause(index, false)
+    end
+  end
+  player.waveform_view.on(:seeking) do |frames|
+    audio_controller.set_player_position_frame_relative(index, frames.to_i)
   end
 
   #grab current state
