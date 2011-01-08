@@ -63,6 +63,16 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
 
   def audio_file=(filename)
     @waveform.set_audio_file(filename)
+    rect = @waveform.bounding_rect
+    if transform.is_rotating
+      rect.width += 2 * geometry.height
+      rect.x -= geometry.height
+    else
+      rect.width += 2 * geometry.width
+      rect.x -= geometry.width
+    end
+    @scene.set_scene_rect(rect)
+    audio_file_position = 0
   end
 
   def clear_audio_file
