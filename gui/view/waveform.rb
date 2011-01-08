@@ -50,6 +50,17 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     fire :release
   end
 
+  def wheelEvent(event)
+    amt = event.delta / 160.0
+    if transform.is_rotating
+      amt *= geometry.height
+    else
+      amt *= geometry.width
+    end
+    frames = amt * @waveform.zoom
+    fire :seeking => frames
+  end
+
   def audio_file=(filename)
     @waveform.set_audio_file(filename)
   end
