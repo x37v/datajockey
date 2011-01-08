@@ -152,9 +152,14 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
                mixBuffer[i][frame] = 
                   mAudioBuffer->sample(i, mSampleIndex, mSampleIndexResidual);
             }
-            mSampleIndexResidual += mPlaySpeed;
-            mSampleIndex += floor(mSampleIndexResidual);
-            mSampleIndexResidual -= floor(mSampleIndexResidual);
+
+            //don't go past the length
+            if (mSampleIndex < mAudioBuffer->length()) {
+               mSampleIndexResidual += mPlaySpeed;
+               mSampleIndex += floor(mSampleIndexResidual);
+               mSampleIndexResidual -= floor(mSampleIndexResidual);
+            }
+
             //update our position
             if(mBeatBuffer){
                mPosition = mBeatBuffer->position_at_time(
@@ -302,6 +307,9 @@ void Player::position(const TimePoint &val){
 void Player::position_at_frame(unsigned long frame) {
    mSampleIndex = frame;
    mSampleIndexResidual = 0;
+   if (mAudioBuffer && mAudioBuffer->length() <= mSampleIndex) {
+      mSampleIndex = mAudioBuffer->length();
+   }
    //TODO should update position.. but mPositionDirty updates sample index..
    mPositionDirty = false;
 }
