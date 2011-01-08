@@ -71,7 +71,13 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
 
   def audio_file_position=(frame_index)
     x = frame_index / @waveform.zoom
-    center_on(x + 100, 0)
+    offset = 0
+    if transform.is_rotating
+      offset = geometry.height / 4
+    else
+      offset = geometry.width / 4
+    end
+    center_on(x + offset, 0)
     @cursor.set_pos(x, 0)
   end
 
