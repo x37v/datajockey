@@ -269,6 +269,10 @@ unsigned int SoundFile::readf(short *ptr, unsigned int frames){
 }
 
 SoundFile::operator bool () const {
+   return valid();
+}
+
+bool SoundFile::valid() const {
    switch(mType){
       case SNDFILE:
          return true;

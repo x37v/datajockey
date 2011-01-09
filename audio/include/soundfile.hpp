@@ -72,6 +72,7 @@ class SoundFile {
 		unsigned int readf (float *ptr, unsigned int frames) ;
 		unsigned int readf (short *ptr, unsigned int frames) ;
 		operator bool () const ;
+      bool valid() const;
       unsigned int frames();
 };
 

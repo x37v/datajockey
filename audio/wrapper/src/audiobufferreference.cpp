@@ -52,7 +52,7 @@ AudioBuffer * AudioBufferReference::get_and_increment_count(const QString& fileN
    return NULL;
 }
 
-#define DIVISION 64
+#define DEFAULT_DIV 64
 
 void AudioBufferReference::set_or_increment_count(const QString& fileName, AudioBuffer * buffer){
    QMutexLocker lock(&mMutex);
@@ -60,7 +60,6 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
    if (i != mBufferManager.end()) {
       i.value().first += 1;
    } else {
-
       //TODO the shared memory stuff should probably go somewhere else
       QString shmName = QString("dj://audio/") + fileName;
       QSharedMemory * shm = new QSharedMemory(shmName);
@@ -68,18 +67,24 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
          shm->detach();
 
       const unsigned int buff_size = buffer->raw_buffer().size();
-      unsigned int division = DIVISION;
-      unsigned int num_elems = (buff_size / division);
+      //TODO we shouldn't be getting here..
+      if (buff_size == 0) {
+         //XXX report error
+         mBufferManager[fileName] = QPair<int, buffer_shared_pair_t>(1, buffer_shared_pair_t(buffer, NULL));
+         return;
+      }
+      unsigned int div = DEFAULT_DIV;
+      unsigned int num_elems = (buff_size / div);
       unsigned int size = sizeof(float) * num_elems;
 
       while ((shm->create(size, QSharedMemory::ReadWrite) != true) && shm->error() == QSharedMemory::InvalidSize) {
-         division *= 2;
+         div = div * 2;
          num_elems /= 2;
          size = sizeof(float) * num_elems;
-         cout << "increasing div to " << division << endl;
+         cout << "increasing div to " << div << " " << shm->errorString().toStdString() << endl;
       }
 
-      //TODO somehow notify if the division is not default?
+      //TODO somehow notify if the div is not default?
 
       if (shm->error() == QSharedMemory::NoError) {
          shm->lock();
@@ -87,8 +92,8 @@ void AudioBufferReference::set_or_increment_count(const QString& fileName, Audio
          if (data) {
             for(unsigned int j = 0; j < num_elems; j++){
                float d = 0.0;
-               unsigned int top = MIN(buff_size, (j + 1) * division);
-               for(unsigned int k = j * division; k < top; k++) {
+               unsigned int top = MIN(buff_size, (j + 1) * div);
+               for(unsigned int k = j * div; k < top; k++) {
                   d = MAX(d, fabs(buffer->raw_buffer()[k]));
                }
                data[j] = d;

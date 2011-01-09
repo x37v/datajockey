@@ -532,7 +532,11 @@ void AudioController::set_player_audio_file(int player_index, QString location){
                mThreadPool[player_index]->abort();
                mThreadPool[player_index]->wait();
             }
-            mThreadPool[player_index]->load(location);
+            try {
+               mThreadPool[player_index]->load(location);
+            } catch(...) {
+               //TODO report error
+            }
          }
 
          //update player state

@@ -45,10 +45,11 @@ DataJockey::Audio::AudioBuffer * AudioController::AudioLoaderThread::load(QStrin
    return mAudioBuffer;
 }
 
+//TODO report errors
 void AudioController::AudioLoaderThread::run() {
    if (mAudioBuffer) {
       mAudioBuffer->load(AudioLoaderThread::progress_callback, this);
-      {
+      if(mAudioBuffer->valid()) {
          QMutexLocker lock(&mMutex);
          if (!mAborted) {
             //tell the controller that the load is complete.
@@ -57,6 +58,12 @@ void AudioController::AudioLoaderThread::run() {
                delete mAudioBuffer;
          } else
             delete mAudioBuffer;
+         //cleanup
+         mAudioBuffer = NULL;
+         mFileName = QString();
+      } else {
+         QMutexLocker lock(&mMutex);
+         delete mAudioBuffer;
          //cleanup
          mAudioBuffer = NULL;
          mFileName = QString();

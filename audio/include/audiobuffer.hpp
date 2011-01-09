@@ -21,10 +21,12 @@ namespace DataJockey {
             unsigned int sample_rate() const;
             unsigned int channels() const;
             unsigned int length() const;
-            bool loaded();
+            bool loaded() const;
             //grab a sample
             float sample(unsigned int channel, unsigned int index) const;
             float sample(unsigned int channel, unsigned int index, double subsample) const;
+
+            bool valid() const;
 
             //get the data buffer
             const data_buffer_t& raw_buffer() const;

@@ -14,11 +14,11 @@ AudioBuffer::AudioBuffer(std::string soundfileLocation)
       mSoundFile(soundfileLocation.c_str()),
       mLoaded(false),
       mAbort(false),
-      mNumChannels(1)
+      mNumChannels(0)
 {
 
    //check to make sure soundfile exists
-   if(!mSoundFile){
+   if(!mSoundFile.valid()){
       std::string str("cannot open soundfile: ");
       str.append(soundfileLocation);
       throw std::runtime_error(str);
@@ -38,10 +38,13 @@ unsigned int AudioBuffer::channels() const {
 }
 
 unsigned int AudioBuffer::length() const{
-   return mAudioData.size() / channels();
+   unsigned int chans = channels();
+   if (chans)
+      return mAudioData.size() / chans;
+   return 0;
 }
 
-bool AudioBuffer::loaded() { return mLoaded; }
+bool AudioBuffer::loaded() const { return mLoaded; }
 
 float AudioBuffer::sample(unsigned int channel, unsigned int index) const{
    index = channel + index * channels();
@@ -56,6 +59,10 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
    float sample0 = sample(channel, index);
    float sample1 = sample(channel, index + 1);
    return linear_interp(sample0, sample1, subsample);
+}
+
+bool AudioBuffer::valid() const {
+   return loaded() && mSoundFile.valid();
 }
 
 bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) {
