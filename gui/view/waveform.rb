@@ -19,8 +19,19 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     }
 
     self.set_scene(@scene)
+    @orientation = :horizontal
 
     set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
+  end
+
+  def orientation=(orient)
+    reset_matrix
+    if (orient == :vertical)
+      @orientation = :vertical
+      rotate(-90)
+    else
+      @orientation = :horizontal
+    end
   end
 
   def mousePressEvent(event)
@@ -59,6 +70,18 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     end
     frames = amt * @waveform.zoom
     fire :seeking => frames
+  end
+
+  def resizeEvent(event)
+    s = event.size
+    reset_matrix
+    if @orientation == :vertical
+      scale(s.width.to_f / 200, 1.0)
+      rotate(-90)
+    else
+      scale(1.0, s.height.to_f / 200)
+    end
+    super(event)
   end
 
   def audio_file=(filename)

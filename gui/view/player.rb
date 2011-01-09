@@ -70,7 +70,7 @@ class DataJockey::View::Player < Qt::Widget
     @waveform_view = View::WaveForm.new.tap do |w|
       w.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
       w.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
-      w.rotate(-90)
+      w.orientation = :vertical
     end
 
     @top_layout = Qt::HBoxLayout.new
