@@ -1,6 +1,7 @@
 require 'datajockey_view'
 
 class DataJockey::View::WaveForm < Qt::GraphicsView
+  attr_accessor :follow
 
   def initialize
     super
@@ -20,6 +21,7 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
 
     self.set_scene(@scene)
     @orientation = :horizontal
+    @follow = true
 
     set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
   end
@@ -110,7 +112,9 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     else
       offset = geometry.width / 4
     end
-    center_on(x + offset, 0)
+    if @follow
+      center_on(x + offset, 0)
+    end
     @cursor.set_pos(x, 0)
   end
 
