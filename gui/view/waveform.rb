@@ -89,10 +89,12 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
         if frames > 0
           #TODO why 4?
           @waveform.zoom = frames.to_f / (size.height.to_f  * 4)
-          scale(size.width.to_f / 200, 1.0)
-          center_on(frames.to_f * @waveform.zoom.to_f / 2, 0)
           rotate(-90)
-          self.ensure_visible(@scene.scene_rect)
+          #r = Qt::RectF.new(0,-100,frames, 200)
+          #self.ensure_visible(r)
+          self.ensure_visible(@scene.scene_rect, Qt::IgnoreAspectRatio)
+          scale(1.0, size.width.to_f / 200)
+          center_on(0, (frames.to_f * @waveform.zoom.to_f) / 2)
         end
       else
         fit_in_view(@waveform, Qt::IgnoreAspectRatio)
@@ -119,7 +121,7 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
         rect.width += 2 * geometry.width
         rect.x -= geometry.width
       end
-      resize_to(frame_rect)
+      resize_to(geometry)
     end
     @scene.set_scene_rect(rect)
     audio_file_position = 0
