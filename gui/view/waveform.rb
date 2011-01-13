@@ -77,31 +77,35 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
 
   def resizeEvent(event)
     s = event.size
+    resize_to(s)
+    super(event)
+  end
+
+  def resize_to(size)
     reset_matrix
     if @full_view
       if @orientation == :vertical
         frames = @waveform.audio_file_frames
         if frames > 0
           #TODO why 4?
-          @waveform.zoom = frames.to_f / (s.height.to_f  * 4)
-          scale(s.width.to_f / 200, 1.0)
+          @waveform.zoom = frames.to_f / (size.height.to_f  * 4)
+          scale(size.width.to_f / 200, 1.0)
           center_on(frames.to_f * @waveform.zoom.to_f / 2, 0)
           rotate(-90)
           self.ensure_visible(@scene.scene_rect)
         end
       else
         fit_in_view(@waveform, Qt::IgnoreAspectRatio)
-        scale(1.0, s.height.to_f / 200)
+        scale(1.0, size.height.to_f / 200)
       end
     else
       if @orientation == :vertical
-        scale(s.width.to_f / 200, 1.0)
+        scale(size.width.to_f / 200, 1.0)
         rotate(-90)
       else
-        scale(1.0, s.height.to_f / 200)
+        scale(1.0, size.height.to_f / 200)
       end
     end
-    super(event)
   end
 
   def audio_file=(filename)
@@ -115,6 +119,7 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
         rect.width += 2 * geometry.width
         rect.x -= geometry.width
       end
+      resize_to(frame_rect)
     end
     @scene.set_scene_rect(rect)
     audio_file_position = 0
