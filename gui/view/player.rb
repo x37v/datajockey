@@ -82,15 +82,19 @@ class DataJockey::View::Player < Qt::Widget
     end
 
     @top_layout = Qt::HBoxLayout.new
-    @top_layout << @control_layout
-    @splitter = Qt::Splitter.new(Qt::Vertical)
+    @splitter = Qt::Splitter.new(Qt::Horizontal)
+    @control_widget = Qt::Widget.new
+    @control_widget.set_layout @control_layout
     if (opts[:waveform_position] == :right)
-      @top_layout << @waveform_progress
-      @top_layout << @waveform_view
+      @splitter.add_widget(@control_widget)
+      @splitter.add_widget(@waveform_progress)
+      @splitter.add_widget(@waveform_view)
     else
-      @top_layout.insert_widget(0, @waveform_progress)
-      @top_layout.insert_widget(0, @waveform_view)
+      @splitter.add_widget(@waveform_view)
+      @splitter.add_widget(@waveform_progress)
+      @splitter.add_widget(@control_widget)
     end
+    @top_layout << @splitter
 
     set_layout @top_layout
 
