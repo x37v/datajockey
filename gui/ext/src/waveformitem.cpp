@@ -108,6 +108,13 @@ void WaveFormItem::clearAudioFile(){
    prepareGeometryChange();
 }
 
+int WaveFormItem::audioFileFrames() {
+   if (mSharedBuffer.isAttached()) {
+      return mSharedBuffer.size() * data_scale;
+   }
+   return 0;
+}
+
 void WaveFormItem::setZoom(int level){
    if (level > 1)
       mZoom = level;

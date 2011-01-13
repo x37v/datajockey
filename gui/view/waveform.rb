@@ -1,7 +1,7 @@
 require 'datajockey_view'
 
 class DataJockey::View::WaveForm < Qt::GraphicsView
-  attr_accessor :follow
+  attr_accessor :follow, :full_view
 
   def initialize
     super
@@ -22,6 +22,7 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
     self.set_scene(@scene)
     @orientation = :horizontal
     @follow = true
+    @full_view = false
 
     set_background_brush(Qt::Brush.new(Qt::Color.new(0,0,0)))
   end
@@ -77,11 +78,25 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
   def resizeEvent(event)
     s = event.size
     reset_matrix
-    if @orientation == :vertical
-      scale(s.width.to_f / 200, 1.0)
-      rotate(-90)
+    if @full_view
+      if @orientation == :vertical
+        frames = @waveform.audio_file_frames
+        if frames > 0
+          #TODO why 4?
+          @waveform.zoom = frames.to_f / (s.height.to_f  * 4)
+          rotate(-90)
+          self.ensure_visible(@scene.scene_rect)
+        end
+      else
+        fit_in_view(@waveform, Qt::IgnoreAspectRatio)
+      end
     else
-      scale(1.0, s.height.to_f / 200)
+      if @orientation == :vertical
+        scale(s.width.to_f / 200, 1.0)
+        rotate(-90)
+      else
+        scale(1.0, s.height.to_f / 200)
+      end
     end
     super(event)
   end
@@ -89,12 +104,14 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
   def audio_file=(filename)
     @waveform.set_audio_file(filename)
     rect = @waveform.bounding_rect
-    if transform.is_rotating
-      rect.width += 2 * geometry.height
-      rect.x -= geometry.height
-    else
-      rect.width += 2 * geometry.width
-      rect.x -= geometry.width
+    unless @full_view
+      if transform.is_rotating
+        rect.width += 2 * geometry.height
+        rect.x -= geometry.height
+      else
+        rect.width += 2 * geometry.width
+        rect.x -= geometry.width
+      end
     end
     @scene.set_scene_rect(rect)
     audio_file_position = 0

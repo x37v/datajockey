@@ -67,6 +67,14 @@ class DataJockey::View::Player < Qt::Widget
     }
     @control_layout << @slider_layout
 
+    @waveform_progress = View::WaveForm.new.tap do |w|
+      w.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      w.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
+      w.orientation = :vertical
+      w.follow = false
+      w.full_view = true
+    end
+
     @waveform_view = View::WaveForm.new.tap do |w|
       w.set_horizontal_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
       w.set_vertical_scroll_bar_policy(Qt::ScrollBarAlwaysOff)
@@ -75,9 +83,12 @@ class DataJockey::View::Player < Qt::Widget
 
     @top_layout = Qt::HBoxLayout.new
     @top_layout << @control_layout
+    @splitter = Qt::Splitter.new(Qt::Vertical)
     if (opts[:waveform_position] == :right)
+      @top_layout << @waveform_progress
       @top_layout << @waveform_view
     else
+      @top_layout.insert_widget(0, @waveform_progress)
       @top_layout.insert_widget(0, @waveform_view)
     end
 
@@ -95,5 +106,22 @@ class DataJockey::View::Player < Qt::Widget
   def play_speed
     @speed_slider.value + 1000
   end
+
+
+  def audio_file=(file)
+    @waveform_view.audio_file = file
+    @waveform_progress.audio_file = file
+  end
+
+  def clear_audio_file
+    @waveform_view.clear_audio_file
+    @waveform_progress.clear_audio_file
+  end
+
+  def audio_file_position=(pos)
+    @waveform_view.audio_file_position = pos
+    @waveform_progress.audio_file_position = pos
+  end
+
 end
 
