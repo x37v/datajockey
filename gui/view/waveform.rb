@@ -84,11 +84,14 @@ class DataJockey::View::WaveForm < Qt::GraphicsView
         if frames > 0
           #TODO why 4?
           @waveform.zoom = frames.to_f / (s.height.to_f  * 4)
+          scale(s.width.to_f / 200, 1.0)
+          center_on(frames.to_f * @waveform.zoom.to_f / 2, 0)
           rotate(-90)
           self.ensure_visible(@scene.scene_rect)
         end
       else
         fit_in_view(@waveform, Qt::IgnoreAspectRatio)
+        scale(1.0, s.height.to_f / 200)
       end
     else
       if @orientation == :vertical
