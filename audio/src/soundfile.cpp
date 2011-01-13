@@ -54,7 +54,7 @@ SoundFile::SoundFile(std::string location) :
    std::string mp3End1("MP3");
 
    //determine what type of soundfile it is
-   if(mSndFile){
+   if(mSndFile && mSndFile.error() == SF_ERR_NO_ERROR){
       mType = SNDFILE;
       mSampleRate = mSndFile.samplerate();
       mChannels = mSndFile.channels();
@@ -393,11 +393,11 @@ int main(){
 	for(unsigned int i = 0; i < 2048; i++)
 		frame[i] = 0;
 	//SoundFile f("/mp3/adolescents/adolescents/01-i_hate_children.mp3");
-	SoundFile f("/mp3/dj_deeon/gimme_head_ep/b1-like_it_raw.mp3");
+	SoundFile f("/home/alex/music/new/chrome/anthology_1979-1983_2004/01-chrome-anthology_1979-1983-chromosome_damage.mp3");
 	//SoundFile f("/mp3/woody_guthrie/dust_bowl_ballads/01-the_great_dust_storm_dust_storm_disaster.ogg");
 	//SoundFile f("/tmp/asdf12345");
 	if(f){
-		cout << f.samplerate() << endl;
+		cout << "sample rate: " << f.samplerate() << endl;
 		SndfileHandle sndFile("/tmp/test.wav",
 				SFM_WRITE, 
 				SF_FORMAT_WAV | SF_FORMAT_PCM_16, 
