@@ -436,6 +436,14 @@ void AudioController::set_player_position_frame_relative(int player_index, int f
       set_player_position_frame(player_index, frame, false);
 }
 
+int AudioController::get_player_position_frame(int player_index) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return 0;
+
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mCurrentFrame;
+}
+
 void AudioController::set_player_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;

@@ -76,6 +76,7 @@ mixer_panel.players.each_with_index do |player, index|
   player.volume = audio_controller.player_volume(index)
   player.audio_file = audio_controller.player_audio_file(index)
   player.play_speed = audio_controller.player_play_speed(index)
+  player.audio_file_position = audio_controller.get_player_position_frame(index)
 end
 
 audio_controller.on(:player_audio_file_load_progress, ["int", "int"]) do |player_index, percent|
