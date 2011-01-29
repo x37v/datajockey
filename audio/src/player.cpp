@@ -581,6 +581,45 @@ bool PlayerLoadCommand::store(CommandIOData& data) const{
    return false;
 }
 
+AudioBuffer * PlayerLoadCommand::audio_buffer() const {
+   return mAudioBuffer;
+}
+
+BeatBuffer * PlayerLoadCommand::beat_buffer() const {
+   return mBeatBuffer;
+}
+
+PlayerSetBeatBufferCommand::PlayerSetBeatBufferCommand(unsigned int idx, 
+      BeatBuffer * beatBuffer) : 
+   PlayerCommand(idx)
+{
+   mBeatBuffer = beatBuffer;
+}
+
+void PlayerSetBeatBufferCommand::execute(){
+   Player * p = player(); 
+   if(p != NULL){
+      //store the time executed
+      position_executed(p->position());
+      //execute the action
+      p->beat_buffer(mBeatBuffer);
+   }
+}
+
+bool PlayerSetBeatBufferCommand::store(CommandIOData& data) const{
+   PlayerCommand::store(data, "PlayerSetBeatBufferCommand");
+   //XXX how to do this one?  maybe associate a global map of files loaded,
+   //indicies to file names or database indicies?
+   return false;
+}
+
+BeatBuffer * PlayerSetBeatBufferCommand::buffer() const {
+   return mBeatBuffer;
+}
+void PlayerSetBeatBufferCommand::buffer(BeatBuffer * buffer) {
+   mBeatBuffer = buffer;
+}
+
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
       position_t target, const TimePoint & timepoint) : 
    PlayerCommand(idx),

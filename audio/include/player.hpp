@@ -168,8 +168,20 @@ namespace DataJockey {
             PlayerLoadCommand(unsigned int idx, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
             virtual void execute();
             virtual bool store(CommandIOData& data) const;
+            AudioBuffer * audio_buffer() const;
+            BeatBuffer * beat_buffer() const;
          private:
             AudioBuffer * mAudioBuffer;
+            BeatBuffer * mBeatBuffer;
+      };
+      class PlayerSetBeatBufferCommand : public PlayerCommand {
+         public:
+            PlayerSetBeatBufferCommand(unsigned int idx, BeatBuffer * beatBuffer);
+            virtual void execute();
+            virtual bool store(CommandIOData& data) const;
+            BeatBuffer * buffer() const;
+            void buffer(BeatBuffer * buffer);
+         private:
             BeatBuffer * mBeatBuffer;
       };
       class PlayerPositionCommand : public PlayerCommand {

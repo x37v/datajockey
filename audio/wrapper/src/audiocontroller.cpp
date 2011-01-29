@@ -44,11 +44,35 @@ class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::Pla
       QString mOldFileName;
 };
 
+//beat buffers are always copies, so once the beat buffer is out of the audio
+//thread we want to delete it as we have a copy of the data we care about
+//so we just need a done action which delete the beat buffer
+class AudioController::PlayerSetBeatBufferCommand : public DataJockey::Audio::PlayerSetBeatBufferCommand {
+   public:
+      PlayerSetBeatBufferCommand(unsigned int idx, BeatBuffer * beatBuffer) : 
+         DataJockey::Audio::PlayerSetBeatBufferCommand(idx, beatBuffer) { }
+      virtual ~PlayerSetBeatBufferCommand() { }
+      virtual void execute_done() {
+         BeatBuffer * b = buffer();
+         if (b)
+            delete b;
+         buffer(NULL);
+      }
+};
+
 class AudioController::PlayerState {
    public:
       PlayerState() :
-         mFileName(), mCurrentFrame(0) { }
+         mFileName(),
+         mBeatBuffer(),
+         mInBeatBufferTransaction(false),
+         mCurrentFrame(0) { }
+      //not okay to update in audio thread
       QString mFileName;
+      Audio::BeatBuffer mBeatBuffer;
+      bool mInBeatBufferTransaction;
+
+      //okay to update in audio thread
       unsigned int mVolume;
       unsigned int mPlaySpeed;
       bool mMute;
@@ -630,6 +654,84 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
       return false;
    return true;
 }
+
+void AudioController::set_player_clear_beat_buffer(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+
+   //clear out our local beat buffer and send an empty one to the audio thread
+   player_state->mBeatBuffer.clear();
+   queue_command(new AudioController::PlayerSetBeatBufferCommand(player_index, NULL));
+}
+
+void AudioController::set_player_beat_buffer_begin(int player_index){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+   player_state->mInBeatBufferTransaction = true;
+
+}
+
+void AudioController::set_player_beat_buffer_end(int player_index, bool commit){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+
+   //update our state
+   PlayerState * player_state = mPlayerStates[player_index];
+   player_state->mInBeatBufferTransaction = false;
+
+   //if this is a commit then send the buffer
+   if (commit) {
+      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
+      queue_command(new AudioController::PlayerSetBeatBufferCommand(player_index, buff));
+   }
+}
+
+void AudioController::set_player_beat_buffer_add_beat(int player_index, double value){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+
+   //insert the beat
+   player_state->mBeatBuffer.insert_beat(value);
+
+   //if we're not in a transaction then send the new beat buffer
+   if(!player_state->mInBeatBufferTransaction) {
+      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
+      queue_command(new AudioController::PlayerSetBeatBufferCommand(player_index, buff));
+   }
+}
+
+void AudioController::set_player_beat_buffer_remove_beat(int player_index, double value){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+
+   //TODO
+}
+
+void AudioController::set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value){
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+
+   //update the beat
+   player_state->mBeatBuffer.update_value(beat_index, new_value);
+
+   //if we're not in a transaction then send the new beat buffer
+   if(!player_state->mInBeatBufferTransaction) {
+      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
+      queue_command(new AudioController::PlayerSetBeatBufferCommand(player_index, buff));
+   }
+}
+
 
 void AudioController::set_master_volume(int /*val*/){
    //TODO

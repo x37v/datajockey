@@ -23,6 +23,7 @@ namespace DataJockey {
          private:
             //forward declarations
             class PlayerClearBuffersCommand;
+            class PlayerSetBeatBufferCommand;
             class PlayerState;
             class ConsumeThread;
             class AudioLoaderThread;
@@ -84,6 +85,21 @@ namespace DataJockey {
             void set_player_audio_file(int player_index, QString location);
             void set_player_clear_buffers(int player_index);
 
+            //****** BEAT BUFFER COMMANDS
+            //clear a players beat buffer
+            void set_player_clear_beat_buffer(int player_index);
+            //starts a beat buffer setting transaction
+            //the beat buffer isn't actually sent to the player until
+            //after the transaction is ended
+            void set_player_beat_buffer_begin(int player_index);
+            //ends the beat buffer transaction, the transaction is canceled if commit = false
+            void set_player_beat_buffer_end(int player_index, bool commit = true);
+            //add a beat to the beat buffer
+            void set_player_beat_buffer_add_beat(int player_index, double value);
+            void set_player_beat_buffer_remove_beat(int player_index, double value);
+            void set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value);
+
+            //***** MASTER COMMANDS
             void set_master_volume(int val);
             void set_master_cue_volume(int val);
             void set_master_cross_fade_enable(bool enable);
