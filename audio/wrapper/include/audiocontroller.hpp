@@ -23,7 +23,6 @@ namespace DataJockey {
          private:
             //forward declarations
             class PlayerClearBuffersCommand;
-            class PlayerSetBeatBufferCommand;
             class PlayerState;
             class ConsumeThread;
             class AudioLoaderThread;

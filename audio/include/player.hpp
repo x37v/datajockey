@@ -46,20 +46,22 @@ namespace DataJockey {
                   float ** mixBuffer, float ** cueBuffer);
 
             //getters
-            play_state_t play_state();
-            out_state_t out_state();
-            stretch_method_t stretch_method();
-            bool muted();
-            bool syncing();
-            bool looping();
-            double volume();
-            double play_speed();
-            const TimePoint& position();
-            const TimePoint& start_position();
-            const TimePoint& end_position();
-            const TimePoint& loop_start_position();
-            const TimePoint& loop_end_position();
+            play_state_t play_state() const;
+            out_state_t out_state() const;
+            stretch_method_t stretch_method() const;
+            bool muted() const;
+            bool syncing() const;
+            bool looping() const;
+            double volume() const;
+            double play_speed() const;
+            const TimePoint& position() const;
+            const TimePoint& start_position() const;
+            const TimePoint& end_position() const;
+            const TimePoint& loop_start_position() const;
+            const TimePoint& loop_end_position() const;
             unsigned long current_frame() const;
+            AudioBuffer * audio_buffer() const;
+            BeatBuffer * beat_buffer() const;
 
             //setters
             void play_state(play_state_t val);
@@ -163,26 +165,39 @@ namespace DataJockey {
             action_t mAction;
             double mValue;
       };
-      class PlayerLoadCommand : public PlayerCommand {
+      class PlayerSetAudioBufferCommand : public PlayerCommand {
          public:
-            PlayerLoadCommand(unsigned int idx, AudioBuffer * buffer, BeatBuffer * beatBuffer = NULL);
+            //set the buffer, if you set deleteOldBuffer the buffer that is replaced with the given buffer
+            //will be deleted during the execute_done action [or the destructor].  Otherwise, the old buffer
+            //is up to you to deal with
+            PlayerSetAudioBufferCommand(unsigned int idx, AudioBuffer * buffer, bool deleteOldBuffer = false);
+            virtual ~PlayerSetAudioBufferCommand();
             virtual void execute();
+            virtual void execute_done();
             virtual bool store(CommandIOData& data) const;
-            AudioBuffer * audio_buffer() const;
-            BeatBuffer * beat_buffer() const;
+            AudioBuffer * buffer() const;
+            void buffer(AudioBuffer * buffer);
          private:
-            AudioBuffer * mAudioBuffer;
-            BeatBuffer * mBeatBuffer;
+            AudioBuffer * mBuffer;
+            AudioBuffer * mOldBuffer;
+            bool mDeleteOldBuffer;
       };
       class PlayerSetBeatBufferCommand : public PlayerCommand {
          public:
-            PlayerSetBeatBufferCommand(unsigned int idx, BeatBuffer * beatBuffer);
+            //set the buffer, if you set deleteOldBuffer the buffer that is replaced with the given buffer
+            //will be deleted during the execute_done action [or the destructor].  Otherwise, the old buffer
+            //is up to you to deal with
+            PlayerSetBeatBufferCommand(unsigned int idx, BeatBuffer * buffer, bool deleteOldBuffer = false);
+            virtual ~PlayerSetBeatBufferCommand();
             virtual void execute();
+            virtual void execute_done();
             virtual bool store(CommandIOData& data) const;
             BeatBuffer * buffer() const;
             void buffer(BeatBuffer * buffer);
          private:
-            BeatBuffer * mBeatBuffer;
+            BeatBuffer * mBuffer;
+            BeatBuffer * mOldBuffer;
+            bool mDeleteOldBuffer;
       };
       class PlayerPositionCommand : public PlayerCommand {
          public:

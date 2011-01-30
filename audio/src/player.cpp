@@ -229,20 +229,22 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
 }
 
 //getters
-Player::play_state_t Player::play_state(){ return mPlayState; }
-Player::out_state_t Player::out_state(){ return mOutState; }
-Player::stretch_method_t Player::stretch_method(){ return mStretchMethod; }
-bool Player::muted(){ return mMute; }
-bool Player::syncing(){ return mSync; }
-bool Player::looping(){ return mLoop; }
-double Player::volume(){ return mVolume; }
-double Player::play_speed(){ return mPlaySpeed; }
-const TimePoint& Player::position(){ return mPosition; }
-const TimePoint& Player::start_position(){ return mStartPosition; }
-const TimePoint& Player::end_position(){ return mEndPosition; }
-const TimePoint& Player::loop_start_position(){ return mLoopStartPosition; }
-const TimePoint& Player::loop_end_position(){ return mLoopEndPosition; }
+Player::play_state_t Player::play_state() const { return mPlayState; }
+Player::out_state_t Player::out_state() const { return mOutState; }
+Player::stretch_method_t Player::stretch_method() const { return mStretchMethod; }
+bool Player::muted() const { return mMute; }
+bool Player::syncing() const { return mSync; }
+bool Player::looping() const { return mLoop; }
+double Player::volume() const { return mVolume; }
+double Player::play_speed() const { return mPlaySpeed; }
+const TimePoint& Player::position() const { return mPosition; }
+const TimePoint& Player::start_position() const { return mStartPosition; }
+const TimePoint& Player::end_position() const { return mEndPosition; }
+const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
+const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
 unsigned long Player::current_frame() const { return mSampleIndex; }
+AudioBuffer * Player::audio_buffer() const { return mAudioBuffer; }
+BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
 
 //setters
 void Player::play_state(play_state_t val){
@@ -553,47 +555,72 @@ bool PlayerDoubleCommand::store(CommandIOData& data) const{
    return true;
 }
 
-PlayerLoadCommand::PlayerLoadCommand(unsigned int idx, 
+PlayerSetAudioBufferCommand::PlayerSetAudioBufferCommand(unsigned int idx, 
       AudioBuffer * buffer,
-      BeatBuffer * beatBuffer
-      ) : 
-   PlayerCommand(idx)
-{
-   mAudioBuffer = buffer;
-   mBeatBuffer = beatBuffer;
+      bool deleteOldBuffer) : 
+   PlayerCommand(idx), 
+   mBuffer(buffer),
+   mOldBuffer(NULL),
+   mDeleteOldBuffer(deleteOldBuffer)
+{ }
+
+PlayerSetAudioBufferCommand::~PlayerSetAudioBufferCommand() {
+   if (mOldBuffer && mDeleteOldBuffer) {
+      delete mOldBuffer;
+      mOldBuffer = NULL;
+   }
 }
 
-void PlayerLoadCommand::execute(){
+void PlayerSetAudioBufferCommand::execute(){
    Player * p = player(); 
    if(p != NULL){
       //store the time executed
       position_executed(p->position());
+      //store the old buffer pointer
+      mOldBuffer = p->audio_buffer();
       //execute the action
-      p->audio_buffer(mAudioBuffer);
-      p->beat_buffer(mBeatBuffer);
+      p->audio_buffer(mBuffer);
    }
 }
 
-bool PlayerLoadCommand::store(CommandIOData& data) const{
-   PlayerCommand::store(data, "PlayerLoadCommand");
+void PlayerSetAudioBufferCommand::execute_done(){
+   if (mOldBuffer && mDeleteOldBuffer) {
+      delete mOldBuffer;
+      mOldBuffer = NULL;
+   }
+   //execute our super class's done action
+   PlayerCommand::execute_done();
+}
+
+bool PlayerSetAudioBufferCommand::store(CommandIOData& data) const{
+   PlayerCommand::store(data, "PlayerSetAudioBufferCommand");
    //XXX how to do this one?  maybe associate a global map of files loaded,
    //indicies to file names or database indicies?
    return false;
 }
 
-AudioBuffer * PlayerLoadCommand::audio_buffer() const {
-   return mAudioBuffer;
+AudioBuffer * PlayerSetAudioBufferCommand::buffer() const {
+   return mBuffer;
 }
 
-BeatBuffer * PlayerLoadCommand::beat_buffer() const {
-   return mBeatBuffer;
+void PlayerSetAudioBufferCommand::buffer(AudioBuffer * buffer) {
+   mBuffer = buffer;
 }
 
 PlayerSetBeatBufferCommand::PlayerSetBeatBufferCommand(unsigned int idx, 
-      BeatBuffer * beatBuffer) : 
-   PlayerCommand(idx)
-{
-   mBeatBuffer = beatBuffer;
+      BeatBuffer * buffer,
+      bool deleteOldBuffer) : 
+   PlayerCommand(idx), 
+   mBuffer(buffer),
+   mOldBuffer(NULL),
+   mDeleteOldBuffer(deleteOldBuffer)
+{ }
+
+PlayerSetBeatBufferCommand::~PlayerSetBeatBufferCommand() {
+   if (mOldBuffer && mDeleteOldBuffer) {
+      delete mOldBuffer;
+      mOldBuffer = NULL;
+   }
 }
 
 void PlayerSetBeatBufferCommand::execute(){
@@ -601,9 +628,20 @@ void PlayerSetBeatBufferCommand::execute(){
    if(p != NULL){
       //store the time executed
       position_executed(p->position());
+      //store the old buffer pointer
+      mOldBuffer = p->beat_buffer();
       //execute the action
-      p->beat_buffer(mBeatBuffer);
+      p->beat_buffer(mBuffer);
    }
+}
+
+void PlayerSetBeatBufferCommand::execute_done(){
+   if (mOldBuffer && mDeleteOldBuffer) {
+      delete mOldBuffer;
+      mOldBuffer = NULL;
+   }
+   //execute our super class's done action
+   PlayerCommand::execute_done();
 }
 
 bool PlayerSetBeatBufferCommand::store(CommandIOData& data) const{
@@ -614,10 +652,11 @@ bool PlayerSetBeatBufferCommand::store(CommandIOData& data) const{
 }
 
 BeatBuffer * PlayerSetBeatBufferCommand::buffer() const {
-   return mBeatBuffer;
+   return mBuffer;
 }
+
 void PlayerSetBeatBufferCommand::buffer(BeatBuffer * buffer) {
-   mBeatBuffer = buffer;
+   mBuffer = buffer;
 }
 
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
