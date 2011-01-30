@@ -108,6 +108,9 @@ namespace DataJockey {
             TimePoint mLoopStartPosition;
             TimePoint mLoopEndPosition;
 
+            bool mUpdateTransportOffset;
+            TimePoint mTransportOffset; //an offset to the transport, for syncing
+
             //internals, bookkeeping, etc
             unsigned int mSampleRate;
             float * mVolumeBuffer;

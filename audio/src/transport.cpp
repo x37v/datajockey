@@ -82,7 +82,9 @@ TransportBPMCommand::TransportBPMCommand(Transport * t, double bpm) :
 }
 
 void TransportBPMCommand::execute(){
-   transport()->bpm(mBPM);
+   Transport * t = transport();
+   if (t)
+      t->bpm(mBPM);
 }
 
 bool TransportBPMCommand::store(CommandIOData& /*data*/) const{

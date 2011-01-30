@@ -168,7 +168,7 @@ bool TimePoint::operator<(const TimePoint &other) const {
          if(this->type() != BEAT_BAR)
             return false;
          else {
-            //XXX ignoring beat_type!  Assuing x/4
+            //XXX ignoring beat_type!  Assuming x/4
             unsigned int this_beats = this->beat() + this->bar() * this->beats_per_bar();
             unsigned int other_beats = other.beat() + other.bar() * other.beats_per_bar();
             if(this_beats < other_beats || 
@@ -195,7 +195,7 @@ bool TimePoint::operator>(const TimePoint &other) const {
          if(this->type() != BEAT_BAR)
             return false;
          else {
-            //XXX ignoring beat_type!  Assuing x/4
+            //XXX ignoring beat_type!  Assuming x/4
             unsigned int this_beats = this->beat() + this->bar() * this->beats_per_bar();
             unsigned int other_beats = other.beat() + other.bar() * other.beats_per_bar();
             if(this_beats > other_beats || 
@@ -222,11 +222,35 @@ const TimePoint TimePoint::operator+(const TimePoint &other) const {
    if (other.type() == type()) {
       if (type() == SECONDS) {
          double sec = seconds() + other.seconds(); 
-         if (sec < 0.0)
-            sec = 0.0;
          ret.seconds(sec);
       } else {
          //TODO
+      }
+   } else {
+      //TODO
+   }
+   return ret;
+}
+
+const TimePoint TimePoint::operator-(const TimePoint &other) const {
+   TimePoint ret(*this);
+   if (other.type() == type()) {
+      if (type() == SECONDS) {
+         //TODO should we not allow negative?
+         ret.seconds(seconds() - other.seconds()); 
+      } else {
+         //XXX ignoring beat_type!  Assuming x/4
+         int this_beats = this->beat() + this->bar() * this->beats_per_bar();
+         int other_beats = other.beat() + other.bar() * other.beats_per_bar();
+         int diff  = this_beats - other_beats;
+         double pos_diff = this->pos_in_beat() - other.pos_in_beat();
+         while (pos_diff < 0) {
+            diff -= 1;
+            pos_diff += 1.0;
+         }
+         if (diff < 0)
+            diff = 0;
+         ret.at_beat(diff, pos_diff);
       }
    } else {
       //TODO

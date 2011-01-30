@@ -7,7 +7,8 @@
 using namespace DataJockey::Audio;
 
 Player::Player() : 
-   mPosition(0.0)
+   mPosition(0.0),
+   mTransportOffset(0,0)
 {
    //states
    mPlayState = PAUSE;
@@ -33,6 +34,8 @@ Player::Player() :
 
    mPositionDirty = false;
    mSetup = false;
+
+   mUpdateTransportOffset = true;
 }
 
 Player::~Player(){
@@ -74,6 +77,11 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
    //do we need to update the mSampleIndex based on the position?
    if(mPositionDirty)
       update_position(transport);
+
+   if(mUpdateTransportOffset) {
+      mTransportOffset = transport.position();
+      mUpdateTransportOffset = false;
+   }
 
    if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
       return;
@@ -123,17 +131,10 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
             //only update the rate on the beat.
             if(inbeat && mSync && mBeatBuffer){
                double secTillBeat = transport.seconds_till_next_beat();
-               //we don't want to advance a beat if we just got to where
-               //we want to be
-               if(mPositionDirty)
-                  update_position(transport);
-               else {
-                  //on beat we advance our beat,
-                  //make our pos_in_beat the same as the transport
-                  mPosition.advance_beat();
-                  mPosition.pos_in_beat(transport.position().pos_in_beat());
-                  update_position(transport);
-               }
+
+               mPosition = transport.position() - mTransportOffset;
+               update_position(transport);
+
                if(secTillBeat != 0){
                   TimePoint next = mPosition;
                   next.advance_beat();
@@ -248,7 +249,10 @@ BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
 
 //setters
 void Player::play_state(play_state_t val){
-   mPlayState = val;
+   if (mPlayState != val) {
+      mPlayState = val;
+      mUpdateTransportOffset = true;
+   }
 }
 
 void Player::out_state(out_state_t val){
@@ -263,7 +267,11 @@ void Player::mute(bool val){
 }
 
 void Player::sync(bool val){
-   mSync = val;
+   if (val != mSync) {
+      mSync = val;
+      mUpdateTransportOffset = true;
+   }
+   //TODO change position type?
 }
 
 void Player::loop(bool val){
@@ -280,6 +288,8 @@ void Player::play_speed(double val){
 
 void Player::position(const TimePoint &val){
    mPosition = val;
+   mUpdateTransportOffset = true;
+
    //if we're not set up then we cannot update our sample index because we don't
    //know the sample rate, so we just set dirty = true
    if(!mSetup){
@@ -309,6 +319,8 @@ void Player::position(const TimePoint &val){
 void Player::position_at_frame(unsigned long frame) {
    mSampleIndex = frame;
    mSampleIndexResidual = 0;
+   mUpdateTransportOffset = true;
+
    if (mAudioBuffer && mAudioBuffer->length() <= mSampleIndex) {
       mSampleIndex = mAudioBuffer->length();
    }

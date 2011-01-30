@@ -151,7 +151,7 @@ AudioController::AudioController() :
 
    for(unsigned int i = 0; i < mNumPlayers; i++) {
       DataJockey::Audio::Player * player = mMaster->players()[i];
-      player->sync(false);
+      player->sync(true);
       player->out_state(Player::MAIN_MIX);
       player->play_state(Player::PLAY);
 
