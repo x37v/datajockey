@@ -104,6 +104,7 @@ namespace DataJockey {
             void set_master_cross_fade_enable(bool enable);
             void set_master_cross_fade_position(int val);
             void set_master_cross_fade_players(int left, int right);
+            void set_master_bpm(double bpm);
 
             //start and stop the audio processing
             void start_audio();

@@ -1,6 +1,7 @@
 #include "audiocontroller.hpp"
 #include "audioloaderthread.hpp"
 #include "audiobufferreference.hpp"
+#include "transport.hpp"
 
 #include <QMutexLocker>
 #include <vector>
@@ -763,6 +764,10 @@ void AudioController::set_master_cross_fade_players(int left, int right){
    if (right < 0 || right >= (int)mNumPlayers)
       return;
    queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
+}
+
+void AudioController::set_master_bpm(double bpm) {
+   queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
 }
 
 void AudioController::start_audio() {
