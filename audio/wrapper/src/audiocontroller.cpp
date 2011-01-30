@@ -706,11 +706,13 @@ void AudioController::set_player_beat_buffer_add_beat(int player_index, double v
    }
 }
 
-void AudioController::set_player_beat_buffer_remove_beat(int player_index, double value){
+void AudioController::set_player_beat_buffer_remove_beat(int /*player_index*/, double /*value*/){
+   /*
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * player_state = mPlayerStates[player_index];
+   */
 
    //TODO
 }

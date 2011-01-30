@@ -1,4 +1,5 @@
 #include "timepoint.hpp"
+#include <stdlib.h>
 
 using namespace DataJockey::Audio;
 
@@ -14,7 +15,7 @@ TimePoint::TimePoint(double sec) {
    seconds(sec);
 }
 
-TimePoint::TimePoint(unsigned int bar, unsigned int beat, double pos_in_beat) {
+TimePoint::TimePoint(int bar, unsigned int beat, double pos_in_beat) {
    //default type is 4/4
    mBeatsPerBar = mBeatType = 4;
    mType = BEAT_BAR;
@@ -44,7 +45,7 @@ TimePoint& TimePoint::operator=(const TimePoint& source) {
 
 //getters
 TimePoint::time_type TimePoint::type() const { return mType; }
-unsigned int TimePoint::bar() const { return mBar; }
+int TimePoint::bar() const { return mBar; }
 unsigned int TimePoint::beat() const { return mBeat; }
 double TimePoint::pos_in_beat() const { return mPosInBeat; }
 unsigned int TimePoint::beats_per_bar() const { return mBeatsPerBar; }
@@ -64,7 +65,7 @@ bool TimePoint::valid() const {
 
 //setters
 void TimePoint::type(TimePoint::time_type t){ mType = t; }
-void TimePoint::bar(unsigned int val){ mBar = val; }
+void TimePoint::bar(int val){ mBar = val; }
 void TimePoint::beat(unsigned int val){ mBeat = val; }
 void TimePoint::pos_in_beat(double val){ mPosInBeat = val; }
 
@@ -80,7 +81,7 @@ void TimePoint::beat_type(unsigned int val){
 
 void TimePoint::seconds(double val){ mSeconds = val; }
 
-void TimePoint::at_bar(unsigned int newBar, unsigned int newBeat, double newPos){
+void TimePoint::at_bar(int newBar, unsigned int newBeat, double newPos){
    //fix up range!
    while(newPos >= 1.0){
       newBeat += 1;
@@ -88,6 +89,7 @@ void TimePoint::at_bar(unsigned int newBar, unsigned int newBeat, double newPos)
    }
    if(newPos < 0)
       newPos = 0;
+   //TODO does this still work with negative bar?
    while(newBeat >= mBeatsPerBar){
       newBeat -= mBeatsPerBar;
       newBar += 1;
@@ -97,7 +99,7 @@ void TimePoint::at_bar(unsigned int newBar, unsigned int newBeat, double newPos)
    pos_in_beat(newPos);
 }
 
-void TimePoint::at_beat(unsigned int newBeat, double newPos){
+void TimePoint::at_beat(int newBeat, double newPos){
    //fix up range!
    while(newPos >= 1.0){
       newBeat += 1;
@@ -106,7 +108,7 @@ void TimePoint::at_beat(unsigned int newBeat, double newPos){
    if(newPos < 0)
       newPos = 0;
    bar(newBeat / mBeatsPerBar);
-   beat(newBeat % mBeatsPerBar);
+   beat(abs(newBeat) % mBeatsPerBar);
    pos_in_beat(newPos);
 }
 

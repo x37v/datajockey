@@ -79,7 +79,8 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
       update_position(transport);
 
    if(mUpdateTransportOffset) {
-      mTransportOffset = transport.position();
+      mTransportOffset = (transport.position() - mPosition);
+      mTransportOffset.pos_in_beat(0.0);
       mUpdateTransportOffset = false;
    }
 
@@ -132,6 +133,11 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
             if(inbeat && mSync && mBeatBuffer){
                double secTillBeat = transport.seconds_till_next_beat();
 
+               if(mUpdateTransportOffset) {
+                  mTransportOffset = (transport.position() - mPosition);
+                  mTransportOffset.pos_in_beat(0.0);
+                  mUpdateTransportOffset = false;
+               }
                mPosition = transport.position() - mTransportOffset;
                update_position(transport);
 
@@ -324,7 +330,13 @@ void Player::position_at_frame(unsigned long frame) {
    if (mAudioBuffer && mAudioBuffer->length() <= mSampleIndex) {
       mSampleIndex = mAudioBuffer->length();
    }
-   //TODO should update position.. but mPositionDirty updates sample index..
+
+   if (mBeatBuffer) {
+      double time = mSampleIndex;
+      time /= mSampleRate;
+      mPosition = mBeatBuffer->position_at_time(time, mPosition);
+   }
+
    mPositionDirty = false;
 }
 
