@@ -4,6 +4,7 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), 'ext')
 STYLE_SHEET_FILE = 'style.css'
 
 require 'view/mixerpanel'
+require 'model/beatbuffer'
 
 include DataJockey
 
@@ -16,6 +17,10 @@ mixer_panel.show()
 audio_controller = Qt::DBusInterface.new("org.x37v.datajockey", "/audio", 
                                 "org.x37v.datajockey.audio",
                                 Qt::DBusConnection::sessionBus(), app)
+
+#create the beat buffers
+@beat_buffers = mixer_panel.players.size.times.collect { Model::BeatBuffer.new }
+
 
 =begin
 audio_controller = Audio::AudioController.instance
@@ -106,6 +111,17 @@ audio_controller.on(:player_position_changed, ["int", "int"]) do |player_index, 
   end
 end
 
+@beat_buffers.each_with_index do |buffer, index|
+  buffer.on(:timepoints_changed) do |timepoints|
+    audio_controller.set_player_beat_buffer_begin(index)
+    audio_controller.set_player_beat_buffer_clear(index)
+    timepoints.each do |t|
+      audio_controller.set_player_beat_buffer_add_beat(index, t)
+    end
+    audio_controller.set_player_beat_buffer_end(index, true)
+  end
+end
+
 #app.on(:about_to_quit) do
 #  audio_controller.stop_audio
 #end
@@ -128,6 +144,17 @@ x = Qt::Timer.every(10) {
 =end
 
 #audio_controller.set_player_audio_file(0, '/home/alex/backup/alex_big_harddrive/alex/music-backup/drexciya/drexciya_4-the_unknown_aqua_zone/04-aquabahn.flac')
+
+audio_controller.set_player_audio_file(0, '/home/alex/personal/11-phuture-acid_tracks.flac')
+audio_controller.set_player_audio_file(1, '/home/alex/personal/11-phuture-acid_tracks.flac')
+
+audio_controller.set_player_sync(0, true)
+audio_controller.set_player_sync(1, true)
+
+audio_controller.set_master_bpm(120.0)
+
+@beat_buffers[0].load_beats('/home/alex/personal/projects/datajockey/acid_tracks.yaml')
+@beat_buffers[1].load_beats('/home/alex/personal/projects/datajockey/acid_tracks.yaml')
 
 trap("INT") do
   app.quit
