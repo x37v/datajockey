@@ -79,9 +79,9 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
       update_position(transport);
 
    if(mUpdateTransportOffset) {
-      mTransportOffset = (transport.position() - mPosition);
-      mTransportOffset.pos_in_beat(0.0);
-      mUpdateTransportOffset = false;
+      update_transport_offset(transport);
+      if (mBeatBuffer && mSync)
+         update_play_speed(transport);
    }
 
    if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
@@ -129,28 +129,18 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
    if(mPlayState == PLAY){
       switch(mStretchMethod){
          case PLAY_RATE:
-            //only update the rate on the beat.
-            if(inbeat && mSync && mBeatBuffer){
-               double secTillBeat = transport.seconds_till_next_beat();
 
-               if(mUpdateTransportOffset) {
-                  mTransportOffset = (transport.position() - mPosition);
-                  mTransportOffset.pos_in_beat(0.0);
-                  mUpdateTransportOffset = false;
-               }
+            if(mUpdateTransportOffset) {
+               update_transport_offset(transport);
                mPosition = transport.position() - mTransportOffset;
                update_position(transport);
+            }
 
-               if(secTillBeat != 0){
-                  TimePoint next = mPosition;
-                  next.advance_beat();
-                  double newSpeed = mBeatBuffer->time_at_position(next) - 
-                     mBeatBuffer->time_at_position(mPosition);
-                  newSpeed /= secTillBeat; 
-                  //XXX should make this a setting
-                  if(newSpeed > 0.25 && newSpeed < 4)
-                     mPlaySpeed = newSpeed;
-               }
+            //only update the rate on the beat.
+            if(inbeat && mSync && mBeatBuffer){
+               mPosition = transport.position() - mTransportOffset;
+               update_position(transport);
+               update_play_speed(transport);
                //do we need to update the mSampleIndex based on the position?
             } else if(mPositionDirty)
                update_position(transport);
@@ -416,6 +406,30 @@ void Player::update_position(const Transport& transport){
             (double)(mPosition.bar() * mPosition.beats_per_bar() + mPosition.beat()));
       mSampleIndexResidual = 0;
    }
+}
+
+void Player::update_play_speed(const Transport& transport) {
+   double secTillBeat = transport.seconds_till_next_beat();
+   if (secTillBeat <= 0)
+      return;
+
+   TimePoint next = mPosition;
+   next.advance_beat();
+
+   double newSpeed = mBeatBuffer->time_at_position(next) - 
+      mBeatBuffer->time_at_position(mPosition);
+   newSpeed /= secTillBeat; 
+   //XXX should make this a setting
+   if(newSpeed > 0.25 && newSpeed < 4)
+      mPlaySpeed = newSpeed;
+}
+
+void Player::update_transport_offset(const Transport& transport) {
+   mTransportOffset = (transport.position() - mPosition);
+   if(mTransportOffset.pos_in_beat() > 0.5)
+      mTransportOffset.advance_beat();
+   mTransportOffset.pos_in_beat(0.0);
+   mUpdateTransportOffset = false;
 }
 
 //command stuff

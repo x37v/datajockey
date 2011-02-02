@@ -122,6 +122,9 @@ namespace DataJockey {
 
             //helpers
             void update_position(const Transport& transport);
+            //for updating the play speed while syncing
+            void update_play_speed(const Transport& transport);
+            void update_transport_offset(const Transport& transport);
       };
       class PlayerCommand : public Command {
          public:
