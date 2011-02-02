@@ -650,7 +650,7 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
    return true;
 }
 
-void AudioController::set_player_clear_beat_buffer(int player_index){
+void AudioController::set_player_beat_buffer_clear(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);

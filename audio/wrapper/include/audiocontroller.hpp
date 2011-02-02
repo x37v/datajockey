@@ -86,7 +86,7 @@ namespace DataJockey {
 
             //****** BEAT BUFFER COMMANDS
             //clear a players beat buffer
-            void set_player_clear_beat_buffer(int player_index);
+            void set_player_beat_buffer_clear(int player_index);
             //starts a beat buffer setting transaction
             //the beat buffer isn't actually sent to the player until
             //after the transaction is ended
