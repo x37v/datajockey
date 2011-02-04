@@ -3,12 +3,18 @@
 #include "master.hpp"
 #define RUBBERBAND_WINDOW_SIZE 64
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
+#define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
+
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 using namespace DataJockey::Audio;
 
 Player::Player() : 
    mPosition(0.0),
-   mTransportOffset(0,0)
+   mTransportOffset(0,0),
+   mEqInstance(NULL)
 {
    //states
    mPlayState = PAUSE;
@@ -44,6 +50,8 @@ Player::~Player(){
       delete [] mVolumeBuffer;
    if(mRubberBandStretcher)
       delete mRubberBandStretcher;
+	if(mEqInstance)
+		slv2_instance_free(mEqInstance);
 }
 
 //this creates internal buffers
@@ -64,6 +72,29 @@ void Player::setup_audio(
             RubberBand::RubberBandStretcher::OptionThreadingNever);
    //XXX what is the ideal size?
    mRubberBandStretcher->setMaxProcessSize(maxBufferLen * 4);
+
+   //do lv2
+   Master * master = Master::instance();
+	SLV2Value plugin_uri = slv2_value_new_uri(master->lv2_world(), DJ_EQ_URI);
+	SLV2Plugin eq_plugin = slv2_plugins_get_by_uri(master->lv2_plugins(), plugin_uri);
+   if (!eq_plugin) {
+		cerr << "could not load eq lv2 plugin, do you have dj eq installed?:" << endl;
+		cerr << "\t\t" << DJ_EQ_URI << endl;
+   } else {
+      //load the plugin
+      mEqInstance = slv2_plugin_instantiate(eq_plugin, mSampleRate, NULL);
+      if (!mEqInstance) {
+         cerr << "could not instantiate eq lv2 plugin, do you have dj eq installed?:" << endl;
+         cerr << "\t\t" << DJ_EQ_URI << endl;
+      } else {
+         slv2_instance_connect_port(mEqInstance, 0, &mEqControl.low);
+         slv2_instance_connect_port(mEqInstance, 1, &mEqControl.mid);
+         slv2_instance_connect_port(mEqInstance, 2, &mEqControl.high);
+         slv2_instance_connect_port(mEqInstance, 7, &mEqControl.latency);
+         slv2_instance_activate(mEqInstance);
+      }
+   }
+
    mSetup = true;
 }
 
@@ -198,9 +229,16 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 }
 
 //finalize audio computation, apply effects, etc.
-   void Player::audio_post_compute(unsigned int /*numFrames*/, float ** /*mixBuffer*/){
+   void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
       if(!mAudioBuffer)
          return;
+      if(mEqInstance) {
+         slv2_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
+         slv2_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
+         slv2_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
+         slv2_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
+         slv2_instance_run(mEqInstance, numFrames);
+      }
    }
 
 //actually fill the output vectors
@@ -219,8 +257,10 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
       }
    } else {
       for(unsigned int i = 0; i < 2; i++){
-         for(unsigned int j = 0; j < numFrames; j++)
+         for(unsigned int j = 0; j < numFrames; j++) {
+            cueBuffer[i][j] = 0.0f;
             mixBuffer[i][j] *= mVolumeBuffer[j];
+         }
       }
    }
 }

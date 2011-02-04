@@ -27,6 +27,14 @@ Master::Master(){
    mCrossFade = false;
    mCrossFadeMixers[0] = 0;
    mCrossFadeMixers[1] = 1;
+
+   //set up lv2
+   mLV2World = slv2_world_new();
+   mLV2Plugins = NULL;
+   if (mLV2World) {
+      slv2_world_load_all(mLV2World);
+      mLV2Plugins = slv2_world_get_all_plugins(mLV2World);
+   }
 }
 
 Master::~Master(){
@@ -212,6 +220,14 @@ Scheduler * Master::scheduler(){
 
 Transport * Master::transport(){
    return &mTransport;
+}
+
+SLV2World Master::lv2_world() const {
+   return mLV2World;
+}
+
+SLV2Plugins Master::lv2_plugins() const {
+   return mLV2Plugins;
 }
 
 //setters

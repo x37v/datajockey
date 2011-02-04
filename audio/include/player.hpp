@@ -7,10 +7,20 @@
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
-#include "rubberband/RubberBandStretcher.h"
+#include <rubberband/RubberBandStretcher.h>
+#include <slv2/collections.h>
+#include <slv2/plugin.h>
+#include <slv2/plugininstance.h>
 
 namespace DataJockey {
    namespace Audio {
+      struct EqControl {
+         EqControl() : low(0.0), mid(0.0), high(0.0){}
+         float low;
+         float mid;
+         float high;
+         float latency;
+      };
       class Player {
          public:
             //internal types
@@ -119,6 +129,10 @@ namespace DataJockey {
             RubberBand::RubberBandStretcher * mRubberBandStretcher;
             AudioBuffer * mAudioBuffer;
             BeatBuffer * mBeatBuffer;
+
+            //the eq instance
+            SLV2Instance   mEqInstance;
+            EqControl mEqControl;
 
             //helpers
             void update_position(const Transport& transport);

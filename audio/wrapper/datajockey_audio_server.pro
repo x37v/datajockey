@@ -17,7 +17,7 @@ QMAKE_CXXFLAGS += -ffast-math
 INCLUDEPATH += include/
 INCLUDEPATH += /usr/local/include/
 
-LIBS += -ljackcpp -lsndfile -lmad -lvorbisfile -lrubberband
+LIBS += -ljackcpp -lsndfile -lmad -lvorbisfile -lrubberband -lslv2
 LIBS += $$system("pkg-config --libs jack") 
 
 MOC_DIR = moc

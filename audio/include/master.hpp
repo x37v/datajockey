@@ -5,6 +5,7 @@
 #include "transport.hpp"
 #include "scheduler.hpp"
 #include "types.hpp"
+#include "slv2/slv2.h"
 #include <vector>
 
 namespace DataJockey {
@@ -40,6 +41,8 @@ namespace DataJockey {
             const std::vector<Player *>& players() const;
             Scheduler * scheduler();
             Transport * transport();
+            SLV2World lv2_world() const;
+            SLV2Plugins lv2_plugins() const;
 
             //setters
             void master_volume(float val);
@@ -62,6 +65,9 @@ namespace DataJockey {
             unsigned int mCrossFadeMixers[2];
             bool mCrossFade;
             float mCrossFadePosition;
+
+            SLV2World mLV2World;
+            SLV2Plugins mLV2Plugins;
       };
       class MasterCommand : public Command {
          public:
