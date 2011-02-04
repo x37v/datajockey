@@ -84,6 +84,9 @@ namespace DataJockey {
             void set_player_audio_file(int player_index, QString location);
             void set_player_clear_buffers(int player_index);
 
+            //eq the eq 0 is the lowest, 2 * one_scale is the top
+            void set_player_eq(int player_index, int band, int value);
+
             //****** BEAT BUFFER COMMANDS
             //clear a players beat buffer
             void set_player_beat_buffer_clear(int player_index);

@@ -27,6 +27,7 @@ namespace DataJockey {
             enum play_state_t {PLAY, PAUSE};
             enum out_state_t {MAIN_MIX, CUE};
             enum stretch_method_t {PLAY_RATE, RUBBER_BAND};
+            enum eq_band_t {LOW, MID, HIGH};
 
             Player();
             ~Player();
@@ -90,6 +91,7 @@ namespace DataJockey {
             void loop_end_position(const TimePoint &val);
             void audio_buffer(AudioBuffer * buf);
             void beat_buffer(BeatBuffer * buf);
+            void eq(eq_band_t band, double value);
 
             //misc
             void position_relative(TimePoint amt); //go to a position relative to the current position
@@ -176,7 +178,8 @@ namespace DataJockey {
          public:
             enum action_t {
                VOLUME, VOLUME_RELATIVE,
-               PLAY_SPEED, PLAY_SPEED_RELATIVE
+               PLAY_SPEED, PLAY_SPEED_RELATIVE,
+               EQ_LOW, EQ_MID, EQ_HIGH
             };
             PlayerDoubleCommand(unsigned int idx, action_t action, double value);
             virtual void execute();

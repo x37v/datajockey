@@ -405,6 +405,21 @@ void Player::beat_buffer(BeatBuffer * buf){
    }
 }
 
+void Player::eq(eq_band_t band, double value) {
+   if (value < -70.0)
+      value = -70.0;
+   else if (value > 6.0)
+      value = 6.0;
+   switch (band) {
+      case LOW:
+         mEqControl.low = value; break;
+      case MID:
+         mEqControl.mid = value; break;
+      case HIGH:
+         mEqControl.high = value; break;
+   }
+}
+
 
 //misc
 void Player::position_relative(TimePoint amt){
@@ -598,17 +613,19 @@ void PlayerDoubleCommand::execute(){
       //execute the action
       switch(mAction){
          case VOLUME:
-            p->volume(mValue);
-            break;
+            p->volume(mValue); break;
          case VOLUME_RELATIVE:
-            p->volume_relative(mValue);
-            break;
+            p->volume_relative(mValue); break;
          case PLAY_SPEED:
-            p->play_speed(mValue);
-            break;
+            p->play_speed(mValue); break;
          case PLAY_SPEED_RELATIVE:
-            p->play_speed_relative(mValue);
-            break;
+            p->play_speed_relative(mValue); break;
+         case EQ_LOW:
+            p->eq(Player::LOW, mValue); break;
+         case EQ_MID:
+            p->eq(Player::MID, mValue); break;
+         case EQ_HIGH:
+            p->eq(Player::HIGH, mValue); break;
       };
    }
 }
@@ -627,6 +644,15 @@ bool PlayerDoubleCommand::store(CommandIOData& data) const{
          break;
       case PLAY_SPEED_RELATIVE:
          data["action"] = "play_speed_relative";
+         break;
+      case EQ_LOW:
+         data["action"] = "eq_low";
+         break;
+      case EQ_MID:
+         data["action"] = "eq_mid";
+         break;
+      case EQ_HIGH:
+         data["action"] = "eq_high";
          break;
    };
    data["value"] = mValue;

@@ -597,6 +597,40 @@ void AudioController::set_player_clear_buffers(int player_index) {
    }
 }
 
+void AudioController::set_player_eq(int player_index, int band, int value) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers || band < 0 || band > 2)
+      return;
+
+   int ione_scale = one_scale;
+
+   QMutexLocker lock(&mPlayerStatesMutex);
+   if (value < -ione_scale)
+      value = -ione_scale;
+   else if (value > ione_scale)
+      value = ione_scale;
+
+   float remaped = 0.0;
+   if (value > 0) {
+      remaped = (6.0 * value) / (float)one_scale;
+   } else {
+      remaped = (70.0 * value) / (float)one_scale;
+   }
+
+   PlayerDoubleCommand::action_t action;
+   switch(band) {
+      case 0:
+         action = PlayerDoubleCommand::EQ_LOW; break;
+      case 1:
+         action = PlayerDoubleCommand::EQ_MID; break;
+      case 2:
+         action = PlayerDoubleCommand::EQ_HIGH; break;
+   }
+
+   queue_command(new PlayerDoubleCommand(player_index, action, remaped));
+
+   //TODO emit change
+}
+
 void AudioController::relay_player_audio_file_changed(int player_index, QString fileName){
    emit(player_audio_file_changed(player_index, fileName));
 }
