@@ -110,7 +110,7 @@ void WaveFormItem::clearAudioFile(){
 
 int WaveFormItem::audioFileFrames() {
    if (mSharedBuffer.isAttached()) {
-      return mSharedBuffer.size() * data_scale;
+      return mSharedBuffer.size() * data_scale();
    }
    return 0;
 }
