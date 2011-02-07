@@ -4,4 +4,4 @@ core
 core.*
 a.out
 *.o
-datajockey
+./datajockey
