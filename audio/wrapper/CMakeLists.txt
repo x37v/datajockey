@@ -26,7 +26,19 @@ endif (NOT COMPILE_RUBY)
 SET(CUSTOM_RUBY_SITE_ARCH_DIR ${RUBY_SITEARCH_DIR} CACHE DIR "custom installation directory for ruby binary extension" )
 SET(CUSTOM_RUBY_SITE_LIB_DIR ${RUBY_SITELIB_DIR} CACHE DIR "custom installation directory for ruby extension" )
 
-include_directories( ${CMAKE_SOURCE_DIR}/smoke ${RUBY_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ruby/qtruby/src ${QT_INCLUDES} /home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/ext/ruby/qtruby/src/ /usr/include/ ./include/ ../include/ .)
+SET(QT_BINDINGS_DIR /home/alex/.rvm/gems/ruby-1.9.2-p290/gems/qtbindings-4.6.3.4/)
+
+include_directories(
+   ${CMAKE_SOURCE_DIR}/smoke
+   ${RUBY_INCLUDE_DIRS}
+   ${CMAKE_SOURCE_DIR}/ruby/qtruby/src
+   ${QT_INCLUDES}
+   ${QT_BINDINGS_DIR}/ext/ruby/qtruby/src/
+   /usr/include/
+   /usr/include/rasqal/
+   ./include/
+   ../include/ 
+   .)
 
 SET(datajockey_MOC_HEADERS
    include/audiocontroller.hpp
@@ -35,7 +47,7 @@ SET(datajockey_MOC_HEADERS
 
 QT4_WRAP_CPP(datajockey_MOC_SRC ${datajockey_MOC_HEADERS})
 
-link_directories(/home/alex/.rvm/gems/ruby-1.9.2-p0/gems/qtbindings-4.6.3.2/lib/1.9/)
+link_directories(${QT_BINDINGS_DIR}/lib/1.9/)
 set(rubydatajockey_audio_LIBRARY_SRC 
    ${datajockey_MOC_SRC}
    src/datajockey_audio.cpp 

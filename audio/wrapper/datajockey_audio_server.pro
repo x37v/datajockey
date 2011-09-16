@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS += -ffast-math
 
 INCLUDEPATH += include/
 INCLUDEPATH += /usr/local/include/
+INCLUDEPATH += /usr/include/rasqal/
 
 LIBS += -ljackcpp -lsndfile -lmad -lvorbisfile -lrubberband -lslv2
 LIBS += $$system("pkg-config --libs jack") 

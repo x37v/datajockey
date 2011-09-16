@@ -3,4 +3,4 @@ source 'http://rubygems.org'
 
 gem 'sqlite3-ruby', :require => 'sqlite3'
 gem 'activerecord'
-gem 'qtbindings'
+gem 'qtbindings', :git => 'https://github.com/ryanmelt/qtbindings.git'
