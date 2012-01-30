@@ -229,17 +229,17 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 }
 
 //finalize audio computation, apply effects, etc.
-   void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
-      if(!mAudioBuffer)
-         return;
-      if(mEqInstance) {
-         slv2_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
-         slv2_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
-         slv2_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
-         slv2_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
-         slv2_instance_run(mEqInstance, numFrames);
-      }
+void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
+   if(!mAudioBuffer)
+      return;
+   if(mEqInstance) {
+      slv2_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
+      slv2_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
+      slv2_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
+      slv2_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
+      slv2_instance_run(mEqInstance, numFrames);
    }
+}
 
 //actually fill the output vectors
 void Player::audio_fill_output_buffers(unsigned int numFrames,
