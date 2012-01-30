@@ -176,7 +176,7 @@ int main(int argc, char * argv[]){
    Master * master = DataJockey::Audio::Master::instance();
 
    cout << "reading in buffer" << endl;
-   AudioBuffer audio_buffer("/home/alex/personal/11-phuture-acid_tracks.flac");
+   AudioBuffer audio_buffer("/home/alex/projects/music/11-phuture-acid_tracks.flac");
    audio_buffer.load();
    BeatBuffer beat_buffer;
    for(unsigned int i = 0; i < 150; i++) {
@@ -185,7 +185,7 @@ int main(int argc, char * argv[]){
    master->add_player();
 
    //master->players()[0]->audio_buffer(&audio_buffer);
-//master->players()[0]->beat_buffer(&beat_buffer);
+   //master->players()[0]->beat_buffer(&beat_buffer);
    master->players()[0]->play_state(DataJockey::Audio::Player::PLAY);
    master->players()[0]->out_state(DataJockey::Audio::Player::MAIN_MIX);
    master->players()[0]->sync(false);
@@ -199,7 +199,7 @@ int main(int argc, char * argv[]){
    master->scheduler()->execute(new PlayerSetAudioBufferCommand(0, &audio_buffer, false));
    master->scheduler()->execute(new PlayerSetBeatBufferCommand(0, &beat_buffer, false));
    master->scheduler()->execute(new PlayerStateCommand(0, PlayerStateCommand::SYNC));
-   master->scheduler()->execute(new TransportBPMCommand(master->transport(), 100.0));
+   master->scheduler()->execute(new TransportBPMCommand(master->transport(), 140.0));
    //master->transport()->bpm(100.0);
 
    for(unsigned int i = 0; i < 20000; i++) {

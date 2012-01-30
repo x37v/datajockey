@@ -1,7 +1,8 @@
 #-ffast-math avoids denormals i think
 INCLUDES = -Iinclude -I/usr/include/rubberband  -I/usr/include/rasqal/
 LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2
-CFLAGS = -g -ffast-math ${INCLUDES}
+DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
+CFLAGS = -g ${DENORMAL_FLAGS} ${INCLUDES}
 
 SRC = \
 		src/audiobuffer.cpp \
