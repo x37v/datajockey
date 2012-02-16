@@ -31,6 +31,15 @@ namespace DataJockey {
       void Stretcher::frame(unsigned int frame, double frame_subsample) {
          mFrame = frame;
          mFrameSubsample = frame_subsample;
+
+         if (mFrame >= mAudioBuffer->length()) {
+            mFrame = mAudioBuffer->length() - 1;
+            mFrameSubsample = 0.0;
+         }
+
+         if (mFrameSubsample < 0.0)
+            mFrameSubsample = 0.0;
+
          frame_updated();
       }
 

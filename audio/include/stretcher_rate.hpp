@@ -9,7 +9,7 @@ namespace DataJockey {
          public:
             virtual ~StretcherRate();
          protected:
-            virtual void compute_frame(float * frame, unsigned int new_index, double new_index_subsample, unsigned int last_index, double last_index_subsample) = 0;
+            virtual void compute_frame(float * frame, unsigned int new_index, double new_index_subsample, unsigned int last_index, double last_index_subsample);
       };
    }
 }
