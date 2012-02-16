@@ -1,7 +1,8 @@
 #include "player.hpp"
 #include <math.h>
 #include "master.hpp"
-#define RUBBERBAND_WINDOW_SIZE 64
+#include "stretcher.hpp"
+#include "stretcher_rate.hpp"
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 #define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
 
@@ -19,21 +20,18 @@ Player::Player() :
    //states
    mPlayState = PAUSE;
    mOutState = CUE;
-   mStretchMethod = PLAY_RATE;
    mMute = false;
    mSync = false;
    mLoop = false;
 
    //continuous
    mVolume = 1.0;
-   mPlaySpeed = 1.0;
 
    mVolumeBuffer = NULL;
-   mAudioBuffer = NULL;
    mBeatBuffer = NULL;
-   mSampleIndex = 0;
-   mSampleIndexResidual = 0.0;
-   mRubberBandStretcher = NULL;
+
+   //XXX who should keep track of these stretchers?
+   mStretcher = new StretcherRate();
 
    //by default we start at the beginning of the audio
    mStartPosition.at_bar(0);
@@ -48,8 +46,6 @@ Player::~Player(){
    //cleanup
    if(mVolumeBuffer)
       delete [] mVolumeBuffer;
-   if(mRubberBandStretcher)
-      delete mRubberBandStretcher;
 	if(mEqInstance)
 		slv2_instance_free(mEqInstance);
 }
@@ -63,15 +59,7 @@ void Player::setup_audio(
    mSampleRate = sampleRate;
    if(mVolumeBuffer)
       delete [] mVolumeBuffer;
-   if(mRubberBandStretcher)
-      delete mRubberBandStretcher;
    mVolumeBuffer = new float[maxBufferLen];
-   mRubberBandStretcher = new 
-      RubberBand::RubberBandStretcher(mSampleRate, 2,
-            RubberBand::RubberBandStretcher::OptionProcessRealTime | 
-            RubberBand::RubberBandStretcher::OptionThreadingNever);
-   //XXX what is the ideal size?
-   mRubberBandStretcher->setMaxProcessSize(maxBufferLen * 4);
 
    //do lv2
    Master * master = Master::instance();
@@ -100,9 +88,9 @@ void Player::setup_audio(
 
 //the audio computation methods
 //setup for audio computation
-void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
-      const Transport& transport){ 
-   if(!mAudioBuffer)
+void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer, const Transport& transport){ 
+
+   if(!mStretcher->audio_buffer())
       return;
 
    //do we need to update the mSampleIndex based on the position?
@@ -115,33 +103,10 @@ void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer,
          update_play_speed(transport);
    }
 
-   if(mSampleIndex + mSampleIndexResidual >= mAudioBuffer->length())
+   if(mStretcher->frame() >= mStretcher->audio_buffer()->length())
       return;
    if(mEndPosition.valid() && mPosition >= mEndPosition)
       return;
-
-   if(mStretchMethod == RUBBER_BAND){
-      if(mPlayState == PLAY){
-         //XXX SYNC not implemented yet!
-         mRubberBandStretcher->setTimeRatio(1.0 / mPlaySpeed);
-         while(mRubberBandStretcher->available() < (int)numFrames){
-            unsigned int winSize = MIN(RUBBERBAND_WINDOW_SIZE, numFrames);
-            for(unsigned int i = 0; i < 2; i++){
-               for(unsigned int j = 0; j < winSize; j++){
-                  mixBuffer[i][j] = mAudioBuffer->sample(i, mSampleIndex + j);
-               }
-            }
-            mSampleIndex += winSize;
-            mRubberBandStretcher->process(mixBuffer, winSize, false);
-         }
-         mSampleIndexResidual = 0;
-         //update our position
-         if(mBeatBuffer){
-            mPosition = mBeatBuffer->position_at_time(
-                  (double)mSampleIndex / (double)mSampleRate, mPosition);
-         }
-      }
-   } 
 }
 
 //actually compute one frame, filling an internal buffer
@@ -151,86 +116,65 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
    //zero out the frame;
    mixBuffer[0][frame] = mixBuffer[1][frame] = 0.0;
 
-   if(!mAudioBuffer)
+   if(!mStretcher->audio_buffer())
       return;
+
    //compute the volume
    mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
    //compute the actual frame
    if(mPlayState == PLAY){
-      switch(mStretchMethod){
-         case PLAY_RATE:
-
-            if(mUpdateTransportOffset) {
-               update_transport_offset(transport);
-               mPosition = transport.position() - mTransportOffset;
-               update_position(transport);
-            }
-
-            //only update the rate on the beat.
-            if(inbeat && mSync && mBeatBuffer){
-               mPosition = transport.position() - mTransportOffset;
-               update_position(transport);
-               update_play_speed(transport);
-               //do we need to update the mSampleIndex based on the position?
-            } else if(mPositionDirty)
-               update_position(transport);
-
-            for(unsigned int i = 0; i < 2; i++){
-               mixBuffer[i][frame] = 
-                  mAudioBuffer->sample(i, mSampleIndex, mSampleIndexResidual);
-            }
-
-            //don't go past the length
-            if (mSampleIndex < mAudioBuffer->length()) {
-               mSampleIndexResidual += mPlaySpeed;
-               mSampleIndex += floor(mSampleIndexResidual);
-               mSampleIndexResidual -= floor(mSampleIndexResidual);
-            }
-
-            //update our position
-            if(mBeatBuffer){
-               mPosition = mBeatBuffer->position_at_time(
-                     ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
-               //if we've reached the end then stop, if we've reached the end of the loop
-               //reposition to the beginning of the loop
-               if(mEndPosition.valid() && mPosition >= mEndPosition)
-                  break;
-               else if(mLoop && mLoopEndPosition.valid() && 
-                     mLoopStartPosition.valid() &&
-                     mPosition >= mLoopEndPosition) {
-                  position(mLoopStartPosition);
-               }
-            } else {
-               //XXX deal with position if there is no beat buffer
-               if (mPosition.type() == TimePoint::SECONDS) {
-                  double seconds = ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate;
-                  mPosition.seconds(seconds);
-               } else {
-                  //TODO what?
-               }
-            }
-            break;
-         case RUBBER_BAND:
-            float *tmp[2], vals[2];
-            tmp[0] = &vals[0];
-            tmp[1] = &vals[2];
-
-            if(mRubberBandStretcher->retrieve(tmp, 1)){
-               for(unsigned int i = 0; i < 2; i++){
-                  mixBuffer[i][frame] = *tmp[i];
-               }
-            }
-            break;
-         default:
-            break;
+      if(mUpdateTransportOffset) {
+         update_transport_offset(transport);
+         mPosition = transport.position() - mTransportOffset;
+         update_position(transport);
       }
+
+      //only update the rate on the beat.
+      if(inbeat && mSync && mBeatBuffer){
+         mPosition = transport.position() - mTransportOffset;
+         update_position(transport);
+         update_play_speed(transport);
+         //do we need to update the mSampleIndex based on the position?
+      } else if(mPositionDirty)
+         update_position(transport);
+
+      float buffer[2];
+      mStretcher->next_frame(buffer);
+      mixBuffer[0][frame] = buffer[0];
+      mixBuffer[1][frame] = buffer[1];
    }
+
+#if 0
+      //XXX what to do?
+      //update our position
+      if(mBeatBuffer){
+         mPosition = mBeatBuffer->position_at_time(
+               ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
+         //if we've reached the end then stop, if we've reached the end of the loop
+         //reposition to the beginning of the loop
+         if(mEndPosition.valid() && mPosition >= mEndPosition)
+            break;
+         else if(mLoop && mLoopEndPosition.valid() && 
+               mLoopStartPosition.valid() &&
+               mPosition >= mLoopEndPosition) {
+            position(mLoopStartPosition);
+         }
+      } else {
+         //XXX deal with position if there is no beat buffer
+         if (mPosition.type() == TimePoint::SECONDS) {
+            double seconds = ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate;
+            mPosition.seconds(seconds);
+         } else {
+            //TODO what?
+         }
+      }
+#endif
 }
 
 //finalize audio computation, apply effects, etc.
 void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
-   if(!mAudioBuffer)
+   if(!mStretcher->audio_buffer())
       return;
    if(mEqInstance) {
       slv2_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
@@ -244,7 +188,7 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
 //actually fill the output vectors
 void Player::audio_fill_output_buffers(unsigned int numFrames,
       float ** mixBuffer, float ** cueBuffer){
-   if(!mAudioBuffer)
+   if(!mStretcher->audio_buffer())
       return;
 
    //send the data out, copying to the cue buffer before volume if needed
@@ -268,19 +212,17 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
 //getters
 Player::play_state_t Player::play_state() const { return mPlayState; }
 Player::out_state_t Player::out_state() const { return mOutState; }
-Player::stretch_method_t Player::stretch_method() const { return mStretchMethod; }
 bool Player::muted() const { return mMute; }
 bool Player::syncing() const { return mSync; }
 bool Player::looping() const { return mLoop; }
 double Player::volume() const { return mVolume; }
-double Player::play_speed() const { return mPlaySpeed; }
+double Player::play_speed() const { return mStretcher->speed(); }
 const TimePoint& Player::position() const { return mPosition; }
 const TimePoint& Player::start_position() const { return mStartPosition; }
 const TimePoint& Player::end_position() const { return mEndPosition; }
 const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
 const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
-unsigned long Player::current_frame() const { return mSampleIndex; }
-AudioBuffer * Player::audio_buffer() const { return mAudioBuffer; }
+AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); }
 BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
 
 //setters
@@ -293,9 +235,6 @@ void Player::play_state(play_state_t val){
 
 void Player::out_state(out_state_t val){
    mOutState = val;
-}
-
-void Player::stretch_method(stretch_method_t /*val*/){
 }
 
 void Player::mute(bool val){
@@ -319,7 +258,7 @@ void Player::volume(double val){
 }
 
 void Player::play_speed(double val){
-   mPlaySpeed = val;
+   mStretcher->speed(val);
 }
 
 void Player::position(const TimePoint &val){
@@ -342,27 +281,24 @@ void Player::position(const TimePoint &val){
    //otherwise we grab the time from the beat buffer!
    mPositionDirty = false;
    if(mPosition.type() == TimePoint::SECONDS){
-      mSampleIndex = (double)mSampleRate * mPosition.seconds();
-      mSampleIndexResidual = 0;
+      unsigned int frame = (double)mSampleRate * mPosition.seconds();
+      mStretcher->frame(frame);
    } else if(mBeatBuffer){
-      mSampleIndex = mSampleRate * mBeatBuffer->time_at_position(mPosition);
-      mSampleIndexResidual = 0;
+      unsigned int frame = mSampleRate * mBeatBuffer->time_at_position(mPosition);
+      mStretcher->frame(frame);
    } else
       mPositionDirty = true;
 
 }
 
 void Player::position_at_frame(unsigned long frame) {
-   mSampleIndex = frame;
-   mSampleIndexResidual = 0;
-   mUpdateTransportOffset = true;
+   if (!mStretcher->audio_buffer())
+      return;
 
-   if (mAudioBuffer && mAudioBuffer->length() <= mSampleIndex) {
-      mSampleIndex = mAudioBuffer->length();
-   }
+   mStretcher->frame(frame);
 
    if (mBeatBuffer) {
-      double time = mSampleIndex;
+      double time = mStretcher->frame();
       time /= mSampleRate;
       mPosition = mBeatBuffer->position_at_time(time, mPosition);
    }
@@ -387,7 +323,7 @@ void Player::loop_end_position(const TimePoint &val){
 }
 
 void Player::audio_buffer(AudioBuffer * buf){
-   mAudioBuffer = buf;
+   mStretcher->audio_buffer(buf);
    //set at the start
    //TODO what if the start position's type is not the same as the position type?
    //mPosition = mStartPosition;
@@ -427,15 +363,11 @@ void Player::position_relative(TimePoint amt){
 }
 
 void Player::position_at_frame_relative(long offset){
-   long frame = mSampleIndex + offset;
-   if (frame > 0)
-      position_at_frame(frame);
-   else
-      position_at_frame(0);
+   mStretcher->frame(offset + mStretcher->frame());
 }
 
 void Player::play_speed_relative(double amt){
-   mPlaySpeed += amt;
+   mStretcher->speed(mStretcher->speed() + amt);
 }
 
 void Player::volume_relative(double amt){
@@ -445,6 +377,8 @@ void Player::volume_relative(double amt){
 
 void Player::update_position(const Transport& transport){
    mPositionDirty = false;
+   //XXX do we need this?
+#if 0
 
    //if the type is seconds then set to that value
    //if it isn't and we have a beat buffer set to the appropriate value
@@ -461,6 +395,7 @@ void Player::update_position(const Transport& transport){
             (double)(mPosition.bar() * mPosition.beats_per_bar() + mPosition.beat()));
       mSampleIndexResidual = 0;
    }
+#endif
 }
 
 void Player::update_play_speed(const Transport& transport) {
@@ -476,14 +411,17 @@ void Player::update_play_speed(const Transport& transport) {
    newSpeed /= secTillBeat; 
    //XXX should make this a setting
    if(newSpeed > 0.25 && newSpeed < 4)
-      mPlaySpeed = newSpeed;
+      mStretcher->speed(newSpeed);
 }
 
 void Player::update_transport_offset(const Transport& transport) {
    mTransportOffset = (transport.position() - mPosition);
+
+   //XXX do we really want to do this?
    if(mTransportOffset.pos_in_beat() > 0.5)
       mTransportOffset.advance_beat();
    mTransportOffset.pos_in_beat(0.0);
+
    mUpdateTransportOffset = false;
 }
 

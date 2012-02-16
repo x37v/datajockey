@@ -7,6 +7,7 @@
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
+#include "stretcher.hpp"
 #include <rubberband/RubberBandStretcher.h>
 #include <slv2/collections.h>
 #include <slv2/plugin.h>
@@ -26,7 +27,6 @@ namespace DataJockey {
             //internal types
             enum play_state_t {PLAY, PAUSE};
             enum out_state_t {MAIN_MIX, CUE};
-            enum stretch_method_t {PLAY_RATE, RUBBER_BAND};
             enum eq_band_t {LOW, MID, HIGH};
 
             Player();
@@ -59,7 +59,6 @@ namespace DataJockey {
             //getters
             play_state_t play_state() const;
             out_state_t out_state() const;
-            stretch_method_t stretch_method() const;
             bool muted() const;
             bool syncing() const;
             bool looping() const;
@@ -70,14 +69,13 @@ namespace DataJockey {
             const TimePoint& end_position() const;
             const TimePoint& loop_start_position() const;
             const TimePoint& loop_end_position() const;
-            unsigned long current_frame() const;
+
             AudioBuffer * audio_buffer() const;
             BeatBuffer * beat_buffer() const;
 
             //setters
             void play_state(play_state_t val);
             void out_state(out_state_t val);
-            void stretch_method(stretch_method_t val);
             void mute(bool val);
             void sync(bool val);
             void loop(bool val);
@@ -103,7 +101,6 @@ namespace DataJockey {
             //states
             play_state_t mPlayState;
             out_state_t mOutState;
-            stretch_method_t mStretchMethod;
             bool mMute;
             bool mSync; //sync to main transport or not
             bool mLoop;
@@ -111,7 +108,6 @@ namespace DataJockey {
 
             //continuous
             double mVolume;
-            double mPlaySpeed;
             TimePoint mPosition; //the current position in the audio
             bool mPositionDirty; //indicates if the sampleindex needs update based
             //on the position update
@@ -126,11 +122,8 @@ namespace DataJockey {
             //internals, bookkeeping, etc
             unsigned int mSampleRate;
             float * mVolumeBuffer;
-            unsigned long mSampleIndex;
-            double mSampleIndexResidual;
-            RubberBand::RubberBandStretcher * mRubberBandStretcher;
-            AudioBuffer * mAudioBuffer;
             BeatBuffer * mBeatBuffer;
+            Stretcher * mStretcher;
 
             //the eq instance
             SLV2Instance   mEqInstance;
@@ -142,6 +135,7 @@ namespace DataJockey {
             void update_play_speed(const Transport& transport);
             void update_transport_offset(const Transport& transport);
       };
+
       class PlayerCommand : public Command {
          public:
             PlayerCommand(unsigned int idx);
@@ -159,6 +153,7 @@ namespace DataJockey {
             //this comes from the player's position
             TimePoint mPositionExecuted;
       };
+
       class PlayerStateCommand : public PlayerCommand {
          public:
             enum action_t {
@@ -174,6 +169,7 @@ namespace DataJockey {
          private:
             action_t mAction;
       };
+
       class PlayerDoubleCommand : public PlayerCommand {
          public:
             enum action_t {
@@ -188,6 +184,7 @@ namespace DataJockey {
             action_t mAction;
             double mValue;
       };
+
       class PlayerSetAudioBufferCommand : public PlayerCommand {
          public:
             //set the buffer, if you set deleteOldBuffer the buffer that is replaced with the given buffer
@@ -205,6 +202,7 @@ namespace DataJockey {
             AudioBuffer * mOldBuffer;
             bool mDeleteOldBuffer;
       };
+
       class PlayerSetBeatBufferCommand : public PlayerCommand {
          public:
             //set the buffer, if you set deleteOldBuffer the buffer that is replaced with the given buffer
@@ -222,6 +220,7 @@ namespace DataJockey {
             BeatBuffer * mOldBuffer;
             bool mDeleteOldBuffer;
       };
+
       class PlayerPositionCommand : public PlayerCommand {
          public:
             enum position_t {
