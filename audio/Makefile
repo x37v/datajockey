@@ -15,6 +15,8 @@ SRC = \
 		src/scheduler.cpp \
 		src/schedulenode.cpp \
 		src/soundfile.cpp \
+		src/stretcher.cpp \
+		src/stretcher_rate.cpp \
 		src/timepoint.cpp \
 		src/transport.cpp
 
