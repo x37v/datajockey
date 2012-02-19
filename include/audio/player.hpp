@@ -8,7 +8,6 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "stretcher.hpp"
-#include <rubberband/RubberBandStretcher.h>
 #include <slv2/collections.h>
 #include <slv2/plugin.h>
 #include <slv2/plugininstance.h>
@@ -69,6 +68,7 @@ namespace DataJockey {
             const TimePoint& end_position() const;
             const TimePoint& loop_start_position() const;
             const TimePoint& loop_end_position() const;
+            unsigned int frame() const;
 
             AudioBuffer * audio_buffer() const;
             BeatBuffer * beat_buffer() const;

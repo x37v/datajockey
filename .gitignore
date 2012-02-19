@@ -5,3 +5,5 @@ core.*
 a.out
 *.o
 ./datajockey
+obj/
+moc/

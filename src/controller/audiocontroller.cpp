@@ -98,7 +98,7 @@ class AudioController::QueryPlayerStates : public MasterCommand {
       }
       virtual void execute(){
          for(unsigned int i = 0; i < mNumPlayers; i++)
-            mStates[i]->mCurrentFrame = master()->players()[i]->current_frame();
+            mStates[i]->mCurrentFrame = master()->players()[i]->frame();
       }
       virtual void execute_done() {
          for(unsigned int i = 0; i < mNumPlayers; i++)
