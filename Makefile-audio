@@ -1,0 +1,38 @@
+#-ffast-math avoids denormals i think
+INCLUDES = -Iinclude/audio/ -I/usr/include/rubberband  -I/usr/include/rasqal/
+LIBS = -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2
+DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
+CFLAGS = -g ${DENORMAL_FLAGS} ${INCLUDES}
+
+SRC = \
+		src/audio/audiobuffer.cpp \
+		src/audio/audioio.cpp \
+		src/audio/beatbuffer.cpp \
+		src/audio/command.cpp \
+		src/audio/main.cpp \
+		src/audio/master.cpp \
+		src/audio/player.cpp \
+		src/audio/scheduler.cpp \
+		src/audio/schedulenode.cpp \
+		src/audio/soundfile.cpp \
+		src/audio/stretcher.cpp \
+		src/audio/stretcher_rate.cpp \
+		src/audio/timepoint.cpp \
+		src/audio/transport.cpp
+
+OBJ = ${SRC:.cpp=.o}
+
+first: datajockey
+
+#the master depends on the scheduler
+src/audio/master.o: src/audio/scheduler.o
+
+.cpp.o:
+	@echo CC $<
+	@${CC} -c ${CFLAGS} -o $*.o $<
+
+datajockey: ${OBJ}
+	g++ -o $@ ${CFLAGS} ${OBJ} ${LIBS}
+
+clean:
+	rm -f ${OBJ} datajockey
