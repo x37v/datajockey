@@ -50,6 +50,8 @@ Player::~Player(){
 		slv2_instance_free(mEqInstance);
 }
 
+//#error "GO OVER ALL OF THIS!!!!!!!!!!!!!!, stretcher not fully integrated"
+
 //this creates internal buffers
 //** must be called BEFORE the audio callback starts
 void Player::setup_audio(
@@ -406,10 +408,12 @@ void Player::update_play_speed(const Transport& transport) {
    TimePoint next = mPosition;
    next.advance_beat();
 
-   double newSpeed = mBeatBuffer->time_at_position(next) - 
-      mBeatBuffer->time_at_position(mPosition);
+   double newSpeed = mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
    newSpeed /= secTillBeat; 
+
    //XXX should make this a setting
+   //should we at least set no sync and notify observers?
+   //also, if we do abs(newSpeed) we could allow for going backwards?
    if(newSpeed > 0.25 && newSpeed < 4)
       mStretcher->speed(newSpeed);
 }

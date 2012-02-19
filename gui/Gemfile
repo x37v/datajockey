@@ -1,6 +1,0 @@
-$ruby_version = `ruby --version`.split[1].to_f
-source 'http://rubygems.org'
-
-gem 'sqlite3-ruby', :require => 'sqlite3'
-gem 'activerecord'
-gem 'qtbindings', :git => 'https://github.com/ryanmelt/qtbindings.git'

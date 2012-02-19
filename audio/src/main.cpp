@@ -201,6 +201,23 @@ int main(int argc, char * argv[]){
    master->scheduler()->execute(new PlayerStateCommand(0, PlayerStateCommand::SYNC));
    master->scheduler()->execute(new TransportBPMCommand(master->transport(), 140.0));
    //master->transport()->bpm(100.0);
+   for(unsigned int i = 0; i < 20000; i++) {
+      usleep(1000);
+      master->scheduler()->execute_done_actions();
+   }
+   cout << "not syncing anymore" << endl;
+   master->scheduler()->execute(new PlayerStateCommand(0, PlayerStateCommand::NO_SYNC));
+   usleep(1000);
+   master->scheduler()->execute_done_actions();
+
+   master->scheduler()->execute(new TransportBPMCommand(master->transport(), 120.0));
+
+   for(unsigned int i = 0; i < 4000; i++) {
+      usleep(1000);
+      master->scheduler()->execute_done_actions();
+   }
+   cout << "syncing again" << endl;
+   master->scheduler()->execute(new PlayerStateCommand(0, PlayerStateCommand::SYNC));
 
    for(unsigned int i = 0; i < 20000; i++) {
       usleep(1000);

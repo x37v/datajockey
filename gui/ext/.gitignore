@@ -1,9 +1,0 @@
-CMakeCache.txt
-CMakeFiles/
-Makefile
-cmake_install.cmake
-*.so
-smoke/generator.log
-smoke/smokedata.cpp
-smoke/x_1.cpp
-smoke/x_2.cpp
