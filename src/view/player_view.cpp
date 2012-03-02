@@ -40,6 +40,18 @@ Player::Player(QWidget * parent) : QWidget(parent) {
    }
    mTopLayout->addLayout(button_layout);
 
+   QString eq[3] = {
+      "high",
+      "mid",
+      "low"
+   };
+   for (unsigned int i = 0; i < 3; i++) {
+      QDial * dial = new QDial(this);
+      dial->setRange(-one_scale, one_scale);
+      mEqDials.insert(eq[i], dial);
+      mTopLayout->addWidget(dial, 0, Qt::AlignHCenter);
+   }
+
    mVolumeSlider = new QSlider(Qt::Vertical, this);
    mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
    mVolumeSlider->setValue(one_scale);
@@ -49,5 +61,6 @@ Player::Player(QWidget * parent) : QWidget(parent) {
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
+QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 
