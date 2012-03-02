@@ -16,13 +16,15 @@ DEPENDPATH += . \
 MOC_DIR = moc/
 OBJECTS_DIR = obj/
 INCLUDEPATH += . \
+   include/ \
    include/audio \
    include/controller \
    include/view \
    /usr/include/rubberband /usr/include/rasqal/
 
 # Input
-HEADERS += include/audio/audiobuffer.hpp \
+HEADERS += include/defines.hpp \
+           include/audio/audiobuffer.hpp \
            include/audio/audioio.hpp \
            include/audio/beatbuffer.hpp \
            include/audio/command.hpp \
@@ -43,7 +45,8 @@ HEADERS += include/audio/audiobuffer.hpp \
            include/controller/audioloaderthread.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp
-SOURCES += src/audio/audiobuffer.cpp \
+SOURCES += src/defines.cpp \
+           src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \
            src/audio/beatbuffer.cpp \
            src/audio/command.cpp \

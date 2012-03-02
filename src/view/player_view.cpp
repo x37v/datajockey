@@ -1,6 +1,7 @@
 #include "player_view.hpp"
 #include <QPushButton>
 #include <QGridLayout>
+#include "defines.hpp"
 
 using namespace DataJockey::View;
 
@@ -26,6 +27,11 @@ Player::Player(QWidget * parent) : QWidget(parent) {
    mTopLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
    QGridLayout * button_layout = new QGridLayout();
 
+   mTrackDescription = new QTextEdit(this);
+   mTrackDescription->setReadOnly(true);
+   mTrackDescription->setText("EMPTY");
+   mTopLayout->addWidget(mTrackDescription);
+
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
       QPushButton * btn = new QPushButton(items[i].label, this);
       btn->setCheckable(items[i].checkable);
@@ -34,6 +40,14 @@ Player::Player(QWidget * parent) : QWidget(parent) {
    }
    mTopLayout->addLayout(button_layout);
 
+   mVolumeSlider = new QSlider(Qt::Vertical, this);
+   mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
+   mVolumeSlider->setValue(one_scale);
+   mTopLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+
    setLayout(mTopLayout);
 }
+
+QPushButton * Player::button(QString name) const { return mButtons[name]; }
+QSlider * Player::volume_slider() const { return mVolumeSlider; }
 
