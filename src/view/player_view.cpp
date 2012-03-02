@@ -1,11 +1,14 @@
 #include "player_view.hpp"
 #include "defines.hpp"
+#include "waveformitem.hpp"
 
 #include <QPushButton>
 #include <QGridLayout>
 #include <QSlider>
 #include <QDial>
 #include <QProgressBar>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 
 using namespace DataJockey::View;
 
@@ -17,7 +20,7 @@ struct button_info {
    QString name;
 };
 
-Player::Player(QWidget * parent) : QWidget(parent) {
+Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent) {
    button_info items[] = {
       {0, 0, false, "ld", "load"},
       {0, 2, false, "rs", "reset"},
@@ -28,18 +31,21 @@ Player::Player(QWidget * parent) : QWidget(parent) {
       {2, 2, false, ">>", "seek_forward"},
    };
 
-   mTopLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+   mTopLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+   if (waveform_orientation == WAVEFORM_LEFT)
+      mTopLayout->setDirection(QBoxLayout::RightToLeft);
+
+   mControlLayout = new QBoxLayout(QBoxLayout::TopToBottom);
    QGridLayout * button_layout = new QGridLayout();
 
    mTrackDescription = new QTextEdit(this);
    mTrackDescription->setReadOnly(true);
    mTrackDescription->setText("EMPTY");
-   mTopLayout->addWidget(mTrackDescription);
+   mControlLayout->addWidget(mTrackDescription);
 
    mProgressBar = new QProgressBar(this);
    mProgressBar->setTextVisible(true);
-   mProgressBar->setValue(50);
-   mTopLayout->addWidget(mProgressBar);
+   mControlLayout->addWidget(mProgressBar);
 
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
       QPushButton * btn = new QPushButton(items[i].label, this);
@@ -47,25 +53,33 @@ Player::Player(QWidget * parent) : QWidget(parent) {
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col);
    }
-   mTopLayout->addLayout(button_layout);
+   mControlLayout->addLayout(button_layout);
 
-   QString eq[3] = {
-      "high",
-      "mid",
-      "low"
-   };
+   QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
       QDial * dial = new QDial(this);
       dial->setRange(-one_scale, one_scale);
       mEqDials.insert(eq[i], dial);
-      mTopLayout->addWidget(dial, 0, Qt::AlignHCenter);
+      mControlLayout->addWidget(dial, 0, Qt::AlignHCenter);
    }
 
    mVolumeSlider = new QSlider(Qt::Vertical, this);
    mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
    mVolumeSlider->setValue(one_scale);
-   mTopLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+   mControlLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
 
+   mWaveFormView = new QGraphicsView(this);
+   mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
+
+   QGraphicsScene * scene = new QGraphicsScene(mWaveFormView);
+
+   mWaveForm = new WaveFormItem();
+   scene->addItem(mWaveForm);
+
+   mWaveFormView->setScene(scene);
+
+   mTopLayout->addLayout(mControlLayout);
+   mTopLayout->addWidget(mWaveFormView);
    setLayout(mTopLayout);
 }
 
