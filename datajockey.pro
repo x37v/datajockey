@@ -41,6 +41,7 @@ HEADERS += include/audio/audiobuffer.hpp \
            include/controller/audiobufferreference.hpp \
            include/controller/audiocontroller.hpp \
            include/controller/audioloaderthread.hpp \
+           include/view/player_view.hpp \
            include/view/waveformitem.hpp
 SOURCES += src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \
@@ -60,4 +61,5 @@ SOURCES += src/audio/audiobuffer.cpp \
            src/controller/audiocontroller.cpp \
            src/controller/audioloaderthread.cpp \
            src/view/main.cpp \
+           src/view/player_view.cpp \
            src/view/waveformitem.cpp
