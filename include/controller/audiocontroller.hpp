@@ -10,6 +10,7 @@
 #include "timepoint.hpp"
 #include "player.hpp"
 #include "audiobuffer.hpp"
+#include "audiobufferreference.hpp"
 #include "beatbuffer.hpp"
 #include "scheduler.hpp"
 #include <vector>
@@ -36,9 +37,6 @@ namespace DataJockey {
             static AudioController * cInstance;
          public:
             static AudioController * instance();
-            //this is the value we use to scale from an int to a double, this
-            //represents 'one' as a double in int terms.
-            const static unsigned int one_scale;
 
             //getters
             //player
@@ -146,6 +144,7 @@ namespace DataJockey {
 
             unsigned int mNumPlayers;
             std::vector<AudioLoaderThread *> mThreadPool;
+            std::vector<Audio::AudioBufferReference> mPlayerAudioBuffers;
 
             //execute/consume the scheduler's done actions
             ConsumeThread * mConsumeThread;

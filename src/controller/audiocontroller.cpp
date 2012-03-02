@@ -2,6 +2,7 @@
 #include "audioloaderthread.hpp"
 #include "audiobufferreference.hpp"
 #include "transport.hpp"
+#include "defines.hpp"
 
 #include <QMutexLocker>
 #include <vector>
@@ -125,7 +126,6 @@ class AudioController::ConsumeThread : public QThread {
       }
 };
 
-const unsigned int DataJockey::Audio::AudioController::one_scale = 1000;
 AudioController * AudioController::cInstance = NULL;
 
 AudioController::AudioController() :
