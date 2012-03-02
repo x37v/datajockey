@@ -24,15 +24,15 @@ Player::Player(QWidget * parent) : QWidget(parent) {
    };
 
    mTopLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
-   QGridLayout * mButtonLayout = new QGridLayout();
+   QGridLayout * button_layout = new QGridLayout();
 
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
       QPushButton * btn = new QPushButton(items[i].label, this);
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);
-      mButtonLayout->addWidget(btn, items[i].row, items[i].col);
+      button_layout->addWidget(btn, items[i].row, items[i].col);
    }
-   mTopLayout->addLayout(mButtonLayout);
+   mTopLayout->addLayout(button_layout);
 
    setLayout(mTopLayout);
 }
