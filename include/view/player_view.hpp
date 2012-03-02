@@ -6,10 +6,11 @@
 #include <QString>
 #include <QBoxLayout>
 #include <QTextEdit>
-#include <QSlider>
-#include <QDial>
 
 class QPushButton;
+class QSlider;
+class QDial;
+class QProgressBar;
 
 namespace DataJockey {
    namespace View {
@@ -20,7 +21,9 @@ namespace DataJockey {
             QPushButton * button(QString name) const;
             QDial * eq_dial(QString name) const;
             QSlider * volume_slider() const;
+            QProgressBar * progress_bar() const;
          private:
+            QProgressBar * mProgressBar;
             QMap<QString, QPushButton *> mButtons;
             QBoxLayout * mTopLayout;
             QTextEdit * mTrackDescription;

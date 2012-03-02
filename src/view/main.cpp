@@ -8,6 +8,7 @@ int main(int argc, char * argv[]){
 
    View::Player player;
    player.show();
+   app.setStyle("plastique");
 
    app.exec();
 }

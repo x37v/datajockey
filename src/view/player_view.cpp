@@ -1,7 +1,11 @@
 #include "player_view.hpp"
+#include "defines.hpp"
+
 #include <QPushButton>
 #include <QGridLayout>
-#include "defines.hpp"
+#include <QSlider>
+#include <QDial>
+#include <QProgressBar>
 
 using namespace DataJockey::View;
 
@@ -31,6 +35,11 @@ Player::Player(QWidget * parent) : QWidget(parent) {
    mTrackDescription->setReadOnly(true);
    mTrackDescription->setText("EMPTY");
    mTopLayout->addWidget(mTrackDescription);
+
+   mProgressBar = new QProgressBar(this);
+   mProgressBar->setTextVisible(true);
+   mProgressBar->setValue(50);
+   mTopLayout->addWidget(mProgressBar);
 
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
       QPushButton * btn = new QPushButton(items[i].label, this);
@@ -63,4 +72,4 @@ Player::Player(QWidget * parent) : QWidget(parent) {
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
-
+QProgressBar * Player::progress_bar() const { return mProgressBar; }
