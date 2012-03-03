@@ -38,6 +38,10 @@ void WaveFormView::set_audio_file(const QString& file_name) {
    rect.setWidth(rect.width() + 2 * geometry().height());
    rect.setX(rect.x() - geometry().height());
    mScene->setSceneRect(rect);
+
+   resetMatrix();
+   scale((float)geometry().width() / 200.0, 1.0);
+   rotate(-90);
 }
 
 void WaveFormView::set_audio_frame(int frame) {
@@ -47,10 +51,10 @@ void WaveFormView::set_audio_frame(int frame) {
 }
 
 void WaveFormView::resizeEvent(QResizeEvent * event) {
-   //resetMatrix();
-   ////scale(((float)event->size().width() / 200.0), 1.0);
-   //rotate(-90);
-   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
+   resetMatrix();
+   //scale(((float)event->size().width() / 200.0), 1.0);
+   rotate(-90);
+   ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 
    QGraphicsView::resizeEvent(event);
 }

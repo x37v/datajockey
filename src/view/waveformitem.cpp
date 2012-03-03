@@ -82,7 +82,7 @@ void WaveFormItem::setPen(const QPen& pen) {
 void WaveFormItem::setAudioFile(const QString& fileName) {
    mAudioBuffer.reset(fileName);
    if (mAudioBuffer.valid()) {
-      mBoundingRect.setWidth(mAudioBuffer->length() / (sizeof(float) * mZoom));
+      mBoundingRect.setWidth(mAudioBuffer->length() / mZoom);
    } else {
       mBoundingRect.setWidth(0);
    }
