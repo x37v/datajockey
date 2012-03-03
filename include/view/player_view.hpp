@@ -34,6 +34,10 @@ namespace DataJockey {
          public slots:
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
+         signals:
+            void seek_relative(int frames);
+         protected slots:
+            void relay_seek_relative(int frames);
          private:
             QProgressBar * mProgressBar;
             QMap<QString, QPushButton *> mButtons;
@@ -43,6 +47,7 @@ namespace DataJockey {
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
             WaveFormView * mWaveFormView;
+            unsigned int mFrames;
       };
    }
 }

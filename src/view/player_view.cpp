@@ -1,6 +1,8 @@
 #include "player_view.hpp"
 #include "defines.hpp"
 #include "waveformitem.hpp"
+#include "audiobufferreference.hpp"
+#include "audiobuffer.hpp"
 
 #include <QPushButton>
 #include <QGridLayout>
@@ -18,7 +20,7 @@ struct button_info {
    QString name;
 };
 
-Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent) {
+Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent), mFrames(0) {
    button_info items[] = {
       {0, 0, false, "ld", "load"},
       {0, 2, false, "rs", "reset"},
@@ -74,6 +76,11 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mTopLayout->addLayout(mControlLayout);
    mTopLayout->addWidget(mWaveFormView);
    setLayout(mTopLayout);
+
+   QObject::connect(mWaveFormView,
+         SIGNAL(seek_relative(int)),
+         this,
+         SLOT(relay_seek_relative(int)));
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
@@ -83,5 +90,24 @@ QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
 
-void Player::set_audio_file(const QString& file_name) { mWaveFormView->set_audio_file(file_name); }
-void Player::set_audio_frame(int frame) { mWaveFormView->set_audio_frame(frame); }
+void Player::set_audio_file(const QString& file_name) {
+   Audio::AudioBufferReference ref(file_name);
+
+   mWaveFormView->set_audio_file(file_name);
+   if (ref.valid())
+      mFrames = ref->length();
+   else
+      mFrames = 0;
+   mProgressBar->setValue(0);
+}
+
+void Player::set_audio_frame(int frame) {
+   mWaveFormView->set_audio_frame(frame);
+   if (mFrames) {
+      mProgressBar->setValue(frame / (mFrames / 100));
+   } else
+      mProgressBar->setValue(0);
+}
+
+void Player::relay_seek_relative(int frames) { emit(seek_relative(frames)); }
+

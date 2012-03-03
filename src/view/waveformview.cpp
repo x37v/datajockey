@@ -29,6 +29,9 @@ WaveFormView::WaveFormView(QWidget * parent) {
    //mWaveFormView->ensureVisible(mScene->mSceneRect(), Qt::IgnoreAspectRatio);
 }
 
+WaveFormView::~WaveFormView() {
+}
+
 void WaveFormView::set_audio_file(const QString& file_name) {
    mWaveForm->setAudioFile(file_name);
    QRectF rect = mWaveForm->boundingRect();
@@ -45,9 +48,18 @@ void WaveFormView::set_audio_frame(int frame) {
 
 void WaveFormView::resizeEvent(QResizeEvent * event) {
    //resetMatrix();
-   //scale(((float)event->size().width() / 200.0), 1.0);
+   ////scale(((float)event->size().width() / 200.0), 1.0);
    //rotate(-90);
+   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 
    QGraphicsView::resizeEvent(event);
 }
+
+void WaveFormView::wheelEvent(QWheelEvent * event) {
+   float amt = (float)event->delta() / 160.0;
+   amt *= geometry().height();
+   int frames = amt * mWaveForm->zoom();
+   emit(seek_relative(frames));
+}
+
 

@@ -5,6 +5,10 @@
 #include <QSlider>
 #include <QDial>
 
+//XXX
+#include <iostream>
+using namespace std;
+
 using namespace DataJockey::Controller;
 
 PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent) { 
@@ -28,6 +32,11 @@ void PlayerMapper::map(int index, View::Player * player) {
          SIGNAL(player_position_changed(int, int)),
          this,
          SLOT(position_changed(int, int)));
+
+   QObject::connect(player,
+         SIGNAL(seek_relative(int)),
+         this,
+         SLOT(seek_relative(int)));
 
    QPushButton * button;
    foreach(button, player->buttons()) {
@@ -160,3 +169,12 @@ void PlayerMapper::position_changed(int player_index, int frame) {
       return;
    player->set_audio_frame(frame);
 }
+
+void PlayerMapper::seek_relative(int frames) {
+   View::Player * player = static_cast<View::Player *>(QObject::sender());
+   if (!player)
+      return;
+   int index = mPlayerIndexMap[player];
+   mAudioController->set_player_position_frame_relative(index, frames);
+}
+

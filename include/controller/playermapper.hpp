@@ -36,6 +36,8 @@ namespace DataJockey {
 
             void position_changed(int player_index, int frame);
 
+            void seek_relative(int frames);
+
          private:
             QMap<View::Player *, int> mPlayerIndexMap;
             QMap<int, View::Player *> mIndexPlayerMap;
