@@ -21,6 +21,11 @@ void PlayerMapper::map(int index, View::Player * player) {
          SIGNAL(player_audio_file_changed(int, QString)),
          this,
          SLOT(file_changed(int, QString)));
+   QObject::connect(mAudioController,
+         SIGNAL(player_position_changed(int, int)),
+         this,
+         SLOT(position_changed(int, int)));
+
 }
 
 void PlayerMapper::button_pressed() {
@@ -49,3 +54,9 @@ void PlayerMapper::file_load_progress(int player_index, int progress) {
    player->progress_bar()->setValue(progress);
 }
 
+void PlayerMapper::position_changed(int player_index, int frame) {
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   player->set_audio_frame(frame);
+}

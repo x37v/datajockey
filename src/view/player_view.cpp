@@ -72,14 +72,14 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
    mWaveFormView->rotate(-90);
 
-   QGraphicsScene * scene = new QGraphicsScene(mWaveFormView);
+   mWaveFormScene = new QGraphicsScene(mWaveFormView);
 
    mWaveForm = new WaveFormItem();
-   scene->addItem(mWaveForm);
+   mWaveFormScene->addItem(mWaveForm);
 
-   mWaveFormView->setScene(scene);
+   mWaveFormView->setScene(mWaveFormScene);
    //mWaveFormView->fitInView(mWaveForm);
-   //mWaveFormView->ensureVisible(scene->sceneRect(), Qt::IgnoreAspectRatio);
+   //mWaveFormView->ensureVisible(mWaveFormScene->mWaveFormSceneRect(), Qt::IgnoreAspectRatio);
 
    mTopLayout->addLayout(mControlLayout);
    mTopLayout->addWidget(mWaveFormView);
@@ -93,4 +93,13 @@ QProgressBar * Player::progress_bar() const { return mProgressBar; }
 
 void Player::set_audio_file(const QString& file_name) {
    mWaveForm->setAudioFile(file_name);
+   QRectF rect = mWaveForm->boundingRect();
+   rect.setWidth(rect.width() + 2 * mWaveFormView->geometry().height());
+   rect.setX(rect.x() - mWaveFormView->geometry().height());
+   mWaveFormScene->setSceneRect(rect);
+}
+
+void Player::set_audio_frame(int frame) {
+   int offset = mWaveFormView->geometry().height() / 4;
+   mWaveFormView->centerOn(frame / mWaveForm->zoom() + offset, 0);
 }

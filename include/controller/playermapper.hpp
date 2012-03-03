@@ -25,6 +25,8 @@ namespace DataJockey {
             void file_changed(int player_index, QString file_name);
             void file_cleared(int player_index);
             void file_load_progress(int player_index, int percent);
+
+            void position_changed(int player_index, int frame);
          private:
             QMap<View::Player *, int> mPlayerIndexMap;
             QMap<int, View::Player *> mIndexPlayerMap;

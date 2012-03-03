@@ -13,6 +13,7 @@ class QSlider;
 class QDial;
 class QProgressBar;
 class QGraphicsView;
+class QGraphicsScene;
 
 namespace DataJockey {
    namespace View {
@@ -29,6 +30,7 @@ namespace DataJockey {
             QProgressBar * progress_bar() const;
          public slots:
             void set_audio_file(const QString& file_name);
+            void set_audio_frame(int frame);
          private:
             QProgressBar * mProgressBar;
             QMap<QString, QPushButton *> mButtons;
@@ -39,6 +41,7 @@ namespace DataJockey {
             QMap<QString, QDial *> mEqDials;
             WaveFormItem * mWaveForm;
             QGraphicsView * mWaveFormView;
+            QGraphicsScene * mWaveFormScene;
       };
    }
 }
