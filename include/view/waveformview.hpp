@@ -5,6 +5,8 @@
 #include <QString>
 
 class QGraphicsScene;
+class QResizeEvent;
+class QGraphicsLineItem;
 
 namespace DataJockey {
    namespace View {
@@ -15,9 +17,11 @@ namespace DataJockey {
             WaveFormView(QWidget * parent = NULL);
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
+            virtual void resizeEvent(QResizeEvent * event);
          private:
             WaveFormItem * mWaveForm;
-            QGraphicsScene * mWaveFormScene;
+            QGraphicsScene * mScene;
+            QGraphicsLineItem * mCursor;
       };
    }
 }

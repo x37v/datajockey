@@ -52,12 +52,12 @@ void WaveFormItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
       if (windowEnd == windowStart && windowStart != length) {
          windowEnd += 1;
       }
-      unsigned int value = 0;
+      float value = 0;
       for (unsigned int j = windowStart; j < windowEnd; j++) {
-         value = MAX(value, 100.0 * mAudioBuffer->sample(0, j));
-         value = MAX(value, 100.0 * mAudioBuffer->sample(1, j));
+         value = MAX(value, mAudioBuffer->sample(0, j));
+         value = MAX(value, mAudioBuffer->sample(1, j));
       }
-      painter->drawLine(i, -value, i, value);
+      painter->drawLine(i, -value * 100.0, i, value * 100.0);
 
       /*
       //value = 100.0 * bufRef()->raw_buffer()[0][i];
