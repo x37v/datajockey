@@ -46,9 +46,19 @@ void PlayerMapper::map(int index, View::Player * player) {
                SLOT(button_pressed()));
       }
    }
-}
 
-#include <iostream>
+   mSliderIndexMap[player->volume_slider()] =  index;
+   mIndexSliderMap[index] = player->volume_slider();
+
+   QObject::connect(mAudioController,
+         SIGNAL(player_volume_changed(int, int)),
+         this,
+         SLOT(volume_changed(int, int)));
+   QObject::connect(player->volume_slider(),
+         SIGNAL(valueChanged(int)),
+         this,
+         SLOT(volume_changed(int)));
+}
 
 void PlayerMapper::button_pressed() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
@@ -63,7 +73,6 @@ void PlayerMapper::button_pressed() {
    else if (name == "reset") 
       mAudioController->set_player_position(index, 0.0);
    //else if (name == "load") 
-   
 
 }
 
@@ -80,6 +89,20 @@ void PlayerMapper::button_toggled(bool state) {
    } else if (name == "sync") {
       mAudioController->set_player_sync(index, state);
    }
+}
+
+void PlayerMapper::volume_changed(int value) {
+   QSlider * slider = static_cast<QSlider *>(QObject::sender());
+   if (!slider)
+      return;
+   int index = mSliderIndexMap[slider];
+   mAudioController->set_player_volume(index, value);
+}
+
+void PlayerMapper::volume_changed(int player_index, int value) {
+   QSlider * slider = mIndexSliderMap[player_index];
+   if (slider)
+      slider->setValue(value);
 }
 
 void PlayerMapper::file_changed(int player_index, QString file_name) {
