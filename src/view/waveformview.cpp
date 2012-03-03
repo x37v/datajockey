@@ -14,6 +14,7 @@ WaveFormView::WaveFormView(QWidget * parent) {
 
    mWaveForm = new WaveFormItem();
    mWaveForm->setZoom(150);
+   mWaveForm->setPen(QPen(Qt::red));
    mScene->addItem(mWaveForm);
 
    mCursor = new QGraphicsLineItem(0, -100, 0, 100);
@@ -21,6 +22,8 @@ WaveFormView::WaveFormView(QWidget * parent) {
    mScene->addItem(mCursor);
 
    this->setScene(mScene);
+
+   setBackgroundBrush(QBrush(Qt::black));
 
    //mWaveFormView->fitInView(mWaveForm);
    //mWaveFormView->ensureVisible(mScene->mSceneRect(), Qt::IgnoreAspectRatio);
