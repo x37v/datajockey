@@ -7,12 +7,12 @@
 #include <QBoxLayout>
 #include <QTextEdit>
 #include <QGraphicsView>
+#include "waveformview.hpp"
 
 class QPushButton;
 class QSlider;
 class QDial;
 class QProgressBar;
-class QGraphicsView;
 class QGraphicsScene;
 
 namespace DataJockey {
@@ -39,9 +39,7 @@ namespace DataJockey {
             QTextEdit * mTrackDescription;
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
-            WaveFormItem * mWaveForm;
-            QGraphicsView * mWaveFormView;
-            QGraphicsScene * mWaveFormScene;
+            WaveFormView * mWaveFormView;
       };
    }
 }
