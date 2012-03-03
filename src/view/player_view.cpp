@@ -7,8 +7,6 @@
 #include <QSlider>
 #include <QDial>
 #include <QProgressBar>
-#include <QGraphicsView>
-#include <QGraphicsScene>
 
 using namespace DataJockey::View;
 
@@ -26,7 +24,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       {0, 2, false, "rs", "reset"},
       {1, 0, true,  "cu", "cue"},
       {1, 1, true,  "sy", "sync"},
-      {1, 2, true,  "pl", "play"},
+      {1, 2, true,  "||", "pause"},
       {2, 0, false, "<<", "seek_back"},
       {2, 2, false, ">>", "seek_forward"},
    };
@@ -49,6 +47,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
       QPushButton * btn = new QPushButton(items[i].label, this);
+      btn->setProperty("dj_name", items[i].name);
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col);
@@ -77,6 +76,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
+QList<QPushButton *> Player::buttons() const { return mButtons.values(); }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }

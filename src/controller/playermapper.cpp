@@ -1,6 +1,9 @@
 #include "playermapper.hpp"
 #include "player_view.hpp"
 #include <QProgressBar>
+#include <QPushButton>
+#include <QSlider>
+#include <QDial>
 
 using namespace DataJockey::Controller;
 
@@ -26,12 +29,57 @@ void PlayerMapper::map(int index, View::Player * player) {
          this,
          SLOT(position_changed(int, int)));
 
+   QPushButton * button;
+   foreach(button, player->buttons()) {
+      mIndexButtonMap[index] = button;
+      mButtonIndexMap[button] = index;
+
+      if (button->isCheckable()) {
+         QObject::connect(button,
+               SIGNAL(toggled(bool)),
+               this,
+               SLOT(button_toggled(bool)));
+      } else {
+         QObject::connect(button,
+               SIGNAL(pressed()),
+               this,
+               SLOT(button_pressed()));
+      }
+   }
 }
 
+#include <iostream>
+
 void PlayerMapper::button_pressed() {
+   QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   if (!button)
+      return;
+   int index = mButtonIndexMap[button];
+   QString name = button->property("dj_name").toString();
+   if (name == "seek_back") 
+      mAudioController->set_player_position_relative(index, -0.5);
+   else if (name ==  "seek_forward") 
+      mAudioController->set_player_position_relative(index, 0.5);
+   else if (name == "reset") 
+      mAudioController->set_player_position(index, 0.0);
+   //else if (name == "load") 
+   
+
 }
 
 void PlayerMapper::button_toggled(bool state) {
+   QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   if (!button)
+      return;
+   int index = mButtonIndexMap[button];
+   QString name = button->property("dj_name").toString();
+   if (name == "cue") {
+      mAudioController->set_player_cue(index, state);
+   } else if (name == "pause") {
+      mAudioController->set_player_pause(index, state);
+   } else if (name == "sync") {
+      mAudioController->set_player_sync(index, state);
+   }
 }
 
 void PlayerMapper::file_changed(int player_index, QString file_name) {

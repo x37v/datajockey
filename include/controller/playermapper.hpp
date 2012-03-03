@@ -5,6 +5,10 @@
 #include <QMap>
 #include "audiocontroller.hpp"
 
+class QPushButton;
+class QSlider;
+class QDial;
+
 namespace DataJockey {
    namespace View { class Player; }
 
@@ -30,6 +34,10 @@ namespace DataJockey {
          private:
             QMap<View::Player *, int> mPlayerIndexMap;
             QMap<int, View::Player *> mIndexPlayerMap;
+
+            QMap<QPushButton *, int> mButtonIndexMap;
+            QMap<int, QPushButton *> mIndexButtonMap;
+
             Audio::AudioController * mAudioController;
       };
    }

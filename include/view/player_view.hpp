@@ -7,6 +7,7 @@
 #include <QBoxLayout>
 #include <QTextEdit>
 #include <QGraphicsView>
+#include <QList>
 #include "waveformview.hpp"
 
 class QPushButton;
@@ -25,6 +26,7 @@ namespace DataJockey {
             enum WaveformOrientation { WAVEFORM_NONE, WAVEFORM_LEFT, WAVEFORM_RIGHT };
             Player(QWidget * parent = NULL, WaveformOrientation waveform_orientation = WAVEFORM_RIGHT);
             QPushButton * button(QString name) const;
+            QList<QPushButton *> buttons() const;
             QDial * eq_dial(QString name) const;
             QSlider * volume_slider() const;
             QProgressBar * progress_bar() const;
