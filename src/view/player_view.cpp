@@ -58,6 +58,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    for (unsigned int i = 0; i < 3; i++) {
       QDial * dial = new QDial(this);
       dial->setRange(-one_scale, one_scale);
+      dial->setProperty("dj_name", QString("dj_eq_") + eq[i]);
       mEqDials.insert(eq[i], dial);
       mControlLayout->addWidget(dial, 0, Qt::AlignHCenter);
    }
@@ -78,6 +79,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
 QList<QPushButton *> Player::buttons() const { return mButtons.values(); }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
+QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
 

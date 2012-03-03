@@ -28,6 +28,8 @@ namespace DataJockey {
             void volume_changed(int value);
             void volume_changed(int player_index, int value);
 
+            void eq_changed(int value);
+
             void file_changed(int player_index, QString file_name);
             void file_cleared(int player_index);
             void file_load_progress(int player_index, int percent);
@@ -43,6 +45,9 @@ namespace DataJockey {
 
             QMap<QSlider *, int> mSliderIndexMap;
             QMap<int, QSlider *> mIndexSliderMap;
+
+            QMap<QDial *, int> mDialIndexMap;
+            QMap<int, QDial *> mIndexDialMap;
 
             Audio::AudioController * mAudioController;
       };

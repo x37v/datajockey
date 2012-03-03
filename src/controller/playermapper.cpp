@@ -58,6 +58,19 @@ void PlayerMapper::map(int index, View::Player * player) {
          SIGNAL(valueChanged(int)),
          this,
          SLOT(volume_changed(int)));
+
+   mSliderIndexMap[player->volume_slider()] =  index;
+   mIndexSliderMap[index] = player->volume_slider();
+
+   QDial * dial;
+   foreach(dial, player->eq_dials()) {
+      mIndexDialMap[index] = dial;
+      mDialIndexMap[dial] = index;
+      QObject::connect(dial,
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(eq_changed(int)));
+   }
 }
 
 void PlayerMapper::button_pressed() {
@@ -103,6 +116,22 @@ void PlayerMapper::volume_changed(int player_index, int value) {
    QSlider * slider = mIndexSliderMap[player_index];
    if (slider)
       slider->setValue(value);
+}
+
+void PlayerMapper::eq_changed(int value) {
+   QDial * eq = static_cast<QDial *>(QObject::sender());
+   if (!eq)
+      return;
+   int index = mDialIndexMap[eq];
+
+   QString name = eq->property("dj_name").toString();
+   if (name == "dj_eq_low") {
+      mAudioController->set_player_eq(index, 0, value);
+   } else if (name == "dj_eq_mid") {
+      mAudioController->set_player_eq(index, 1, value);
+   } else if (name == "dj_eq_high") {
+      mAudioController->set_player_eq(index, 2, value);
+   }
 }
 
 void PlayerMapper::file_changed(int player_index, QString file_name) {

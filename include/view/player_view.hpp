@@ -28,6 +28,7 @@ namespace DataJockey {
             QPushButton * button(QString name) const;
             QList<QPushButton *> buttons() const;
             QDial * eq_dial(QString name) const;
+            QList<QDial *> eq_dials() const;
             QSlider * volume_slider() const;
             QProgressBar * progress_bar() const;
          public slots:
