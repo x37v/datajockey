@@ -31,11 +31,7 @@ void AudioBufferReference::decrement_count(const QString& fileName) {
       i.value().first -= 1;
       //if we have reached zero reference count then destroy it
       if (i.value().first < 1) {
-         delete i.value().second.first;
-         if(i.value().second.second) {
-            i.value().second.second->detach();
-            delete i.value().second.second;
-         }
+         delete i.value().second;
          mBufferManager.erase(i);
       }
    }
@@ -47,7 +43,7 @@ AudioBuffer * AudioBufferReference::get_and_increment_count(const QString& fileN
 
    if (i != mBufferManager.end()) {
       i.value().first += 1;
-      return i.value().second.first;
+      return i.value().second;
    }
    return NULL;
 }
@@ -57,57 +53,11 @@ AudioBuffer * AudioBufferReference::get_and_increment_count(const QString& fileN
 void AudioBufferReference::set_or_increment_count(const QString& fileName, AudioBuffer * buffer){
    QMutexLocker lock(&mMutex);
    manager_map_t::iterator i = mBufferManager.find(fileName);
-   if (i != mBufferManager.end()) {
+   if (i != mBufferManager.end())
       i.value().first += 1;
-   } else {
-      //TODO the shared memory stuff should probably go somewhere else
-      QString shmName = QString("dj://audio/") + fileName;
-      QSharedMemory * shm = new QSharedMemory(shmName);
-      if (shm->isAttached())
-         shm->detach();
+   else
+      mBufferManager[fileName] = ref_cnt_audio_buffer_t(1, buffer);
 
-      const unsigned int buff_size = buffer->raw_buffer().size();
-      //TODO we shouldn't be getting here..
-      if (buff_size == 0) {
-         //XXX report error
-         mBufferManager[fileName] = QPair<int, buffer_shared_pair_t>(1, buffer_shared_pair_t(buffer, NULL));
-         return;
-      }
-      unsigned int div = DEFAULT_DIV;
-      unsigned int num_elems = (buff_size / div);
-      unsigned int size = sizeof(float) * num_elems;
-
-      while ((shm->create(size, QSharedMemory::ReadWrite) != true) && shm->error() == QSharedMemory::InvalidSize) {
-         div = div * 2;
-         num_elems /= 2;
-         size = sizeof(float) * num_elems;
-         cout << "increasing div to " << div << " " << shm->errorString().toStdString() << endl;
-      }
-
-      //TODO somehow notify if the div is not default?
-
-      if (shm->error() == QSharedMemory::NoError) {
-         shm->lock();
-         float * data = (float *)shm->data();
-         if (data) {
-            for(unsigned int j = 0; j < num_elems; j++){
-               float d = 0.0;
-               unsigned int top = MIN(buff_size, (j + 1) * div);
-               for(unsigned int k = j * div; k < top; k++) {
-                  d = MAX(d, fabs(buffer->raw_buffer()[k]));
-               }
-               data[j] = d;
-            }
-         } 
-         mBufferManager[fileName] = QPair<int, buffer_shared_pair_t>(1, buffer_shared_pair_t(buffer, shm));
-         shm->unlock();
-      } else {
-         cout << "failed to create shared memory! size:\t" << size << fileName.toStdString() << endl;
-         cout << shm->errorString().toStdString() << endl;
-         mBufferManager[fileName] = QPair<int, buffer_shared_pair_t>(1, buffer_shared_pair_t(buffer, NULL));
-         delete shm;
-      }
-   }
 }
 
 
@@ -154,7 +104,7 @@ void AudioBufferReference::release() {
    mFileName.clear();
 }
 
-AudioBuffer * AudioBufferReference::operator()() const {
+AudioBuffer * AudioBufferReference::operator->() const {
    return mAudioBuffer;
 }
 

@@ -70,6 +70,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
    mWaveFormView = new QGraphicsView(this);
    mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
+   mWaveFormView->rotate(-90);
 
    QGraphicsScene * scene = new QGraphicsScene(mWaveFormView);
 
@@ -77,6 +78,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    scene->addItem(mWaveForm);
 
    mWaveFormView->setScene(scene);
+   //mWaveFormView->fitInView(mWaveForm);
+   //mWaveFormView->ensureVisible(scene->sceneRect(), Qt::IgnoreAspectRatio);
 
    mTopLayout->addLayout(mControlLayout);
    mTopLayout->addWidget(mWaveFormView);
@@ -87,3 +90,7 @@ QPushButton * Player::button(QString name) const { return mButtons[name]; }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
+
+void Player::set_audio_file(const QString& file_name) {
+   mWaveForm->setAudioFile(file_name);
+}

@@ -144,7 +144,6 @@ namespace DataJockey {
 
             unsigned int mNumPlayers;
             std::vector<AudioLoaderThread *> mThreadPool;
-            std::vector<Audio::AudioBufferReference> mPlayerAudioBuffers;
 
             //execute/consume the scheduler's done actions
             ConsumeThread * mConsumeThread;

@@ -43,6 +43,7 @@ HEADERS += include/defines.hpp \
            include/controller/audiobufferreference.hpp \
            include/controller/audiocontroller.hpp \
            include/controller/audioloaderthread.hpp \
+           include/controller/playermapper.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp
 SOURCES += src/defines.cpp \
@@ -63,6 +64,7 @@ SOURCES += src/defines.cpp \
            src/controller/audiobufferreference.cpp \
            src/controller/audiocontroller.cpp \
            src/controller/audioloaderthread.cpp \
+           src/controller/playermapper.cpp \
            src/view/main.cpp \
            src/view/player_view.cpp \
            src/view/waveformitem.cpp

@@ -5,7 +5,6 @@
 #include <QMutex>
 #include <QMap>
 #include <QPair>
-#include <QSharedMemory>
 
 namespace DataJockey {
    namespace Audio {
@@ -24,9 +23,9 @@ namespace DataJockey {
             static AudioBuffer * get_and_increment_count(const QString& fileName);
             static void set_or_increment_count(const QString& fileName, AudioBuffer * buffer);
          private:
-            typedef QPair<DataJockey::Audio::AudioBuffer *, QSharedMemory *> buffer_shared_pair_t;
-            typedef QMap<QString, QPair<int,  buffer_shared_pair_t> > manager_map_t;
             //filename => [refcount, buffer pointer]
+            typedef QPair<int,  DataJockey::Audio::AudioBuffer *> ref_cnt_audio_buffer_t;
+            typedef QMap<QString, ref_cnt_audio_buffer_t > manager_map_t;
             static manager_map_t mBufferManager;
             static QMutex mMutex;
          public:
@@ -38,7 +37,7 @@ namespace DataJockey {
             void reset(const QString& newFileName);
             void release();
             bool valid();
-            DataJockey::Audio::AudioBuffer * operator()() const;
+            DataJockey::Audio::AudioBuffer * operator->() const;
          private:
             QString mFileName;
             AudioBuffer * mAudioBuffer;

@@ -27,6 +27,8 @@ namespace DataJockey {
             QDial * eq_dial(QString name) const;
             QSlider * volume_slider() const;
             QProgressBar * progress_bar() const;
+         public slots:
+            void set_audio_file(const QString& file_name);
          private:
             QProgressBar * mProgressBar;
             QMap<QString, QPushButton *> mButtons;

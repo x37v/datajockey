@@ -6,7 +6,7 @@
 #include <QVariant>
 #include <QPen>
 #include <QString>
-#include <QSharedMemory>
+#include "audiobufferreference.hpp"
 
 class QPainter;
 class QStyleOptionGraphicsItem;
@@ -27,16 +27,13 @@ namespace DataJockey {
             //zoom is #of frames per pixel, so 100 would mean we take the max of 100 frames per 1 unit in the horizontal
             void setZoom(int level);
             int zoom() const;
-            unsigned int data_scale();
          protected:
             virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant & value);
          private:
             QPen mPen;
             QRectF mBoundingRect;
-            QSharedMemory mSharedBuffer;
+            Audio::AudioBufferReference mAudioBuffer;
             unsigned int mZoom;
-            //our data doesn't actually have every frame, we have one data point for every mDataScale frames.
-            unsigned int mDataScale;
       };
    }
 }
