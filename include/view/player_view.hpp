@@ -36,8 +36,11 @@ namespace DataJockey {
             void set_audio_frame(int frame);
          signals:
             void seek_relative(int frames);
+            //tells the controller that we are going to seek, may toggle pause
+            void seeking(bool state);
          protected slots:
             void relay_seek_relative(int frames);
+            void relay_mouse_button(bool down); //from waveform
          private:
             QProgressBar * mProgressBar;
             QMap<QString, QPushButton *> mButtons;
@@ -48,6 +51,7 @@ namespace DataJockey {
             QMap<QString, QDial *> mEqDials;
             WaveFormView * mWaveFormView;
             unsigned int mFrames;
+            bool mWasPausedPreSeek;
       };
    }
 }

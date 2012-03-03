@@ -7,7 +7,7 @@
 
 using namespace DataJockey::View;
 
-WaveFormView::WaveFormView(QWidget * parent) {
+WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0) {
    rotate(-90);
 
    mScene = new QGraphicsScene(this);
@@ -63,3 +63,18 @@ void WaveFormView::wheelEvent(QWheelEvent * event) {
 }
 
 
+void WaveFormView::mouseMoveEvent(QMouseEvent * event) {
+   int diff = event->y() - mLastMousePos;
+   mLastMousePos = event->y();
+   int frames = mWaveForm->zoom() * diff;
+   emit(seek_relative(frames));
+}
+
+void WaveFormView::mousePressEvent(QMouseEvent * event) {
+   mLastMousePos = event->y();
+   emit(mouse_down(true));
+}
+
+void WaveFormView::mouseReleaseEvent(QMouseEvent * event) {
+   emit(mouse_down(false));
+}

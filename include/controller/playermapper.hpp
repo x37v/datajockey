@@ -37,6 +37,7 @@ namespace DataJockey {
             void position_changed(int player_index, int frame);
 
             void seek_relative(int frames);
+            void seeking(bool start);
 
          private:
             QMap<View::Player *, int> mPlayerIndexMap;
@@ -50,6 +51,8 @@ namespace DataJockey {
 
             QMap<QDial *, int> mDialIndexMap;
             QMap<int, QDial *> mIndexDialMap;
+
+            QMap<int, bool> mIndexPreSeekPauseState;
 
             Audio::AudioController * mAudioController;
       };

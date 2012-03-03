@@ -20,6 +20,7 @@ PlayerMapper::~PlayerMapper() { }
 void PlayerMapper::map(int index, View::Player * player) {
    mIndexPlayerMap[index] = player;
    mPlayerIndexMap[player] = index;
+   mIndexPreSeekPauseState[index] = false;
    QObject::connect(mAudioController,
          SIGNAL(player_audio_file_load_progress(int, int)),
          this,
@@ -37,6 +38,10 @@ void PlayerMapper::map(int index, View::Player * player) {
          SIGNAL(seek_relative(int)),
          this,
          SLOT(seek_relative(int)));
+   QObject::connect(player,
+         SIGNAL(seeking(bool)),
+         this,
+         SLOT(seeking(bool)));
 
    QPushButton * button;
    foreach(button, player->buttons()) {
@@ -176,5 +181,18 @@ void PlayerMapper::seek_relative(int frames) {
       return;
    int index = mPlayerIndexMap[player];
    mAudioController->set_player_position_frame_relative(index, frames);
+}
+
+void PlayerMapper::seeking(bool start) {
+   View::Player * player = static_cast<View::Player *>(QObject::sender());
+   if (!player)
+      return;
+   int index = mPlayerIndexMap[player];
+   if (start) {
+      mIndexPreSeekPauseState[index] = mAudioController->player_pause(index);
+      mAudioController->set_player_pause(index, true);
+   } else {
+      mAudioController->set_player_pause(index, mIndexPreSeekPauseState[index]);
+   }
 }
 

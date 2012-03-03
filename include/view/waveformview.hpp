@@ -21,9 +21,14 @@ namespace DataJockey {
             void set_audio_frame(int frame);
             virtual void resizeEvent(QResizeEvent * event);
             virtual void wheelEvent(QWheelEvent * event);
+            virtual void mouseMoveEvent(QMouseEvent * event);
+            virtual void mousePressEvent(QMouseEvent * event);
+            virtual void mouseReleaseEvent(QMouseEvent * event);
          signals:
             void seek_relative(int);
+            void mouse_down(bool);
          private:
+            int mLastMousePos;
             WaveFormItem * mWaveForm;
             QGraphicsScene * mScene;
             QGraphicsLineItem * mCursor;
