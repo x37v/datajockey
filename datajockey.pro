@@ -49,6 +49,7 @@ HEADERS += include/defines.hpp \
            include/controller/audioloaderthread.hpp \
            include/controller/playermapper.hpp \
            include/model/audiomodel.hpp \
+           include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp \
            include/view/waveformview.hpp
@@ -72,6 +73,7 @@ SOURCES += src/defines.cpp \
            src/controller/playermapper.cpp \
            src/model/audiomodel.cpp \
            src/view/main.cpp \
+           src/view/mixerpanel.cpp \
            src/view/player_view.cpp \
            src/view/waveformitem.cpp \
            src/view/waveformview.cpp

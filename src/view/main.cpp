@@ -1,4 +1,5 @@
 #include <QApplication>
+#include "mixerpanel.hpp"
 #include "player_view.hpp"
 #include "audiomodel.hpp"
 #include "playermapper.hpp"
@@ -10,15 +11,15 @@ int main(int argc, char * argv[]){
    app.setStyle("plastique");
 
    Audio::AudioModel * model = Audio::AudioModel::instance();
-
-   View::Player player;
-   player.show();
-
+   View::MixerPanel * mixer_panel = new View::MixerPanel();
    Controller::PlayerMapper * mapper = new Controller::PlayerMapper(&app);
-   mapper->map(0, &player);
+
+   mapper->map(mixer_panel->players());
 
    model->start_audio();
-
    model->set_player_audio_file(0, "/home/alex/projects/music/11-phuture-acid_tracks.flac");
+   model->set_player_audio_file(1, "/home/alex/projects/music/11-phuture-acid_tracks.flac");
+
+   mixer_panel->show();
    app.exec();
 }

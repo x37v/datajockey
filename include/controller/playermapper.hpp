@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QList>
 #include "audiomodel.hpp"
 
 class QPushButton;
@@ -19,7 +20,7 @@ namespace DataJockey {
          public:
             PlayerMapper(QObject * parent = NULL);
             virtual ~PlayerMapper();
-            void map(int index, View::Player * player);
+            void map(QList<View::Player *> players);
          protected slots:
             //uses button names
             void button_pressed();
@@ -40,6 +41,8 @@ namespace DataJockey {
             void seeking(bool start);
 
          private:
+            void map(int index, View::Player * player);
+
             QMap<View::Player *, int> mPlayerIndexMap;
             QMap<int, View::Player *> mIndexPlayerMap;
 

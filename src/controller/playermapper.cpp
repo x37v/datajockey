@@ -17,6 +17,11 @@ PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent) {
 
 PlayerMapper::~PlayerMapper() { }
 
+void PlayerMapper::map(QList<View::Player *> players) {
+   for (int i = 0; i < players.size(); i++)
+      map(i, players[i]);
+}
+
 void PlayerMapper::map(int index, View::Player * player) {
    mIndexPlayerMap[index] = player;
    mPlayerIndexMap[player] = index;
