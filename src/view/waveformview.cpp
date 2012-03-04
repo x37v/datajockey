@@ -47,7 +47,15 @@ void WaveFormView::set_audio_file(const QString& file_name) {
 void WaveFormView::set_audio_frame(int frame) {
    int offset = geometry().height() / 4;
    centerOn(frame / mWaveForm->zoom() + offset, 0);
+
+   int prev_x = mCursor->pos().x();
+
    mCursor->setPos(frame / mWaveForm->zoom(), 0);
+
+   //TODO is there a better way?
+   //invalidate a box around the last cursor position, so that it gets redrawn without the cursor
+   QRectF rect(prev_x - 1, -100, 3, 200);
+   mScene->invalidate(rect);
 }
 
 void WaveFormView::resizeEvent(QResizeEvent * event) {
