@@ -1,4 +1,4 @@
-#include "audiocontroller.hpp"
+#include "audiomodel.hpp"
 #include "audioloaderthread.hpp"
 #include "audiobufferreference.hpp"
 #include "transport.hpp"
@@ -15,13 +15,13 @@ using namespace DataJockey::Audio;
 using std::cout;
 using std::endl;
 
-class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::PlayerCommand {
+class AudioModel::PlayerClearBuffersCommand : public DataJockey::Audio::PlayerCommand {
    public:
       PlayerClearBuffersCommand(unsigned int idx,
-            AudioController * controller,
+            AudioModel * model,
             QString oldFileName = QString()) :
          DataJockey::Audio::PlayerCommand(idx),
-         mAudioController(controller),
+         mAudioModel(model),
          mOldFileName(oldFileName),
          mOldBeatBuffer(NULL) { }
       virtual ~PlayerClearBuffersCommand() { }
@@ -51,12 +51,12 @@ class AudioController::PlayerClearBuffersCommand : public DataJockey::Audio::Pla
          return false;
       }
    private:
-      AudioController * mAudioController;
+      AudioModel * mAudioModel;
       QString mOldFileName;
       BeatBuffer * mOldBeatBuffer;
 };
 
-class AudioController::PlayerState {
+class AudioModel::PlayerState {
    public:
       PlayerState() :
          mFileName(),
@@ -80,17 +80,17 @@ class AudioController::PlayerState {
 };
 
 //TODO how to get it to run at the end of the frame?
-class AudioController::QueryPlayerStates : public MasterCommand {
+class AudioModel::QueryPlayerStates : public MasterCommand {
    private:
-      AudioController * mAudioController;
+      AudioModel * mAudioModel;
    public:
-      std::vector<AudioController::PlayerState* > mStates;
+      std::vector<AudioModel::PlayerState* > mStates;
       unsigned int mNumPlayers;
 
-      QueryPlayerStates(AudioController * controller) : mAudioController(controller) {
-         mNumPlayers = mAudioController->player_count();
+      QueryPlayerStates(AudioModel * model) : mAudioModel(model) {
+         mNumPlayers = mAudioModel->player_count();
          for(unsigned int i = 0; i < mNumPlayers; i++)
-            mStates.push_back(new AudioController::PlayerState);
+            mStates.push_back(new AudioModel::PlayerState);
          mStates.resize(mNumPlayers);
       }
       virtual ~QueryPlayerStates() {
@@ -103,22 +103,22 @@ class AudioController::QueryPlayerStates : public MasterCommand {
       }
       virtual void execute_done() {
          for(unsigned int i = 0; i < mNumPlayers; i++)
-            mAudioController->update_player_state(i, mStates[i]);
+            mAudioModel->update_player_state(i, mStates[i]);
       }
       //this command shouldn't be stored
       virtual bool store(CommandIOData& /* data */) const { return false; }
 };
 
-class AudioController::ConsumeThread : public QThread {
+class AudioModel::ConsumeThread : public QThread {
    private:
       Scheduler * mScheduler;
-      AudioController * mController;
+      AudioModel * mModel;
    public:
-      ConsumeThread(AudioController * controller, Scheduler * scheduler) : mScheduler(scheduler), mController(controller) { }
+      ConsumeThread(AudioModel * model, Scheduler * scheduler) : mScheduler(scheduler), mModel(model) { }
 
       void run() {
          while(true) {
-            AudioController::QueryPlayerStates * cmd = new AudioController::QueryPlayerStates(mController);
+            AudioModel::QueryPlayerStates * cmd = new AudioModel::QueryPlayerStates(mModel);
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
             msleep(10);
@@ -126,9 +126,9 @@ class AudioController::ConsumeThread : public QThread {
       }
 };
 
-AudioController * AudioController::cInstance = NULL;
+AudioModel * AudioModel::cInstance = NULL;
 
-AudioController::AudioController() :
+AudioModel::AudioModel() :
    QObject(),
    mPlayerStates(),
    mPlayerStatesMutex(QMutex::Recursive)
@@ -184,78 +184,78 @@ AudioController::AudioController() :
          */
 }
 
-AudioController::~AudioController() {
+AudioModel::~AudioModel() {
 }
 
-AudioController * AudioController::instance(){
+AudioModel * AudioModel::instance(){
    if (!cInstance)
-      cInstance = new AudioController();
+      cInstance = new AudioModel();
    return cInstance;
 }
 
 //*************** getters
 
-unsigned int AudioController::player_count() const { return mNumPlayers; }
+unsigned int AudioModel::player_count() const { return mNumPlayers; }
 
-bool AudioController::player_pause(int player_index){
+bool AudioModel::player_pause(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mPause;
 }
 
-bool AudioController::player_cue(int player_index){
+bool AudioModel::player_cue(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mCue;
 }
 
-//void AudioController::player_out_state(int player_index, Audio::Player::out_state_t val){ } 
-//void AudioController::player_stretch_method(int player_index, Audio::Player::stretch_method_t val){ }
+//void AudioModel::player_out_state(int player_index, Audio::Player::out_state_t val){ } 
+//void AudioModel::player_stretch_method(int player_index, Audio::Player::stretch_method_t val){ }
 
-bool AudioController::player_mute(int player_index){
+bool AudioModel::player_mute(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mMute;
 }
 
-bool AudioController::player_sync(int player_index){
+bool AudioModel::player_sync(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mSync;
 }
 
-bool AudioController::player_loop(int player_index){
+bool AudioModel::player_loop(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mLoop;
 }
 
-int AudioController::player_volume(int player_index){
+int AudioModel::player_volume(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return 0;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mVolume;
 }
 
-int AudioController::player_play_speed(int player_index){
+int AudioModel::player_play_speed(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return 0;
    QMutexLocker lock(&mPlayerStatesMutex);
    return mPlayerStates[player_index]->mPlaySpeed;
 }
 
-//void AudioController::player_position(int player_index){ }
-//void AudioController::player_start_position(int player_index){ }
-//void AudioController::player_end_position(int player_index){ }
-//void AudioController::player_loop_start_position(int player_index){ }
-//void AudioController::player_loop_end_position(int player_index){ }
+//void AudioModel::player_position(int player_index){ }
+//void AudioModel::player_start_position(int player_index){ }
+//void AudioModel::player_end_position(int player_index){ }
+//void AudioModel::player_loop_start_position(int player_index){ }
+//void AudioModel::player_loop_end_position(int player_index){ }
 
-QString AudioController::player_audio_file(int player_index){
+QString AudioModel::player_audio_file(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return QString();
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -264,7 +264,7 @@ QString AudioController::player_audio_file(int player_index){
 
 //****************** setters/slots
 
-void AudioController::set_player_pause(int player_index, bool pause){
+void AudioModel::set_player_pause(int player_index, bool pause){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -281,7 +281,7 @@ void AudioController::set_player_pause(int player_index, bool pause){
    }
 }
 
-void AudioController::set_player_cue(int player_index, bool val){
+void AudioModel::set_player_cue(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -299,13 +299,13 @@ void AudioController::set_player_cue(int player_index, bool val){
 }
 
 /*
-void AudioController::set_player_out_state(int player_index, Player::out_state_t val){
+void AudioModel::set_player_out_state(int player_index, Player::out_state_t val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    //TODO
 }
 
-void AudioController::set_player_stretch_method(int player_index, Player::stretch_method_t val){
+void AudioModel::set_player_stretch_method(int player_index, Player::stretch_method_t val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -313,7 +313,7 @@ void AudioController::set_player_stretch_method(int player_index, Player::stretc
 }
 */
 
-void AudioController::set_player_mute(int player_index, bool val){
+void AudioModel::set_player_mute(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -332,7 +332,7 @@ void AudioController::set_player_mute(int player_index, bool val){
    }
 }
 
-void AudioController::set_player_sync(int player_index, bool val){
+void AudioModel::set_player_sync(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -351,7 +351,7 @@ void AudioController::set_player_sync(int player_index, bool val){
    }
 }
 
-void AudioController::set_player_loop(int player_index, bool val){
+void AudioModel::set_player_loop(int player_index, bool val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -370,7 +370,7 @@ void AudioController::set_player_loop(int player_index, bool val){
    }
 }
 
-void AudioController::set_player_volume(int player_index, int val){
+void AudioModel::set_player_volume(int player_index, int val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -384,7 +384,7 @@ void AudioController::set_player_volume(int player_index, int val){
    }
 }
 
-void AudioController::set_player_play_speed(int player_index, int val){
+void AudioModel::set_player_play_speed(int player_index, int val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    
@@ -398,7 +398,7 @@ void AudioController::set_player_play_speed(int player_index, int val){
    }
 }
 
-void AudioController::set_player_position(int player_index, const TimePoint &val, bool absolute){
+void AudioModel::set_player_position(int player_index, const TimePoint &val, bool absolute){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -412,11 +412,11 @@ void AudioController::set_player_position(int player_index, const TimePoint &val
    queue_command(cmd);
 }
 
-void AudioController::set_player_position_relative(int player_index, const DataJockey::Audio::TimePoint &val) {
+void AudioModel::set_player_position_relative(int player_index, const DataJockey::Audio::TimePoint &val) {
    set_player_position(player_index, val, false);
 }
 
-void AudioController::set_player_position(int player_index, double seconds, bool absolute) {
+void AudioModel::set_player_position(int player_index, double seconds, bool absolute) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -432,11 +432,11 @@ void AudioController::set_player_position(int player_index, double seconds, bool
    queue_command(cmd);
 }
 
-void AudioController::set_player_position_relative(int player_index, double seconds) {
+void AudioModel::set_player_position_relative(int player_index, double seconds) {
    set_player_position(player_index, seconds, false);
 }
 
-void AudioController::set_player_position_frame(int player_index, int frame, bool absolute) {
+void AudioModel::set_player_position_frame(int player_index, int frame, bool absolute) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -450,12 +450,12 @@ void AudioController::set_player_position_frame(int player_index, int frame, boo
    queue_command(cmd);
 }
 
-void AudioController::set_player_position_frame_relative(int player_index, int frame) {
+void AudioModel::set_player_position_frame_relative(int player_index, int frame) {
    if (frame != 0)
       set_player_position_frame(player_index, frame, false);
 }
 
-int AudioController::get_player_position_frame(int player_index) {
+int AudioModel::get_player_position_frame(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return 0;
 
@@ -463,7 +463,7 @@ int AudioController::get_player_position_frame(int player_index) {
    return mPlayerStates[player_index]->mCurrentFrame;
 }
 
-void AudioController::set_player_start_position(int player_index, const TimePoint &val){
+void AudioModel::set_player_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -471,7 +471,7 @@ void AudioController::set_player_start_position(int player_index, const TimePoin
             player_index, PlayerPositionCommand::START, val));
 }
 
-void AudioController::set_player_end_position(int player_index, const TimePoint &val){
+void AudioModel::set_player_end_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -479,7 +479,7 @@ void AudioController::set_player_end_position(int player_index, const TimePoint 
             player_index, PlayerPositionCommand::END, val));
 }
 
-void AudioController::set_player_loop_start_position(int player_index, const TimePoint &val){
+void AudioModel::set_player_loop_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -487,7 +487,7 @@ void AudioController::set_player_loop_start_position(int player_index, const Tim
             player_index, PlayerPositionCommand::LOOP_START, val));
 }
 
-void AudioController::set_player_loop_end_position(int player_index, const TimePoint &val){
+void AudioModel::set_player_loop_end_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -495,21 +495,21 @@ void AudioController::set_player_loop_end_position(int player_index, const TimeP
             player_index, PlayerPositionCommand::LOOP_END, val));
 }
 
-void AudioController::set_player_audio_buffer(int player_index, AudioBuffer * buf){
+void AudioModel::set_player_audio_buffer(int player_index, AudioBuffer * buf){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    queue_command(new PlayerSetAudioBufferCommand(player_index, buf));
 }
 
-void AudioController::set_player_beat_buffer(int player_index, BeatBuffer * /* buf */){
+void AudioModel::set_player_beat_buffer(int player_index, BeatBuffer * /* buf */){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    //TODO
 }
 
-void AudioController::update_player_state(int player_index, PlayerState * state){
+void AudioModel::update_player_state(int player_index, PlayerState * state){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -525,7 +525,7 @@ void AudioController::update_player_state(int player_index, PlayerState * state)
    }
 }
 
-void AudioController::set_player_audio_file(int player_index, QString location){
+void AudioModel::set_player_audio_file(int player_index, QString location){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -582,7 +582,7 @@ void AudioController::set_player_audio_file(int player_index, QString location){
    }
 }
 
-void AudioController::set_player_clear_buffers(int player_index) {
+void AudioModel::set_player_clear_buffers(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -597,7 +597,7 @@ void AudioController::set_player_clear_buffers(int player_index) {
    }
 }
 
-void AudioController::set_player_eq(int player_index, int band, int value) {
+void AudioModel::set_player_eq(int player_index, int band, int value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers || band < 0 || band > 2)
       return;
 
@@ -631,15 +631,15 @@ void AudioController::set_player_eq(int player_index, int band, int value) {
    //TODO emit change
 }
 
-void AudioController::relay_player_audio_file_changed(int player_index, QString fileName){
+void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
    emit(player_audio_file_changed(player_index, fileName));
 }
 
-void AudioController::relay_player_position_changed(int player_index, int frame_index){
+void AudioModel::relay_player_position_changed(int player_index, int frame_index){
    emit(player_position_changed(player_index, frame_index));
 }
 
-void AudioController::relay_audio_file_load_progress(QString fileName, int percent){
+void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
       if (mPlayerStates[player_index]->mFileName == fileName)
@@ -648,7 +648,7 @@ void AudioController::relay_audio_file_load_progress(QString fileName, int perce
 }
 
 //called from another thread
-bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * buffer){
+bool AudioModel::audio_file_load_complete(QString fileName, AudioBuffer * buffer){
    QMutexLocker lock(&mPlayerStatesMutex);
 
    if (!buffer || !buffer->loaded())
@@ -684,7 +684,7 @@ bool AudioController::audio_file_load_complete(QString fileName, AudioBuffer * b
    return true;
 }
 
-void AudioController::set_player_beat_buffer_clear(int player_index){
+void AudioModel::set_player_beat_buffer_clear(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -697,7 +697,7 @@ void AudioController::set_player_beat_buffer_clear(int player_index){
       queue_command(new PlayerSetBeatBufferCommand(player_index, NULL, true));
 }
 
-void AudioController::set_player_beat_buffer_begin(int player_index){
+void AudioModel::set_player_beat_buffer_begin(int player_index){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -706,7 +706,7 @@ void AudioController::set_player_beat_buffer_begin(int player_index){
 
 }
 
-void AudioController::set_player_beat_buffer_end(int player_index, bool commit){
+void AudioModel::set_player_beat_buffer_end(int player_index, bool commit){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -723,7 +723,7 @@ void AudioController::set_player_beat_buffer_end(int player_index, bool commit){
    }
 }
 
-void AudioController::set_player_beat_buffer_add_beat(int player_index, double value){
+void AudioModel::set_player_beat_buffer_add_beat(int player_index, double value){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -740,7 +740,7 @@ void AudioController::set_player_beat_buffer_add_beat(int player_index, double v
    }
 }
 
-void AudioController::set_player_beat_buffer_remove_beat(int /*player_index*/, double /*value*/){
+void AudioModel::set_player_beat_buffer_remove_beat(int /*player_index*/, double /*value*/){
    /*
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
@@ -751,7 +751,7 @@ void AudioController::set_player_beat_buffer_remove_beat(int /*player_index*/, d
    //TODO
 }
 
-void AudioController::set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value){
+void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -768,15 +768,15 @@ void AudioController::set_player_beat_buffer_update_beat(int player_index, int b
 }
 
 
-void AudioController::set_master_volume(int /*val*/){
+void AudioModel::set_master_volume(int /*val*/){
    //TODO
 }
 
-void AudioController::set_master_cue_volume(int /*val*/){
+void AudioModel::set_master_cue_volume(int /*val*/){
    //TODO
 }
 
-void AudioController::set_master_cross_fade_enable(bool enable){
+void AudioModel::set_master_cross_fade_enable(bool enable){
    Command * cmd = NULL;
    if(enable)
       cmd = new MasterBoolCommand(MasterBoolCommand::XFADE);
@@ -785,7 +785,7 @@ void AudioController::set_master_cross_fade_enable(bool enable){
    queue_command(cmd);
 }
 
-void AudioController::set_master_cross_fade_position(int val){
+void AudioModel::set_master_cross_fade_position(int val){
    double dval = (double)val / (double)one_scale;
    if (dval > 1.0)
       dval = 1.0;
@@ -794,7 +794,7 @@ void AudioController::set_master_cross_fade_position(int val){
    queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
 }
 
-void AudioController::set_master_cross_fade_players(int left, int right){
+void AudioModel::set_master_cross_fade_players(int left, int right){
    if (left < 0 || left >= (int)mNumPlayers)
       return;
    if (right < 0 || right >= (int)mNumPlayers)
@@ -802,17 +802,17 @@ void AudioController::set_master_cross_fade_players(int left, int right){
    queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
 }
 
-void AudioController::set_master_bpm(double bpm) {
+void AudioModel::set_master_bpm(double bpm) {
    queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
 }
 
-void AudioController::start_audio() {
+void AudioModel::start_audio() {
    mAudioIO->start();
    mAudioIO->connectToPhysical(0,0);
    mAudioIO->connectToPhysical(1,1);
 }
 
-void AudioController::stop_audio() {
+void AudioModel::stop_audio() {
    //there must be a better way than this!
    for(unsigned int i = 0; i < mNumPlayers; i++)
       set_player_clear_buffers(i);
@@ -820,7 +820,7 @@ void AudioController::stop_audio() {
    mAudioIO->stop();
 }
 
-void AudioController::queue_command(DataJockey::Audio::Command * cmd){
+void AudioModel::queue_command(DataJockey::Audio::Command * cmd){
    mMaster->scheduler()->execute(cmd);
 }
 

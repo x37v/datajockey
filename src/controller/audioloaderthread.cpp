@@ -3,31 +3,31 @@
 
 using namespace DataJockey::Audio;
 
-AudioController::AudioLoaderThread::AudioLoaderThread(AudioController * controller)
-: mAudioBuffer(NULL), mAudioController(controller), mFileName(), mMutex(QMutex::Recursive) { }
+AudioModel::AudioLoaderThread::AudioLoaderThread(AudioModel * model)
+: mAudioBuffer(NULL), mAudioModel(model), mFileName(), mMutex(QMutex::Recursive) { }
 
-void AudioController::AudioLoaderThread::progress_callback(int percent, void *objPtr) {
+void AudioModel::AudioLoaderThread::progress_callback(int percent, void *objPtr) {
    AudioLoaderThread * self = (AudioLoaderThread *)objPtr;
    self->relay_load_progress(self->file_name(), percent);
 }
 
-void AudioController::AudioLoaderThread::abort() {
+void AudioModel::AudioLoaderThread::abort() {
    QMutexLocker lock(&mMutex);
    if (mAudioBuffer)
       mAudioBuffer->abort_load();
    mAborted = true;
 }
 
-const QString& AudioController::AudioLoaderThread::file_name() {
+const QString& AudioModel::AudioLoaderThread::file_name() {
    QMutexLocker lock(&mMutex);
    return mFileName;
 }
 
-void AudioController::AudioLoaderThread::relay_load_progress(QString fileName, int percent) {
+void AudioModel::AudioLoaderThread::relay_load_progress(QString fileName, int percent) {
    emit(load_progress(fileName, percent));
 }
 
-DataJockey::Audio::AudioBuffer * AudioController::AudioLoaderThread::load(QString location){
+DataJockey::Audio::AudioBuffer * AudioModel::AudioLoaderThread::load(QString location){
    QMutexLocker lock(&mMutex);
    mAborted = false;
 
@@ -46,15 +46,15 @@ DataJockey::Audio::AudioBuffer * AudioController::AudioLoaderThread::load(QStrin
 }
 
 //TODO report errors
-void AudioController::AudioLoaderThread::run() {
+void AudioModel::AudioLoaderThread::run() {
    if (mAudioBuffer) {
       mAudioBuffer->load(AudioLoaderThread::progress_callback, this);
       if(mAudioBuffer->valid()) {
          QMutexLocker lock(&mMutex);
          if (!mAborted) {
-            //tell the controller that the load is complete.
+            //tell the model that the load is complete.
             //if it doesn't use the buffer then delete it
-            if (!controller()->audio_file_load_complete(mFileName, mAudioBuffer))
+            if (!model()->audio_file_load_complete(mFileName, mAudioBuffer))
                delete mAudioBuffer;
          } else
             delete mAudioBuffer;
@@ -71,7 +71,7 @@ void AudioController::AudioLoaderThread::run() {
    }
 }
 
-AudioController * AudioController::AudioLoaderThread::controller() {
-   return mAudioController;
+AudioModel * AudioModel::AudioLoaderThread::model() {
+   return mAudioModel;
 }
 

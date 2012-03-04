@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QMap>
-#include "audiocontroller.hpp"
+#include "audiomodel.hpp"
 
 class QPushButton;
 class QSlider;
@@ -13,7 +13,7 @@ namespace DataJockey {
    namespace View { class Player; }
 
    namespace Controller {
-      //maps gui <-> controller
+      //maps gui <-> model
       class PlayerMapper : public QObject {
          Q_OBJECT
          public:
@@ -54,7 +54,7 @@ namespace DataJockey {
 
             QMap<int, bool> mIndexPreSeekPauseState;
 
-            Audio::AudioController * mAudioController;
+            Audio::AudioModel * mAudioModel;
       };
    }
 }

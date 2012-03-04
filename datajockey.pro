@@ -20,6 +20,7 @@ INCLUDEPATH += . \
    include/ \
    include/audio \
    include/controller \
+   include/model \
    include/view \
    /usr/include/rubberband /usr/include/rasqal/
 
@@ -45,9 +46,9 @@ HEADERS += include/defines.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
            include/controller/audiobufferreference.hpp \
-           include/controller/audiocontroller.hpp \
            include/controller/audioloaderthread.hpp \
            include/controller/playermapper.hpp \
+           include/model/audiomodel.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp \
            include/view/waveformview.hpp
@@ -67,9 +68,9 @@ SOURCES += src/defines.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
            src/controller/audiobufferreference.cpp \
-           src/controller/audiocontroller.cpp \
            src/controller/audioloaderthread.cpp \
            src/controller/playermapper.cpp \
+           src/model/audiomodel.cpp \
            src/view/main.cpp \
            src/view/player_view.cpp \
            src/view/waveformitem.cpp \

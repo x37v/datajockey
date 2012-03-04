@@ -12,7 +12,7 @@ using namespace std;
 using namespace DataJockey::Controller;
 
 PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent) { 
-   mAudioController = Audio::AudioController::instance();
+   mAudioModel = Audio::AudioModel::instance();
 }
 
 PlayerMapper::~PlayerMapper() { }
@@ -21,15 +21,15 @@ void PlayerMapper::map(int index, View::Player * player) {
    mIndexPlayerMap[index] = player;
    mPlayerIndexMap[player] = index;
    mIndexPreSeekPauseState[index] = false;
-   QObject::connect(mAudioController,
+   QObject::connect(mAudioModel,
          SIGNAL(player_audio_file_load_progress(int, int)),
          this,
          SLOT(file_load_progress(int, int)));
-   QObject::connect(mAudioController,
+   QObject::connect(mAudioModel,
          SIGNAL(player_audio_file_changed(int, QString)),
          this,
          SLOT(file_changed(int, QString)));
-   QObject::connect(mAudioController,
+   QObject::connect(mAudioModel,
          SIGNAL(player_position_changed(int, int)),
          this,
          SLOT(position_changed(int, int)));
@@ -64,7 +64,7 @@ void PlayerMapper::map(int index, View::Player * player) {
    mSliderIndexMap[player->volume_slider()] =  index;
    mIndexSliderMap[index] = player->volume_slider();
 
-   QObject::connect(mAudioController,
+   QObject::connect(mAudioModel,
          SIGNAL(player_volume_changed(int, int)),
          this,
          SLOT(volume_changed(int, int)));
@@ -94,11 +94,11 @@ void PlayerMapper::button_pressed() {
    int index = mButtonIndexMap[button];
    QString name = button->property("dj_name").toString();
    if (name == "seek_back") 
-      mAudioController->set_player_position_relative(index, -0.5);
+      mAudioModel->set_player_position_relative(index, -0.5);
    else if (name ==  "seek_forward") 
-      mAudioController->set_player_position_relative(index, 0.5);
+      mAudioModel->set_player_position_relative(index, 0.5);
    else if (name == "reset") 
-      mAudioController->set_player_position(index, 0.0);
+      mAudioModel->set_player_position(index, 0.0);
    //else if (name == "load") 
 
 }
@@ -110,11 +110,11 @@ void PlayerMapper::button_toggled(bool state) {
    int index = mButtonIndexMap[button];
    QString name = button->property("dj_name").toString();
    if (name == "cue") {
-      mAudioController->set_player_cue(index, state);
+      mAudioModel->set_player_cue(index, state);
    } else if (name == "pause") {
-      mAudioController->set_player_pause(index, state);
+      mAudioModel->set_player_pause(index, state);
    } else if (name == "sync") {
-      mAudioController->set_player_sync(index, state);
+      mAudioModel->set_player_sync(index, state);
    }
 }
 
@@ -123,7 +123,7 @@ void PlayerMapper::volume_changed(int value) {
    if (!slider)
       return;
    int index = mSliderIndexMap[slider];
-   mAudioController->set_player_volume(index, value);
+   mAudioModel->set_player_volume(index, value);
 }
 
 void PlayerMapper::volume_changed(int player_index, int value) {
@@ -140,11 +140,11 @@ void PlayerMapper::eq_changed(int value) {
 
    QString name = eq->property("dj_name").toString();
    if (name == "dj_eq_low") {
-      mAudioController->set_player_eq(index, 0, value);
+      mAudioModel->set_player_eq(index, 0, value);
    } else if (name == "dj_eq_mid") {
-      mAudioController->set_player_eq(index, 1, value);
+      mAudioModel->set_player_eq(index, 1, value);
    } else if (name == "dj_eq_high") {
-      mAudioController->set_player_eq(index, 2, value);
+      mAudioModel->set_player_eq(index, 2, value);
    }
 }
 
@@ -180,7 +180,7 @@ void PlayerMapper::seek_relative(int frames) {
    if (!player)
       return;
    int index = mPlayerIndexMap[player];
-   mAudioController->set_player_position_frame_relative(index, frames);
+   mAudioModel->set_player_position_frame_relative(index, frames);
 }
 
 void PlayerMapper::seeking(bool start) {
@@ -189,10 +189,10 @@ void PlayerMapper::seeking(bool start) {
       return;
    int index = mPlayerIndexMap[player];
    if (start) {
-      mIndexPreSeekPauseState[index] = mAudioController->player_pause(index);
-      mAudioController->set_player_pause(index, true);
+      mIndexPreSeekPauseState[index] = mAudioModel->player_pause(index);
+      mAudioModel->set_player_pause(index, true);
    } else {
-      mAudioController->set_player_pause(index, mIndexPreSeekPauseState[index]);
+      mAudioModel->set_player_pause(index, mIndexPreSeekPauseState[index]);
    }
 }
 

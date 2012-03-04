@@ -1,6 +1,6 @@
 #include "audiobufferreference.hpp"
 #include "audiobuffer.hpp"
-#include "audiocontroller.hpp"
+#include "audiomodel.hpp"
 #include <QMutexLocker>
 #include <math.h>
 

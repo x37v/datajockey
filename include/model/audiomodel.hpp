@@ -1,5 +1,5 @@
-#ifndef DATAJOCKEY_AUDIO_CONTROLLER_HPP
-#define DATAJOCKEY_AUDIO_CONTROLLER_HPP
+#ifndef DATAJOCKEY_AUDIO_MODEL_HPP
+#define DATAJOCKEY_AUDIO_MODEL_HPP
 
 #include <QObject>
 #include <QString>
@@ -17,7 +17,7 @@
 
 namespace DataJockey {
    namespace Audio {
-      class AudioController : public QObject {
+      class AudioModel : public QObject {
          Q_OBJECT
          Q_CLASSINFO("D-Bus Interface", "org.x37v.datajockey.audio")
 
@@ -30,13 +30,13 @@ namespace DataJockey {
             class QueryPlayerStates;
 
             //singleton
-            AudioController();
-            AudioController(const AudioController&);
-            AudioController& operator=(const AudioController&);
-            ~AudioController();
-            static AudioController * cInstance;
+            AudioModel();
+            AudioModel(const AudioModel&);
+            AudioModel& operator=(const AudioModel&);
+            ~AudioModel();
+            static AudioModel * cInstance;
          public:
-            static AudioController * instance();
+            static AudioModel * instance();
 
             //getters
             //player

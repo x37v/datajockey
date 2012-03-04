@@ -4,16 +4,16 @@
 #include <QThread>
 #include <QMutex>
 #include <QString>
-#include "audiocontroller.hpp"
+#include "audiomodel.hpp"
 
 namespace DataJockey {
    namespace Audio {
 
       class AudioBuffer;
-      class AudioController::AudioLoaderThread : public QThread {
+      class AudioModel::AudioLoaderThread : public QThread {
          Q_OBJECT
          public:
-            AudioLoaderThread(AudioController * controller);
+            AudioLoaderThread(AudioModel * model);
             DataJockey::Audio::AudioBuffer * load(QString location);
             void run();
             static void progress_callback(int percent, void *objPtr);
@@ -24,9 +24,9 @@ namespace DataJockey {
          protected:
             void relay_load_progress(QString fileName, int percent);
             DataJockey::Audio::AudioBuffer * mAudioBuffer;
-            AudioController * controller();
+            AudioModel * model();
          private:
-            AudioController * mAudioController;
+            AudioModel * mAudioModel;
             QString mFileName;
             QMutex mMutex;
             bool mAborted;
