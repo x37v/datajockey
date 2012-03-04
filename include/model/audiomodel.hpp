@@ -99,6 +99,8 @@ namespace DataJockey {
             void set_player_beat_buffer_remove_beat(int player_index, double value);
             void set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value);
 
+            void set_player_beat_buffer(int player_index, DataJockey::Audio::BeatBuffer * buf);
+
             //***** MASTER COMMANDS
             void set_master_volume(int val);
             void set_master_cue_volume(int val);
@@ -170,7 +172,6 @@ namespace DataJockey {
             void queue_command(DataJockey::Audio::Command * cmd);
 
             void set_player_audio_buffer(int player_index, DataJockey::Audio::AudioBuffer * buf);
-            void set_player_beat_buffer(int player_index, DataJockey::Audio::BeatBuffer * buf);
 
             void update_player_state(int player_index, PlayerState * state);
       };

@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus
 DEPENDPATH += . \

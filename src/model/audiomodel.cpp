@@ -503,11 +503,17 @@ void AudioModel::set_player_audio_buffer(int player_index, AudioBuffer * buf){
    queue_command(new PlayerSetAudioBufferCommand(player_index, buf));
 }
 
-void AudioModel::set_player_beat_buffer(int player_index, BeatBuffer * /* buf */){
+void AudioModel::set_player_beat_buffer(int player_index, BeatBuffer * buf){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   //TODO
+   //update our state
+   PlayerState * player_state = mPlayerStates[player_index];
+   player_state->mInBeatBufferTransaction = false;
+
+   player_state->mBeatBuffer = *buf;
+   BeatBuffer * player_buf = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
+   queue_command(new PlayerSetBeatBufferCommand(player_index, player_buf, true));
 }
 
 void AudioModel::update_player_state(int player_index, PlayerState * state){

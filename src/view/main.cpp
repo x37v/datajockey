@@ -4,9 +4,15 @@
 #include "audiomodel.hpp"
 #include "playermapper.hpp"
 #include "defines.hpp"
+#include "beatbuffer.hpp"
 
 #include <QSlider>
 #include <QFile>
+
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 using namespace DataJockey;
 
@@ -52,8 +58,26 @@ int main(int argc, char * argv[]){
    model->set_master_bpm(120.0);
 
    model->start_audio();
-   model->set_player_audio_file(0, "/home/alex/projects/music/11-phuture-acid_tracks.flac");
-   model->set_player_audio_file(1, "/home/alex/projects/music/11-phuture-acid_tracks.flac");
+
+   Audio::BeatBuffer * beat_buffer0 = new Audio::BeatBuffer;
+   if (beat_buffer0->load("/media/x/datajockey_annotation/new/3781-rod_lee-k-life-hey_shorty.yaml")) {
+      cout << "loaded" << endl;
+   } else {
+      cout << "FAILED to load" << endl;
+   }
+
+   model->set_player_audio_file(0, "/media/x/music/rod_lee/k-life/06-hey_shorty.flac");
+   model->set_player_beat_buffer(0, beat_buffer0);
+
+   Audio::BeatBuffer * beat_buffer1 = new Audio::BeatBuffer;
+   if (beat_buffer1->load("/media/x/datajockey_annotation/new/3776-rod_lee-k-life-get_real_high.yaml")) {
+      cout << "loaded" << endl;
+   } else {
+      cout << "FAILED to load" << endl;
+   }
+
+   model->set_player_audio_file(1, "/media/x/music/rod_lee/k-life/01-get_real_high.flac");
+   model->set_player_beat_buffer(1, beat_buffer1);
 
    QObject::connect(qApp, SIGNAL(aboutToQuit()), model, SLOT(stop_audio()));
 

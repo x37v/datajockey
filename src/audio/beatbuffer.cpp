@@ -1,4 +1,6 @@
 #include "beatbuffer.hpp"
+#include "yaml-cpp/yaml.h"
+#include <fstream>
 
 using namespace DataJockey::Audio;
 
@@ -9,6 +11,32 @@ Type linear_interp(Type v0, Type v1, double dist){
 
 BeatBuffer::BeatBuffer() {
    mStartBeat = 0;
+}
+
+bool BeatBuffer::load(std::string file_location) {
+   clear();
+   try {
+      std::ifstream fin(file_location.c_str());
+      YAML::Parser parser(fin);
+      YAML::Node doc;
+      parser.GetNextDocument(doc);
+
+      const YAML::Node& locs = doc["beat locations"];
+      if (locs.size() == 0) {
+         return false;
+      } else {
+         //XXX just using the last in the list
+         const YAML::Node& beats = locs[locs.size() - 1]["time points"];
+         for (unsigned int i = 0; i < beats.size(); i++) {
+            double beat;
+            beats[i] >> beat;
+            insert_beat(beat);
+         }
+      }
+   } catch(...) {
+      return false;
+   }
+   return true;
 }
 
 //XXX assuming 4/4

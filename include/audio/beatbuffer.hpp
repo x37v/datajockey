@@ -16,6 +16,8 @@ namespace DataJockey {
             typedef beat_list_t::iterator iterator;
 
             BeatBuffer();
+            bool load(std::string file_location);
+
             double time_at_position(const TimePoint& position) const;
             TimePoint position_at_time(double seconds) const;
             //this one lets us give a 'last position' helper so we don't have to
