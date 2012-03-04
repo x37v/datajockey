@@ -816,8 +816,9 @@ void AudioModel::stop_audio() {
    //there must be a better way than this!
    for(unsigned int i = 0; i < mNumPlayers; i++)
       set_player_clear_buffers(i);
-   sleep(1);
+   usleep(500000);
    mAudioIO->stop();
+   usleep(500000);
 }
 
 void AudioModel::queue_command(DataJockey::Audio::Command * cmd){
