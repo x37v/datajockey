@@ -37,6 +37,15 @@ int main(int argc, char * argv[]){
          mixer_panel->master_volume_slider(),
          SLOT(setValue(int)));
 
+   QObject::connect(mixer_panel,
+         SIGNAL(tempo_changed(double)),
+         model,
+         SLOT(set_master_bpm(double)));
+   QObject::connect(model,
+         SIGNAL(master_bpm_changed(double)),
+         mixer_panel,
+         SLOT(set_tempo(double)));
+
    model->set_master_cross_fade_enable(true);
    model->set_master_cross_fade_players(0, 1);
    model->set_master_cross_fade_position(one_scale / 2);

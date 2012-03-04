@@ -9,7 +9,7 @@
 
 using namespace DataJockey::View;
 
-MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent) {
+MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false) {
    unsigned int num_players = Audio::AudioModel::instance()->player_count();
 
    QBoxLayout * top_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
@@ -62,3 +62,11 @@ MixerPanel::~MixerPanel() {
 QList<Player *> MixerPanel::players() const { return mPlayers; }
 QSlider * MixerPanel::cross_fade_slider() const { return mCrossFadeSlider; }
 QSlider * MixerPanel::master_volume_slider() const { return mMasterVolume; }
+
+void MixerPanel::set_tempo(double bpm) {
+   mSettingTempo = true;
+   mMasterTempo->setValue(bpm);
+   emit(tempo_changed(bpm));
+   mSettingTempo = false;
+}
+

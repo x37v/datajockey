@@ -19,11 +19,16 @@ namespace DataJockey {
             QList<Player *> players() const;
             QSlider * cross_fade_slider() const;;
             QSlider * master_volume_slider() const;;
+         public slots:
+            void set_tempo(double bpm);
+         signals:
+            void tempo_changed(double);
          private:
             QList<Player *> mPlayers;
             QSlider * mCrossFadeSlider;
             QSlider * mMasterVolume;
             QDoubleSpinBox * mMasterTempo;
+            bool mSettingTempo;
       };
    }
 }

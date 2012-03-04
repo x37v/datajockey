@@ -811,6 +811,7 @@ void AudioModel::set_master_cross_fade_players(int left, int right){
 
 void AudioModel::set_master_bpm(double bpm) {
    queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
+   emit(master_bpm_changed(bpm));
 }
 
 void AudioModel::start_audio() {

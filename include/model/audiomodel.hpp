@@ -127,6 +127,7 @@ namespace DataJockey {
 
             void master_cross_fade_position_changed(int);
             void master_volume_changed(int);
+            void master_bpm_changed(double);
 
          protected slots:
             //only for internal use
