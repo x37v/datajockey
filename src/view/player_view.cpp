@@ -53,13 +53,17 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       btn->setProperty("dj_name", items[i].name);
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);
-      button_layout->addWidget(btn, items[i].row, items[i].col);
+      button_layout->addWidget(btn, items[i].row, items[i].col + 1);
    }
+   button_layout->setSpacing(0);
+   button_layout->setColumnStretch(0, 100);
+   button_layout->setColumnStretch(4, 100);
    mControlLayout->addLayout(button_layout);
 
    QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
       QDial * dial = new QDial(this);
+      dial->setFixedSize(dial->minimumSizeHint());
       dial->setRange(-one_scale, one_scale);
       dial->setProperty("dj_name", QString("dj_eq_") + eq[i]);
       mEqDials.insert(eq[i], dial);
@@ -70,12 +74,13 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
    mVolumeSlider->setValue(one_scale);
    mControlLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+   mControlLayout->setContentsMargins(0,0,0,0);
 
    mWaveFormView = new WaveFormView(this);
    mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
 
-   mTopLayout->addLayout(mControlLayout);
-   mTopLayout->addWidget(mWaveFormView);
+   mTopLayout->addLayout(mControlLayout, 0);
+   mTopLayout->addWidget(mWaveFormView, 10);
    setLayout(mTopLayout);
 
    QObject::connect(mWaveFormView,

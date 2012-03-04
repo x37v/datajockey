@@ -27,36 +27,23 @@ QPushButton {
 }
 */
 
-.QPushButton {
-	/*
-	background-color: #aa1717;
-	*/
-	border: 1px solid white;
-	border-radius: 3px;
-	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 2,
-		stop: 0 black, stop: 1 white);
-	color: white;
-	margin: 0 0 0 0;
-	padding: 2px 2px;
-}
-
-QPushButton::pressed {
-	border: 1px solid white;
-	border-radius: 3px;
-	background: #aa1717;
-	color: black;
-	margin: 0 0 0 0;
-	padding: 0px;
-}
-
 QPushButton {
 	border-width: 0px;
 	border-style: none;
 	margin: 0 0 0 0;
 	padding: 0px;
-	max-width: 24px;
-	max-height: 24px;
-	background: white;
+	min-width: 24px;
+	min-height: 24px;
+	background-color: #131313;
+}
+
+QPushButton::pressed {
+	border: 1px solid white;
+	border-radius: 3px;
+	/*background: #aa1717; */
+	color: black;
+	margin: 0 0 0 0;
+	padding: 0px;
 }
 
 QPushButton::pressed, QPushButton::checked
