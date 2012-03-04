@@ -26,6 +26,7 @@ INCLUDEPATH += . \
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
 QMAKE_CFLAGS += $$DENORMAL_FLAGS
+RESOURCES = datajockey.qrc
 
 # Input
 HEADERS += include/defines.hpp \

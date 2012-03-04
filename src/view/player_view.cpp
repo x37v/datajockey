@@ -48,7 +48,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mControlLayout->addWidget(mProgressBar);
 
    for (unsigned int i = 0; i < sizeof(items) / sizeof(button_info); i++) {
-      QPushButton * btn = new QPushButton(items[i].label, this);
+      //XXX can we style out text? QPushButton * btn = new QPushButton(items[i].label, this);
+      QPushButton * btn = new QPushButton(this);
       btn->setProperty("dj_name", items[i].name);
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);

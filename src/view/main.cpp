@@ -6,6 +6,7 @@
 #include "defines.hpp"
 
 #include <QSlider>
+#include <QFile>
 
 using namespace DataJockey;
 
@@ -36,6 +37,12 @@ int main(int argc, char * argv[]){
    model->set_player_audio_file(1, "/home/alex/projects/music/11-phuture-acid_tracks.flac");
 
    QObject::connect(qApp, SIGNAL(aboutToQuit()), model, SLOT(stop_audio()));
+
+   QFile file(":/style.qss");
+   if(file.open(QFile::ReadOnly)){
+      QString styleSheet = QLatin1String(file.readAll());
+      app.setStyleSheet(styleSheet);
+   }
 
    mixer_panel->show();
    app.exec();

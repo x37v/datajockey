@@ -1,0 +1,372 @@
+QWidget {
+	background-color: #131313;
+	color: white;
+	selection-color: black;
+	selection-background-color: white;
+	font-family: "Mashq";
+}
+
+/*
+haven't figured out how to make the WorkFilterList look good yet..
+WorkFilterListView QTableView {
+	color: black;
+	background: white;
+}
+*/
+
+/*
+QPushButton {
+	background-color: grey;
+	border-width: 1px;
+	border-color: grey;
+	border-style: solid;
+	border-radius: 5px;
+	padding: 0px;
+	min-width: 9ex;
+	min-height: 2.5ex;
+}
+*/
+
+.QPushButton {
+	/*
+	background-color: #aa1717;
+	*/
+	border: 1px solid white;
+	border-radius: 3px;
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 2,
+		stop: 0 black, stop: 1 white);
+	color: white;
+	margin: 0 0 0 0;
+	padding: 2px 2px;
+}
+
+QPushButton::pressed {
+	border: 1px solid white;
+	border-radius: 3px;
+	background: #aa1717;
+	color: black;
+	margin: 0 0 0 0;
+	padding: 0px;
+}
+
+QPushButton {
+	border-width: 0px;
+	border-style: none;
+	margin: 0 0 0 0;
+	padding: 0px;
+	max-width: 24px;
+	max-height: 24px;
+	background: white;
+}
+
+QPushButton::pressed, QPushButton::checked
+{
+	border-width: 0px;
+	border-style: none;
+	margin: 0 0 0 0;
+	padding: 0px;
+}
+
+/*
+QPushButton[dj_name="load"],
+   QPushButton[dj_name="reset"],
+   QPushButton[dj_name="cue"],
+   QPushButton[dj_name="sync"],
+   QPushButton[dj_name="pause"],
+   QPushButton[dj_name="seek_back"],
+   QPushButton[dj_name="seek_forward"]
+   */
+
+QPushButton[dj_name="seek_forward"] { image: url(:icons/seekfwd.png); }
+QPushButton[dj_name="seek_forward"]::pressed { image: url(:icons/seekfwd_off.png); }
+
+QPushButton[dj_name="seek_back"] { image: url(:icons/seekbkd.png); }
+QPushButton[dj_name="seek_back"]::pressed { image: url(:icons/seekbkd_off.png); }
+
+QPushButton[dj_name="load"] { image: url(:icons/load.png); } 
+QPushButton[dj_name="load"]::pressed { image: url(:icons/load_off.png); }
+
+QPushButton[dj_name="reset"] { image: url(:icons/reset.png); } 
+QPushButton[dj_name="reset"]::pressed { image: url(:icons/reset_off.png); }
+
+QPushButton[dj_name="cue"] { image: url(:icons/cue_off.png); }
+QPushButton[dj_name="cue"]::checked { image: url(:icons/cue.png); }
+
+QPushButton[dj_name="sync"] { image: url(:icons/sync_off.png); }
+QPushButton[dj_name="sync"]::checked { image: url(:icons/sync.png); }
+
+QPushButton[dj_name="pause"] { image: url(:icons/play.png); }
+QPushButton[dj_name="pause"]::checked { image: url(:icons/pause.png); }
+
+QPushButton[dj_name="mute"] { image: url(:icons/mute.png); } 
+QPushButton[dj_name="mute"]::checked { image: url(:icons/mute_off.png); }
+
+/*
+QPushButton:hover {
+	background-color: white;
+	color: black;
+}
+*/
+
+/* Increase the padding, so the text is shifted when the button is
+pressed. */
+/*
+QPushButton:pressed {
+	padding-left: 5px;
+	padding-top: 5px;
+	background-color: black;
+	color: white;
+}
+*/
+
+QLabel, QAbstractButton {
+	font: bold;
+}
+
+/* Bold text on status bar looks awful. */
+QStatusBar QLabel {
+	font: normal;
+}
+
+QStatusBar::item {
+	border-width: 1;
+	border-color: white;
+	border-style: solid;
+	border-radius: 3px;
+}
+
+QComboBox, QLineEdit, QSpinBox, QTextEdit, QListView {
+	background-color: black;
+	color: white;
+	selection-color: black;
+	selection-background-color: white;
+}
+
+QTextEdit, QLineEdit {
+	font-family: "Bitstream Vera Sans Mono";
+	font-size: 12px;
+}
+
+QTableView::item { 
+	border: 1px;
+	padding: 0;
+	margin: 0;
+}
+
+QListView::item:hover, QTreeView::item::hover, QTableView::item::hover {
+	background-color: grey;
+	color: white;
+}
+
+QListView::item:selected, QTreeView::item::selected, QTableView::item::selected {
+	background-color: white;
+	color: black;
+}
+
+QLineEdit, QFrame
+{
+	border-width: 1px;
+	border-style: solid;
+	border-color: darkgrey;
+	border-radius: 3px;
+	color: white;
+}
+
+QSplitter > QFrame, QTabWidget > QFrame, ApplicationView > QFrame {
+	border-width: 0;
+	padding: 0;
+	border-radius: 0;
+	border-color: 0;
+	padding: 1px;
+}
+
+QLineEdit:focus, QFrame:focus, QSpinBox::focus, QDoubleSpinBox::focus {
+	/* border-color: #aa1717; */
+	border-color: #99f151;
+}
+
+/* A QLabel is a QFrame ... */
+QLabel {
+	border: none;
+	padding: 0;
+	background: none;
+	font-family: "DejaVu Sans";
+	font-style: bold;
+}
+
+/* A QToolTip is a QLabel ... */
+QToolTip {
+	border: 1px solid grey;
+	color: black;
+	border-radius: 3px;
+	margin: 0 0 0 0;
+	padding: 0px;
+}
+
+/* Nice to have the background color change when hovered. */
+QRadioButton:hover, QCheckBox:hover {
+	background-color: white;
+	color: black;
+}
+
+/* Force the dialog's buttons to follow the Windows guidelines. */
+QDialogButtonBox {
+	button-layout: 0;
+}
+
+QProgressBar {
+	border: 1px solid white;
+	border-radius: 3px;
+	text-align: center;
+	height: 15px;
+}
+
+QProgressBar::chunk, QProgressBar::indeterminate {
+	/*
+	background-color: #99f151;
+	background-color: #aa1717;
+	*/
+	background-color: #dc1e1e;
+	color: black;
+}
+
+QScrollBar {
+	border: 1px solid white;
+	background: grey;
+}
+
+QScrollBar:horizontal {
+	height: 15px;
+	margin: 0px 20px 0 20px;
+}
+
+QScrollBar:vertical {
+	width: 15px;
+	margin: 20px 0px 20 0px;
+}
+
+QScrollBar::handle:horizontal {
+	border: 1px solid grey;
+	background: white;
+	min-width: 20px;
+}
+
+QScrollBar::handle:vertical {
+	border: 1px solid grey;
+	background: white;
+	min-height: 20px;
+}
+
+QScrollBar::add-line:horizontal {
+	border: 1px solid grey;
+	background: darkgrey;
+	width: 20px;
+	subcontrol-position: right;
+	subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical {
+	border: 1px solid grey;
+	background: darkgrey;
+	height: 20px;
+	subcontrol-position: bottom;
+	subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+	border: 1px solid grey;
+	background: darkgrey;
+	width: 20px;
+	subcontrol-position: left;
+	subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+	border: 1px solid grey;
+	background: darkgrey;
+	height: 20px;
+	subcontrol-position: top;
+	subcontrol-origin: margin;
+}
+
+
+QSlider::groove:vertical {
+	background: black;
+	width: 10px;
+}
+
+QSlider::groove:horizontal {
+	background: black;
+	height: 10px;
+}
+
+QSlider::handle {
+
+	background: qradialgradient(cx:0, cy:0, radius: 1, fx:0.1, fy:0.5, stop:0 gray, stop:1 black);
+	/*
+	background: qradialgradient(cx:0, cy:0, radius: 1, fx:0.1, fy:0.5, stop:0 white, stop:1 #99f151);
+	 * background: qradialgradient(cx:0, cy:0, radius: 1, fx:0.1, fy:0.5, stop:0 white, stop:1 black); */
+
+	border-width: 1px;
+	border-color: gray;
+	border-style: solid;
+	border-radius: 3px;
+}
+
+QSlider::handle:vertical {
+	height: 10px;
+	margin: 0 -2px; 
+}
+
+QSlider::handle:horizontal {
+	width: 10px;
+	margin: -2px 0;
+}
+
+QSlider::add-page, QSlider::sub-page {
+	border: 1px solid gray;
+}
+
+QSlider::add-page::vertical {
+	/*
+	background-color: #99f151;
+	background-color: #aa1717;
+	*/
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+		stop: 0 #131313, stop: 1 #aa1717);
+}
+
+QSlider::add-page::horizontal {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+		stop: 0 #131313, stop: 1 #aa1717);
+}
+
+QSlider::sub-page::vertical {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+		stop: 0 #aa1717, stop: 1 #131313);
+}
+
+QSlider::sub-page::horizontal {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+		stop: 0 #aa1717, stop: 1 #131313);
+}
+
+QSpinBox, QDoubleSpinBox {
+	margin: 1px;
+	border-width: 1px;
+	border-color: white;
+	border-style: solid;
+	border-radius: 3px;
+	color: white;
+}
+
+QSpinBox::disabled, QDoubleSpinBox::disabled {
+	border-color: white;
+	background: gray;
+}
+
+QSpinBox::up-arrow, QSpinBox::down-arrow, QDoubleSpinBox::up-arrow, QDoubleSpinBox::down-arrow {
+	color: black;
+	background: gray;
+}
+
