@@ -357,7 +357,6 @@ QSpinBox::disabled, QDoubleSpinBox::disabled {
 }
 
 QSpinBox::up-arrow, QSpinBox::down-arrow, QDoubleSpinBox::up-arrow, QDoubleSpinBox::down-arrow {
-	color: black;
-	background: gray;
+	color: white;
 }
 

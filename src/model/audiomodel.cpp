@@ -768,8 +768,13 @@ void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_i
 }
 
 
-void AudioModel::set_master_volume(int /*val*/){
-   //TODO
+void AudioModel::set_master_volume(int val){
+   if (val < 0)
+      val = 0;
+   else if (val > 1.5 * one_scale)
+      val = 1.5 * one_scale;
+   //TODO actually implement
+   emit(master_volume_changed(val));
 }
 
 void AudioModel::set_master_cue_volume(int /*val*/){

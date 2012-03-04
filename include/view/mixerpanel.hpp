@@ -5,6 +5,7 @@
 #include <QList>
 
 class QSlider;
+class QDoubleSpinBox;
 
 namespace DataJockey {
    namespace View {
@@ -17,9 +18,12 @@ namespace DataJockey {
             virtual ~MixerPanel();
             QList<Player *> players() const;
             QSlider * cross_fade_slider() const;;
+            QSlider * master_volume_slider() const;;
          private:
             QList<Player *> mPlayers;
             QSlider * mCrossFadeSlider;
+            QSlider * mMasterVolume;
+            QDoubleSpinBox * mMasterTempo;
       };
    }
 }

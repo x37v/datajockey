@@ -4,6 +4,8 @@
 #include "defines.hpp"
 
 #include <QSlider>
+#include <QDoubleSpinBox>
+#include <QLabel>
 
 using namespace DataJockey::View;
 
@@ -24,6 +26,27 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent) {
       mixer_layout->addWidget(player);
    }
 
+   //master
+   QBoxLayout * master_layout = new QBoxLayout(QBoxLayout::TopToBottom);
+   master_layout->setAlignment(Qt::AlignCenter);
+
+   QLabel * lab = new QLabel("Tempo", this);
+   master_layout->addWidget(lab, 0, Qt::AlignHCenter);
+
+   mMasterTempo = new QDoubleSpinBox(this);
+   mMasterTempo->setValue(120.0);
+   mMasterTempo->setRange(10.0, 240.0);
+   mMasterTempo->setSingleStep(0.5);
+   mMasterTempo->setDecimals(3);
+   master_layout->addWidget(mMasterTempo, 0, Qt::AlignHCenter);
+
+
+   mMasterVolume = new QSlider(Qt::Vertical, this);
+   mMasterVolume->setRange(0, 1.5 * one_scale);
+   mMasterVolume->setValue(one_scale);
+   master_layout->addWidget(mMasterVolume, 10, Qt::AlignHCenter);
+
+   mixer_layout->addLayout(master_layout);
    top_layout->addLayout(mixer_layout);
 
    mCrossFadeSlider = new QSlider(Qt::Horizontal, this);
@@ -38,3 +61,4 @@ MixerPanel::~MixerPanel() {
 
 QList<Player *> MixerPanel::players() const { return mPlayers; }
 QSlider * MixerPanel::cross_fade_slider() const { return mCrossFadeSlider; }
+QSlider * MixerPanel::master_volume_slider() const { return mMasterVolume; }
