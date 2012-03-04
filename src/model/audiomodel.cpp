@@ -131,7 +131,8 @@ AudioModel * AudioModel::cInstance = NULL;
 AudioModel::AudioModel() :
    QObject(),
    mPlayerStates(),
-   mPlayerStatesMutex(QMutex::Recursive)
+   mPlayerStatesMutex(QMutex::Recursive),
+   mMasterBPM(0.0)
 {
    unsigned int num_players = 2;
 
@@ -810,8 +811,11 @@ void AudioModel::set_master_cross_fade_players(int left, int right){
 }
 
 void AudioModel::set_master_bpm(double bpm) {
-   queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
-   emit(master_bpm_changed(bpm));
+   if (bpm != mMasterBPM) {
+      mMasterBPM = bpm;
+      queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
+      emit(master_bpm_changed(bpm));
+   }
 }
 
 void AudioModel::start_audio() {

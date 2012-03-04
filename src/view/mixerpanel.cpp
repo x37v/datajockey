@@ -54,6 +54,8 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    top_layout->addWidget(mCrossFadeSlider);
 
    setLayout(top_layout);
+
+   QObject::connect(mMasterTempo, SIGNAL(valueChanged(double)), this, SIGNAL(tempo_changed(double)));
 }
 
 MixerPanel::~MixerPanel() {
@@ -64,6 +66,9 @@ QSlider * MixerPanel::cross_fade_slider() const { return mCrossFadeSlider; }
 QSlider * MixerPanel::master_volume_slider() const { return mMasterVolume; }
 
 void MixerPanel::set_tempo(double bpm) {
+   if (mSettingTempo)
+      return;
+
    mSettingTempo = true;
    mMasterTempo->setValue(bpm);
    emit(tempo_changed(bpm));

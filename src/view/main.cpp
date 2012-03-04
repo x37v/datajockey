@@ -49,6 +49,7 @@ int main(int argc, char * argv[]){
    model->set_master_cross_fade_enable(true);
    model->set_master_cross_fade_players(0, 1);
    model->set_master_cross_fade_position(one_scale / 2);
+   model->set_master_bpm(120.0);
 
    model->start_audio();
    model->set_player_audio_file(0, "/home/alex/projects/music/11-phuture-acid_tracks.flac");

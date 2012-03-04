@@ -158,6 +158,8 @@ namespace DataJockey {
             //make sure that player states/audio buffer manager access is thread safe
             QMutex mPlayerStatesMutex;
 
+            double mMasterBPM;
+
             //**** private methods
 
             //returns true if the buffer is actually loaded anywhere
