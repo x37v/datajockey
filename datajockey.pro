@@ -5,6 +5,7 @@
 TEMPLATE = app
 TARGET = datajockey
 LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2
+DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus
 DEPENDPATH += . \
               include/audio \
@@ -21,6 +22,9 @@ INCLUDEPATH += . \
    include/controller \
    include/view \
    /usr/include/rubberband /usr/include/rasqal/
+
+QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
+QMAKE_CFLAGS += $$DENORMAL_FLAGS
 
 # Input
 HEADERS += include/defines.hpp \
