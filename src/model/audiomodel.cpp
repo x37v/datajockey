@@ -786,12 +786,14 @@ void AudioModel::set_master_cross_fade_enable(bool enable){
 }
 
 void AudioModel::set_master_cross_fade_position(int val){
+   if (val < 0)
+      val = 0;
+   else if (val > (int)one_scale)
+      val = one_scale;
    double dval = (double)val / (double)one_scale;
-   if (dval > 1.0)
-      dval = 1.0;
-   else if(dval < 0.0)
-      dval = 0.0;
    queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
+
+   emit(master_cross_fade_position_changed(val));
 }
 
 void AudioModel::set_master_cross_fade_players(int left, int right){

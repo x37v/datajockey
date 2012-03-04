@@ -125,6 +125,8 @@ namespace DataJockey {
             void player_audio_file_load_progress(int player_index, int percent);
             void player_audio_file_changed(int player_index, QString location);
 
+            void master_cross_fade_position_changed(int);
+
          protected slots:
             //only for internal use
             void relay_player_audio_file_changed(int player_index, QString fileName);

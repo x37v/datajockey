@@ -3,6 +3,9 @@
 #include "player_view.hpp"
 #include "audiomodel.hpp"
 #include "playermapper.hpp"
+#include "defines.hpp"
+
+#include <QSlider>
 
 using namespace DataJockey;
 
@@ -15,6 +18,18 @@ int main(int argc, char * argv[]){
    Controller::PlayerMapper * mapper = new Controller::PlayerMapper(&app);
 
    mapper->map(mixer_panel->players());
+   QObject::connect(mixer_panel->cross_fade_slider(),
+         SIGNAL(valueChanged(int)),
+         model,
+         SLOT(set_master_cross_fade_position(int)));
+   QObject::connect(model,
+         SIGNAL(master_cross_fade_position_changed(int)),
+         mixer_panel->cross_fade_slider(),
+         SLOT(setValue(int)));
+
+   model->set_master_cross_fade_enable(true);
+   model->set_master_cross_fade_players(0, 1);
+   model->set_master_cross_fade_position(one_scale / 2);
 
    model->start_audio();
    model->set_player_audio_file(0, "/home/alex/projects/music/11-phuture-acid_tracks.flac");

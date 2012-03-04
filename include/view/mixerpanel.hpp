@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QList>
 
+class QSlider;
+
 namespace DataJockey {
    namespace View {
       class Player;
@@ -14,8 +16,10 @@ namespace DataJockey {
             MixerPanel(QWidget * parent = NULL);
             virtual ~MixerPanel();
             QList<Player *> players() const;
+            QSlider * cross_fade_slider() const;;
          private:
             QList<Player *> mPlayers;
+            QSlider * mCrossFadeSlider;
       };
    }
 }
