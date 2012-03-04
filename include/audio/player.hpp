@@ -101,6 +101,7 @@ namespace DataJockey {
             //states
             play_state_t mPlayState;
             out_state_t mOutState;
+            bool mCueMutesMain;
             bool mMute;
             bool mSync; //sync to main transport or not
             bool mLoop;

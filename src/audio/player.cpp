@@ -20,6 +20,8 @@ Player::Player() :
    //states
    mPlayState = PAUSE;
    mOutState = CUE;
+   //TODO make this configurable
+   mCueMutesMain = true;
    mMute = false;
    mSync = false;
    mLoop = false;
@@ -198,7 +200,10 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
       for(unsigned int i = 0; i < 2; i++){
          for(unsigned int j = 0; j < numFrames; j++){
             cueBuffer[i][j] = mixBuffer[i][j];
-            mixBuffer[i][j] *= mVolumeBuffer[j];
+            if (mCueMutesMain)
+               mixBuffer[i][j] = 0.0f;
+            else
+               mixBuffer[i][j] *= mVolumeBuffer[j];
          }
       }
    } else {
