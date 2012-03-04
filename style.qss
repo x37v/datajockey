@@ -338,6 +338,10 @@ QSlider::sub-page::horizontal {
 		stop: 0 #aa1717, stop: 1 #131313);
 }
 
+QDial {
+   background: red;
+}
+
 QSpinBox, QDoubleSpinBox {
 	margin: 1px;
 	border-width: 1px;

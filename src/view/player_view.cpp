@@ -63,7 +63,10 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
       QDial * dial = new QDial(this);
+      dial->setNotchesVisible(true);
       dial->setFixedSize(dial->minimumSizeHint());
+      dial->setSingleStep(one_scale / 64);
+      dial->setPageStep(one_scale / 16);
       dial->setRange(-one_scale, one_scale);
       dial->setProperty("dj_name", QString("dj_eq_") + eq[i]);
       mEqDials.insert(eq[i], dial);
