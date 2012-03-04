@@ -8,3 +8,4 @@ datajockey
 obj/
 moc/
 Makefile
+qrc_datajockey.cpp
