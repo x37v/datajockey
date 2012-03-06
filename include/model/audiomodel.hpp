@@ -57,6 +57,7 @@ namespace DataJockey {
             //void player_loop_start_position(int player_index);
             //void player_loop_end_position(int player_index);
             QString player_audio_file(int player_index);
+            BeatBuffer player_beat_buffer(int player_index);
 
             void set_player_pause(int player_index, bool pause);
             void set_player_cue(int player_index, bool val);
@@ -99,7 +100,9 @@ namespace DataJockey {
             void set_player_beat_buffer_remove_beat(int player_index, double value);
             void set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value);
 
-            void set_player_beat_buffer(int player_index, DataJockey::Audio::BeatBuffer * buf);
+            void set_player_beat_buffer(int player_index, QString buffer_file);
+
+            void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
             //***** MASTER COMMANDS
             void set_master_volume(int val);
@@ -126,6 +129,7 @@ namespace DataJockey {
             void player_audio_file_cleared(int player_index);
             void player_audio_file_load_progress(int player_index, int percent);
             void player_audio_file_changed(int player_index, QString location);
+            void player_beat_buffer_changed(int player_index);
 
             void master_cross_fade_position_changed(int);
             void master_volume_changed(int);

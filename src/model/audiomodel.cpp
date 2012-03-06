@@ -263,6 +263,13 @@ QString AudioModel::player_audio_file(int player_index){
    return mPlayerStates[player_index]->mFileName;
 }
 
+BeatBuffer AudioModel::player_beat_buffer(int player_index) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return BeatBuffer();
+   QMutexLocker lock(&mPlayerStatesMutex);
+   return mPlayerStates[player_index]->mBeatBuffer;
+}
+
 //****************** setters/slots
 
 void AudioModel::set_player_pause(int player_index, bool pause){
@@ -503,17 +510,30 @@ void AudioModel::set_player_audio_buffer(int player_index, AudioBuffer * buf){
    queue_command(new PlayerSetAudioBufferCommand(player_index, buf));
 }
 
-void AudioModel::set_player_beat_buffer(int player_index, BeatBuffer * buf){
+void AudioModel::set_player_beat_buffer(int player_index, QString buffer_file) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
    //update our state
+   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * player_state = mPlayerStates[player_index];
    player_state->mInBeatBufferTransaction = false;
 
-   player_state->mBeatBuffer = *buf;
+   //XXX what if we fail to load?
+   //defer this to a thread?
+   if (buffer_file.isEmpty())
+      player_state->mBeatBuffer.clear();
+   else
+      player_state->mBeatBuffer.load(buffer_file.toStdString());
    BeatBuffer * player_buf = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
    queue_command(new PlayerSetBeatBufferCommand(player_index, player_buf, true));
+
+   emit(player_beat_buffer_changed(player_index));
+}
+
+void AudioModel::set_player_buffers(int player_index, QString audio_file, QString beat_file) {
+   set_player_audio_file(player_index, audio_file);
+   set_player_beat_buffer(player_index, beat_file);
 }
 
 void AudioModel::update_player_state(int player_index, PlayerState * state){

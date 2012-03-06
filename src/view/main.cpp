@@ -59,25 +59,12 @@ int main(int argc, char * argv[]){
 
    model->start_audio();
 
-   Audio::BeatBuffer * beat_buffer0 = new Audio::BeatBuffer;
-   if (beat_buffer0->load("/media/x/datajockey_annotation/new/3764.yaml")) {
-      cout << "loaded" << endl;
-   } else {
-      cout << "FAILED to load" << endl;
-   }
-
-   model->set_player_audio_file(0, "/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac");
-   model->set_player_beat_buffer(0, beat_buffer0);
-
-   Audio::BeatBuffer * beat_buffer1 = new Audio::BeatBuffer;
-   if (beat_buffer1->load("/media/x/datajockey_annotation/new/3788-low_end_theory-3455-suck_it.yaml")) {
-      cout << "loaded" << endl;
-   } else {
-      cout << "FAILED to load" << endl;
-   }
-
-   model->set_player_audio_file(1, "/media/x/music/low_end_theory/3455/07-suck_it.flac");
-   model->set_player_beat_buffer(1, beat_buffer1);
+   model->set_player_buffers(0,
+         "/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
+         "/media/x/datajockey_annotation/new/3764.yaml");
+   model->set_player_buffers(1,
+         "/media/x/music/low_end_theory/3455/07-suck_it.flac",
+         "/media/x/datajockey_annotation/new/3788-low_end_theory-3455-suck_it.yaml");
 
    QObject::connect(qApp, SIGNAL(aboutToQuit()), model, SLOT(stop_audio()));
 
