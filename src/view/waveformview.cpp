@@ -1,5 +1,6 @@
 #include "waveformview.hpp"
 #include "waveformitem.hpp"
+#include "audiomodel.hpp"
 
 #include <QGraphicsScene>
 #include <QResizeEvent>
@@ -7,7 +8,7 @@
 
 using namespace DataJockey::View;
 
-WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer() {
+WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer(), mSampleRate(44100) {
    rotate(-90);
 
    mScene = new QGraphicsScene(this);
@@ -33,10 +34,13 @@ WaveFormView::~WaveFormView() {
 }
 
 void WaveFormView::set_audio_file(const QString& file_name) {
+
+   mSampleRate = Audio::AudioModel::instance()->sample_rate();
+
    mWaveForm->setAudioFile(file_name);
    QRectF rect = mWaveForm->boundingRect();
-   rect.setWidth(rect.width() + 2 * geometry().height());
-   rect.setX(rect.x() - geometry().height());
+   //rect.setWidth(rect.width() + 2 * geometry().height());
+   //rect.setX(rect.x() - geometry().height());
    mScene->setSceneRect(rect);
 
    resetMatrix();
@@ -50,11 +54,11 @@ void WaveFormView::set_beat_buffer(Audio::BeatBuffer & buffer) {
    //update the current ones
    for (; index < std::min((int)mBeatBuffer.length(), mBeatLines.length()); index++) {
       mBeatLines[index]->setVisible(true);
-      mBeatLines[index]->setPos((44100 * mBeatBuffer[index]) / mWaveForm->zoom(), 0);
+      mBeatLines[index]->setPos((mSampleRate * mBeatBuffer[index]) / mWaveForm->zoom(), 0);
    }
    //allocate any new that we need
    for (; index < (int)mBeatBuffer.length(); index++) {
-      qreal pos = (44100 * mBeatBuffer[index]) / mWaveForm->zoom();
+      qreal pos = (mSampleRate * mBeatBuffer[index]) / mWaveForm->zoom();
       mBeatLines.append(mScene->addLine(pos, -100, pos, 100, QPen(Qt::yellow)));
    }
    //set the unneeded ones to invisible

@@ -196,6 +196,10 @@ AudioModel * AudioModel::instance(){
 
 //*************** getters
 
+unsigned int AudioModel::sample_rate() const {
+   mAudioIO->getSampleRate();
+}
+
 unsigned int AudioModel::player_count() const { return mNumPlayers; }
 
 bool AudioModel::player_pause(int player_index){

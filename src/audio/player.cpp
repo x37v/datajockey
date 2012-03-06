@@ -303,6 +303,7 @@ void Player::position_at_frame(unsigned long frame) {
    if (!mStretcher->audio_buffer())
       return;
 
+   mUpdateTransportOffset = true;
    mStretcher->frame(frame);
 
    if (mBeatBuffer) {
@@ -389,25 +390,19 @@ void Player::volume_relative(double amt){
 
 void Player::update_position(const Transport& transport){
    mPositionDirty = false;
-   //XXX do we need this?
-#if 0
-
+   //XXX do we really need this?
    //if the type is seconds then set to that value
    //if it isn't and we have a beat buffer set to the appropriate value
    //otherwise guess the position based on the bar/beat and the current transport
    //tempo
    if(mPosition.type() == TimePoint::SECONDS){
-      mSampleIndex = mSampleRate * mPosition.seconds();
-      mSampleIndexResidual = 0;
+      mStretcher->frame(mSampleRate * mPosition.seconds());
    } else if(mBeatBuffer){
-      mSampleIndex = mSampleRate * mBeatBuffer->time_at_position(mPosition);
-      mSampleIndexResidual = 0;
+      mStretcher->frame(mSampleRate * mBeatBuffer->time_at_position(mPosition));
    } else {
-      mSampleIndex = (double)mSampleRate * ((60.0 / transport.bpm()) *
-            (double)(mPosition.bar() * mPosition.beats_per_bar() + mPosition.beat()));
-      mSampleIndexResidual = 0;
+      mStretcher->frame((double)mSampleRate * ((60.0 / transport.bpm()) *
+            (double)(mPosition.bar() * mPosition.beats_per_bar() + mPosition.beat())));
    }
-#endif
 }
 
 void Player::update_play_speed(const Transport& transport) {

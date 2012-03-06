@@ -59,12 +59,19 @@ int main(int argc, char * argv[]){
 
    model->start_audio();
 
+   //model->set_player_buffers(0,
+         //"/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
+         //"/media/x/datajockey_annotation/new/3764.yaml");
+   //model->set_player_buffers(1,
+         //"/media/x/music/low_end_theory/3455/06-l_m_b_rmx.flac",
+         //"/media/x/datajockey_annotation/new/3787-low_end_theory-3455-l_m_b_rmx.yaml");
+
    model->set_player_buffers(0,
-         "/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
-         "/media/x/datajockey_annotation/new/3764.yaml");
+         "/media/x/music/various/warp102-influences/disc_1/11-phuture-acid_tracks.flac",
+         "/media/x/datajockey_annotation/3029.yaml");
    model->set_player_buffers(1,
-         "/media/x/music/low_end_theory/3455/06-l_m_b_rmx.flac",
-         "/media/x/datajockey_annotation/new/3787-low_end_theory-3455-l_m_b_rmx.yaml");
+         "/media/x/music/various/warp102-influences/disc_1/11-phuture-acid_tracks.flac",
+         "/media/x/datajockey_annotation/3029.yaml");
 
    QObject::connect(qApp, SIGNAL(aboutToQuit()), model, SLOT(stop_audio()));
 

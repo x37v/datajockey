@@ -38,6 +38,7 @@ namespace DataJockey {
             QGraphicsLineItem * mCursor;
             Audio::BeatBuffer mBeatBuffer;
             QList<QGraphicsLineItem * > mBeatLines;
+            unsigned int mSampleRate;
       };
    }
 }

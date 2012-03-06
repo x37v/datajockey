@@ -41,6 +41,8 @@ namespace DataJockey {
             //getters
             //player
          public slots:
+            unsigned int sample_rate() const;
+
             unsigned int player_count() const;
             bool player_pause(int player_index);
             bool player_cue(int player_index);
@@ -58,7 +60,7 @@ namespace DataJockey {
             //void player_loop_end_position(int player_index);
             QString player_audio_file(int player_index);
             BeatBuffer player_beat_buffer(int player_index);
-            unsigned int sample_rate() const;
+
 
             void set_player_pause(int player_index, bool pause);
             void set_player_cue(int player_index, bool val);
