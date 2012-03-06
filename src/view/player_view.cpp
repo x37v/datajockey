@@ -55,6 +55,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col + 1);
    }
+   //sync is checked to start out with
+   mButtons["sync"]->setChecked(true);
+
    button_layout->setSpacing(0);
    button_layout->setColumnStretch(0, 100);
    button_layout->setColumnStretch(4, 100);

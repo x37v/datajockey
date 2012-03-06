@@ -23,6 +23,9 @@ void PlayerMapper::map(QList<View::Player *> players) {
 }
 
 void PlayerMapper::map(int index, View::Player * player) {
+   if (mIndexPlayerMap.contains(index))
+      return;
+
    mIndexPlayerMap[index] = player;
    mPlayerIndexMap[player] = index;
    mIndexPreSeekPauseState[index] = false;

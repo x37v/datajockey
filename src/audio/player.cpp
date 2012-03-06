@@ -427,8 +427,8 @@ void Player::update_transport_offset(const Transport& transport) {
    mTransportOffset = (transport.position() - mPosition);
 
    //XXX do we really want to do this?
-   if(mTransportOffset.pos_in_beat() > 0.5)
-      mTransportOffset.advance_beat();
+   //if(mTransportOffset.pos_in_beat() > 0.5)
+      //mTransportOffset.advance_beat();
    mTransportOffset.pos_in_beat(0.0);
 
    mUpdateTransportOffset = false;

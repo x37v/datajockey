@@ -8,7 +8,7 @@
 
 using namespace DataJockey::View;
 
-WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer(), mSampleRate(44100) {
+WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer(), mSampleRate(44100.0) {
    rotate(-90);
 
    mScene = new QGraphicsScene(this);
@@ -27,7 +27,7 @@ WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer(), 
    setBackgroundBrush(QBrush(Qt::black));
 
    //mWaveFormView->fitInView(mWaveForm);
-   //mWaveFormView->ensureVisible(mScene->mSceneRect(), Qt::IgnoreAspectRatio);
+   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 }
 
 WaveFormView::~WaveFormView() {
@@ -35,13 +35,14 @@ WaveFormView::~WaveFormView() {
 
 void WaveFormView::set_audio_file(const QString& file_name) {
 
-   mSampleRate = Audio::AudioModel::instance()->sample_rate();
+   mSampleRate = (double)Audio::AudioModel::instance()->sample_rate();
 
    mWaveForm->setAudioFile(file_name);
    QRectF rect = mWaveForm->boundingRect();
    //rect.setWidth(rect.width() + 2 * geometry().height());
    //rect.setX(rect.x() - geometry().height());
    mScene->setSceneRect(rect);
+   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 
    resetMatrix();
    scale((float)geometry().width() / 200.0, 1.0);
@@ -53,12 +54,13 @@ void WaveFormView::set_beat_buffer(Audio::BeatBuffer & buffer) {
    int index = 0;
    //update the current ones
    for (; index < std::min((int)mBeatBuffer.length(), mBeatLines.length()); index++) {
+      qreal pos = (mBeatBuffer[index] * mSampleRate) / mWaveForm->zoom();
+      mBeatLines[index]->setLine(pos, -100, pos, 100);
       mBeatLines[index]->setVisible(true);
-      mBeatLines[index]->setPos((mSampleRate * mBeatBuffer[index]) / mWaveForm->zoom(), 0);
    }
    //allocate any new that we need
    for (; index < (int)mBeatBuffer.length(); index++) {
-      qreal pos = (mSampleRate * mBeatBuffer[index]) / mWaveForm->zoom();
+      qreal pos = (mBeatBuffer[index] * mSampleRate) / mWaveForm->zoom();
       mBeatLines.append(mScene->addLine(pos, -100, pos, 100, QPen(Qt::yellow)));
    }
    //set the unneeded ones to invisible
@@ -85,7 +87,7 @@ void WaveFormView::resizeEvent(QResizeEvent * event) {
    resetMatrix();
    //scale(((float)event->size().width() / 200.0), 1.0);
    rotate(-90);
-   ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
+   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 
    QGraphicsView::resizeEvent(event);
 }

@@ -7,6 +7,7 @@ TARGET = datajockey
 LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus
+CONFIG += debug
 DEPENDPATH += . \
               include/audio \
               include/controller \
