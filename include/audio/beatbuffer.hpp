@@ -31,6 +31,8 @@ namespace DataJockey {
             BeatBuffer::const_iterator end() const;
             BeatBuffer::iterator end();
 
+            double operator[](unsigned int i) const;
+
             unsigned int length() const;
 
             //setters realtime safe

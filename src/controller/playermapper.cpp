@@ -35,6 +35,10 @@ void PlayerMapper::map(int index, View::Player * player) {
          this,
          SLOT(file_changed(int, QString)));
    QObject::connect(mAudioModel,
+         SIGNAL(player_beat_buffer_changed(int)),
+         this,
+         SLOT(beat_buffer_changed(int)));
+   QObject::connect(mAudioModel,
          SIGNAL(player_position_changed(int, int)),
          this,
          SLOT(position_changed(int, int)));
@@ -171,6 +175,13 @@ void PlayerMapper::file_load_progress(int player_index, int progress) {
    if (!player)
       return;
    player->progress_bar()->setValue(progress);
+}
+
+void PlayerMapper::beat_buffer_changed(int player_index) {
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   player->set_beat_buffer(mAudioModel->player_beat_buffer(player_index));
 }
 
 void PlayerMapper::position_changed(int player_index, int frame) {

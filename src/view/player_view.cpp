@@ -122,6 +122,10 @@ void Player::set_audio_frame(int frame) {
       mProgressBar->setValue(0);
 }
 
+void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
+   mWaveFormView->set_beat_buffer(buffer);
+}
+
 void Player::relay_seek_relative(int frames) { emit(seek_relative(frames)); }
 void Player::relay_mouse_button(bool down) { emit(seeking(down)); }
 

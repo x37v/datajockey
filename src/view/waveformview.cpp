@@ -7,7 +7,7 @@
 
 using namespace DataJockey::View;
 
-WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0) {
+WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer() {
    rotate(-90);
 
    mScene = new QGraphicsScene(this);
@@ -42,6 +42,25 @@ void WaveFormView::set_audio_file(const QString& file_name) {
    resetMatrix();
    scale((float)geometry().width() / 200.0, 1.0);
    rotate(-90);
+}
+
+void WaveFormView::set_beat_buffer(Audio::BeatBuffer & buffer) {
+   mBeatBuffer = buffer;
+   int index = 0;
+   //update the current ones
+   for (; index < std::min((int)mBeatBuffer.length(), mBeatLines.length()); index++) {
+      mBeatLines[index]->setVisible(true);
+      mBeatLines[index]->setPos((44100 * mBeatBuffer[index]) / mWaveForm->zoom(), 0);
+   }
+   //allocate any new that we need
+   for (; index < (int)mBeatBuffer.length(); index++) {
+      qreal pos = (44100 * mBeatBuffer[index]) / mWaveForm->zoom();
+      mBeatLines.append(mScene->addLine(pos, -100, pos, 100, QPen(Qt::yellow)));
+   }
+   //set the unneeded ones to invisible
+   for (; index < mBeatLines.length(); index++) {
+      mBeatLines[index]->setVisible(false);
+   }
 }
 
 void WaveFormView::set_audio_frame(int frame) {

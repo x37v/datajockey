@@ -3,6 +3,8 @@
 
 #include <QGraphicsView>
 #include <QString>
+#include <QList>
+#include "beatbuffer.hpp"
 
 class QGraphicsScene;
 class QResizeEvent;
@@ -19,6 +21,8 @@ namespace DataJockey {
             virtual ~WaveFormView();
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
+            void set_beat_buffer(Audio::BeatBuffer & buffer);
+
             virtual void resizeEvent(QResizeEvent * event);
             virtual void wheelEvent(QWheelEvent * event);
             virtual void mouseMoveEvent(QMouseEvent * event);
@@ -32,6 +36,8 @@ namespace DataJockey {
             WaveFormItem * mWaveForm;
             QGraphicsScene * mScene;
             QGraphicsLineItem * mCursor;
+            Audio::BeatBuffer mBeatBuffer;
+            QList<QGraphicsLineItem * > mBeatLines;
       };
    }
 }

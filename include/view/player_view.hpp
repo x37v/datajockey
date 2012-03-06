@@ -9,6 +9,7 @@
 #include <QGraphicsView>
 #include <QList>
 #include "waveformview.hpp"
+#include "beatbuffer.hpp"
 
 class QPushButton;
 class QSlider;
@@ -34,6 +35,7 @@ namespace DataJockey {
          public slots:
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
+            void set_beat_buffer(Audio::BeatBuffer buffer);
          signals:
             void seek_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause

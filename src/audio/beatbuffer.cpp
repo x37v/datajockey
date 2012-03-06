@@ -129,6 +129,8 @@ BeatBuffer::iterator BeatBuffer::begin() { return mBeatData.begin(); }
 BeatBuffer::const_iterator BeatBuffer::end() const { return mBeatData.end(); }
 BeatBuffer::iterator BeatBuffer::end() { return mBeatData.end(); }
 
+double BeatBuffer::operator[](unsigned int i) const { return mBeatData[i]; }
+
 unsigned int BeatBuffer::length() const { return mBeatData.size(); }
 
 void BeatBuffer::update_value(unsigned int index, double value) {

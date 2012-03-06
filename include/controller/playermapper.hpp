@@ -34,6 +34,7 @@ namespace DataJockey {
             void file_changed(int player_index, QString file_name);
             void file_cleared(int player_index);
             void file_load_progress(int player_index, int percent);
+            void beat_buffer_changed(int player_index);
 
             void position_changed(int player_index, int frame);
 
