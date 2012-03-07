@@ -1,5 +1,6 @@
 #include "playermapper.hpp"
 #include "player_view.hpp"
+#include "timepoint.hpp"
 #include <QProgressBar>
 #include <QPushButton>
 #include <QSlider>
@@ -106,9 +107,9 @@ void PlayerMapper::button_pressed() {
    int index = mButtonIndexMap[button];
    QString name = button->property("dj_name").toString();
    if (name == "seek_back") 
-      mAudioModel->set_player_position_relative(index, -0.5);
+      mAudioModel->set_player_position_relative(index, Audio::TimePoint(0) - Audio::TimePoint(0,1));
    else if (name ==  "seek_forward") 
-      mAudioModel->set_player_position_relative(index, 0.5);
+      mAudioModel->set_player_position_relative(index, Audio::TimePoint(0,1));
    else if (name == "reset") 
       mAudioModel->set_player_position(index, 0.0);
    //else if (name == "load") 
