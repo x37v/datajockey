@@ -5,7 +5,7 @@
 #include <QMap>
 #include <QString>
 #include <QBoxLayout>
-#include <QTextEdit>
+#include <QLineEdit>
 #include <QGraphicsView>
 #include <QList>
 #include "waveformview.hpp"
@@ -36,6 +36,7 @@ namespace DataJockey {
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
             void set_beat_buffer(Audio::BeatBuffer buffer);
+            void set_song_description(QString line1, QString line2);
          signals:
             void seek_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
@@ -48,7 +49,7 @@ namespace DataJockey {
             QMap<QString, QPushButton *> mButtons;
             QBoxLayout * mTopLayout;
             QBoxLayout * mControlLayout;
-            QTextEdit * mTrackDescription;
+            QLineEdit * mTrackDescription[2];
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
             WaveFormView * mWaveFormView;

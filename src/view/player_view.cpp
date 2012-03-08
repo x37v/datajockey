@@ -38,10 +38,12 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mControlLayout = new QBoxLayout(QBoxLayout::TopToBottom);
    QGridLayout * button_layout = new QGridLayout();
 
-   mTrackDescription = new QTextEdit(this);
-   mTrackDescription->setReadOnly(true);
-   mTrackDescription->setText("EMPTY");
-   mControlLayout->addWidget(mTrackDescription);
+   for (unsigned int i = 0; i < 2; i++) {
+      mTrackDescription[i] = new QLineEdit(this);
+      mTrackDescription[i]->setText("");
+      mTrackDescription[i]->setReadOnly(true);
+      mControlLayout->addWidget(mTrackDescription[i]);
+   }
 
    mProgressBar = new QProgressBar(this);
    mProgressBar->setTextVisible(true);
@@ -129,6 +131,13 @@ void Player::set_audio_frame(int frame) {
 
 void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
    mWaveFormView->set_beat_buffer(buffer);
+}
+
+void Player::set_song_description(QString line1, QString line2) {
+   mTrackDescription[0]->setText(line1);
+   mTrackDescription[1]->setText(line2);
+   mTrackDescription[0]->setCursorPosition(0);
+   mTrackDescription[1]->setCursorPosition(0);
 }
 
 void Player::relay_seek_relative(int frames) { emit(seek_relative(frames)); }

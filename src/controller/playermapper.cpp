@@ -33,7 +33,11 @@ namespace {
          "where audio_works.id = ");
 }
 
-PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent), mCurrentwork(0), mFileQuery("", Model::db::get()) { 
+PlayerMapper::PlayerMapper(QObject * parent) :
+   QObject(parent), mCurrentwork(0),
+   mFileQuery("", Model::db::get()),
+   mWorkInfoQuery("", Model::db::get())
+{ 
    mAudioModel = Audio::AudioModel::instance();
 }
 
@@ -158,6 +162,18 @@ void PlayerMapper::button_pressed() {
          mAudioModel->set_player_buffers(index,
                audiobufloc,
                beatbufloc);
+
+         mWorkInfoQuery.exec(workQueryStr);
+			if(mWorkInfoQuery.first()){
+				rec = mWorkInfoQuery.record();
+				int titleCol = rec.indexOf("title");
+				int artistCol = rec.indexOf("artist");
+            mIndexPlayerMap[index]->set_song_description(
+                  mWorkInfoQuery.value(artistCol).toString(),
+                  mWorkInfoQuery.value(titleCol).toString());
+         } else {
+            mIndexPlayerMap[index]->set_song_description("unknown", "unknown");
+         }
       }
    }
 

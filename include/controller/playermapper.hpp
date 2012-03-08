@@ -65,6 +65,8 @@ namespace DataJockey {
 
             int mCurrentwork;
             QSqlQuery mFileQuery;
+            QSqlQuery mWorkInfoQuery;
+
       };
    }
 }
