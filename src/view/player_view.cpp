@@ -84,6 +84,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
    mWaveFormView = new WaveFormView(this);
    mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
+   mWaveFormView->setMinimumWidth(220);
+   mWaveFormView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
    mTopLayout->addLayout(mControlLayout, 0);
    mTopLayout->addWidget(mWaveFormView, 10);
