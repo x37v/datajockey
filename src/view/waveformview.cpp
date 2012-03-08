@@ -38,15 +38,17 @@ void WaveFormView::set_audio_file(const QString& file_name) {
    mSampleRate = (double)Audio::AudioModel::instance()->sample_rate();
 
    mWaveForm->setAudioFile(file_name);
+
+   //resetMatrix();
+   //scale((float)geometry().width() / 200.0, 1.0);
+   //rotate(-90);
+   //mScene->setSceneRect(mWaveForm->boundingRect());
+
    QRectF rect = mWaveForm->boundingRect();
    //rect.setWidth(rect.width() + 2 * geometry().height());
    //rect.setX(rect.x() - geometry().height());
    mScene->setSceneRect(rect);
-   //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 
-   resetMatrix();
-   scale((float)geometry().width() / 200.0, 1.0);
-   rotate(-90);
 }
 
 void WaveFormView::set_beat_buffer(Audio::BeatBuffer & buffer) {
@@ -86,6 +88,7 @@ void WaveFormView::set_audio_frame(int frame) {
 void WaveFormView::resizeEvent(QResizeEvent * event) {
    resetMatrix();
    //scale(((float)event->size().width() / 200.0), 1.0);
+   //scale((float)geometry().width() / 200.0, 1.0);
    rotate(-90);
    //ensureVisible(mScene->sceneRect(), Qt::IgnoreAspectRatio);
 

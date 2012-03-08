@@ -71,17 +71,13 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
    mAudioModel->set_master_cross_fade_position(one_scale / 2);
    mAudioModel->set_master_bpm(120.0);
 
-   mAudioModel->set_player_pause(0, true);
-   mAudioModel->set_player_pause(1, true);
 
-   mAudioModel->start_audio();
-
-   mAudioModel->set_player_buffers(0,
-         "/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
-         "/media/x/datajockey_annotation/recovered/3981-dj_slugo-dance_mania_ghetto_classics_vol_1-freaky_ride.yaml");
-   mAudioModel->set_player_buffers(1,
-         "/media/x/music/low_end_theory/3455/07-suck_it.flac",
-         "/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
+   //mAudioModel->set_player_buffers(0,
+         //"/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
+         //"/media/x/datajockey_annotation/recovered/3981-dj_slugo-dance_mania_ghetto_classics_vol_1-freaky_ride.yaml");
+   //mAudioModel->set_player_buffers(1,
+         //"/media/x/music/low_end_theory/3455/07-suck_it.flac",
+         //"/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
 
    TagModel * tag_model = new TagModel(Model::db::get(), mTop);
    WorkTableModel * work_table_model = new WorkTableModel(Model::db::get(), mTop);
@@ -148,6 +144,8 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
    splitter->addWidget(left);
    splitter->addWidget(work_db_view);
    top_layout->addWidget(splitter);
+
+   mAudioModel->start_audio();
 
    mTop->setLayout(top_layout);
    mTop->show();
