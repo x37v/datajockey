@@ -115,6 +115,11 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
 
    //filter application
    QObject::connect(
+         filter_list,
+         SIGNAL(selectionChanged(WorkFilterModel *)),
+         filtered_work_model,
+         SLOT(setFilter(WorkFilterModel *)));
+   QObject::connect(
          work_db_view,
          SIGNAL(filter_state_changed(bool)),
          filtered_work_model,
