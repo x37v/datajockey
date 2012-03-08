@@ -271,6 +271,11 @@ BeatBuffer AudioModel::player_beat_buffer(int player_index) {
    return mPlayerStates[player_index]->mBeatBuffer;
 }
 
+double AudioModel::master_bpm() const {
+   return mMasterBPM;
+}
+
+
 //****************** setters/slots
 
 void AudioModel::set_player_pause(int player_index, bool pause){
