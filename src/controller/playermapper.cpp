@@ -1,10 +1,14 @@
 #include "playermapper.hpp"
 #include "player_view.hpp"
 #include "timepoint.hpp"
+#include "db.hpp"
+
 #include <QProgressBar>
 #include <QPushButton>
 #include <QSlider>
+#include <QString>
 #include <QDial>
+#include <QSqlRecord>
 
 //XXX
 #include <iostream>
@@ -12,7 +16,24 @@ using namespace std;
 
 using namespace DataJockey::Controller;
 
-PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent) { 
+namespace {
+   const QString cFileQueryString(
+         "select audio_files.location audio_file, annotation_files.location beat_file\n"
+         "from audio_works\n"
+         "\tjoin audio_files on audio_files.id = audio_works.audio_file_id\n"
+         "\tjoin annotation_files on annotation_files.audio_work_id = audio_works.id\n"
+         "where audio_works.id = ");
+
+   const QString cWorkInfoQueryString(
+         "select audio_works.name title,\n"
+         "\tartists.name\n"
+         "artist from audio_works"
+         "\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id\n"
+         "\tinner join artists on artists.id = artist_audio_works.artist_id\n"
+         "where audio_works.id = ");
+}
+
+PlayerMapper::PlayerMapper(QObject * parent) : QObject(parent), mCurrentwork(0), mFileQuery("", Model::db::get()) { 
    mAudioModel = Audio::AudioModel::instance();
 }
 
@@ -100,6 +121,11 @@ void PlayerMapper::map(int index, View::Player * player) {
    }
 }
 
+void PlayerMapper::setWork(int id) {
+   mCurrentwork = id;
+}
+
+
 void PlayerMapper::button_pressed() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    if (!button)
@@ -112,7 +138,28 @@ void PlayerMapper::button_pressed() {
       mAudioModel->set_player_position_relative(index, Audio::TimePoint(0,1));
    else if (name == "reset") 
       mAudioModel->set_player_position(index, 0.0);
-   //else if (name == "load") 
+   else if (name == "load") {
+      //build up query
+      QString fileQueryStr(cFileQueryString);
+      QString workQueryStr(cWorkInfoQueryString);
+      QString id;
+      id.setNum(mCurrentwork);
+      fileQueryStr.append(id);
+      workQueryStr.append(id);
+      //execute
+      mFileQuery.exec(fileQueryStr);
+      QSqlRecord rec = mFileQuery.record();
+      int audioFileCol = rec.indexOf("audio_file");
+      int beatFileCol = rec.indexOf("beat_file");
+
+		if(mFileQuery.first()){
+			QString audiobufloc = mFileQuery.value(audioFileCol).toString();
+			QString beatbufloc = mFileQuery.value(beatFileCol).toString();
+         mAudioModel->set_player_buffers(index,
+               audiobufloc,
+               beatbufloc);
+      }
+   }
 
 }
 

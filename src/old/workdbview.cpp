@@ -74,6 +74,10 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 			this, SIGNAL(applyFilterPushed()));
 	QObject::connect(mRemoveFilterButton, SIGNAL(clicked(bool)),
 			this, SIGNAL(removeFilterPushed()));
+	QObject::connect(mApplyFilterButton, SIGNAL(clicked(bool)),
+			this, SLOT(setFiltered()));
+	QObject::connect(mRemoveFilterButton, SIGNAL(clicked(bool)),
+			this, SLOT(setUnFiltered()));
 
 }
 
@@ -132,6 +136,7 @@ void WorkDBView::setSelection( const QItemSelection & selected){
 }
 
 void WorkDBView::setFiltered(){
+   emit(filter_state_changed(true));
 	//bool selected = false;
 	//int work_index = 0;
 	//QModelIndexList indexes = mTableView->selectionModel()->selectedIndexes();
@@ -149,5 +154,6 @@ void WorkDBView::setFiltered(){
 
 void WorkDBView::setUnFiltered(){
 	//mModel->setUnFiltered();
+   emit(filter_state_changed(false));
 }
 

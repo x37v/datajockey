@@ -48,6 +48,7 @@ class WorkDBView : public QWidget {
 		void workSelected(int work);
 		void applyFilterPushed();
 		void removeFilterPushed();
+      void filter_state_changed(bool);
 	private:
 		QTableView * mTableView;
 		QPushButton * mApplyFilterButton;

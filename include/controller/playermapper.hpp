@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QList>
+#include <QSqlQuery>
 #include "audiomodel.hpp"
 
 class QPushButton;
@@ -21,6 +22,8 @@ namespace DataJockey {
             PlayerMapper(QObject * parent = NULL);
             virtual ~PlayerMapper();
             void map(QList<View::Player *> players);
+         public slots:
+            void setWork(int id);
          protected slots:
             //uses button names
             void button_pressed();
@@ -59,6 +62,9 @@ namespace DataJockey {
             QMap<int, bool> mIndexPreSeekPauseState;
 
             Audio::AudioModel * mAudioModel;
+
+            int mCurrentwork;
+            QSqlQuery mFileQuery;
       };
    }
 }

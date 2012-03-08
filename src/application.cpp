@@ -8,13 +8,20 @@
 #include "db.hpp"
 #include "workdetailview.hpp"
 #include "workdbview.hpp"
+#include "workfiltermodel.hpp"
 #include "worktablemodel.hpp"
 #include "tagmodel.hpp"
+#include "workfilterlist.hpp"
+#include "workfilterlistview.hpp"
+#include "workfiltermodel.hpp"
+#include "defaultworkfilters.hpp"
+#include "tageditor.hpp"
 
 #include <QSlider>
 #include <QFile>
 #include <QWidget>
 #include <QSplitter>
+#include <QTabWidget>
 
 using namespace DataJockey;
 
@@ -78,8 +85,44 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
 
    TagModel * tag_model = new TagModel(Model::db::get(), mTop);
    WorkTableModel * work_table_model = new WorkTableModel(Model::db::get(), mTop);
+	WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, Model::db::get(), mTop);
-   WorkDBView * work_db_view = new WorkDBView(work_table_model, mTop);
+   WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
+   TagEditor * tag_editor = new TagEditor(tag_model, mTop);
+
+   WorkFilterList * filter_list = new WorkFilterList(work_table_model);
+	TagSelectionFilter * tag_filter = new TagSelectionFilter(work_table_model);
+	TempoRangeFilter * tempo_filter = new TempoRangeFilter(work_table_model);
+   filter_list->addFilter(tag_filter);
+   filter_list->addFilter(tempo_filter);
+   WorkFilterListView * filter_list_view = new WorkFilterListView(filter_list, mTop);
+
+   //tag selection
+   QObject::connect(
+         tag_editor,
+         SIGNAL(tagSelectionChanged(QList<int>)),
+         tag_filter,
+         SLOT(setTags(QList<int>)));
+
+   //work selection
+   QObject::connect(
+         work_db_view,
+         SIGNAL(workSelected(int)),
+         work_detail,
+         SLOT(setWork(int)));
+
+   QObject::connect(
+         work_db_view,
+         SIGNAL(workSelected(int)),
+         mapper,
+         SLOT(setWork(int)));
+
+   //filter application
+   QObject::connect(
+         work_db_view,
+         SIGNAL(filter_state_changed(bool)),
+         filtered_work_model,
+         SLOT(filter(bool)));
 
    QFile file(":/style.qss");
    if(file.open(QFile::ReadOnly)){
@@ -87,9 +130,14 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
       this->setStyleSheet(styleSheet);
    }
 
+   QTabWidget * left_tab_view = new QTabWidget(mTop);
+   left_tab_view->addTab(mixer_panel, "mixer");
+   left_tab_view->addTab(tag_editor, "tags");
+   left_tab_view->addTab(filter_list_view, "filters");
+
    QBoxLayout * left_layout = new QBoxLayout(QBoxLayout::TopToBottom);
    QSplitter * splitter = new QSplitter(Qt::Vertical);
-   splitter->addWidget(mixer_panel);
+   splitter->addWidget(left_tab_view);
    splitter->addWidget(work_detail);
    left_layout->addWidget(splitter);
 
