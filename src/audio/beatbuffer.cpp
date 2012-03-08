@@ -22,11 +22,11 @@ bool BeatBuffer::load(std::string file_location) {
       parser.GetNextDocument(doc);
 
       const YAML::Node& locs = doc["beat locations"];
-      if (locs.size() == 0) {
+      if (locs.Type() == YAML::NodeType::Sequence && locs.size() == 0) {
          return false;
       } else {
          //XXX just using the last in the list
-         const YAML::Node& beats = locs[locs.size() - 1]["time points"];
+         const YAML::Node& beats = (locs.Type() == YAML::NodeType::Sequence) ? locs[locs.size() - 1]["time points"] : locs["time points"];
          for (unsigned int i = 0; i < beats.size(); i++) {
             double beat;
             beats[i] >> beat;
