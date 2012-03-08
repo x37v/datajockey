@@ -21,7 +21,7 @@ Player::Player() :
    mPlayState = PAUSE;
    mOutState = CUE;
    //TODO make this configurable
-   mCueMutesMain = true;
+   mCueMutesMain = false;
    mMute = false;
    mSync = false;
    mLoop = false;
