@@ -19,10 +19,12 @@
  */
 
 #include "defaultworkfilters.hpp"
+#include "audiomodel.hpp"
+#include "db.hpp"
 #include <math.h>
 
 TagSelectionFilter::TagSelectionFilter(QObject * parent):
-	WorkFilterModel(parent), mQuery("", appModel->db())
+	WorkFilterModel(parent), mQuery("", DataJockey::Model::db::get())
 {
 }
 
@@ -93,7 +95,7 @@ void TagSelectionFilter::setTags(QList<int> tags){
 }
 
 TempoRangeFilter::TempoRangeFilter(QObject * parent) :
-	WorkFilterModel(parent), mQuery("", appModel->db())
+	WorkFilterModel(parent), mQuery("", DataJockey::Model::db::get())
 {
 	mBelow = 7.0f;
 	mAbove = 7.0f;

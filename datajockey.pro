@@ -54,11 +54,12 @@ HEADERS += include/defines.hpp \
            include/controller/audioloaderthread.hpp \
            include/controller/playermapper.hpp \
            include/model/audiomodel.hpp \
+           include/model/db.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp \
            include/view/waveformview.hpp \
-           #include/old/defaultworkfilters.hpp \
+           include/old/defaultworkfilters.hpp \
            #include/old/oscreceiver.hpp \
            #include/old/oscsender.hpp \
            include/old/tageditor.hpp \
@@ -93,12 +94,13 @@ SOURCES += src/defines.cpp \
            src/controller/audioloaderthread.cpp \
            src/controller/playermapper.cpp \
            src/model/audiomodel.cpp \
+           src/model/db.cpp \
            src/view/main.cpp \
            src/view/mixerpanel.cpp \
            src/view/player_view.cpp \
            src/view/waveformitem.cpp \
            src/view/waveformview.cpp \
-           #src/old/defaultworkfilters.cpp \
+           src/old/defaultworkfilters.cpp \
            #src/old/oscreceiver.cpp \
            #src/old/oscsender.cpp \
            src/old/tageditor.cpp \

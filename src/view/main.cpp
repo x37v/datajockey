@@ -5,6 +5,7 @@
 #include "playermapper.hpp"
 #include "defines.hpp"
 #include "beatbuffer.hpp"
+#include "db.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -19,6 +20,8 @@ using namespace DataJockey;
 int main(int argc, char * argv[]){
    QApplication app(argc, argv);
    app.setStyle("plastique");
+
+   //Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
 
    Audio::AudioModel * model = Audio::AudioModel::instance();
    View::MixerPanel * mixer_panel = new View::MixerPanel();
@@ -64,10 +67,10 @@ int main(int argc, char * argv[]){
 
    model->set_player_buffers(0,
          "/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
-         "/media/x/datajockey_annotation/new/3764.yaml");
+         "/media/x/datajockey_annotation/recovered/3981-dj_slugo-dance_mania_ghetto_classics_vol_1-freaky_ride.yaml");
    model->set_player_buffers(1,
-         "/media/x/music/low_end_theory/3455/06-l_m_b_rmx.flac",
-         "/media/x/datajockey_annotation/new/3787-low_end_theory-3455-l_m_b_rmx.yaml");
+         "/media/x/music/low_end_theory/3455/07-suck_it.flac",
+         "/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
 
    //model->set_player_buffers(0,
          //"/media/x/music/various/warp102-influences/disc_1/11-phuture-acid_tracks.flac",
