@@ -33,7 +33,8 @@ QMAKE_CFLAGS += $$DENORMAL_FLAGS
 RESOURCES = datajockey.qrc
 
 # Input
-HEADERS += include/defines.hpp \
+HEADERS += include/application.hpp \
+           include/defines.hpp \
            include/audio/audiobuffer.hpp \
            include/audio/audioio.hpp \
            include/audio/beatbuffer.hpp \
@@ -75,7 +76,8 @@ HEADERS += include/defines.hpp \
            #include/old/workpreviewer.hpp \
            include/old/worktablemodel.hpp \
            include/old/worktagmodelfilter.hpp
-SOURCES += src/defines.cpp \
+SOURCES += src/application.cpp \
+           src/defines.cpp \
            src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \
            src/audio/beatbuffer.cpp \
