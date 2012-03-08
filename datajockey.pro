@@ -6,15 +6,17 @@ TEMPLATE = app
 TARGET = datajockey
 LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
-QT += dbus
+QT += dbus sql
 CONFIG += debug
 DEPENDPATH += . \
               include/audio \
               include/controller \
               include/view \
+              include/old \
               src/audio \
               src/controller \
-              src/view
+              src/view \
+              src/old
 MOC_DIR = moc/
 OBJECTS_DIR = obj/
 INCLUDEPATH += . \
@@ -23,6 +25,7 @@ INCLUDEPATH += . \
    include/controller \
    include/model \
    include/view \
+   include/old \
    /usr/include/rubberband /usr/include/rasqal/
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
@@ -54,7 +57,23 @@ HEADERS += include/defines.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
            include/view/waveformitem.hpp \
-           include/view/waveformview.hpp
+           include/view/waveformview.hpp \
+           #include/old/defaultworkfilters.hpp \
+           #include/old/oscreceiver.hpp \
+           #include/old/oscsender.hpp \
+           include/old/tageditor.hpp \
+           include/old/tagmodel.hpp \
+           include/old/tagview.hpp \
+           include/old/treeitem.h \
+           include/old/treemodel.h \
+           include/old/workdbview.hpp \
+           include/old/workdetailview.hpp \
+           include/old/workfilterlist.hpp \
+           include/old/workfilterlistview.hpp \
+           include/old/workfiltermodel.hpp \
+           #include/old/workpreviewer.hpp \
+           include/old/worktablemodel.hpp \
+           include/old/worktagmodelfilter.hpp
 SOURCES += src/defines.cpp \
            src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \
@@ -78,5 +97,20 @@ SOURCES += src/defines.cpp \
            src/view/mixerpanel.cpp \
            src/view/player_view.cpp \
            src/view/waveformitem.cpp \
-           src/view/waveformview.cpp
-
+           src/view/waveformview.cpp \
+           #src/old/defaultworkfilters.cpp \
+           #src/old/oscreceiver.cpp \
+           #src/old/oscsender.cpp \
+           src/old/tageditor.cpp \
+           src/old/tagmodel.cpp \
+           src/old/tagview.cpp \
+           src/old/treeitem.cpp \
+           src/old/treemodel.cpp \
+           src/old/workdbview.cpp \
+           src/old/workdetailview.cpp \
+           src/old/workfilterlist.cpp \
+           src/old/workfilterlistview.cpp \
+           src/old/workfiltermodel.cpp \
+           #src/old/workpreviewer.cpp \
+           src/old/worktablemodel.cpp \
+           src/old/worktagmodelfilter.cpp
