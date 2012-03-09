@@ -676,7 +676,7 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
 
    queue_command(new PlayerDoubleCommand(player_index, action, remaped));
 
-   if (band >= 0 && band < 2)
+   if (band >= 0 && band < 3)
       emit(player_eq_changed(player_index, band, value));
 }
 
