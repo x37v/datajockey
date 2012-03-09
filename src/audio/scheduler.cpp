@@ -59,10 +59,13 @@ void Scheduler::execute_schedule(const Transport& transport){
       Command * cmd;
       TimePoint pos = transport.position();
       mCommandsIn.read(cmd);
-      cmd->execute();
-      cmd->time_executed(pos);
-      if(mCommandsOut.getWriteSpace())
-         mCommandsOut.write(cmd);
+      //shouldn't ever be null huh?
+      if (cmd) {
+         cmd->execute();
+         cmd->time_executed(pos);
+         if(mCommandsOut.getWriteSpace())
+            mCommandsOut.write(cmd);
+      }
       //XXX what if there is no write space?
    }
    //actually eval the scheuldule
@@ -145,8 +148,11 @@ void Scheduler::execute_done_actions(){
    while(mCommandsOut.getReadSpace()){
       Command * cmd;
       mCommandsOut.read(cmd);
-      cmd->execute_done();
-      delete cmd;
+      //it should never be null, but just in case?
+      if (cmd) {
+         cmd->execute_done();
+         delete cmd;
+      }
    }
 }
 
