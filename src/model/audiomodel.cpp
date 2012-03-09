@@ -661,7 +661,8 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
 
    queue_command(new PlayerDoubleCommand(player_index, action, remaped));
 
-   //TODO emit change
+   if (band >= 0 && band < 2)
+      emit(player_eq_changed(player_index, band, value));
 }
 
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){

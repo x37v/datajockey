@@ -33,6 +33,7 @@ namespace DataJockey {
             void volume_changed(int player_index, int value);
 
             void eq_changed(int value);
+            void eq_changed(int player_index, int band, int value);
 
             void file_changed(int player_index, QString file_name);
             void file_cleared(int player_index);

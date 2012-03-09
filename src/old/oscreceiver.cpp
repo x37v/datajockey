@@ -117,41 +117,44 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 			} else
 				throw osc::MissingArgumentException();
 		} 
-#if 0
       else if(boost::regex_match(remain.c_str(), matches, mute_re)){
 			//make sure our matches list is long enough to test
 			if(matches.size() == 2){
+            bool mute;
 				//if we have no argument then we're just setting the mute
 				//otherwise toggle mute
 				if(strcmp("", matches[1].str().c_str()) == 0) {
 					if(arg_it != m.ArgumentsEnd())
-						mModel->mixerChannels()->at(mixer)->setMuted(boolFromBoolOrInt(*arg_it));
+						mute = boolFromBoolOrInt(*arg_it);
 					else 
 						throw osc::MissingArgumentException();
 				} else {
-					mModel->mixerChannels()->at(mixer)->setMuted(
-							!mModel->mixerChannels()->at(mixer)->muted());
+               mute = !mModel->player_mute(mixer);
 				}
+            QMetaObject::invokeMethod(mModel, "set_player_mute", Qt::QueuedConnection,
+                  Q_ARG(int, mixer),
+                  Q_ARG(bool, mute));
 			}
 		} else if(boost::regex_match(remain.c_str(), matches, eq_re)){
 			if(matches.size() == 3){
-				EQModel * eqModel = mModel->mixerChannels()->at(mixer)->eq();
-				//figure out the band
-				EQModel::band band;
-				if(strcmp(matches[1].str().c_str(), "low") == 0)
-					band = EQModel::LOW;
-				else if(strcmp(matches[1].str().c_str(), "mid") == 0)
-					band = EQModel::MID;
-				else
-					band = EQModel::HIGH;
+            int band = 0;
+				if(strcmp(matches[1].str().c_str(), "mid") == 0)
+               band = 1;
+				else if(strcmp(matches[1].str().c_str(), "high") == 0)
+               band = 2;
 
 				if(strcmp(matches[2].str().c_str(), "") == 0){
 					//absolute
 					if(arg_it == m.ArgumentsEnd())
 						throw osc::MissingArgumentException();
-					else
-						eqModel->set(band, floatFromOscNumber(*arg_it));
-				} else if(strcmp(matches[2].str().c_str(), "/cut") == 0){
+               int val = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
+               QMetaObject::invokeMethod(mModel, "set_player_eq", Qt::QueuedConnection,
+                     Q_ARG(int, mixer),
+                     Q_ARG(int, band),
+                     Q_ARG(int, val));
+            } 
+#if 0
+            else if(strcmp(matches[2].str().c_str(), "/cut") == 0){
 					//cut
 					if(arg_it == m.ArgumentsEnd())
 						throw osc::MissingArgumentException();
@@ -169,17 +172,19 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 								eqModel->value(band) + floatFromOscNumber(*arg_it));
 					}
 				}
+#endif
 			}
 		} else if(boost::regex_match(remain.c_str(), load_re)){
+         /*
 			if(arg_it == m.ArgumentsEnd())
 				throw osc::MissingArgumentException();
 			int work = intFromOsc(*arg_it);
 			mModel->mixerChannels()->at(mixer)->loadWork(work);
+         */
 			//otherwise it is a djmixer control message [or not valid]
 		} else {
-			processDJControlMessage(remain.c_str(), mModel->mixerChannels()->at(mixer)->control(), m);
+			processDJControlMessage(remain.c_str(), m);
 		}
-#endif
 	}
 }
 

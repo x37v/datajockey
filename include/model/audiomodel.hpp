@@ -128,6 +128,7 @@ namespace DataJockey {
             void player_sync_changed(int player_index, bool val);
             void player_loop_changed(int player_index, bool val);
             void player_volume_changed(int player_index, int val);
+            void player_eq_changed(int player_index, int band, int val);
             void player_play_speed_changed(int player_index, int val);
             //void player_position_changed(int player_index, const DataJockey::Audio::TimePoint &val);
             void player_position_changed(int player_index, int frame_index);

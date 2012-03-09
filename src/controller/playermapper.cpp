@@ -123,6 +123,10 @@ void PlayerMapper::map(int index, View::Player * player) {
             this,
             SLOT(eq_changed(int)));
    }
+   QObject::connect(mAudioModel,
+         SIGNAL(player_eq_changed(int, int, int)),
+         this,
+         SLOT(eq_changed(int, int, int)));
 }
 
 void PlayerMapper::setWork(int id) {
@@ -221,6 +225,25 @@ void PlayerMapper::eq_changed(int value) {
       mAudioModel->set_player_eq(index, 1, value);
    } else if (name == "dj_eq_high") {
       mAudioModel->set_player_eq(index, 2, value);
+   }
+}
+
+void PlayerMapper::eq_changed(int player_index, int band, int value) {
+   if (band < 0 || band > 2)
+      return;
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   switch (band) {
+      case 0:
+         player->eq_dial("low")->setValue(value);
+         break;
+      case 1:
+         player->eq_dial("mid")->setValue(value);
+         break;
+      case 2:
+         player->eq_dial("high")->setValue(value);
+         break;
    }
 }
 
