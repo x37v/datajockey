@@ -66,7 +66,7 @@ OscReceiver::OscReceiver(){
 
 
 void OscReceiver::ProcessMessage( const osc::ReceivedMessage& m, const IpEndpointName&  ){
-	boost::regex top_re("^/datajockey/(\\w*)(.*)$");
+	boost::regex top_re("^/dj/(\\w*)(.*)$");
 	boost::regex mixer_re("^mixer$");
 	boost::regex xfade_re("^crossfade$");
 	boost::regex master_re("^master$");
