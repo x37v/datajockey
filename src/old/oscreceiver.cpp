@@ -329,7 +329,6 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 }
 
 void OscReceiver::processMasterMessage(const std::string addr, const osc::ReceivedMessage& m){
-#if 0
 	boost::regex volume_re("^/volume(/relative){0,1}/{0,1}$");
 	boost::regex tempo_re("^/tempo(/relative){0,1}/{0,1}$");
 	boost::regex sync_re("^/syncsource/{0,1}$");
@@ -338,36 +337,39 @@ void OscReceiver::processMasterMessage(const std::string addr, const osc::Receiv
 	if(boost::regex_match(addr.c_str(), matches, volume_re)){
 		//make sure our matches list is long enough and that we have an argument
 		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			float num = floatFromOscNumber(*arg_it);
+			int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
 			//"" == absolute, otherwise, relative
-			if(strcmp("", matches[1].str().c_str()) == 0)
-				mModel->master()->setVolume(num);
-			else 
-				mModel->master()->setVolume(mModel->master()->volume() + num);
+			if(strcmp("", matches[1].str().c_str()) == 0) {
+            QMetaObject::invokeMethod(mModel, "set_master_volume", Qt::QueuedConnection,
+                  Q_ARG(int, vol));
+         }
+			//else 
+				//mModel->master()->setVolume(mModel->master()->volume() + num);
 		} else
 			throw osc::MissingArgumentException();
 	} else if(boost::regex_match(addr.c_str(), matches, tempo_re)){
 		//make sure our matches list is long enough and that we have an argument
 		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			float num = floatFromOscNumber(*arg_it);
+			float bpm = floatFromOscNumber(*arg_it);
 			//"" == absolute, otherwise, relative
-			if(strcmp("", matches[1].str().c_str()) == 0)
-				mModel->master()->setTempo(num);
-			else 
-				mModel->master()->setTempo(mModel->master()->tempo() + num);
+			if(strcmp("", matches[1].str().c_str()) != 0)
+				bpm += mModel->master_bpm();
+         QMetaObject::invokeMethod(mModel, "set_master_bpm", Qt::QueuedConnection,
+               Q_ARG(double, bpm));
 		} else
 			throw osc::MissingArgumentException();
 	} else if(boost::regex_match(addr.c_str(), sync_re)){
+#if 0
 		//make sure our matches list is long enough and that we have an argument
 		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
 			int src = intFromOsc(*arg_it);
 			mModel->master()->setSyncSource(src);
 		} else
 			throw osc::MissingArgumentException();
+#endif
 	} else {
 		//XXX throw an error?
 	}
-#endif
 }
 
 #include "ip/UdpSocket.h"
