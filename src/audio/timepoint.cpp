@@ -255,18 +255,34 @@ const TimePoint TimePoint::operator-(const TimePoint &other) const {
          //TODO should we not allow negative?
          ret.seconds(seconds() - other.seconds()); 
       } else {
-         //XXX ignoring beat_type!  Assuming x/4
-         int this_beats = this->beat() + this->bar() * this->beats_per_bar();
-         int other_beats = other.beat() + other.bar() * other.beats_per_bar();
-         int diff  = this_beats - other_beats;
-         double pos_diff = this->pos_in_beat() - other.pos_in_beat();
-         while (pos_diff < 0) {
-            diff -= 1;
-            pos_diff += 1.0;
+         //XXX assuming that they both have the same beats per bar!
+         unsigned int bar_div = this->beats_per_bar();
+         int beat = this->beat() - other.beat();
+         int bar = this->bar() - other.bar();
+
+         //compute pos
+         double pos = this->pos_in_beat() - other.pos_in_beat();
+
+         //fixup pos [0..1.0)
+         while (pos < 0.0) {
+            pos += 1.0;
+            beat -= 1;
          }
-         if (diff < 0)
-            diff = 0;
-         ret.at_beat(diff, pos_diff);
+         while (pos >= 1.0) {
+            pos -= 1.0;
+            beat += 1;
+         }
+
+         //fixup beat [0..bar_div - 1]
+         while (beat < 0) {
+            beat += bar_div;
+            bar -= 1;
+         }
+         while (beat >= bar_div) {
+            beat -= bar_div;
+            bar += 1;
+         }
+         ret.at_bar(bar, (unsigned int)beat, pos);
       }
    } else {
       //TODO
