@@ -368,15 +368,14 @@ void Player::eq(eq_band_t band, double value) {
 
 //misc
 void Player::position_relative(TimePoint amt){
+   mPosition = mBeatBuffer->position_at_time(
+         ((double)mStretcher->frame()) / (double)mSampleRate, mPosition);
    position(mPosition + amt);
 }
 
 void Player::position_at_frame_relative(long offset){
    long frame = offset + mStretcher->frame();
-   if (frame > 0)
-      mStretcher->frame(offset + mStretcher->frame());
-   else
-      mStretcher->frame(0);
+   position_at_frame(frame > 0 ? frame : 0);
 }
 
 void Player::play_speed_relative(double amt){
