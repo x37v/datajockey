@@ -226,7 +226,21 @@ const TimePoint TimePoint::operator+(const TimePoint &other) const {
          double sec = seconds() + other.seconds(); 
          ret.seconds(sec);
       } else {
-         //TODO
+         //XXX assuming that they both have the same beats per bar!
+         unsigned int bar_div = this->beats_per_bar();
+
+         double pos = this->pos_in_beat() + other.pos_in_beat();
+         unsigned int beats = this->beat() + other.beat();
+         int bar = this->bar() + other.bar();
+         while(pos >= 1.0) {
+            pos -= 1.0;
+            beats += 1;
+         }
+         while (beats >= bar_div) {
+            beats -= bar_div;
+            bar += 1;
+         }
+         ret.at_bar(bar, beats, this->pos_in_beat());
       }
    } else {
       //TODO
