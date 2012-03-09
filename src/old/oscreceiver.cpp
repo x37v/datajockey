@@ -278,7 +278,6 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 }
 
 void OscReceiver::processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m){
-#if 0
 	boost::regex position_re("^(/relative){0,1}/{0,1}$");
 	//boost::regex leftmixer_re("^/mixer/left/{0,1}$");
 	//boost::regex rightmixer_re("^/mixer/right/{0,1}$");
@@ -290,12 +289,16 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 	if(boost::regex_match(addr.c_str(), matches, position_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
-		float arg = floatFromOscNumber(*arg_it);
-		if(strcmp("", matches[1].str().c_str()) == 0)
-			mModel->crossFade()->setPosition(arg);
-		else
-			mModel->crossFade()->setPosition(mModel->crossFade()->position() + arg);
-	} else if(boost::regex_match(addr.c_str(), mixers_re)){
+		int pos = (float)DataJockey::one_scale * floatFromOscNumber(*arg_it);
+		if(strcmp("", matches[1].str().c_str()) == 0) {
+         QMetaObject::invokeMethod(mModel, "set_master_cross_fade_position", Qt::QueuedConnection,
+               Q_ARG(int, pos));
+      }
+		//else
+			//mModel->crossFade()->setPosition(mModel->crossFade()->position() + arg);
+	} 
+#if 0
+   else if(boost::regex_match(addr.c_str(), mixers_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
 		int left = intFromOsc(*arg_it);
