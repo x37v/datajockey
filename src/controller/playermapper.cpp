@@ -137,7 +137,7 @@ void PlayerMapper::button_pressed() {
    int index = mButtonIndexMap[button];
    QString name = button->property("dj_name").toString();
    if (name == "seek_back") 
-      mAudioModel->set_player_position_relative(index, Audio::TimePoint(0) - Audio::TimePoint(0,1));
+      mAudioModel->set_player_position_relative(index, Audio::TimePoint(-1,3));
    else if (name ==  "seek_forward") 
       mAudioModel->set_player_position_relative(index, Audio::TimePoint(0,1));
    else if (name == "reset") 
