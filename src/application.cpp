@@ -16,6 +16,7 @@
 #include "workfiltermodel.hpp"
 #include "defaultworkfilters.hpp"
 #include "tageditor.hpp"
+#include "oscreceiver.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -150,7 +151,10 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
    splitter->addWidget(work_db_view);
    top_layout->addWidget(splitter);
 
+   OscThread * osc_thread = new OscThread(12000);
+
    mAudioModel->start_audio();
+   osc_thread->start();
 
    mTop->setLayout(top_layout);
    mTop->show();

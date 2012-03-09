@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql
 CONFIG += debug
@@ -26,7 +26,8 @@ INCLUDEPATH += . \
    include/model \
    include/view \
    include/old \
-   /usr/include/rubberband /usr/include/rasqal/
+   /usr/include/rubberband /usr/include/rasqal/ \
+   /usr/local/include/oscpack/
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
 QMAKE_CFLAGS += $$DENORMAL_FLAGS
@@ -61,7 +62,7 @@ HEADERS += include/application.hpp \
            include/view/waveformitem.hpp \
            include/view/waveformview.hpp \
            include/old/defaultworkfilters.hpp \
-           #include/old/oscreceiver.hpp \
+           include/old/oscreceiver.hpp \
            #include/old/oscsender.hpp \
            include/old/tageditor.hpp \
            include/old/tagmodel.hpp \
@@ -103,7 +104,7 @@ SOURCES += src/application.cpp \
            src/view/waveformitem.cpp \
            src/view/waveformview.cpp \
            src/old/defaultworkfilters.cpp \
-           #src/old/oscreceiver.cpp \
+           src/old/oscreceiver.cpp \
            #src/old/oscsender.cpp \
            src/old/tageditor.cpp \
            src/old/tagmodel.cpp \

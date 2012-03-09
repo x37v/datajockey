@@ -21,15 +21,11 @@
 #include "oscreceiver.hpp"
 #include "osc/OscReceivedElements.h"
 #include <boost/regex.hpp>
-#include "crossfademodel.hpp"
-#include "mastermodel.hpp"
-#include "mixerpanelmodel.hpp"
-#include "djmixerchannelmodel.hpp"
-#include "djmixercontrolmodel.hpp"
-#include "mixerchannelmodel.hpp"
-#include "eqmodel.hpp"
 #include <stdlib.h>
 #include <iostream>
+
+#include "audiomodel.hpp"
+#include "defines.hpp"
 
 bool boolFromBoolOrInt(const osc::ReceivedMessageArgument a){
 	if(a.IsBool())
@@ -64,8 +60,8 @@ float floatFromOscNumber(const osc::ReceivedMessageArgument a){
 		throw osc::WrongArgumentTypeException();
 }
 
-OscReceiver::OscReceiver(MixerPanelModel * model){
-	mModel = model;
+OscReceiver::OscReceiver(){
+   mModel = DataJockey::Audio::AudioModel::instance();
 }
 
 
@@ -106,22 +102,23 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 		unsigned int mixer = (unsigned int)atoi(matches[1].str().c_str());
 		std::string remain(matches[2].str());
 		//make sure we're in range
-		if(mixer >= mModel->numMixerChannels())
+		if(mixer >= mModel->player_count())
 			return;
 		if(boost::regex_match(remain.c_str(), matches, volume_re)){
 			//make sure our matches list is long enough and that we have an argument
 			if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-				float num = floatFromOscNumber(*arg_it);
-				//"" == absolute, otherwise, relative
-				if(strcmp("", matches[1].str().c_str()) == 0)
-					mModel->mixerChannels()->at(mixer)->setVolume(num);
-				else {
-					mModel->mixerChannels()->at(mixer)->setVolume(
-							mModel->mixerChannels()->at(mixer)->volume() + num);
-				}
+            int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
+            //"" == absolute, otherwise, relative
+            if(strcmp("", matches[1].str().c_str()) != 0)
+               vol += mModel->player_volume(mixer);
+            QMetaObject::invokeMethod(mModel, "set_player_volume", Qt::QueuedConnection,
+                  Q_ARG(int, mixer),
+                  Q_ARG(int, vol));
 			} else
 				throw osc::MissingArgumentException();
-		} else if(boost::regex_match(remain.c_str(), matches, mute_re)){
+		} 
+#if 0
+      else if(boost::regex_match(remain.c_str(), matches, mute_re)){
 			//make sure our matches list is long enough to test
 			if(matches.size() == 2){
 				//if we have no argument then we're just setting the mute
@@ -182,12 +179,12 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 		} else {
 			processDJControlMessage(remain.c_str(), mModel->mixerChannels()->at(mixer)->control(), m);
 		}
+#endif
 	}
 }
 
-void OscReceiver::processDJControlMessage(const std::string addr, 
-		DJMixerControlModel * control, 
-		const osc::ReceivedMessage& m){
+void OscReceiver::processDJControlMessage(const std::string addr, const osc::ReceivedMessage& m){
+#if 0
 	boost::regex play_re("^play(/toggle){0,1}/{0,1}$");
 	boost::regex cue_re("^cue(/toggle){0,1}/{0,1}$");
 	boost::regex sync_re("^sync(/toggle){0,1}/{0,1}$");
@@ -251,9 +248,11 @@ void OscReceiver::processDJControlMessage(const std::string addr,
 	} else {
 		//XXX throw an error?
 	}
+#endif
 }
 
 void OscReceiver::processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m){
+#if 0
 	boost::regex position_re("^(/relative){0,1}/{0,1}$");
 	//boost::regex leftmixer_re("^/mixer/left/{0,1}$");
 	//boost::regex rightmixer_re("^/mixer/right/{0,1}$");
@@ -297,9 +296,11 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 		else
 			mModel->crossFade()->enable(boolFromBoolOrInt(*arg_it));
 	}
+#endif
 }
 
 void OscReceiver::processMasterMessage(const std::string addr, const osc::ReceivedMessage& m){
+#if 0
 	boost::regex volume_re("^/volume(/relative){0,1}/{0,1}$");
 	boost::regex tempo_re("^/tempo(/relative){0,1}/{0,1}$");
 	boost::regex sync_re("^/syncsource/{0,1}$");
@@ -337,5 +338,18 @@ void OscReceiver::processMasterMessage(const std::string addr, const osc::Receiv
 	} else {
 		//XXX throw an error?
 	}
+#endif
 }
 
+#include "ip/UdpSocket.h"
+
+OscThread::OscThread(unsigned int port) {
+	mPort = port;
+}
+
+void OscThread::run(){
+	UdpListeningReceiveSocket s(
+			IpEndpointName( IpEndpointName::ANY_ADDRESS, mPort ),
+			&mOscReceiver );
+	s.Run();
+}
