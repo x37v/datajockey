@@ -477,6 +477,21 @@ int AudioModel::get_player_position_frame(int player_index) {
    return mPlayerStates[player_index]->mCurrentFrame;
 }
 
+void AudioModel::set_player_position_beat_relative(int player_index, int beats) {
+   TimePoint point;
+   unsigned int abs_beat = abs(beats);
+   int bar = 0;
+   while(abs_beat >= 4) {
+      abs_beat -= 4;
+      bar += 1;
+   }
+   point.at_bar(bar, abs_beat);
+   if (beats < 0)
+      point = TimePoint(0,0) - point;
+
+   set_player_position_relative(player_index, point);
+}
+
 void AudioModel::set_player_start_position(int player_index, const TimePoint &val){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;

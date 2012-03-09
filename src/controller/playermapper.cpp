@@ -39,22 +39,7 @@ PlayerMapper::PlayerMapper(QObject * parent) :
    mWorkInfoQuery("", Model::db::get())
 { 
    mAudioModel = Audio::AudioModel::instance();
-}
 
-PlayerMapper::~PlayerMapper() { }
-
-void PlayerMapper::map(QList<View::Player *> players) {
-   for (int i = 0; i < players.size(); i++)
-      map(i, players[i]);
-}
-
-void PlayerMapper::map(int index, View::Player * player) {
-   if (mIndexPlayerMap.contains(index))
-      return;
-
-   mIndexPlayerMap[index] = player;
-   mPlayerIndexMap[player] = index;
-   mIndexPreSeekPauseState[index] = false;
    QObject::connect(mAudioModel,
          SIGNAL(player_audio_file_load_progress(int, int)),
          this,
@@ -72,6 +57,44 @@ void PlayerMapper::map(int index, View::Player * player) {
          this,
          SLOT(position_changed(int, int)));
 
+   QObject::connect(mAudioModel,
+         SIGNAL(player_cue_changed(int, bool)),
+         this,
+         SLOT(cue_changed(int, bool)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_pause_changed(int, bool)),
+         this,
+         SLOT(pause_changed(int, bool)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_sync_changed(int, bool)),
+         this,
+         SLOT(sync_changed(int, bool)));
+
+   QObject::connect(mAudioModel,
+         SIGNAL(player_volume_changed(int, int)),
+         this,
+         SLOT(volume_changed(int, int)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_eq_changed(int, int, int)),
+         this,
+         SLOT(eq_changed(int, int, int)));
+}
+
+PlayerMapper::~PlayerMapper() { }
+
+void PlayerMapper::map(QList<View::Player *> players) {
+   for (int i = 0; i < players.size(); i++)
+      map(i, players[i]);
+}
+
+void PlayerMapper::map(int index, View::Player * player) {
+   if (mIndexPlayerMap.contains(index))
+      return;
+
+   mIndexPlayerMap[index] = player;
+   mPlayerIndexMap[player] = index;
+   mIndexPreSeekPauseState[index] = false;
+
    QObject::connect(player,
          SIGNAL(seek_relative(int)),
          this,
@@ -80,6 +103,10 @@ void PlayerMapper::map(int index, View::Player * player) {
          SIGNAL(seeking(bool)),
          this,
          SLOT(seeking(bool)));
+   QObject::connect(player->volume_slider(),
+         SIGNAL(valueChanged(int)),
+         this,
+         SLOT(volume_changed(int)));
 
    QPushButton * button;
    foreach(button, player->buttons()) {
@@ -102,15 +129,6 @@ void PlayerMapper::map(int index, View::Player * player) {
    mSliderIndexMap[player->volume_slider()] =  index;
    mIndexSliderMap[index] = player->volume_slider();
 
-   QObject::connect(mAudioModel,
-         SIGNAL(player_volume_changed(int, int)),
-         this,
-         SLOT(volume_changed(int, int)));
-   QObject::connect(player->volume_slider(),
-         SIGNAL(valueChanged(int)),
-         this,
-         SLOT(volume_changed(int)));
-
    mSliderIndexMap[player->volume_slider()] =  index;
    mIndexSliderMap[index] = player->volume_slider();
 
@@ -123,10 +141,6 @@ void PlayerMapper::map(int index, View::Player * player) {
             this,
             SLOT(eq_changed(int)));
    }
-   QObject::connect(mAudioModel,
-         SIGNAL(player_eq_changed(int, int, int)),
-         this,
-         SLOT(eq_changed(int, int, int)));
 }
 
 void PlayerMapper::setWork(int id) {
@@ -245,6 +259,27 @@ void PlayerMapper::eq_changed(int player_index, int band, int value) {
          player->eq_dial("high")->setValue(value);
          break;
    }
+}
+
+void PlayerMapper::cue_changed(int player_index, bool cue) {
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   player->button("cue")->setChecked(cue);
+}
+
+void PlayerMapper::pause_changed(int player_index, bool pause) {
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   player->button("pause")->setChecked(pause);
+}
+
+void PlayerMapper::sync_changed(int player_index, bool sync) {
+   View::Player * player = mIndexPlayerMap[player_index];
+   if (!player)
+      return;
+   player->button("sync")->setChecked(sync);
 }
 
 void PlayerMapper::file_changed(int player_index, QString file_name) {

@@ -183,13 +183,12 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
          */
 			//otherwise it is a djmixer control message [or not valid]
 		} else {
-			processDJControlMessage(remain.c_str(), m);
+			processDJControlMessage(remain.c_str(), mixer, m);
 		}
 	}
 }
 
-void OscReceiver::processDJControlMessage(const std::string addr, const osc::ReceivedMessage& m){
-#if 0
+void OscReceiver::processDJControlMessage(const std::string addr, int mixer, const osc::ReceivedMessage& m){
 	boost::regex play_re("^play(/toggle){0,1}/{0,1}$");
 	boost::regex cue_re("^cue(/toggle){0,1}/{0,1}$");
 	boost::regex sync_re("^sync(/toggle){0,1}/{0,1}$");
@@ -201,43 +200,65 @@ void OscReceiver::processDJControlMessage(const std::string addr, const osc::Rec
 	osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
 
 	if(boost::regex_match(addr.c_str(), matches, play_re)){
+      bool pause;
 		//"" == set else toggle
 		if(strcmp(matches[1].str().c_str(), "") == 0){
-			if(arg_it == m.ArgumentsEnd())
-				throw osc::MissingArgumentException();
-			else
-				control->setPlay(boolFromBoolOrInt(*arg_it));
-		} else 
-			control->setPlay(!control->playing());
+         if(arg_it == m.ArgumentsEnd())
+            throw osc::MissingArgumentException();
+         else
+            pause = !boolFromBoolOrInt(*arg_it);
+		} else {
+         pause = !mModel->player_pause(mixer);
+      }
+      QMetaObject::invokeMethod(mModel, "set_player_pause", Qt::QueuedConnection,
+            Q_ARG(int, mixer),
+            Q_ARG(bool, pause));
 	} else if(boost::regex_match(addr.c_str(), matches, reset_re)){
-			control->resetWorkPosition();
+      QMetaObject::invokeMethod(mModel, "set_player_position", Qt::QueuedConnection,
+            Q_ARG(int, mixer),
+            Q_ARG(double, 0.0));
 	} else if(boost::regex_match(addr.c_str(), matches, cue_re)){
+      bool cue;
 		if(strcmp(matches[1].str().c_str(), "") == 0){
 			//set
 			if(arg_it == m.ArgumentsEnd())
 				throw osc::MissingArgumentException();
 			else
-				control->setCueing(boolFromBoolOrInt(*arg_it));
+				cue = boolFromBoolOrInt(*arg_it);
 		} else 
-			control->setCueing(!control->cueing());
+         cue = !mModel->player_cue(mixer);
+      QMetaObject::invokeMethod(mModel, "set_player_cue", Qt::QueuedConnection,
+            Q_ARG(int, mixer),
+            Q_ARG(bool, cue));
 	} else if(boost::regex_match(addr.c_str(), matches, sync_re)){
+      bool sync;
 		if(strcmp(matches[1].str().c_str(), "") == 0){
 			//set
 			if(arg_it == m.ArgumentsEnd())
 				throw osc::MissingArgumentException();
 			else
-				control->setSync(boolFromBoolOrInt(*arg_it));
+				sync = boolFromBoolOrInt(*arg_it);
 		} else 
-			control->setSync(!control->synced());
+         sync = !mModel->player_sync(mixer);
+      QMetaObject::invokeMethod(mModel, "set_player_sync", Qt::QueuedConnection,
+            Q_ARG(int, mixer),
+            Q_ARG(bool, sync));
 	} else if(boost::regex_match(addr.c_str(), matches, seek_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
-		int arg = intFromOsc(*arg_it);
+		int beats = intFromOsc(*arg_it);
+
+      //absolute
 		if(strcmp(matches[1].str().c_str(), "") == 0){
-			control->setPlaybackPosition(arg);
-		} else 
-			control->seek(arg);
-	} else if(boost::regex_match(addr.c_str(), matches, beatoffset_re)){
+			//control->setPlaybackPosition(arg);
+		} else {
+         QMetaObject::invokeMethod(mModel, "set_player_position_beat_relative", Qt::QueuedConnection,
+               Q_ARG(int, mixer),
+               Q_ARG(int, beats));
+      }
+	} 
+#if 0
+   else if(boost::regex_match(addr.c_str(), matches, beatoffset_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
 		int arg = intFromOsc(*arg_it);

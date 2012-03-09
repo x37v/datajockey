@@ -35,6 +35,10 @@ namespace DataJockey {
             void eq_changed(int value);
             void eq_changed(int player_index, int band, int value);
 
+            void cue_changed(int player_index, bool cue);
+            void pause_changed(int player_index, bool pause);
+            void sync_changed(int player_index, bool sync);
+
             void file_changed(int player_index, QString file_name);
             void file_cleared(int player_index);
             void file_load_progress(int player_index, int percent);

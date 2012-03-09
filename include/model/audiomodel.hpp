@@ -80,6 +80,7 @@ namespace DataJockey {
             void set_player_position_relative(int player_index, double seconds);
             void set_player_position_frame_relative(int player_index, int frame);
             int  get_player_position_frame(int player_index);
+            void set_player_position_beat_relative(int player_index, int beats);
             void set_player_start_position(int player_index, const DataJockey::Audio::TimePoint &val);
             void set_player_end_position(int player_index, const DataJockey::Audio::TimePoint &val);
             void set_player_loop_start_position(int player_index, const DataJockey::Audio::TimePoint &val);
