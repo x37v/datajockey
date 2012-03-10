@@ -866,10 +866,19 @@ void AudioModel::set_master_bpm(double bpm) {
    }
 }
 
+void AudioModel::set_master_sync_to(int player_index) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+   queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, player_index));
+}
+
 void AudioModel::start_audio() {
    mAudioIO->start();
-   mAudioIO->connectToPhysical(0,0);
-   mAudioIO->connectToPhysical(1,1);
+
+   mAudioIO->connectToPhysical(0,4);
+   mAudioIO->connectToPhysical(1,5);
+   mAudioIO->connectToPhysical(2,2);
+   mAudioIO->connectToPhysical(3,3);
 }
 
 void AudioModel::stop_audio() {

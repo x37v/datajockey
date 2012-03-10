@@ -230,6 +230,7 @@ const TimePoint& Player::end_position() const { return mEndPosition; }
 const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
 const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
+
 AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); }
 BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
 

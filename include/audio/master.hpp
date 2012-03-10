@@ -50,6 +50,7 @@ namespace DataJockey {
             void cross_fade(bool val);
             void cross_fade_position(float val);
             void cross_fade_mixers(unsigned int left, unsigned int right);
+            //void sync_to_player(unsigned int player_index);
          private:
             //internal buffers
             std::vector<float **> mPlayerBuffers;
@@ -86,6 +87,19 @@ namespace DataJockey {
             virtual bool store(CommandIOData& data) const;
          private:
             action_t mAction;
+      };
+      //XXX not implemented
+      class MasterIntCommand : public MasterCommand {
+         public:
+            enum action_t {
+               SYNC_TO_PLAYER
+            };
+            MasterIntCommand(action_t action, int value);
+            virtual void execute();
+            virtual bool store(CommandIOData& data) const;
+         private:
+            action_t mAction;
+            int mValue;
       };
       class MasterDoubleCommand : public MasterCommand {
          public:

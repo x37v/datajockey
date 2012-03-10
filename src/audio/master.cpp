@@ -203,12 +203,17 @@ float Master::master_volume() const { return mMasterVolume; }
 float Master::cue_volume() const { return mCueVolume; }
 bool Master::cross_fadeing() const { return mCrossFade; }
 float Master::cross_fade_position() const { return mCrossFadePosition; }
-   unsigned int Master::cross_fade_mixer(unsigned int index) const {
-      if(index > 1)
-         return 0;
-      else
-         return mCrossFadeMixers[index];
-   }
+unsigned int Master::cross_fade_mixer(unsigned int index) const {
+   if(index > 1)
+      return 0;
+   else
+      return mCrossFadeMixers[index];
+}
+
+/*
+void Master::sync_to_player(unsigned int player_index) {
+}
+*/
 
 const std::vector<Player *>& Master::players() const {
    return mPlayers;
@@ -281,6 +286,25 @@ void MasterBoolCommand::execute(){
 }
 
 bool MasterBoolCommand::store(CommandIOData& /*data*/) const {
+   //XXX TODO
+   return false;
+}
+
+MasterIntCommand::MasterIntCommand(action_t action, int value) : 
+   mAction(action), mValue (value){
+}
+
+void MasterIntCommand::execute() {
+   /*
+   switch(mAction) {
+      case SYNC_TO_PLAYER:
+         master()->sync_to_player(mValue);
+         break;
+   }
+   */
+}
+
+bool MasterIntCommand::store(CommandIOData& data) const {
    //XXX TODO
    return false;
 }
