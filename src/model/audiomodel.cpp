@@ -121,7 +121,7 @@ class AudioModel::ConsumeThread : public QThread {
             AudioModel::QueryPlayerStates * cmd = new AudioModel::QueryPlayerStates(mModel);
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
-            msleep(10);
+            msleep(15);
          }
       }
 };

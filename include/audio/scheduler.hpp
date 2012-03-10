@@ -6,6 +6,8 @@
 #include "schedulenode.hpp"
 #include <jackringbuffer.hpp>
 #include <map>
+#include <QMutex>
+#include <QMutexLocker>
 
 namespace DataJockey {
    namespace Audio {
@@ -47,6 +49,9 @@ namespace DataJockey {
             //this is called to invalid the mScheduleLast and Cur pointer
             //incase we've jumped around in the transport
             void invalidate_schedule_pointers();
+
+            //make sure that don't try to write to the command queue from more than one thread once
+            QMutex mExecuteMutex;
 
             friend class AddCommand;
          private:

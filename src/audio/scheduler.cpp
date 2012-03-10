@@ -17,6 +17,8 @@ Scheduler::Scheduler() :
 }
 
 void Scheduler::execute(Command * cmd){
+   QMutexLocker lock(&mExecuteMutex);
+
    if(mCommandsIn.getWriteSpace())
       mCommandsIn.write(cmd);
    else {
