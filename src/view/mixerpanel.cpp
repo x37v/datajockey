@@ -6,6 +6,12 @@
 #include <QSlider>
 #include <QDoubleSpinBox>
 #include <QLabel>
+#include <QPushButton>
+#include <QDial>
+#include <iostream>
+
+using std::cerr;
+using std::endl;
 
 using namespace DataJockey::View;
 
@@ -24,6 +30,39 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
       Player * player = new Player(this, orentation);
       mPlayers.append(player);
       mixer_layout->addWidget(player);
+
+      //hacks, setting values to map objects to player indices
+      mSenderToIndex[player] = i;
+      mSenderToIndex[player->volume_slider()] = i;
+      
+      QObject::connect(player->volume_slider(),
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(relay_player_volume(int)));
+
+      QPushButton * button;
+      foreach(button, player->buttons()) {
+         mSenderToIndex[button] = i;
+         if (button->isCheckable()) {
+            QObject::connect(button,
+                  SIGNAL(toggled(bool)),
+                  this,
+                  SLOT(relay_player_toggle(bool)));
+         } else {
+            QObject::connect(button,
+                  SIGNAL(toggled(bool)),
+                  this,
+                  SLOT(relay_player_trigger()));
+         }
+      }
+      QDial * dial;
+      foreach(dial, player->eq_dials()) {
+         mSenderToIndex[dial] = i;
+         QObject::connect(dial,
+               SIGNAL(valueChanged(int)),
+               this,
+               SLOT(relay_player_eq(int)));
+      }
    }
 
    //master
@@ -65,6 +104,54 @@ QList<Player *> MixerPanel::players() const { return mPlayers; }
 QSlider * MixerPanel::cross_fade_slider() const { return mCrossFadeSlider; }
 QSlider * MixerPanel::master_volume_slider() const { return mMasterVolume; }
 
+void MixerPanel::set_player_toggle(int player_index, QString name, bool value) {
+   if (player_index >= mPlayers.size())
+      return;
+   if(QPushButton * button = mPlayers[player_index]->button(name))
+      button->setChecked(value);
+   else
+      cerr << name.toStdString() << " is not a valid set_player_toggle name" << endl;
+}
+
+void MixerPanel::set_player_int(int player_index, QString name, int value) {
+   if (player_index >= mPlayers.size())
+      return;
+
+   Player * player = mPlayers[player_index];
+   if (name == "volume")
+      player->volume_slider()->setValue(value);
+   else if (name == "frame")
+      player->set_audio_frame(value);
+   else if (name == "eq_low")
+      player->eq_dial("low")->setValue(value);
+   else if (name == "eq_mid")
+      player->eq_dial("mid")->setValue(value);
+   else if (name == "eq_high")
+      player->eq_dial("high")->setValue(value);
+   else
+      cerr << name.toStdString() << " is not a valid set_player_int name" << endl;
+}
+
+
+void MixerPanel::set_player_audio_file(int player_index, const QString& file_name){
+   if (player_index >= mPlayers.size())
+      return;
+   mPlayers[player_index]->set_audio_file(file_name);
+}
+
+void MixerPanel::set_player_beat_buffer(int player_index, Audio::BeatBuffer buffer){
+   if (player_index >= mPlayers.size())
+      return;
+   mPlayers[player_index]->set_beat_buffer(buffer);
+}
+
+void MixerPanel::set_player_song_description(int player_index, QString line1, QString line2){
+   if (player_index >= mPlayers.size())
+      return;
+   mPlayers[player_index]->set_song_description(line1, line2);
+}
+
+
 void MixerPanel::set_tempo(double bpm) {
    if (mSettingTempo)
       return;
@@ -73,5 +160,45 @@ void MixerPanel::set_tempo(double bpm) {
    mMasterTempo->setValue(bpm);
    emit(tempo_changed(bpm));
    mSettingTempo = false;
+}
+
+void MixerPanel::relay_player_toggle(bool checked) {
+   QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   if (!button)
+      return;
+
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_toggle(player_index.value(), button->property("dj_name").toString(), checked));
+}
+
+void MixerPanel::relay_player_trigger() {
+   QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   if (!button)
+      return;
+
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_trigger(player_index.value(), button->property("dj_name").toString()));
+}
+
+void MixerPanel::relay_player_volume(int val) {
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_int(player_index.value(), "volume", val));
+}
+
+void MixerPanel::relay_player_eq(int val) {
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_int(player_index.value(), sender()->property("dj_name").toString(), val));
 }
 

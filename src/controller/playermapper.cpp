@@ -233,11 +233,11 @@ void PlayerMapper::eq_changed(int value) {
    int index = mDialIndexMap[eq];
 
    QString name = eq->property("dj_name").toString();
-   if (name == "dj_eq_low") {
+   if (name == "eq_low") {
       mAudioModel->set_player_eq(index, 0, value);
-   } else if (name == "dj_eq_mid") {
+   } else if (name == "eq_mid") {
       mAudioModel->set_player_eq(index, 1, value);
-   } else if (name == "dj_eq_high") {
+   } else if (name == "eq_high") {
       mAudioModel->set_player_eq(index, 2, value);
    }
 }

@@ -73,7 +73,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       dial->setSingleStep(one_scale / 64);
       dial->setPageStep(one_scale / 16);
       dial->setRange(-one_scale, one_scale);
-      dial->setProperty("dj_name", QString("dj_eq_") + eq[i]);
+      dial->setProperty("dj_name", QString("eq_") + eq[i]);
       mEqDials.insert(eq[i], dial);
       mControlLayout->addWidget(dial, 0, Qt::AlignHCenter);
    }

@@ -94,6 +94,9 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
    filter_list->addFilter(tempo_filter);
    WorkFilterListView * filter_list_view = new WorkFilterListView(filter_list, mTop);
 
+   //set the filter
+   filtered_work_model->setFilter(tag_filter);
+
    //tag selection
    QObject::connect(
          tag_editor,
@@ -125,6 +128,7 @@ Application::Application(int & argc, char ** argv) : QApplication(argc, argv) {
          SIGNAL(filter_state_changed(bool)),
          filtered_work_model,
          SLOT(filter(bool)));
+
 
    QFile file(":/style.qss");
    if(file.open(QFile::ReadOnly)){

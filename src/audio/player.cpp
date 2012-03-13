@@ -272,6 +272,9 @@ void Player::play_speed(double val){
 
 void Player::position(const TimePoint &val){
    mPosition = val;
+   if (mPosition < TimePoint(0,0))
+      mPosition.at_bar(0,0);
+
    mUpdateTransportOffset = true;
 
    //if we're not set up then we cannot update our sample index because we don't

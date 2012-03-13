@@ -29,6 +29,9 @@ namespace DataJockey {
 
       //set the frame
       void Stretcher::frame(unsigned int frame, double frame_subsample) {
+         if (!mAudioBuffer)
+            return;
+
          mFrame = frame;
          mFrameSubsample = frame_subsample;
 
