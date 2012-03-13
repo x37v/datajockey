@@ -41,6 +41,11 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
             this,
             SLOT(relay_player_volume(int)));
 
+      QObject::connect(player,
+            SIGNAL(seeking(bool)),
+            this,
+            SLOT(relay_player_seeking(bool)));
+
       QPushButton * button;
       foreach(button, player->buttons()) {
          mSenderToIndex[button] = i;
@@ -200,6 +205,13 @@ void MixerPanel::relay_player_volume(int val) {
       return;
 
    emit(player_int(player_index.value(), "volume", val));
+}
+
+void MixerPanel::relay_player_seeking(bool state) {
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+   emit(player_toggle(player_index.value(), "seeking", state));
 }
 
 void MixerPanel::relay_player_eq(int val) {
