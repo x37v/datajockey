@@ -8,8 +8,9 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDial>
-#include <iostream>
+#include <QProgressBar>
 
+#include <iostream>
 using std::cerr;
 using std::endl;
 
@@ -95,6 +96,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    setLayout(top_layout);
 
    QObject::connect(mMasterTempo, SIGNAL(valueChanged(double)), this, SIGNAL(tempo_changed(double)));
+   QObject::connect(mCrossFadeSlider, SIGNAL(valueChanged(int)), this, SIGNAL(crossfade_changed(int)));
 }
 
 MixerPanel::~MixerPanel() {
@@ -122,6 +124,8 @@ void MixerPanel::set_player_int(int player_index, QString name, int value) {
       player->volume_slider()->setValue(value);
    else if (name == "frame")
       player->set_audio_frame(value);
+   else if (name == "progress")
+      player->progress_bar()->setValue(value);
    else if (name == "eq_low")
       player->eq_dial("low")->setValue(value);
    else if (name == "eq_mid")
@@ -160,6 +164,10 @@ void MixerPanel::set_tempo(double bpm) {
    mMasterTempo->setValue(bpm);
    emit(tempo_changed(bpm));
    mSettingTempo = false;
+}
+
+void MixerPanel::set_crossfade(int val) {
+   mCrossFadeSlider->setValue(val);
 }
 
 void MixerPanel::relay_player_toggle(bool checked) {

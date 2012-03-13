@@ -30,6 +30,7 @@ namespace DataJockey {
             void set_player_song_description(int player_index, QString line1, QString line2);
 
             void set_tempo(double bpm);
+            void set_crossfade(int val);
 
          protected slots:
             void relay_player_toggle(bool state);
@@ -38,6 +39,7 @@ namespace DataJockey {
             void relay_player_eq(int val);
          signals:
             void tempo_changed(double);
+            void crossfade_changed(int val);
 
             void player_trigger(int player_index, QString name);
             void player_toggle(int player_index, QString name, bool val);
