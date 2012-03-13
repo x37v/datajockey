@@ -211,6 +211,7 @@ void MixerPanel::relay_player_seeking(bool state) {
    QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
    if (player_index == mSenderToIndex.end())
       return;
+
    emit(player_toggle(player_index.value(), "seeking", state));
 }
 
