@@ -21,6 +21,7 @@ namespace DataJockey {
             QList<Player *> players() const;
             QSlider * cross_fade_slider() const;;
             QSlider * master_volume_slider() const;;
+
          public slots:
             void set_player_toggle(int player_index, QString name, bool value);
             void set_player_int(int player_index, QString name, int value);
@@ -37,6 +38,7 @@ namespace DataJockey {
             void relay_player_trigger();
             void relay_player_volume(int val);
             void relay_player_eq(int val);
+
          signals:
             void tempo_changed(double);
             void crossfade_changed(int val);
@@ -44,6 +46,7 @@ namespace DataJockey {
             void player_trigger(int player_index, QString name);
             void player_toggle(int player_index, QString name, bool val);
             void player_int(int player_index, QString name, int val);
+
          private:
             QList<Player *> mPlayers;
             QSlider * mCrossFadeSlider;
