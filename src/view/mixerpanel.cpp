@@ -58,12 +58,12 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
             QObject::connect(button,
                   SIGNAL(toggled(bool)),
                   this,
-                  SLOT(relay_player_toggle(bool)));
+                  SLOT(relay_player_toggled(bool)));
          } else {
             QObject::connect(button,
                   SIGNAL(clicked()),
                   this,
-                  SLOT(relay_player_trigger()));
+                  SLOT(relay_player_triggered()));
          }
       }
       QDial * dial;
@@ -179,7 +179,7 @@ void MixerPanel::set_master_int(QString name, int val) {
       mCrossFadeSlider->setValue(val);
 }
 
-void MixerPanel::relay_player_toggle(bool checked) {
+void MixerPanel::relay_player_toggled(bool checked) {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    if (!button)
       return;
@@ -188,10 +188,10 @@ void MixerPanel::relay_player_toggle(bool checked) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_toggle(player_index.value(), button->property("dj_name").toString(), checked));
+   emit(player_toggled(player_index.value(), button->property("dj_name").toString(), checked));
 }
 
-void MixerPanel::relay_player_trigger() {
+void MixerPanel::relay_player_triggered() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    if (!button)
       return;
@@ -200,7 +200,7 @@ void MixerPanel::relay_player_trigger() {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_trigger(player_index.value(), button->property("dj_name").toString()));
+   emit(player_triggered(player_index.value(), button->property("dj_name").toString()));
 }
 
 void MixerPanel::relay_player_volume(int val) {
@@ -208,7 +208,7 @@ void MixerPanel::relay_player_volume(int val) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_int(player_index.value(), "volume", val));
+   emit(player_value_changed(player_index.value(), "volume", val));
 }
 
 void MixerPanel::relay_player_seek_frame_relative(int frames) {
@@ -216,7 +216,7 @@ void MixerPanel::relay_player_seek_frame_relative(int frames) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_int(player_index.value(), "seek_frame_relative", frames));
+   emit(player_value_changed(player_index.value(), "seek_frame_relative", frames));
 }
 
 void MixerPanel::relay_player_seeking(bool state) {
@@ -224,7 +224,7 @@ void MixerPanel::relay_player_seeking(bool state) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_toggle(player_index.value(), "seeking", state));
+   emit(player_toggled(player_index.value(), "seeking", state));
 }
 
 void MixerPanel::relay_player_eq(int val) {
@@ -232,6 +232,6 @@ void MixerPanel::relay_player_eq(int val) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_int(player_index.value(), sender()->property("dj_name").toString(), val));
+   emit(player_value_changed(player_index.value(), sender()->property("dj_name").toString(), val));
 }
 

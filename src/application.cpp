@@ -70,21 +70,21 @@ Application::Application(int & argc, char ** argv) :
 
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,
-         SIGNAL(player_trigger(int, QString)),
+         SIGNAL(player_triggered(int, QString)),
          this,
          SLOT(set_player_trigger(int, QString)));
 
    //hook view into model
    QObject::connect(mMixerPanel,
-         SIGNAL(player_trigger(int, QString)),
+         SIGNAL(player_triggered(int, QString)),
          mAudioModel,
          SLOT(player_trigger(int, QString)));
    QObject::connect(mMixerPanel,
-         SIGNAL(player_toggle(int, QString, bool)),
+         SIGNAL(player_toggled(int, QString, bool)),
          mAudioModel,
          SLOT(player_set(int, QString, bool)));
    QObject::connect(mMixerPanel,
-         SIGNAL(player_int(int, QString, int)),
+         SIGNAL(player_value_changed(int, QString, int)),
          mAudioModel,
          SLOT(player_set(int, QString, int)));
 
