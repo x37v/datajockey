@@ -69,8 +69,6 @@ namespace DataJockey {
             Audio::AudioModel * mAudioModel;
 
             int mCurrentwork;
-            QSqlQuery mFileQuery;
-            QSqlQuery mWorkInfoQuery;
 
       };
    }

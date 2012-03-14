@@ -1,7 +1,6 @@
 #include "playermapper.hpp"
 #include "player_view.hpp"
 #include "timepoint.hpp"
-#include "db.hpp"
 
 #include <QProgressBar>
 #include <QPushButton>
@@ -16,27 +15,8 @@ using namespace std;
 
 using namespace DataJockey::Controller;
 
-namespace {
-   const QString cFileQueryString(
-         "select audio_files.location audio_file, annotation_files.location beat_file\n"
-         "from audio_works\n"
-         "\tjoin audio_files on audio_files.id = audio_works.audio_file_id\n"
-         "\tjoin annotation_files on annotation_files.audio_work_id = audio_works.id\n"
-         "where audio_works.id = ");
-
-   const QString cWorkInfoQueryString(
-         "select audio_works.name title,\n"
-         "\tartists.name\n"
-         "artist from audio_works"
-         "\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id\n"
-         "\tinner join artists on artists.id = artist_audio_works.artist_id\n"
-         "where audio_works.id = ");
-}
-
 PlayerMapper::PlayerMapper(QObject * parent) :
    QObject(parent), mCurrentwork(0),
-   mFileQuery("", Model::db::get()),
-   mWorkInfoQuery("", Model::db::get())
 { 
    mAudioModel = Audio::AudioModel::instance();
 
@@ -161,38 +141,6 @@ void PlayerMapper::button_pressed() {
    else if (name == "reset") 
       mAudioModel->set_player_position(index, 0.0);
    else if (name == "load") {
-      //build up query
-      QString fileQueryStr(cFileQueryString);
-      QString workQueryStr(cWorkInfoQueryString);
-      QString id;
-      id.setNum(mCurrentwork);
-      fileQueryStr.append(id);
-      workQueryStr.append(id);
-      //execute
-      mFileQuery.exec(fileQueryStr);
-      QSqlRecord rec = mFileQuery.record();
-      int audioFileCol = rec.indexOf("audio_file");
-      int beatFileCol = rec.indexOf("beat_file");
-
-		if(mFileQuery.first()){
-			QString audiobufloc = mFileQuery.value(audioFileCol).toString();
-			QString beatbufloc = mFileQuery.value(beatFileCol).toString();
-         mAudioModel->set_player_buffers(index,
-               audiobufloc,
-               beatbufloc);
-
-         mWorkInfoQuery.exec(workQueryStr);
-			if(mWorkInfoQuery.first()){
-				rec = mWorkInfoQuery.record();
-				int titleCol = rec.indexOf("title");
-				int artistCol = rec.indexOf("artist");
-            mIndexPlayerMap[index]->set_song_description(
-                  mWorkInfoQuery.value(artistCol).toString(),
-                  mWorkInfoQuery.value(titleCol).toString());
-         } else {
-            mIndexPlayerMap[index]->set_song_description("unknown", "unknown");
-         }
-      }
    }
 
 }

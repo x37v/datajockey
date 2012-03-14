@@ -54,7 +54,6 @@ HEADERS += include/application.hpp \
            include/audio/types.hpp \
            include/controller/audiobufferreference.hpp \
            include/controller/audioloaderthread.hpp \
-           include/controller/playermapper.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
            include/view/mixerpanel.hpp \
@@ -95,7 +94,6 @@ SOURCES += src/application.cpp \
            src/audio/transport.cpp \
            src/controller/audiobufferreference.cpp \
            src/controller/audioloaderthread.cpp \
-           src/controller/playermapper.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
            src/view/main.cpp \

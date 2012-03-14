@@ -11,6 +11,7 @@
 #include <QProgressBar>
 
 #include <iostream>
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -28,6 +29,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
          orentation = Player::WAVEFORM_RIGHT;
       else if (i == 1)
          orentation = Player::WAVEFORM_LEFT;
+
       Player * player = new Player(this, orentation);
       mPlayers.append(player);
       mixer_layout->addWidget(player);
@@ -56,7 +58,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
                   SLOT(relay_player_toggle(bool)));
          } else {
             QObject::connect(button,
-                  SIGNAL(toggled(bool)),
+                  SIGNAL(clicked()),
                   this,
                   SLOT(relay_player_trigger()));
          }
@@ -171,8 +173,13 @@ void MixerPanel::set_tempo(double bpm) {
    mSettingTempo = false;
 }
 
-void MixerPanel::set_crossfade(int val) {
-   mCrossFadeSlider->setValue(val);
+void MixerPanel::set_master_int(QString name, int val) {
+   if (name == "volume")
+      mMasterVolume->setValue(val);
+   else if (name == "crossfade")
+      mCrossFadeSlider->setValue(val);
+   else
+      cerr << name.toStdString() << " is not a valid set_master_int name" << endl;
 }
 
 void MixerPanel::relay_player_toggle(bool checked) {

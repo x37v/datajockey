@@ -31,7 +31,7 @@ namespace DataJockey {
             void set_player_song_description(int player_index, QString line1, QString line2);
 
             void set_tempo(double bpm);
-            void set_crossfade(int val);
+            void set_master_int(QString name, int val);
 
          protected slots:
             void relay_player_toggle(bool state);

@@ -63,16 +63,10 @@ namespace DataJockey {
 
             double master_bpm() const;
 
+            void set_player_trigger(int player_index, QString name);
+            void set_player_toggle(int player_index, QString name, bool value);
+            void set_player_int(int player_index, QString name, int value);
 
-            void set_player_pause(int player_index, bool pause);
-            void set_player_cue(int player_index, bool val);
-            //void set_player_out_state(int player_index, Audio::Player::out_state_t val);
-            //void set_player_stretch_method(int player_index, Audio::Player::stretch_method_t val);
-            void set_player_mute(int player_index, bool val);
-            void set_player_sync(int player_index, bool val);
-            void set_player_loop(int player_index, bool val);
-            void set_player_volume(int player_index, int val);
-            void set_player_play_speed(int player_index, int val);
             void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
             void set_player_position(int player_index, double seconds, bool absolute = true);
             void set_player_position_frame(int player_index, int frame, bool absolute = true);
@@ -88,9 +82,6 @@ namespace DataJockey {
 
             void set_player_audio_file(int player_index, QString location);
             void set_player_clear_buffers(int player_index);
-
-            //eq the eq 0 is the lowest, 2 is high, one_scale is the top
-            void set_player_eq(int player_index, int band, int value);
 
             //****** BEAT BUFFER COMMANDS
             //clear a players beat buffer
@@ -155,6 +146,10 @@ namespace DataJockey {
          private:
             friend class PlayerClearBuffersCommand;
             friend class AudioLoaderThread;
+
+            //not threadsafe, expects to have mutex already locked
+            //eq the eq 0 is the lowest, 2 is high, one_scale is the top
+            void set_player_eq(int player_index, int band, int value);
 
             //pointers to other internal singletons
             DataJockey::Audio::AudioIO * mAudioIO;
