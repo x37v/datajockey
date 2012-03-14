@@ -35,6 +35,7 @@ namespace DataJockey {
 
          protected slots:
             void relay_player_toggle(bool state);
+            void relay_player_seek_frame_relative(int frames);
             void relay_player_seeking(bool state);
             void relay_player_trigger();
             void relay_player_volume(int val);

@@ -782,6 +782,15 @@ void AudioModel::set_player_toggle(int player_index, QString name, bool value) {
                value ? DataJockey::Audio::PlayerStateCommand::LOOP : DataJockey::Audio::PlayerStateCommand::NO_LOOP);
          mPlayerStates[player_index]->mLoop = value;
       }
+   } else if (name == "seeking") {
+      //pause while seeking
+      if (value) {
+         if (!mPlayerStates[player_index]->mPause)
+            cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PAUSE);
+      } else {
+         if (!mPlayerStates[player_index]->mPause)
+            cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY);
+      }
    } else {
       cerr << name.toStdString() << " is not a valid set_player_toggle arg" << endl;
       return;
@@ -819,6 +828,11 @@ void AudioModel::set_player_int(int player_index, QString name, int value) {
       set_player_eq(player_index, 1, value);
    } else if (name == "eq_high") {
       set_player_eq(player_index, 2, value);
+   } else if (name == "seek_frame_relative") {
+      set_player_position_frame_relative(player_index, value);
+   } else {
+      cerr << name.toStdString() << " is not a valid set_player_int arg" << endl;
+      return;
    }
 
    if (cmd)

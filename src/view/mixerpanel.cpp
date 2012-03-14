@@ -12,7 +12,6 @@
 
 #include <iostream>
 using std::cout;
-using std::cerr;
 using std::endl;
 
 using namespace DataJockey::View;
@@ -47,6 +46,10 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
             SIGNAL(seeking(bool)),
             this,
             SLOT(relay_player_seeking(bool)));
+      QObject::connect(player,
+            SIGNAL(seek_frame_relative(int)),
+            this,
+            SLOT(relay_player_seek_frame_relative(int)));
 
       QPushButton * button;
       foreach(button, player->buttons()) {
@@ -118,8 +121,6 @@ void MixerPanel::set_player_toggle(int player_index, QString name, bool value) {
       return;
    if(QPushButton * button = mPlayers[player_index]->button(name))
       button->setChecked(value);
-   else
-      cerr << name.toStdString() << " is not a valid set_player_toggle name" << endl;
 }
 
 void MixerPanel::set_player_int(int player_index, QString name, int value) {
@@ -139,8 +140,6 @@ void MixerPanel::set_player_int(int player_index, QString name, int value) {
       player->eq_dial("mid")->setValue(value);
    else if (name == "eq_high")
       player->eq_dial("high")->setValue(value);
-   else
-      cerr << name.toStdString() << " is not a valid set_player_int name" << endl;
 }
 
 
@@ -178,8 +177,6 @@ void MixerPanel::set_master_int(QString name, int val) {
       mMasterVolume->setValue(val);
    else if (name == "crossfade")
       mCrossFadeSlider->setValue(val);
-   else
-      cerr << name.toStdString() << " is not a valid set_master_int name" << endl;
 }
 
 void MixerPanel::relay_player_toggle(bool checked) {
@@ -212,6 +209,14 @@ void MixerPanel::relay_player_volume(int val) {
       return;
 
    emit(player_int(player_index.value(), "volume", val));
+}
+
+void MixerPanel::relay_player_seek_frame_relative(int frames) {
+   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_int(player_index.value(), "seek_frame_relative", frames));
 }
 
 void MixerPanel::relay_player_seeking(bool state) {

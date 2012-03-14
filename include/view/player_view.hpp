@@ -38,7 +38,7 @@ namespace DataJockey {
             void set_beat_buffer(Audio::BeatBuffer buffer);
             void set_song_description(QString line1, QString line2);
          signals:
-            void seek_relative(int frames);
+            void seek_frame_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
             void seeking(bool state);
          protected slots:

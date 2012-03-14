@@ -140,6 +140,6 @@ void Player::set_song_description(QString line1, QString line2) {
    mTrackDescription[1]->setCursorPosition(0);
 }
 
-void Player::relay_seek_relative(int frames) { emit(seek_relative(frames)); }
+void Player::relay_seek_relative(int frames) { emit(seek_frame_relative(frames)); }
 void Player::relay_mouse_button(bool down) { emit(seeking(down)); }
 
