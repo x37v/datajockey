@@ -271,11 +271,18 @@ void Player::play_speed(double val){
 }
 
 void Player::position(const TimePoint &val){
+   const TimePoint last_pos = mPosition;
+
    mPosition = val;
    if (mPosition < TimePoint(0,0))
       mPosition.at_bar(0,0);
 
-   mUpdateTransportOffset = true;
+   //update the transport offset if it isn't already dirty
+   if (!mUpdateTransportOffset) {
+      //update the transport offset
+      TimePoint diff = last_pos - mPosition;
+      mTransportOffset += diff;
+   }
 
    //if we're not set up then we cannot update our sample index because we don't
    //know the sample rate, so we just set dirty = true
