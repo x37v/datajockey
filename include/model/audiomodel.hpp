@@ -115,18 +115,10 @@ namespace DataJockey {
             void stop_audio();
 
          signals:
-            void player_pause_changed(int player_index, bool pause);
-            void player_cue_changed(int player_index, bool val);
-            void player_mute_changed(int player_index, bool val);
-            void player_sync_changed(int player_index, bool val);
-            void player_loop_changed(int player_index, bool val);
-            void player_volume_changed(int player_index, int val);
-            void player_eq_changed(int player_index, int band, int val);
-            void player_play_speed_changed(int player_index, int val);
-            //void player_position_changed(int player_index, const DataJockey::Audio::TimePoint &val);
-            void player_position_changed(int player_index, int frame_index);
+            void player_changed_int(int player_index, QString name, int value);
+            void player_changed_bool(int player_index, QString name, bool value);
+
             void player_audio_file_cleared(int player_index);
-            void player_audio_file_load_progress(int player_index, int percent);
             void player_audio_file_changed(int player_index, QString location);
             void player_beat_buffer_changed(int player_index);
 

@@ -530,17 +530,24 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
    }
 
    PlayerDoubleCommand::action_t action;
+   QString name;
    switch(band) {
       case 0:
-         action = PlayerDoubleCommand::EQ_LOW; break;
+         action = PlayerDoubleCommand::EQ_LOW;
+         name = "eq_low";
+         break;
       case 1:
-         action = PlayerDoubleCommand::EQ_MID; break;
+         action = PlayerDoubleCommand::EQ_MID;
+         name = "eq_mid";
+         break;
       case 2:
-         action = PlayerDoubleCommand::EQ_HIGH; break;
+         action = PlayerDoubleCommand::EQ_HIGH;
+         name = "eq_high";
+         break;
    }
 
    queue_command(new PlayerDoubleCommand(player_index, action, remaped));
-   emit(player_eq_changed(player_index, band, value));
+   emit(player_changed_int(player_index, name, value));
 }
 
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
@@ -548,14 +555,14 @@ void AudioModel::relay_player_audio_file_changed(int player_index, QString fileN
 }
 
 void AudioModel::relay_player_position_changed(int player_index, int frame_index){
-   emit(player_position_changed(player_index, frame_index));
+   emit(player_changed_int(player_index, "frame", frame_index));
 }
 
 void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
       if (mPlayerStates[player_index]->mFileName == fileName)
-         emit(player_audio_file_load_progress(player_index, percent));
+         emit(player_changed_int(player_index, "progress", percent));
    }
 }
 
@@ -752,40 +759,38 @@ void AudioModel::set_player_toggle(int player_index, QString name, bool value) {
       if (mPlayerStates[player_index]->mCue != value) {
          cmd = new DataJockey::Audio::PlayerStateCommand(player_index, value ? PlayerStateCommand::OUT_CUE : PlayerStateCommand::OUT_MAIN);
          mPlayerStates[player_index]->mCue = value;
-         emit(player_cue_changed(player_index, value));
       }
    } else if (name == "pause") {
       if (mPlayerStates[player_index]->mPause != value) {
          cmd = new DataJockey::Audio::PlayerStateCommand(player_index, value ? PlayerStateCommand::PAUSE : PlayerStateCommand::PLAY);
          mPlayerStates[player_index]->mPause = value;
-         emit(player_pause_changed(player_index, value));
       }
    } else if (name == "sync") {
       if (mPlayerStates[player_index]->mSync != value) {
          cmd = new DataJockey::Audio::PlayerStateCommand(player_index, value ? DataJockey::Audio::PlayerStateCommand::SYNC : DataJockey::Audio::PlayerStateCommand::NO_SYNC);
          mPlayerStates[player_index]->mSync = value;
-         emit(player_sync_changed(player_index, value));
       }
    } else if (name == "mute") {
       if (mPlayerStates[player_index]->mMute != value) {
          cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
                value ? DataJockey::Audio::PlayerStateCommand::MUTE : DataJockey::Audio::PlayerStateCommand::NO_MUTE);
          mPlayerStates[player_index]->mMute = value;
-         emit(player_mute_changed(player_index, value));
       }
    } else if (name == "loop") {
       if (mPlayerStates[player_index]->mLoop != value) {
          cmd = new DataJockey::Audio::PlayerStateCommand(player_index, 
                value ? DataJockey::Audio::PlayerStateCommand::LOOP : DataJockey::Audio::PlayerStateCommand::NO_LOOP);
          mPlayerStates[player_index]->mLoop = value;
-         emit(player_loop_changed(player_index, value));
       }
    } else {
       cerr << name.toStdString() << " is not a valid set_player_toggle arg" << endl;
+      return;
    }
 
-   if (cmd)
+   if (cmd) {
       queue_command(cmd);
+      emit(player_changed_bool(player_index, name, value));
+   }
 }
 
 void AudioModel::set_player_int(int player_index, QString name, int value) {
@@ -799,14 +804,14 @@ void AudioModel::set_player_int(int player_index, QString name, int value) {
          double volume = (double)value / double(one_scale);
          cmd = new DataJockey::Audio::PlayerDoubleCommand(player_index, DataJockey::Audio::PlayerDoubleCommand::VOLUME, volume);
          mPlayerStates[player_index]->mVolume = value;
-         emit(player_volume_changed(player_index, value));
+         emit(player_changed_int(player_index, "volume", value));
       }
    } else if (name == "speed") {
       if (mPlayerStates[player_index]->mPlaySpeed != (unsigned int)value) {
          double speed = (double)value / double(one_scale);
          cmd = new DataJockey::Audio::PlayerDoubleCommand(player_index, DataJockey::Audio::PlayerDoubleCommand::PLAY_SPEED, speed);
          mPlayerStates[player_index]->mPlaySpeed = value;
-         emit(player_play_speed_changed(player_index, value));
+         emit(player_changed_int(player_index, "speed", value));
       }
    } else if (name == "eq_low") {
       set_player_eq(player_index, 0, value);

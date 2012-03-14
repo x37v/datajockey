@@ -144,7 +144,7 @@ void MixerPanel::set_player_int(int player_index, QString name, int value) {
 }
 
 
-void MixerPanel::set_player_audio_file(int player_index, const QString& file_name){
+void MixerPanel::set_player_audio_file(int player_index, QString file_name){
    if (player_index >= mPlayers.size())
       return;
    mPlayers[player_index]->set_audio_file(file_name);

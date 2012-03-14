@@ -89,6 +89,24 @@ Application::Application(int & argc, char ** argv) :
          mAudioModel,
          SLOT(set_player_int(int, QString, int)));
 
+   QObject::connect(mAudioModel,
+         SIGNAL(player_changed_bool(int, QString, bool)),
+         mMixerPanel,
+         SLOT(set_player_toggle(int, QString, bool)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_changed_int(int, QString, int)),
+         mMixerPanel,
+         SLOT(set_player_int(int, QString, int)));
+
+   QObject::connect(mAudioModel,
+         SIGNAL(player_audio_file_changed(int, QString)),
+         mMixerPanel,
+         SLOT(set_player_audio_file(int, QString)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_beat_buffer_changed(int)),
+         this,
+         SLOT(relay_player_beat_buffer(int)));
+
    QObject::connect(mMixerPanel->master_volume_slider(),
          SIGNAL(valueChanged(int)),
          mAudioModel,
@@ -254,5 +272,10 @@ void Application::set_player_trigger(int player_index, QString name) {
          mMixerPanel->set_player_song_description(player_index, "unknown", "unknown");
       }
    }
+}
+
+void Application::relay_player_beat_buffer(int player_index) {
+   //XXX check bounds?
+   mMixerPanel->set_player_beat_buffer(player_index, mAudioModel->player_beat_buffer(player_index));
 }
 

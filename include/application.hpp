@@ -17,6 +17,8 @@ namespace DataJockey {
          void pre_quit_actions();
          void select_work(int work_id);
          void set_player_trigger(int player_index, QString name);
+      protected slots:
+         void relay_player_beat_buffer(int player_index);
       private:
          Audio::AudioModel * mAudioModel;
          View::MixerPanel * mMixerPanel;

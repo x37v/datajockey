@@ -26,7 +26,7 @@ namespace DataJockey {
             void set_player_toggle(int player_index, QString name, bool value);
             void set_player_int(int player_index, QString name, int value);
 
-            void set_player_audio_file(int player_index, const QString& file_name);
+            void set_player_audio_file(int player_index, QString file_name);
             void set_player_beat_buffer(int player_index, Audio::BeatBuffer buffer);
             void set_player_song_description(int player_index, QString line1, QString line2);
 
