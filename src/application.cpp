@@ -52,9 +52,8 @@ Application::Application(int & argc, char ** argv) :
    mWorkInfoQuery = new QSqlQuery("", Model::db::get());
 
    mAudioModel = Audio::AudioModel::instance();
-   //XXX need a parent for mMixerPanel?
-   mMixerPanel = new View::MixerPanel;
    mTop = new QWidget(0, Qt::Window);
+   mMixerPanel = new View::MixerPanel(mTop);
 
    setStyle("plastique");
 
