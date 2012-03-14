@@ -285,7 +285,8 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 			throw osc::MissingArgumentException();
 		int pos = (float)DataJockey::one_scale * floatFromOscNumber(*arg_it);
 		if(strcmp("", matches[1].str().c_str()) == 0) {
-         QMetaObject::invokeMethod(mModel, "set_master_cross_fade_position", Qt::QueuedConnection,
+         QMetaObject::invokeMethod(mModel, "volume", Qt::QueuedConnection,
+               Q_ARG(QString, "crossfade"),
                Q_ARG(int, pos));
       }
 		//else
@@ -334,7 +335,8 @@ void OscReceiver::processMasterMessage(const std::string addr, const osc::Receiv
 			int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
 			//"" == absolute, otherwise, relative
 			if(strcmp("", matches[1].str().c_str()) == 0) {
-            QMetaObject::invokeMethod(mModel, "set_master_volume", Qt::QueuedConnection,
+            QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
+                  Q_ARG(QString, "volume"),
                   Q_ARG(int, vol));
          }
 			//else 

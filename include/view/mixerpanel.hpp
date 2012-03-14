@@ -18,10 +18,6 @@ namespace DataJockey {
          public:
             MixerPanel(QWidget * parent = NULL);
             virtual ~MixerPanel();
-            QList<Player *> players() const;
-            QSlider * cross_fade_slider() const;;
-            QSlider * master_volume_slider() const;;
-
          public slots:
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
@@ -31,7 +27,7 @@ namespace DataJockey {
             void set_player_song_description(int player_index, QString line1, QString line2);
 
             void set_tempo(double bpm);
-            void set_master_int(QString name, int val);
+            void master_set(QString name, int val);
 
          protected slots:
             void relay_player_toggled(bool state);
@@ -41,13 +37,16 @@ namespace DataJockey {
             void relay_player_volume(int val);
             void relay_player_eq(int val);
 
-         signals:
-            void tempo_changed(double);
-            void crossfade_changed(int val);
+            void relay_crossfade_changed(int value);
+            void relay_volume_changed(int value);
 
+         signals:
             void player_triggered(int player_index, QString name);
             void player_toggled(int player_index, QString name, bool val);
             void player_value_changed(int player_index, QString name, int val);
+
+            void tempo_changed(double);
+            void master_value_changed(QString name, int value);
 
          private:
             QList<Player *> mPlayers;

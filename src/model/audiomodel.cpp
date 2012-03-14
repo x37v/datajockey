@@ -547,7 +547,7 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
    }
 
    queue_command(new PlayerDoubleCommand(player_index, action, remaped));
-   emit(player_changed_int(player_index, name, value));
+   emit(player_value_changed(player_index, name, value));
 }
 
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
@@ -555,14 +555,14 @@ void AudioModel::relay_player_audio_file_changed(int player_index, QString fileN
 }
 
 void AudioModel::relay_player_position_changed(int player_index, int frame_index){
-   emit(player_changed_int(player_index, "frame", frame_index));
+   emit(player_value_changed(player_index, "frame", frame_index));
 }
 
 void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){
    QMutexLocker lock(&mPlayerStatesMutex);
    for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++) {
       if (mPlayerStates[player_index]->mFileName == fileName)
-         emit(player_changed_int(player_index, "progress", percent));
+         emit(player_value_changed(player_index, "progress", percent));
    }
 }
 
@@ -686,6 +686,14 @@ void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_i
    }
 }
 
+void AudioModel::master_set(QString name, int value) {
+   if (name == "volume")
+      set_master_volume(value);
+   else if (name == "crossfade")
+      set_master_cross_fade_position(value);
+   else
+      cerr << name.toStdString() << " is not a master_set player_set (int) arg" << endl;
+}
 
 void AudioModel::set_master_volume(int val){
    if (val < 0)
@@ -693,7 +701,7 @@ void AudioModel::set_master_volume(int val){
    else if (val > 1.5 * one_scale)
       val = 1.5 * one_scale;
    //TODO actually implement
-   emit(master_volume_changed(val));
+   emit(master_value_changed("volume", val));
 }
 
 void AudioModel::set_master_cue_volume(int /*val*/){
@@ -717,7 +725,7 @@ void AudioModel::set_master_cross_fade_position(int val){
    double dval = (double)val / (double)one_scale;
    queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
 
-   emit(master_cross_fade_position_changed(val));
+   emit(master_value_changed("crossfade", val));
 }
 
 void AudioModel::set_master_cross_fade_players(int left, int right){
@@ -798,7 +806,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
 
    if (cmd) {
       queue_command(cmd);
-      emit(player_changed_bool(player_index, name, value));
+      emit(player_toggled(player_index, name, value));
    }
 }
 
@@ -813,14 +821,14 @@ void AudioModel::player_set(int player_index, QString name, int value) {
          double volume = (double)value / double(one_scale);
          cmd = new DataJockey::Audio::PlayerDoubleCommand(player_index, DataJockey::Audio::PlayerDoubleCommand::VOLUME, volume);
          mPlayerStates[player_index]->mVolume = value;
-         emit(player_changed_int(player_index, "volume", value));
+         emit(player_value_changed(player_index, "volume", value));
       }
    } else if (name == "speed") {
       if (mPlayerStates[player_index]->mPlaySpeed != (unsigned int)value) {
          double speed = (double)value / double(one_scale);
          cmd = new DataJockey::Audio::PlayerDoubleCommand(player_index, DataJockey::Audio::PlayerDoubleCommand::PLAY_SPEED, speed);
          mPlayerStates[player_index]->mPlaySpeed = value;
-         emit(player_changed_int(player_index, "speed", value));
+         emit(player_value_changed(player_index, "speed", value));
       }
    } else if (name == "eq_low") {
       set_player_eq(player_index, 0, value);

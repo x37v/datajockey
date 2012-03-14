@@ -59,14 +59,14 @@ Application::Application(int & argc, char ** argv) :
 
    QObject::connect(this, SIGNAL(aboutToQuit()), this, SLOT(pre_quit_actions()));
 
-   QObject::connect(mMixerPanel->cross_fade_slider(),
-         SIGNAL(valueChanged(int)),
+   QObject::connect(mMixerPanel,
+         SIGNAL(master_value_changed(QString, int)),
          mAudioModel,
-         SLOT(set_master_cross_fade_position(int)));
+         SLOT(master_set(QString, int)));
    QObject::connect(mAudioModel,
-         SIGNAL(master_cross_fade_position_changed(int)),
-         mMixerPanel->cross_fade_slider(),
-         SLOT(setValue(int)));
+         SIGNAL(master_value_changed(QString, int)),
+         mMixerPanel,
+         SLOT(master_set(QString, int)));
 
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,
@@ -89,11 +89,11 @@ Application::Application(int & argc, char ** argv) :
          SLOT(player_set(int, QString, int)));
 
    QObject::connect(mAudioModel,
-         SIGNAL(player_changed_bool(int, QString, bool)),
+         SIGNAL(player_toggled(int, QString, bool)),
          mMixerPanel,
          SLOT(player_set(int, QString, bool)));
    QObject::connect(mAudioModel,
-         SIGNAL(player_changed_int(int, QString, int)),
+         SIGNAL(player_value_changed(int, QString, int)),
          mMixerPanel,
          SLOT(player_set(int, QString, int)));
 
@@ -105,15 +105,6 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(player_beat_buffer_changed(int)),
          this,
          SLOT(relay_player_beat_buffer(int)));
-
-   QObject::connect(mMixerPanel->master_volume_slider(),
-         SIGNAL(valueChanged(int)),
-         mAudioModel,
-         SLOT(set_master_volume(int)));
-   QObject::connect(mAudioModel,
-         SIGNAL(master_volume_changed(int)),
-         mMixerPanel->master_volume_slider(),
-         SLOT(setValue(int)));
 
    QObject::connect(mMixerPanel,
          SIGNAL(tempo_changed(double)),

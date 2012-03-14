@@ -102,6 +102,8 @@ namespace DataJockey {
             void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
             //***** MASTER COMMANDS
+            void master_set(QString name, int value);
+
             void set_master_volume(int val);
             void set_master_cue_volume(int val);
             void set_master_cross_fade_enable(bool enable);
@@ -115,15 +117,14 @@ namespace DataJockey {
             void stop_audio();
 
          signals:
-            void player_changed_int(int player_index, QString name, int value);
-            void player_changed_bool(int player_index, QString name, bool value);
+            void player_value_changed(int player_index, QString name, int value);
+            void player_toggled(int player_index, QString name, bool value);
 
             void player_audio_file_cleared(int player_index);
             void player_audio_file_changed(int player_index, QString location);
             void player_beat_buffer_changed(int player_index);
 
-            void master_cross_fade_position_changed(int);
-            void master_volume_changed(int);
+            void master_value_changed(QString name, int value);
             void master_bpm_changed(double);
 
          protected slots:
