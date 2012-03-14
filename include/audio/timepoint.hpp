@@ -47,6 +47,8 @@ namespace DataJockey {
             bool operator>=(const TimePoint &other) const;
             const TimePoint operator+(const TimePoint &other) const;
             const TimePoint operator-(const TimePoint &other) const;
+
+            TimePoint& operator+=(const TimePoint &other);
          private:
             time_type mType;
             //mirroring jack transport

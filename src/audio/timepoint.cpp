@@ -256,7 +256,7 @@ const TimePoint TimePoint::operator-(const TimePoint &other) const {
          ret.seconds(seconds() - other.seconds()); 
       } else {
          //XXX assuming that they both have the same beats per bar!
-         unsigned int bar_div = this->beats_per_bar();
+         int bar_div = this->beats_per_bar();
          int beat = this->beat() - other.beat();
          int bar = this->bar() - other.bar();
 
@@ -290,3 +290,7 @@ const TimePoint TimePoint::operator-(const TimePoint &other) const {
    return ret;
 }
 
+TimePoint& TimePoint::operator+=(const TimePoint &other) {
+   *this = *this + other;
+   return *this;
+}
