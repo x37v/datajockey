@@ -111,9 +111,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
             //"" == absolute, otherwise, relative
             if(strcmp("", matches[1].str().c_str()) != 0)
                vol += mModel->player_volume(mixer);
-            QMetaObject::invokeMethod(mModel, "set_player_volume", Qt::QueuedConnection,
-                  Q_ARG(int, mixer),
-                  Q_ARG(int, vol));
+            player_set(mixer, "volume", vol);
 			} else
 				throw osc::MissingArgumentException();
 		} 
@@ -131,9 +129,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 				} else {
                mute = !mModel->player_mute(mixer);
 				}
-            QMetaObject::invokeMethod(mModel, "set_player_mute", Qt::QueuedConnection,
-                  Q_ARG(int, mixer),
-                  Q_ARG(bool, mute));
+            player_set(mixer, "mute", mute);
 			}
 		} else if(boost::regex_match(remain.c_str(), matches, eq_re)){
 			if(matches.size() == 3){
@@ -148,10 +144,16 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 					if(arg_it == m.ArgumentsEnd())
 						throw osc::MissingArgumentException();
                int val = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
-               QMetaObject::invokeMethod(mModel, "set_player_eq", Qt::QueuedConnection,
-                     Q_ARG(int, mixer),
-                     Q_ARG(int, band),
-                     Q_ARG(int, val));
+               QString sband = "eq_high";
+               switch(band) {
+                  case 0:
+                     sband = "eq_low";
+                     break;
+                  case 1:
+                     sband = "eq_mid";
+                     break;
+               }
+               player_set(mixer, sband, val);
             } 
 #if 0
             else if(strcmp(matches[2].str().c_str(), "/cut") == 0){
@@ -210,9 +212,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 		} else {
          pause = !mModel->player_pause(mixer);
       }
-      QMetaObject::invokeMethod(mModel, "set_player_pause", Qt::QueuedConnection,
-            Q_ARG(int, mixer),
-            Q_ARG(bool, pause));
+      player_set(mixer, "pause", pause);
 	} else if(boost::regex_match(addr.c_str(), matches, reset_re)){
       QMetaObject::invokeMethod(mModel, "set_player_position", Qt::QueuedConnection,
             Q_ARG(int, mixer),
@@ -227,9 +227,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 				cue = boolFromBoolOrInt(*arg_it);
 		} else 
          cue = !mModel->player_cue(mixer);
-      QMetaObject::invokeMethod(mModel, "set_player_cue", Qt::QueuedConnection,
-            Q_ARG(int, mixer),
-            Q_ARG(bool, cue));
+      player_set(mixer, "cue", cue);
 	} else if(boost::regex_match(addr.c_str(), matches, sync_re)){
       bool sync;
 		if(strcmp(matches[1].str().c_str(), "") == 0){
@@ -240,9 +238,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 				sync = boolFromBoolOrInt(*arg_it);
 		} else 
          sync = !mModel->player_sync(mixer);
-      QMetaObject::invokeMethod(mModel, "set_player_sync", Qt::QueuedConnection,
-            Q_ARG(int, mixer),
-            Q_ARG(bool, sync));
+      player_set(mixer, "sync", sync);
 	} else if(boost::regex_match(addr.c_str(), matches, seek_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
@@ -252,9 +248,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 		if(strcmp(matches[1].str().c_str(), "") == 0){
 			//control->setPlaybackPosition(arg);
 		} else {
-         QMetaObject::invokeMethod(mModel, "set_player_position_beat_relative", Qt::QueuedConnection,
-               Q_ARG(int, mixer),
-               Q_ARG(int, beats));
+         player_set(mixer, "seek_beat_relative", beats);
       }
 	} 
 #if 0
@@ -370,6 +364,26 @@ void OscReceiver::processMasterMessage(const std::string addr, const osc::Receiv
 	} else {
 		//XXX throw an error?
 	}
+}
+
+void OscReceiver::player_trigger(int player_index, QString name) {
+   QMetaObject::invokeMethod(mModel, "player_trigger", Qt::QueuedConnection,
+         Q_ARG(int, player_index),
+         Q_ARG(QString, name));
+}
+
+void OscReceiver::player_set(int player_index, QString name, bool value) {
+   QMetaObject::invokeMethod(mModel, "set_player", Qt::QueuedConnection,
+         Q_ARG(int, player_index),
+         Q_ARG(QString, name),
+         Q_ARG(bool, value));
+}
+
+void OscReceiver::player_set(int player_index, QString name, int value) {
+   QMetaObject::invokeMethod(mModel, "set_player", Qt::QueuedConnection,
+         Q_ARG(int, player_index),
+         Q_ARG(QString, name),
+         Q_ARG(int, value));
 }
 
 #include "ip/UdpSocket.h"

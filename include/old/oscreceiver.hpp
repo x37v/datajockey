@@ -42,6 +42,9 @@ class OscReceiver : public osc::OscPacketListener {
 		void processMasterMessage(const std::string addr, const osc::ReceivedMessage& m);
 	private:
       DataJockey::Audio::AudioModel * mModel;
+      void player_trigger(int player_index, QString name);
+      void player_set(int player_index, QString name, bool value);
+      void player_set(int player_index, QString name, int value);
 };
 
 class OscThread : public QThread {
