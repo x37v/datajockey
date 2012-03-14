@@ -63,9 +63,9 @@ namespace DataJockey {
 
             double master_bpm() const;
 
-            void set_player_trigger(int player_index, QString name);
-            void set_player_toggle(int player_index, QString name, bool value);
-            void set_player_int(int player_index, QString name, int value);
+            void player_trigger(int player_index, QString name);
+            void player_set(int player_index, QString name, bool value);
+            void player_set(int player_index, QString name, int value);
 
             void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
             void set_player_position(int player_index, double seconds, bool absolute = true);

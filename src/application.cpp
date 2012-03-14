@@ -78,24 +78,24 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(mMixerPanel,
          SIGNAL(player_trigger(int, QString)),
          mAudioModel,
-         SLOT(set_player_trigger(int, QString)));
+         SLOT(player_trigger(int, QString)));
    QObject::connect(mMixerPanel,
          SIGNAL(player_toggle(int, QString, bool)),
          mAudioModel,
-         SLOT(set_player_toggle(int, QString, bool)));
+         SLOT(player_set(int, QString, bool)));
    QObject::connect(mMixerPanel,
          SIGNAL(player_int(int, QString, int)),
          mAudioModel,
-         SLOT(set_player_int(int, QString, int)));
+         SLOT(player_set(int, QString, int)));
 
    QObject::connect(mAudioModel,
          SIGNAL(player_changed_bool(int, QString, bool)),
          mMixerPanel,
-         SLOT(set_player_toggle(int, QString, bool)));
+         SLOT(player_set(int, QString, bool)));
    QObject::connect(mAudioModel,
          SIGNAL(player_changed_int(int, QString, int)),
          mMixerPanel,
-         SLOT(set_player_int(int, QString, int)));
+         SLOT(player_set(int, QString, int)));
 
    QObject::connect(mAudioModel,
          SIGNAL(player_audio_file_changed(int, QString)),

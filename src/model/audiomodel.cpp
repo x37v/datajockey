@@ -736,7 +736,7 @@ void AudioModel::set_master_bpm(double bpm) {
    }
 }
 
-void AudioModel::set_player_trigger(int player_index, QString name) {
+void AudioModel::player_trigger(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    if (name == "reset")
@@ -746,10 +746,10 @@ void AudioModel::set_player_trigger(int player_index, QString name) {
    else if (name == "seek_back")
       set_player_position_relative(player_index, Audio::TimePoint(-1,3));
    else if (name != "load")
-      cerr << name.toStdString() << " is not a valid set_player_trigger arg" << endl;
+      cerr << name.toStdString() << " is not a valid player_trigger arg" << endl;
 }
 
-void AudioModel::set_player_toggle(int player_index, QString name, bool value) {
+void AudioModel::player_set(int player_index, QString name, bool value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -792,7 +792,7 @@ void AudioModel::set_player_toggle(int player_index, QString name, bool value) {
             cmd = new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY);
       }
    } else {
-      cerr << name.toStdString() << " is not a valid set_player_toggle arg" << endl;
+      cerr << name.toStdString() << " is not a valid player_set (bool) arg" << endl;
       return;
    }
 
@@ -802,7 +802,7 @@ void AudioModel::set_player_toggle(int player_index, QString name, bool value) {
    }
 }
 
-void AudioModel::set_player_int(int player_index, QString name, int value) {
+void AudioModel::player_set(int player_index, QString name, int value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -830,8 +830,10 @@ void AudioModel::set_player_int(int player_index, QString name, int value) {
       set_player_eq(player_index, 2, value);
    } else if (name == "seek_frame_relative") {
       set_player_position_frame_relative(player_index, value);
+   } else if (name == "seek_beat_relative") {
+      set_player_position_beat_relative(player_index, value);
    } else {
-      cerr << name.toStdString() << " is not a valid set_player_int arg" << endl;
+      cerr << name.toStdString() << " is not a valid player_set (int) arg" << endl;
       return;
    }
 

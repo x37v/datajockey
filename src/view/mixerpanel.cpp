@@ -116,14 +116,14 @@ QList<Player *> MixerPanel::players() const { return mPlayers; }
 QSlider * MixerPanel::cross_fade_slider() const { return mCrossFadeSlider; }
 QSlider * MixerPanel::master_volume_slider() const { return mMasterVolume; }
 
-void MixerPanel::set_player_toggle(int player_index, QString name, bool value) {
+void MixerPanel::player_set(int player_index, QString name, bool value) {
    if (player_index >= mPlayers.size())
       return;
    if(QPushButton * button = mPlayers[player_index]->button(name))
       button->setChecked(value);
 }
 
-void MixerPanel::set_player_int(int player_index, QString name, int value) {
+void MixerPanel::player_set(int player_index, QString name, int value) {
    if (player_index >= mPlayers.size())
       return;
 

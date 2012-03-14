@@ -23,8 +23,8 @@ namespace DataJockey {
             QSlider * master_volume_slider() const;;
 
          public slots:
-            void set_player_toggle(int player_index, QString name, bool value);
-            void set_player_int(int player_index, QString name, int value);
+            void player_set(int player_index, QString name, bool value);
+            void player_set(int player_index, QString name, int value);
 
             void set_player_audio_file(int player_index, QString file_name);
             void set_player_beat_buffer(int player_index, Audio::BeatBuffer buffer);
