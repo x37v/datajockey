@@ -77,23 +77,41 @@ TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos)
    unsigned int size = mBeatData.size();
    unsigned int start = mStartBeat;
 
+   if (start >= size)
+      start = 0;
+
    if(size > 0 && seconds >= 0){
-      //advance to the last position
+      //make sure we aren't trying to advance before the start
+      if (seconds <= mBeatData[start]) {
+         pos.at_bar(start / 4, start % 4);
+         return pos;
+      } else if (seconds >= mBeatData.back()) {
+         pos.at_bar(size / 4, size % 4);
+         return pos;
+      }
+
+      //advance to the last position if it is before the time we are looking for
       //XXX what about TimePoint::SECONDS types?
-      if(lastPos.type() == TimePoint::BEAT_BAR)
-         start += lastPos.beats_per_bar() * lastPos.bar() + lastPos.beat();
+      if(lastPos.type() == TimePoint::BEAT_BAR) {
+         int beat = lastPos.beats_per_bar() * lastPos.bar() + lastPos.beat() + start;
+         if (beat < size && mBeatData[beat] <= seconds)
+            start = beat;
+      }
 
       for(unsigned int i = start; i < size; i++){
          //XXX assuming 4/4
          if(mBeatData[i] == seconds)
-            pos.at_bar((i - mStartBeat) / 4, (i - mStartBeat) % 4);
+            pos.at_bar((i - start) / 4, (i - start) % 4);
          else if(mBeatData[i] > seconds){
-            if(i > 0){
-               unsigned int beat = i - 1 - mStartBeat;
-               pos.at_bar(beat / 4, beat % 4, 
-                     (seconds - mBeatData[beat]) / (mBeatData[i - mStartBeat] - mBeatData[beat]));
-            } else 
+            if(i == start){
                pos.at_bar(0);
+            } else {
+               unsigned int beat = i - 1 - start;
+               double diff = mBeatData[i - start] - mBeatData[beat];
+               if (diff != 0)
+                  diff = (seconds - mBeatData[beat]) / diff;
+               pos.at_bar(beat / 4, beat % 4, diff);
+            }
             return pos;
          }
       }

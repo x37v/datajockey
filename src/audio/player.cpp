@@ -378,8 +378,10 @@ void Player::position_relative(TimePoint amt){
 }
 
 void Player::position_at_frame_relative(long offset){
-   long frame = offset + mStretcher->frame();
-   position_at_frame(frame > 0 ? frame : 0);
+   if (offset < 0 && -offset > mStretcher->frame())
+      position_at_frame(0);
+   else
+      position_at_frame(offset + mStretcher->frame());
 }
 
 void Player::play_speed_relative(double amt){
