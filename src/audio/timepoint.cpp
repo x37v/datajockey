@@ -294,3 +294,18 @@ TimePoint& TimePoint::operator+=(const TimePoint &other) {
    *this = *this + other;
    return *this;
 }
+
+TimePoint& TimePoint::operator-=(const TimePoint &other) {
+   *this = *this - other;
+   return *this;
+}
+
+namespace DataJockey {
+   namespace Audio {
+      TimePoint operator-(const TimePoint &timepoint) {
+         TimePoint output(0,0);
+         output -= timepoint;
+         return output;
+      }
+   }
+}

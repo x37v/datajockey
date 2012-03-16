@@ -49,6 +49,10 @@ namespace DataJockey {
             const TimePoint operator-(const TimePoint &other) const;
 
             TimePoint& operator+=(const TimePoint &other);
+            TimePoint& operator-=(const TimePoint &other);
+
+            //negation
+            friend TimePoint operator-(const TimePoint &timepoint);
          private:
             time_type mType;
             //mirroring jack transport
