@@ -44,15 +44,7 @@ namespace DataJockey {
             unsigned int sample_rate() const;
 
             unsigned int player_count() const;
-            bool player_pause(int player_index);
-            bool player_cue(int player_index);
-            //void player_out_state(int player_index, Audio::Player::out_state_t val);
-            //void player_stretch_method(int player_index, Audio::Player::stretch_method_t val);
-            bool player_mute(int player_index);
-            bool player_sync(int player_index);
-            bool player_loop(int player_index);
-            int player_volume(int player_index);
-            int player_play_speed(int player_index);
+
             //void player_position(int player_index);
             //void player_start_position(int player_index);
             //void player_end_position(int player_index);
@@ -63,22 +55,16 @@ namespace DataJockey {
 
             double master_bpm() const;
 
+            //getters
+            bool player_state_bool(int player_index, QString name);
+            int player_state_int(int player_index, QString name);
+
+            //setters
             void player_trigger(int player_index, QString name);
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
-
-            void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
-            void set_player_position(int player_index, double seconds, bool absolute = true);
-            void set_player_position_frame(int player_index, int frame, bool absolute = true);
-            void set_player_position_relative(int player_index, const DataJockey::Audio::TimePoint &val);
-            void set_player_position_relative(int player_index, double seconds);
-            void set_player_position_frame_relative(int player_index, int frame);
-            int  get_player_position_frame(int player_index);
-            void set_player_position_beat_relative(int player_index, int beats);
-            void set_player_start_position(int player_index, const DataJockey::Audio::TimePoint &val);
-            void set_player_end_position(int player_index, const DataJockey::Audio::TimePoint &val);
-            void set_player_loop_start_position(int player_index, const DataJockey::Audio::TimePoint &val);
-            void set_player_loop_end_position(int player_index, const DataJockey::Audio::TimePoint &val);
+            void player_set(int player_index, QString name, double value);
+            void player_set(int player_index, QString name, DataJockey::Audio::TimePoint value);
 
             void set_player_audio_file(int player_index, QString location);
             void set_player_clear_buffers(int player_index);
@@ -139,11 +125,6 @@ namespace DataJockey {
          private:
             friend class PlayerClearBuffersCommand;
             friend class AudioLoaderThread;
-
-            //not threadsafe, expects to have mutex already locked
-            //eq the eq 0 is the lowest, 2 is high, one_scale is the top
-            void set_player_eq(int player_index, int band, int value);
-
             //pointers to other internal singletons
             DataJockey::Audio::AudioIO * mAudioIO;
             DataJockey::Audio::Master * mMaster;
@@ -156,6 +137,10 @@ namespace DataJockey {
 
             //maintain player state information
             std::vector<PlayerState *> mPlayerStates;
+            typedef QPair<PlayerStateCommand::action_t, PlayerStateCommand::action_t> player_onoff_action_pair_t;
+            QMap<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
+            QMap<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
+            QMap<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
 
             //make sure that player states/audio buffer manager access is thread safe
             QMutex mPlayerStatesMutex;
@@ -174,6 +159,14 @@ namespace DataJockey {
             void set_player_audio_buffer(int player_index, DataJockey::Audio::AudioBuffer * buf);
 
             void update_player_state(int player_index, PlayerState * state);
+
+
+            //not threadsafe, expects to have mutex already locked
+            //eq the eq 0 is the lowest, 2 is high, one_scale is the top
+            void set_player_eq(int player_index, int band, int value);
+            void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
+            void set_player_position_frame(int player_index, int frame, bool absolute = true);
+            void set_player_position_beat_relative(int player_index, int beats);
       };
    }
 }

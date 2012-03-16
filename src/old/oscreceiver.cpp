@@ -110,7 +110,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
             int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
             //"" == absolute, otherwise, relative
             if(strcmp("", matches[1].str().c_str()) != 0)
-               vol += mModel->player_volume(mixer);
+               vol += mModel->player_state_int(mixer, "volume");
             player_set(mixer, "volume", vol);
 			} else
 				throw osc::MissingArgumentException();
@@ -127,7 +127,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 					else 
 						throw osc::MissingArgumentException();
 				} else {
-               mute = !mModel->player_mute(mixer);
+               mute = !mModel->player_state_bool(mixer, "mute");
 				}
             player_set(mixer, "mute", mute);
 			}
@@ -210,7 +210,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
          else
             pause = !boolFromBoolOrInt(*arg_it);
 		} else {
-         pause = !mModel->player_pause(mixer);
+         pause = !mModel->player_state_bool(mixer, "pause");
       }
       player_set(mixer, "pause", pause);
 	} else if(boost::regex_match(addr.c_str(), matches, reset_re)){
@@ -226,7 +226,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 			else
 				cue = boolFromBoolOrInt(*arg_it);
 		} else 
-         cue = !mModel->player_cue(mixer);
+         cue = !mModel->player_state_bool(mixer, "cue");
       player_set(mixer, "cue", cue);
 	} else if(boost::regex_match(addr.c_str(), matches, sync_re)){
       bool sync;
@@ -237,7 +237,7 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 			else
 				sync = boolFromBoolOrInt(*arg_it);
 		} else 
-         sync = !mModel->player_sync(mixer);
+         sync = !mModel->player_state_bool(mixer, "sync");
       player_set(mixer, "sync", sync);
 	} else if(boost::regex_match(addr.c_str(), matches, seek_re)){
 		if(arg_it == m.ArgumentsEnd())

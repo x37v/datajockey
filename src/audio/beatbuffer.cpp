@@ -94,7 +94,7 @@ TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos)
       //XXX what about TimePoint::SECONDS types?
       if(lastPos.type() == TimePoint::BEAT_BAR) {
          int beat = lastPos.beats_per_bar() * lastPos.bar() + lastPos.beat() + start;
-         if (beat < size && mBeatData[beat] <= seconds)
+         if (beat < static_cast<int>(size) && mBeatData[beat] <= seconds)
             start = beat;
       }
 
