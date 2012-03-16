@@ -172,7 +172,7 @@ void MixerPanel::set_tempo(double bpm) {
 void MixerPanel::master_set(QString name, int val) {
    if (name == "volume")
       mMasterVolume->setValue(val);
-   else if (name == "crossfade")
+   else if (name == "crossfade_position")
       mCrossFadeSlider->setValue(val);
 }
 
@@ -233,7 +233,7 @@ void MixerPanel::relay_player_eq(int val) {
 }
 
 void MixerPanel::relay_crossfade_changed(int value) {
-   emit(master_value_changed("crossfade", value));
+   emit(master_value_changed("crossfade_position", value));
 }
 
 void MixerPanel::relay_volume_changed(int value) {

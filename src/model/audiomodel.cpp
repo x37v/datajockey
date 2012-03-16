@@ -15,6 +15,15 @@ using namespace DataJockey::Audio;
 using std::cerr;
 using std::endl;
 
+template <typename T>
+T clamp(T val, T bottom, T top) {
+   if (val < bottom)
+      return bottom;
+   if (val > top)
+      return top;
+   return val;
+}
+
 class AudioModel::PlayerClearBuffersCommand : public DataJockey::Audio::PlayerCommand {
    public:
       PlayerClearBuffersCommand(unsigned int idx,
@@ -598,46 +607,42 @@ void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_i
    }
 }
 
+void AudioModel::master_set(QString name, bool value) {
+
+   if (name == "crossfade") {
+      queue_command(new MasterBoolCommand(value ? MasterBoolCommand::XFADE : MasterBoolCommand::NO_XFADE));
+   } else
+      cerr << name.toStdString() << " is not a master_set (bool) arg" << endl;
+}
+
 void AudioModel::master_set(QString name, int value) {
-   if (name == "volume")
-      set_master_volume(value);
-   else if (name == "crossfade")
-      set_master_cross_fade_position(value);
-   else
+   //TODO compare against last set value?
+   
+   if (name == "volume") {
+      value = clamp(value, 0, (int)(1.5 * one_scale));
+      queue_command(new MasterDoubleCommand(MasterDoubleCommand::MAIN_VOLUME, (double)value / (double)one_scale));
+      emit(master_value_changed("volume", value));
+   } else if (name == "cue_volume") {
+      value = clamp(value, 0, (int)(1.5 * one_scale));
+      queue_command(new MasterDoubleCommand(MasterDoubleCommand::CUE_VOLUME, (double)value / (double)one_scale));
+      emit(master_value_changed("cue_volume", value));
+   } else if (name == "crossfade_position") {
+      value = clamp(value, 0, (int)one_scale);
+      queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
+      emit(master_value_changed("crossfade_position", value));
+   } else if (name == "sync_to_player") {
+      if (value < 0 || value >= (int)mNumPlayers)
+         return;
+
+      QMutexLocker lock(&mPlayerStatesMutex);
+      queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, value));
+
+      if(!mPlayerStates[value]->mParamBool["sync"]) {
+         mPlayerStates[value]->mParamBool["sync"] = true;
+         emit(player_toggled(value, "sync", true));
+      }
+   } else
       cerr << name.toStdString() << " is not a master_set (int) arg" << endl;
-}
-
-void AudioModel::set_master_volume(int val){
-   if (val < 0)
-      val = 0;
-   else if (val > 1.5 * one_scale)
-      val = 1.5 * one_scale;
-   //TODO actually implement
-   emit(master_value_changed("volume", val));
-}
-
-void AudioModel::set_master_cue_volume(int /*val*/){
-   //TODO
-}
-
-void AudioModel::set_master_cross_fade_enable(bool enable){
-   Command * cmd = NULL;
-   if(enable)
-      cmd = new MasterBoolCommand(MasterBoolCommand::XFADE);
-   else
-      cmd = new MasterBoolCommand(MasterBoolCommand::NO_XFADE);
-   queue_command(cmd);
-}
-
-void AudioModel::set_master_cross_fade_position(int val){
-   if (val < 0)
-      val = 0;
-   else if (val > (int)one_scale)
-      val = one_scale;
-   double dval = (double)val / (double)one_scale;
-   queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, dval));
-
-   emit(master_value_changed("crossfade", val));
 }
 
 void AudioModel::set_master_cross_fade_players(int left, int right){
@@ -659,7 +664,7 @@ void AudioModel::set_master_bpm(double bpm) {
 bool AudioModel::player_state_bool(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return false;
-
+   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    QMap<QString, bool>::const_iterator itr = pstate->mParamBool.find(name);
@@ -671,6 +676,7 @@ bool AudioModel::player_state_bool(int player_index, QString name) {
 int AudioModel::player_state_int(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return 0;
+   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    if (name == "frame") {
@@ -837,12 +843,6 @@ void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::T
    }
 
 
-}
-
-void AudioModel::set_master_sync_to(int player_index) {
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, player_index));
 }
 
 void AudioModel::start_audio() {

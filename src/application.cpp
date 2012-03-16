@@ -115,9 +115,9 @@ Application::Application(int & argc, char ** argv) :
          mMixerPanel,
          SLOT(set_tempo(double)));
 
-   mAudioModel->set_master_cross_fade_enable(true);
+   mAudioModel->master_set("crossfade", true);
    mAudioModel->set_master_cross_fade_players(0, 1);
-   mAudioModel->set_master_cross_fade_position(one_scale / 2);
+   mAudioModel->master_set("crossfade_position", (int)one_scale / 2);
    mAudioModel->set_master_bpm(120.0);
 
 

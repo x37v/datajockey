@@ -88,15 +88,12 @@ namespace DataJockey {
             void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
             //***** MASTER COMMANDS
+            void master_set(QString name, bool value);
             void master_set(QString name, int value);
 
-            void set_master_volume(int val);
-            void set_master_cue_volume(int val);
-            void set_master_cross_fade_enable(bool enable);
-            void set_master_cross_fade_position(int val);
             void set_master_cross_fade_players(int left, int right);
+
             void set_master_bpm(double bpm);
-            void set_master_sync_to(int player_index);
 
             //start and stop the audio processing
             void start_audio();
