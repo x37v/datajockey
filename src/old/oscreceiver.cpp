@@ -285,8 +285,8 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 			throw osc::MissingArgumentException();
 		int pos = (float)DataJockey::one_scale * floatFromOscNumber(*arg_it);
 		if(strcmp("", matches[1].str().c_str()) == 0) {
-         QMetaObject::invokeMethod(mModel, "volume", Qt::QueuedConnection,
-               Q_ARG(QString, "crossfade"),
+         QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
+               Q_ARG(QString, "crossfade_position"),
                Q_ARG(int, pos));
       }
 		//else
@@ -375,14 +375,14 @@ void OscReceiver::player_trigger(int player_index, QString name) {
 }
 
 void OscReceiver::player_set(int player_index, QString name, bool value) {
-   QMetaObject::invokeMethod(mModel, "set_player", Qt::QueuedConnection,
+   QMetaObject::invokeMethod(mModel, "player_set", Qt::QueuedConnection,
          Q_ARG(int, player_index),
          Q_ARG(QString, name),
          Q_ARG(bool, value));
 }
 
 void OscReceiver::player_set(int player_index, QString name, int value) {
-   QMetaObject::invokeMethod(mModel, "set_player", Qt::QueuedConnection,
+   QMetaObject::invokeMethod(mModel, "player_set", Qt::QueuedConnection,
          Q_ARG(int, player_index),
          Q_ARG(QString, name),
          Q_ARG(int, value));
