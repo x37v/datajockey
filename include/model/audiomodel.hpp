@@ -43,19 +43,13 @@ namespace DataJockey {
          public slots:
             unsigned int sample_rate() const;
 
-            unsigned int player_count() const;
-
-            //void player_position(int player_index);
-            //void player_start_position(int player_index);
-            //void player_end_position(int player_index);
-            //void player_loop_start_position(int player_index);
-            //void player_loop_end_position(int player_index);
-            QString player_audio_file(int player_index);
-            BeatBuffer player_beat_buffer(int player_index);
-
             double master_bpm() const;
 
+            unsigned int player_count() const;
+
             //getters
+            QString player_audio_file(int player_index);
+            BeatBuffer player_beat_buffer(int player_index);
             bool player_state_bool(int player_index, QString name);
             int player_state_int(int player_index, QString name);
 

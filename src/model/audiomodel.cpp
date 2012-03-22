@@ -258,7 +258,6 @@ double AudioModel::master_bpm() const {
    return mMasterBPM;
 }
 
-
 void AudioModel::set_player_position(int player_index, const TimePoint &val, bool absolute){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
