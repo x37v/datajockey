@@ -139,25 +139,22 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
       player->eq_dial("high")->setValue(value);
 }
 
-
-void MixerPanel::set_player_audio_file(int player_index, QString file_name){
+void MixerPanel::player_set(int player_index, QString name, QString value) {
    if (player_index >= mPlayers.size())
       return;
-   mPlayers[player_index]->set_audio_file(file_name);
+
+   Player * player = mPlayers[player_index];
+   if (name == "audio_file")
+      player->set_audio_file(value);
+   else if (name == "song_description")
+      player->set_song_description(value);
 }
 
-void MixerPanel::set_player_beat_buffer(int player_index, Audio::BeatBuffer buffer){
+void MixerPanel::player_set_beat_buffer(int player_index, Audio::BeatBuffer buffer){
    if (player_index >= mPlayers.size())
       return;
    mPlayers[player_index]->set_beat_buffer(buffer);
 }
-
-void MixerPanel::set_player_song_description(int player_index, QString line1, QString line2){
-   if (player_index >= mPlayers.size())
-      return;
-   mPlayers[player_index]->set_song_description(line1, line2);
-}
-
 
 void MixerPanel::set_tempo(double bpm) {
    if (mSettingTempo)
@@ -213,7 +210,7 @@ void MixerPanel::relay_player_seek_frame_relative(int frames) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_value_changed(player_index.value(), "seek_frame_relative", frames));
+   emit(player_value_changed(player_index.value(), "play_frame_relative", frames));
 }
 
 void MixerPanel::relay_player_seeking(bool state) {

@@ -133,9 +133,15 @@ void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
    mWaveFormView->set_beat_buffer(buffer);
 }
 
-void Player::set_song_description(QString line1, QString line2) {
-   mTrackDescription[0]->setText(line1);
-   mTrackDescription[1]->setText(line2);
+void Player::set_song_description(QString description) {
+   QStringList des = description.split("\n");
+   if (des.isEmpty() || description.isEmpty()) {
+      mTrackDescription[0]->setText("");
+      mTrackDescription[1]->setText("");
+   } else {
+      mTrackDescription[0]->setText(des[0]);
+      mTrackDescription[1]->setText(description.remove(0, des[0].length() + 1));
+   }
    mTrackDescription[0]->setCursorPosition(0);
    mTrackDescription[1]->setCursorPosition(0);
 }

@@ -98,13 +98,13 @@ Application::Application(int & argc, char ** argv) :
          SLOT(player_set(int, QString, int)));
 
    QObject::connect(mAudioModel,
-         SIGNAL(player_audio_file_changed(int, QString)),
+         SIGNAL(player_value_changed(int, QString, QString)),
          mMixerPanel,
-         SLOT(set_player_audio_file(int, QString)));
+         SLOT(player_set(int, QString, QString)));
    QObject::connect(mAudioModel,
-         SIGNAL(player_beat_buffer_changed(int)),
+         SIGNAL(player_triggered(int, QString)),
          this,
-         SLOT(relay_player_beat_buffer(int)));
+         SLOT(relay_player_trigger(int, QString)));
 
    QObject::connect(mMixerPanel,
          SIGNAL(tempo_changed(double)),
@@ -255,17 +255,20 @@ void Application::set_player_trigger(int player_index, QString name) {
          rec = mWorkInfoQuery->record();
          int titleCol = rec.indexOf("title");
          int artistCol = rec.indexOf("artist");
-         mMixerPanel->set_player_song_description(player_index,
-               mWorkInfoQuery->value(artistCol).toString(),
-               mWorkInfoQuery->value(titleCol).toString());
+         //XXX invoke or is this okay?
+         mMixerPanel->player_set(player_index,
+               "song_description",
+               mWorkInfoQuery->value(artistCol).toString() + "\n" + mWorkInfoQuery->value(titleCol).toString());
       } else {
-         mMixerPanel->set_player_song_description(player_index, "unknown", "unknown");
+         mMixerPanel->player_set(player_index, "song_description", "unknown");
       }
    }
 }
 
-void Application::relay_player_beat_buffer(int player_index) {
-   //XXX check bounds?
-   mMixerPanel->set_player_beat_buffer(player_index, mAudioModel->player_beat_buffer(player_index));
+void Application::relay_player_trigger(int player_index, QString name) {
+   if (name == "beat_buffer_changed") {
+      //XXX check bounds?
+      mMixerPanel->player_set_beat_buffer(player_index, mAudioModel->player_beat_buffer(player_index));
+   }
 }
 

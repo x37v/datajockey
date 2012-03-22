@@ -101,11 +101,9 @@ namespace DataJockey {
 
          signals:
             void player_value_changed(int player_index, QString name, int value);
+            void player_value_changed(int player_index, QString name, QString value);
             void player_toggled(int player_index, QString name, bool value);
-
-            void player_audio_file_cleared(int player_index);
-            void player_audio_file_changed(int player_index, QString location);
-            void player_beat_buffer_changed(int player_index);
+            void player_triggered(int player_index, QString name);
 
             void master_value_changed(QString name, int value);
             void master_bpm_changed(double);

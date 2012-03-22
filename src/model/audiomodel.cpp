@@ -336,7 +336,7 @@ void AudioModel::set_player_beat_buffer(int player_index, QString buffer_file) {
    BeatBuffer * player_buf = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
    queue_command(new PlayerSetBeatBufferCommand(player_index, player_buf, true));
 
-   emit(player_beat_buffer_changed(player_index));
+   emit(player_triggered(player_index, "beat_buffer_changed"));
 }
 
 void AudioModel::set_player_buffers(int player_index, QString audio_file, QString beat_file) {
@@ -412,7 +412,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
          mPlayerStates[player_index]->mFileName = location;
 
          //notify
-         emit(player_audio_file_changed(player_index, location));
+         emit(player_value_changed(player_index, "audio_file", location));
       }
    }
 }
@@ -428,7 +428,7 @@ void AudioModel::set_player_clear_buffers(int player_index) {
       queue_command(new PlayerClearBuffersCommand(player_index, this, oldFileName));
       mPlayerStates[player_index]->mFileName.clear();
       //notify
-      emit(player_audio_file_cleared(player_index));
+      emit(player_triggered(player_index, "audio_file_cleared"));
    }
 }
 
@@ -472,7 +472,7 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
 }
 
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
-   emit(player_audio_file_changed(player_index, fileName));
+   emit(player_value_changed(player_index, "audio_file", fileName));
 }
 
 void AudioModel::relay_player_position_changed(int player_index, int frame_index){
@@ -608,11 +608,10 @@ void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_i
 }
 
 void AudioModel::master_set(QString name, bool value) {
-
    if (name == "crossfade") {
       queue_command(new MasterBoolCommand(value ? MasterBoolCommand::XFADE : MasterBoolCommand::NO_XFADE));
    } else
-      cerr << name.toStdString() << " is not a master_set (bool) arg" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a master_set (bool) arg" << endl;
 }
 
 void AudioModel::master_set(QString name, int value) {
@@ -699,7 +698,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
    else if (name == "seek_back")
       set_player_position_beat_relative(player_index, -1);
    else if (name != "load")
-      cerr << name.toStdString() << " is not a valid player_trigger arg" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_trigger arg" << endl;
 }
 
 void AudioModel::player_set(int player_index, QString name, bool value) {
@@ -724,7 +723,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    //get the state for this name
    QMap<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
    if (state_itr == pstate->mParamBool.end()) {
-      cerr << name.toStdString() << " is not a valid player_set (bool) arg" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (bool) arg" << endl;
       return;
    }
 
@@ -735,7 +734,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    //get the actions
    QMap<QString, player_onoff_action_pair_t>::const_iterator action_itr = mPlayerStateActionMapping.find(name);
    if (action_itr == mPlayerStateActionMapping.end()) {
-      cerr << name.toStdString() << " is not a valid player_set (bool) arg [action not found]" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (bool) arg [action not found]" << endl;
       return;
    }
 
@@ -769,7 +768,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       //get the state for this name
       QMap<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
       if (state_itr == pstate->mParamInt.end()) {
-         cerr << name.toStdString() << " is not a valid player_set (int) arg" << endl;
+         cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (int) arg" << endl;
          return;
       }
 
@@ -780,7 +779,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       //get the action
       QMap<QString, PlayerDoubleCommand::action_t>::const_iterator action_itr = mPlayerDoubleActionMapping.find(name);
       if (action_itr == mPlayerDoubleActionMapping.end()) {
-         cerr << name.toStdString() << " is not a valid player_set (int) arg [action not found]" << endl;
+         cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (int) arg [action not found]" << endl;
          return;
       }
 
@@ -799,7 +798,7 @@ void AudioModel::player_set(int player_index, QString name, double value) {
    } else if (name == "play_position_relative") {
       queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, TimePoint(value)));
    } else {
-      cerr << name.toStdString() << " is not a valid player_set (double) arg" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (double) arg" << endl;
       return;
    }
 }
@@ -814,7 +813,7 @@ void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::T
    //get the action
    QMap<QString, PlayerPositionCommand::position_t>::const_iterator action_itr = mPlayerPositionActionMapping.find(name);
    if (action_itr == mPlayerPositionActionMapping.end()) {
-      cerr << name.toStdString() << " is not a valid player_set (TimePoint) arg [action not found]" << endl;
+      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg [action not found]" << endl;
       return;
    }
    
@@ -826,7 +825,7 @@ void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::T
       //get the state for this name
       QMap<QString, TimePoint>::iterator state_itr = pstate->mParamPosition.find(name);
       if (state_itr == pstate->mParamPosition.end()) {
-         cerr << name.toStdString() << " is not a valid player_set (TimePoint) arg" << endl;
+         cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg" << endl;
          return;
       }
       //return if there isn't anything to be done

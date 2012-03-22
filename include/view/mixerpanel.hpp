@@ -21,10 +21,8 @@ namespace DataJockey {
          public slots:
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
-
-            void set_player_audio_file(int player_index, QString file_name);
-            void set_player_beat_buffer(int player_index, Audio::BeatBuffer buffer);
-            void set_player_song_description(int player_index, QString line1, QString line2);
+            void player_set(int player_index, QString name, QString value);
+            void player_set_beat_buffer(int player_index, Audio::BeatBuffer buffer);
 
             void set_tempo(double bpm);
             void master_set(QString name, int val);
