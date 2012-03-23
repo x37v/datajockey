@@ -79,17 +79,6 @@ class AudioModel::PlayerState {
       QMap<QString, bool> mParamBool;
       QMap<QString, TimePoint> mParamPosition;
 
-
-      /*
-      unsigned int mVolume;
-      unsigned int mPlaySpeed;
-      bool mMute;
-      bool mSync;
-      bool mLoop;
-      bool mCue;
-      bool mPause;
-      */
-
       //okay to update in audio thread
       unsigned int mCurrentFrame;
 };
