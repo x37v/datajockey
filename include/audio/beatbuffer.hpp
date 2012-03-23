@@ -46,6 +46,9 @@ namespace DataJockey {
             void clear();
             void insert_beat(double seconds);
 
+            //not real time save
+            double median_difference();
+
          private:
             //the start beat lets us offset the data
             //indicating where bar 0, beat 0 should in the data

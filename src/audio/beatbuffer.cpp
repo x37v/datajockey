@@ -1,5 +1,7 @@
 #include "beatbuffer.hpp"
 #include "yaml-cpp/yaml.h"
+#include <vector>
+#include <algorithm>
 #include <fstream>
 
 using namespace DataJockey::Audio;
@@ -180,6 +182,22 @@ void BeatBuffer::insert_beat(double seconds) {
       //insert inserts before the iterator
       mBeatData.insert(it, seconds);
    }
+}
+
+double BeatBuffer::median_difference() {
+   if (mBeatData.size() < 2)
+      return 0.1; //XXX is there a better value?
+
+   std::vector<double> distances;
+   for (unsigned int i = 0; i < mBeatData.size() - 1; i++)
+      distances.push_back(mBeatData[i + 1] - mBeatData[i]);
+
+   sort(distances.begin(), distances.end());
+
+   if (distances.size() % 2 == 1)
+      return distances[distances.size() / 2];
+   else
+      return (distances[distances.size() / 2] + distances[distances.size() / 2 + 1]) / 2.0;
 }
 
 #if 0
