@@ -38,8 +38,6 @@ namespace DataJockey {
          public:
             static AudioModel * instance();
 
-            //getters
-            //player
          public slots:
             unsigned int sample_rate() const;
 
@@ -47,21 +45,16 @@ namespace DataJockey {
 
             unsigned int player_count() const;
 
-            //getters
             QString player_audio_file(int player_index);
             BeatBuffer player_beat_buffer(int player_index);
             bool player_state_bool(int player_index, QString name);
             int player_state_int(int player_index, QString name);
 
-            //setters
             void player_trigger(int player_index, QString name);
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
             void player_set(int player_index, QString name, DataJockey::Audio::TimePoint value);
-
-            void set_player_audio_file(int player_index, QString location);
-            void set_player_clear_buffers(int player_index);
 
             //****** BEAT BUFFER COMMANDS
             //clear a players beat buffer
@@ -78,16 +71,14 @@ namespace DataJockey {
             void set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value);
 
             void set_player_beat_buffer(int player_index, QString buffer_file);
-
             void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
             //***** MASTER COMMANDS
             void master_set(QString name, bool value);
             void master_set(QString name, int value);
+            void master_set(QString name, double value);
 
             void set_master_cross_fade_players(int left, int right);
-
-            void set_master_bpm(double bpm);
 
             //start and stop the audio processing
             void start_audio();
@@ -100,7 +91,7 @@ namespace DataJockey {
             void player_triggered(int player_index, QString name);
 
             void master_value_changed(QString name, int value);
-            void master_bpm_changed(double);
+            void master_value_changed(QString name, double value);
 
          protected slots:
             //only for internal use
@@ -145,10 +136,11 @@ namespace DataJockey {
             //convenience method for executing commands in the master's scheduler
             void queue_command(DataJockey::Audio::Command * cmd);
 
+            void set_player_audio_file(int player_index, QString location);
             void set_player_audio_buffer(int player_index, DataJockey::Audio::AudioBuffer * buf);
 
             void update_player_state(int player_index, PlayerState * state);
-
+            void player_clear_buffers(int player_index);
 
             //not threadsafe, expects to have mutex already locked
             //eq the eq 0 is the lowest, 2 is high, one_scale is the top

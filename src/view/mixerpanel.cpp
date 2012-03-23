@@ -105,7 +105,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
 
    setLayout(top_layout);
 
-   QObject::connect(mMasterTempo, SIGNAL(valueChanged(double)), this, SIGNAL(tempo_changed(double)));
+   QObject::connect(mMasterTempo, SIGNAL(valueChanged(double)), this, SLOT(relay_tempo_changed(double)));
    QObject::connect(mCrossFadeSlider, SIGNAL(valueChanged(int)), this, SLOT(relay_crossfade_changed(int)));
    QObject::connect(mMasterVolume, SIGNAL(valueChanged(int)), this, SLOT(relay_volume_changed(int)));
 }
@@ -156,21 +156,16 @@ void MixerPanel::player_set_beat_buffer(int player_index, Audio::BeatBuffer buff
    mPlayers[player_index]->set_beat_buffer(buffer);
 }
 
-void MixerPanel::set_tempo(double bpm) {
-   if (mSettingTempo)
-      return;
-
-   mSettingTempo = true;
-   mMasterTempo->setValue(bpm);
-   emit(tempo_changed(bpm));
-   mSettingTempo = false;
-}
-
 void MixerPanel::master_set(QString name, int val) {
    if (name == "volume")
       mMasterVolume->setValue(val);
    else if (name == "crossfade_position")
       mCrossFadeSlider->setValue(val);
+}
+
+void MixerPanel::master_set(QString name, double val) {
+   if (name == "bpm")
+      mMasterTempo->setValue(val);
 }
 
 void MixerPanel::relay_player_toggled(bool checked) {
@@ -235,5 +230,9 @@ void MixerPanel::relay_crossfade_changed(int value) {
 
 void MixerPanel::relay_volume_changed(int value) {
    emit(master_value_changed("volume", value));
+}
+
+void MixerPanel::relay_tempo_changed(double value) {
+   emit(master_value_changed("bpm", value));
 }
 

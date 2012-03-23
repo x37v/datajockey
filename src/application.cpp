@@ -67,6 +67,14 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(master_value_changed(QString, int)),
          mMixerPanel,
          SLOT(master_set(QString, int)));
+   QObject::connect(mMixerPanel,
+         SIGNAL(master_value_changed(QString, double)),
+         mAudioModel,
+         SLOT(master_set(QString, double)));
+   QObject::connect(mAudioModel,
+         SIGNAL(master_value_changed(QString, double)),
+         mMixerPanel,
+         SLOT(master_set(QString, double)));
 
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,
@@ -106,19 +114,10 @@ Application::Application(int & argc, char ** argv) :
          this,
          SLOT(relay_player_trigger(int, QString)));
 
-   QObject::connect(mMixerPanel,
-         SIGNAL(tempo_changed(double)),
-         mAudioModel,
-         SLOT(set_master_bpm(double)));
-   QObject::connect(mAudioModel,
-         SIGNAL(master_bpm_changed(double)),
-         mMixerPanel,
-         SLOT(set_tempo(double)));
-
    mAudioModel->master_set("crossfade", true);
    mAudioModel->set_master_cross_fade_players(0, 1);
    mAudioModel->master_set("crossfade_position", (int)one_scale / 2);
-   mAudioModel->set_master_bpm(120.0);
+   mAudioModel->master_set("bpm", 120.0);
 
 
    //mAudioModel->set_player_buffers(0,

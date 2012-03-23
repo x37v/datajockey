@@ -372,7 +372,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
       AudioBuffer * buf = AudioBufferReference::get_and_increment_count(location);
 
       //clear out the old buffers
-      set_player_clear_buffers(player_index);
+      player_clear_buffers(player_index);
 
       //once the manager contains the location we know that it is full loaded
       //but, if not it could actually be in progress
@@ -416,7 +416,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
    }
 }
 
-void AudioModel::set_player_clear_buffers(int player_index) {
+void AudioModel::player_clear_buffers(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    QMutexLocker lock(&mPlayerStatesMutex);
@@ -643,20 +643,22 @@ void AudioModel::master_set(QString name, int value) {
       cerr << name.toStdString() << " is not a master_set (int) arg" << endl;
 }
 
+void AudioModel::master_set(QString name, double value) {
+   if (name == "bpm") {
+      if (value != mMasterBPM) {
+         mMasterBPM = value;
+         queue_command(new TransportBPMCommand(mMaster->transport(), value));
+         emit(master_value_changed(name, value));
+      }
+   }
+}
+
 void AudioModel::set_master_cross_fade_players(int left, int right){
    if (left < 0 || left >= (int)mNumPlayers)
       return;
    if (right < 0 || right >= (int)mNumPlayers)
       return;
    queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
-}
-
-void AudioModel::set_master_bpm(double bpm) {
-   if (bpm != mMasterBPM) {
-      mMasterBPM = bpm;
-      queue_command(new TransportBPMCommand(mMaster->transport(), bpm));
-      emit(master_bpm_changed(bpm));
-   }
 }
 
 bool AudioModel::player_state_bool(int player_index, QString name) {
@@ -859,7 +861,7 @@ void AudioModel::start_audio() {
 void AudioModel::stop_audio() {
    //there must be a better way than this!
    for(unsigned int i = 0; i < mNumPlayers; i++)
-      set_player_clear_buffers(i);
+      player_clear_buffers(i);
    usleep(500000);
    mAudioIO->stop();
    usleep(500000);

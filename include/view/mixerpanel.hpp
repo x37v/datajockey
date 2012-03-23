@@ -24,8 +24,8 @@ namespace DataJockey {
             void player_set(int player_index, QString name, QString value);
             void player_set_beat_buffer(int player_index, Audio::BeatBuffer buffer);
 
-            void set_tempo(double bpm);
             void master_set(QString name, int val);
+            void master_set(QString name, double val);
 
          protected slots:
             void relay_player_toggled(bool state);
@@ -37,6 +37,7 @@ namespace DataJockey {
 
             void relay_crossfade_changed(int value);
             void relay_volume_changed(int value);
+            void relay_tempo_changed(double value);
 
          signals:
             void player_triggered(int player_index, QString name);
@@ -45,6 +46,7 @@ namespace DataJockey {
 
             void tempo_changed(double);
             void master_value_changed(QString name, int value);
+            void master_value_changed(QString name, double value);
 
          private:
             QList<Player *> mPlayers;
