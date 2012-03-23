@@ -57,7 +57,7 @@ Application::Application(int & argc, char ** argv) :
 
    setStyle("plastique");
 
-   QObject::connect(this, SIGNAL(aboutToQuit()), this, SLOT(pre_quit_actions()));
+   QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(pre_quit_actions()));
 
    QObject::connect(mMixerPanel,
          SIGNAL(master_value_changed(QString, int)),
@@ -79,7 +79,6 @@ Application::Application(int & argc, char ** argv) :
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,
          SIGNAL(player_triggered(int, QString)),
-         this,
          SLOT(set_player_trigger(int, QString)));
 
    //hook view into model
@@ -111,7 +110,6 @@ Application::Application(int & argc, char ** argv) :
          SLOT(player_set(int, QString, QString)));
    QObject::connect(mAudioModel,
          SIGNAL(player_triggered(int, QString)),
-         this,
          SLOT(relay_player_trigger(int, QString)));
 
    mAudioModel->master_set("crossfade", true);
@@ -161,7 +159,6 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(
          work_db_view,
          SIGNAL(workSelected(int)),
-         this,
          SLOT(select_work(int)));
 
    //filter application
