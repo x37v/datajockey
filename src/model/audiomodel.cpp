@@ -457,6 +457,7 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
 }
 
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
+   player_trigger(player_index, "reset");
    emit(player_value_changed(player_index, "audio_file", fileName));
 }
 
