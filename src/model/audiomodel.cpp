@@ -70,12 +70,10 @@ class AudioModel::PlayerState {
       PlayerState() :
          mFileName(),
          mBeatBuffer(),
-         mInBeatBufferTransaction(false),
          mCurrentFrame(0) { }
       //not okay to update in audio thread
       QString mFileName;
       Audio::BeatBuffer mBeatBuffer;
-      bool mInBeatBufferTransaction;
 
       QMap<QString, int> mParamInt;
       QMap<QString, bool> mParamBool;
@@ -324,7 +322,6 @@ void AudioModel::set_player_beat_buffer(int player_index, QString buffer_file) {
    //update our state
    QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * player_state = mPlayerStates[player_index];
-   player_state->mInBeatBufferTransaction = false;
 
    //XXX what if we fail to load?
    //defer this to a thread?
@@ -521,89 +518,6 @@ bool AudioModel::audio_file_load_complete(QString fileName, AudioBuffer * buffer
    if (!loaded_into_a_player)
       return false;
    return true;
-}
-
-void AudioModel::set_player_beat_buffer_clear(int player_index){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * player_state = mPlayerStates[player_index];
-
-   //clear out our local beat buffer and send an empty one to the audio thread
-   //also, indicate that we want the old buffer to be deallocated once it is cleared
-   player_state->mBeatBuffer.clear();
-   if(!player_state->mInBeatBufferTransaction)
-      queue_command(new PlayerSetBeatBufferCommand(player_index, NULL, true));
-}
-
-void AudioModel::set_player_beat_buffer_begin(int player_index){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * player_state = mPlayerStates[player_index];
-   player_state->mInBeatBufferTransaction = true;
-
-}
-
-void AudioModel::set_player_beat_buffer_end(int player_index, bool commit){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-
-   //update our state
-   PlayerState * player_state = mPlayerStates[player_index];
-   player_state->mInBeatBufferTransaction = false;
-
-   //if this is a commit then send the buffer
-   if (commit) {
-      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
-      //deallocate old buffer
-      queue_command(new PlayerSetBeatBufferCommand(player_index, buff, true));
-   }
-}
-
-void AudioModel::set_player_beat_buffer_add_beat(int player_index, double value){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * player_state = mPlayerStates[player_index];
-
-   //insert the beat
-   player_state->mBeatBuffer.insert_beat(value);
-
-   //if we're not in a transaction then send the new beat buffer
-   if(!player_state->mInBeatBufferTransaction) {
-      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
-      //deallocate old buffer
-      queue_command(new PlayerSetBeatBufferCommand(player_index, buff, true));
-   }
-}
-
-void AudioModel::set_player_beat_buffer_remove_beat(int /*player_index*/, double /*value*/){
-   /*
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * player_state = mPlayerStates[player_index];
-   */
-
-   //TODO
-}
-
-void AudioModel::set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * player_state = mPlayerStates[player_index];
-
-   //update the beat
-   player_state->mBeatBuffer.update_value(beat_index, new_value);
-
-   //if we're not in a transaction then send the new beat buffer
-   if(!player_state->mInBeatBufferTransaction) {
-      BeatBuffer * buff = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
-      queue_command(new PlayerSetBeatBufferCommand(player_index, buff, true));
-   }
 }
 
 void AudioModel::master_set(QString name, bool value) {

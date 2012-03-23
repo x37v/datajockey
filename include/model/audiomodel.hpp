@@ -55,21 +55,6 @@ namespace DataJockey {
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
             void player_set(int player_index, QString name, DataJockey::Audio::TimePoint value);
-
-            //****** BEAT BUFFER COMMANDS
-            //clear a players beat buffer
-            void set_player_beat_buffer_clear(int player_index);
-            //starts a beat buffer setting transaction
-            //the beat buffer isn't actually sent to the player until
-            //after the transaction is ended
-            void set_player_beat_buffer_begin(int player_index);
-            //ends the beat buffer transaction, the transaction is canceled if commit = false
-            void set_player_beat_buffer_end(int player_index, bool commit = true);
-            //add a beat to the beat buffer
-            void set_player_beat_buffer_add_beat(int player_index, double value);
-            void set_player_beat_buffer_remove_beat(int player_index, double value);
-            void set_player_beat_buffer_update_beat(int player_index, int beat_index, double new_value);
-
             void set_player_beat_buffer(int player_index, QString buffer_file);
             void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
