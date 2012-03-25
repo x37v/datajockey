@@ -16,6 +16,7 @@ class QSlider;
 class QDial;
 class QProgressBar;
 class QGraphicsScene;
+class QTimer;
 
 namespace DataJockey {
    namespace View {
@@ -53,6 +54,7 @@ namespace DataJockey {
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
             WaveFormView * mWaveFormView;
+            QTimer * mWaveFormDrawTimeout;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
       };

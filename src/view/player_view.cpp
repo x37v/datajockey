@@ -9,6 +9,7 @@
 #include <QSlider>
 #include <QDial>
 #include <QProgressBar>
+#include <QTimer>
 
 using namespace DataJockey::View;
 
@@ -89,6 +90,11 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mWaveFormView->setMinimumWidth(220);
    mWaveFormView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+   mWaveFormDrawTimeout = new QTimer(this);
+   mWaveFormDrawTimeout->setInterval(50);
+   mWaveFormDrawTimeout->setSingleShot(true);
+   mWaveFormDrawTimeout->start();
+
    mTopLayout->addLayout(mControlLayout, 0);
    mTopLayout->addWidget(mWaveFormView, 10);
    setLayout(mTopLayout);
@@ -122,7 +128,11 @@ void Player::set_audio_file(const QString& file_name) {
 }
 
 void Player::set_audio_frame(int frame) {
-   mWaveFormView->set_audio_frame(frame);
+   if (!mWaveFormDrawTimeout->isActive()) {
+      mWaveFormView->set_audio_frame(frame);
+      mWaveFormDrawTimeout->start();
+   }
+
    if (mFrames) {
       mProgressBar->setValue(frame / (mFrames / 100));
    } else
