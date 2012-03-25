@@ -1,6 +1,6 @@
 #include "audiobuffer.hpp"
 
-#define READ_FRAME_SIZE 2048
+#define READ_FRAME_SIZE 32768
 
 template<typename Type>
 Type linear_interp(Type v0, Type v1, double dist){
