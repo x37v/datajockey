@@ -4,11 +4,11 @@
 
 #define NUM_VERTICIES 800
 
-WaveFormViewGL::WaveFormViewGL(QWidget * parent) :
+WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    QGLWidget(parent),
    mHeight(100),
    mWidth(400),
-   mVertical(false),
+   mVertical(vertical),
    mColorBackgroud(QColor::fromRgb(0,0,0)),
    mColorWaveform(QColor::fromRgb(255,0,0).dark()),
    mColorCursor(QColor::fromRgb(0,255,0)),
@@ -26,6 +26,7 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent) :
 
 QSize WaveFormViewGL::minimumSizeHint() const { return QSize(100, 100); }
 QSize WaveFormViewGL::sizeHint() const { return mVertical ? QSize(100, 400) : QSize(400, 100); }
+void WaveFormViewGL::setVertical(bool vert) { mVertical = vert; }
 
 void WaveFormViewGL::initializeGL(){
    qglClearColor(mColorBackgroud);

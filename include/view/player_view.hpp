@@ -8,7 +8,6 @@
 #include <QLineEdit>
 #include <QGraphicsView>
 #include <QList>
-#include "waveformview.hpp"
 #include "beatbuffer.hpp"
 
 class QPushButton;
@@ -17,11 +16,10 @@ class QDial;
 class QProgressBar;
 class QGraphicsScene;
 class QTimer;
+class WaveFormViewGL;
 
 namespace DataJockey {
    namespace View {
-      class WaveFormItem;
-
       class Player : public QWidget {
          Q_OBJECT
          public:
@@ -53,8 +51,7 @@ namespace DataJockey {
             QLineEdit * mTrackDescription[2];
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
-            WaveFormView * mWaveFormView;
-            QTimer * mWaveFormDrawTimeout;
+            WaveFormViewGL * mWaveFormView;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
       };

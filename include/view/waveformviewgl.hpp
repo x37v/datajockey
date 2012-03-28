@@ -9,9 +9,10 @@
 class WaveFormViewGL : public QGLWidget {
    Q_OBJECT
    public:
-      WaveFormViewGL(QWidget * parent = NULL);
+      WaveFormViewGL(QWidget * parent = NULL, bool vertical = false);
       QSize minimumSizeHint() const;
       QSize sizeHint() const;
+      void setVertical(bool vert);
    protected:
       void initializeGL();
       void paintGL();

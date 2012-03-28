@@ -1,6 +1,6 @@
 #include "player_view.hpp"
 #include "defines.hpp"
-#include "waveformitem.hpp"
+#include "waveformviewgl.hpp"
 #include "audiobufferreference.hpp"
 #include "audiobuffer.hpp"
 
@@ -85,20 +85,15 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mControlLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
    mControlLayout->setContentsMargins(0,0,0,0);
 
-   mWaveFormView = new WaveFormView(this);
+   mWaveFormView = new WaveFormViewGL(this, true);
    mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
    mWaveFormView->setMinimumWidth(220);
-   mWaveFormView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-   mWaveFormDrawTimeout = new QTimer(this);
-   mWaveFormDrawTimeout->setInterval(50);
-   mWaveFormDrawTimeout->setSingleShot(true);
-   mWaveFormDrawTimeout->start();
 
    mTopLayout->addLayout(mControlLayout, 0);
    mTopLayout->addWidget(mWaveFormView, 10);
    setLayout(mTopLayout);
 
+   /*
    QObject::connect(mWaveFormView,
          SIGNAL(seek_relative(int)),
          this,
@@ -107,6 +102,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
          SIGNAL(mouse_down(bool)),
          this,
          SLOT(relay_mouse_button(bool)));
+         */
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
@@ -119,7 +115,7 @@ QProgressBar * Player::progress_bar() const { return mProgressBar; }
 void Player::set_audio_file(const QString& file_name) {
    Audio::AudioBufferReference ref(file_name);
 
-   mWaveFormView->set_audio_file(file_name);
+   //mWaveFormView->set_audio_file(file_name);
    if (ref.valid())
       mFrames = ref->length();
    else
@@ -128,10 +124,7 @@ void Player::set_audio_file(const QString& file_name) {
 }
 
 void Player::set_audio_frame(int frame) {
-   if (!mWaveFormDrawTimeout->isActive()) {
-      mWaveFormView->set_audio_frame(frame);
-      mWaveFormDrawTimeout->start();
-   }
+   //mWaveFormView->set_audio_frame(frame);
 
    if (mFrames) {
       mProgressBar->setValue(frame / (mFrames / 100));
@@ -140,7 +133,7 @@ void Player::set_audio_frame(int frame) {
 }
 
 void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
-   mWaveFormView->set_beat_buffer(buffer);
+   //mWaveFormView->set_beat_buffer(buffer);
 }
 
 void Player::set_song_description(QString description) {

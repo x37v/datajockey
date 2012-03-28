@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = datajockey
 LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
-QT += dbus sql
+QT += dbus sql opengl
 CONFIG += debug
 DEPENDPATH += . \
               include/audio \
@@ -58,8 +58,7 @@ HEADERS += include/application.hpp \
            include/model/db.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
-           include/view/waveformitem.hpp \
-           include/view/waveformview.hpp \
+           include/view/waveformviewgl.hpp \
            include/old/defaultworkfilters.hpp \
            include/old/oscreceiver.hpp \
            #include/old/oscsender.hpp \
@@ -99,8 +98,7 @@ SOURCES += src/application.cpp \
            src/view/main.cpp \
            src/view/mixerpanel.cpp \
            src/view/player_view.cpp \
-           src/view/waveformitem.cpp \
-           src/view/waveformview.cpp \
+           src/view/waveformviewgl.cpp \
            src/old/defaultworkfilters.cpp \
            src/old/oscreceiver.cpp \
            #src/old/oscsender.cpp \
