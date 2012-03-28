@@ -50,6 +50,15 @@ void WaveFormViewGL::set_frame(int frame) {
       update();
 }
 
+void WaveFormViewGL::set_frames_per_line(int num_frames) {
+   if (num_frames < 1)
+      num_frames = 1;
+   if (mFramesPerLine != num_frames) {
+      mFramesPerLine = num_frames;
+      update();
+   }
+}
+
 void WaveFormViewGL::initializeGL(){
    QMutexLocker lock(&mAudioBufferMutex);
 

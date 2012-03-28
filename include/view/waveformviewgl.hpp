@@ -21,6 +21,7 @@ namespace DataJockey {
             void clear_audio();
             void set_audio_file(QString file_name);
             void set_frame(int frame);
+            void set_frames_per_line(int num_frames);
          protected:
             void initializeGL();
             void paintGL();
