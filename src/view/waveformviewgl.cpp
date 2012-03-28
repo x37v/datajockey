@@ -46,9 +46,8 @@ void WaveFormViewGL::set_audio_file(QString file_name) {
 void WaveFormViewGL::set_frame(int frame) {
    int prev = mFrame;
    mFrame = frame;
-   if (prev / mFramesPerLine != mFrame / mFramesPerLine) {
+   if (prev > mFrame || mFrame >= prev + mFramesPerLine)
       update();
-   }
 }
 
 void WaveFormViewGL::initializeGL(){
@@ -140,7 +139,7 @@ void WaveFormViewGL::mouseMoveEvent(QMouseEvent *event){
 */
 
 void WaveFormViewGL::update_waveform() {
-   int first_frame = mFrame - mCursorOffset * mFramesPerLine;
+   int first_frame = ((mFrame / mFramesPerLine) - mCursorOffset) * mFramesPerLine;
 
    //this is only called with a valid audio buffer
    for(unsigned int line = 0; line < mVerticies.size() / 4; line++) {
