@@ -16,10 +16,10 @@ class QDial;
 class QProgressBar;
 class QGraphicsScene;
 class QTimer;
-class WaveFormViewGL;
 
 namespace DataJockey {
    namespace View {
+      class WaveFormViewGL;
       class Player : public QWidget {
          Q_OBJECT
          public:

@@ -115,7 +115,7 @@ QProgressBar * Player::progress_bar() const { return mProgressBar; }
 void Player::set_audio_file(const QString& file_name) {
    Audio::AudioBufferReference ref(file_name);
 
-   //mWaveFormView->set_audio_file(file_name);
+   mWaveFormView->set_audio_file(file_name);
    if (ref.valid())
       mFrames = ref->length();
    else
@@ -124,7 +124,7 @@ void Player::set_audio_file(const QString& file_name) {
 }
 
 void Player::set_audio_frame(int frame) {
-   //mWaveFormView->set_audio_frame(frame);
+   mWaveFormView->set_frame(frame);
 
    if (mFrames) {
       mProgressBar->setValue(frame / (mFrames / 100));

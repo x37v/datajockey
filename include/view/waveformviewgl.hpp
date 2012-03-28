@@ -3,31 +3,47 @@
 
 #include <QGLWidget>
 #include <QtOpenGL>
+#include <QMutex>
 #include <QColor>
 #include <vector>
+#include "audiobufferreference.hpp"
 
-class WaveFormViewGL : public QGLWidget {
-   Q_OBJECT
-   public:
-      WaveFormViewGL(QWidget * parent = NULL, bool vertical = false);
-      QSize minimumSizeHint() const;
-      QSize sizeHint() const;
-      void setVertical(bool vert);
-   protected:
-      void initializeGL();
-      void paintGL();
-      void resizeGL(int width, int height);
-      //void mousePressEvent(QMouseEvent *event);
-      //void mouseMoveEvent(QMouseEvent *event);
-   private:
-      int mHeight;
-      int mWidth;
-      bool mVertical;
-      std::vector<GLfloat> mVerticies;
-      QColor mColorBackgroud;
-      QColor mColorWaveform;
-      QColor mColorCursor;
-      QColor mColorCenterLine;
-};
+namespace DataJockey {
+   namespace View {
+      class WaveFormViewGL : public QGLWidget {
+         Q_OBJECT
+         public:
+            WaveFormViewGL(QWidget * parent = NULL, bool vertical = false);
+            QSize minimumSizeHint() const;
+            QSize sizeHint() const;
+            void setVertical(bool vert);
+         public slots:
+            void clear_audio();
+            void set_audio_file(QString file_name);
+            void set_frame(int frame);
+         protected:
+            void initializeGL();
+            void paintGL();
+            void resizeGL(int width, int height);
+            //void mousePressEvent(QMouseEvent *event);
+            //void mouseMoveEvent(QMouseEvent *event);
+         private:
+            int mHeight;
+            int mWidth;
+            int mCursorOffset;
+            bool mVertical;
+            std::vector<GLfloat> mVerticies;
+            unsigned int mFramesPerLine;
+            int mFrame;
+            QColor mColorBackgroud;
+            QColor mColorWaveform;
+            QColor mColorCursor;
+            QColor mColorCenterLine;
+            Audio::AudioBufferReference mAudioBuffer;
+            QMutex mAudioBufferMutex;
+            void update_waveform();
+      };
+   }
+}
 
 #endif
