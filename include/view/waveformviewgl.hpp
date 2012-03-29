@@ -34,7 +34,7 @@ namespace DataJockey {
             int mCursorOffset;
             bool mVertical;
             std::vector<GLfloat> mVerticies;
-            unsigned int mFramesPerLine;
+            int mFramesPerLine;
             int mFrame;
             QColor mColorBackgroud;
             QColor mColorWaveform;
@@ -43,6 +43,7 @@ namespace DataJockey {
             Audio::AudioBufferReference mAudioBuffer;
             QMutex mAudioBufferMutex;
             void update_waveform();
+            GLfloat line_value(int line_index);
       };
    }
 }

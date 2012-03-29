@@ -148,28 +148,31 @@ void WaveFormViewGL::mouseMoveEvent(QMouseEvent *event){
 */
 
 void WaveFormViewGL::update_waveform() {
-   int first_frame = ((mFrame / mFramesPerLine) - mCursorOffset) * mFramesPerLine;
+   int first_line = ((mFrame / mFramesPerLine) - mCursorOffset);
 
    //this is only called with a valid audio buffer
-   for(unsigned int line = 0; line < mVerticies.size() / 4; line++) {
-      unsigned int index = line * 4;
-      int start_frame = first_frame + line * mFramesPerLine;
+   for(int line = 0; line < (int)mVerticies.size() / 4; line++) {
+      int index = line * 4;
+      GLfloat value = line_value(line + first_line);
+      mVerticies[index] = mVerticies[index + 2] = line;
+      mVerticies[index + 1] = value;
+      mVerticies[index + 3] = -value;
+   }
+}
 
-      if (start_frame < 0 || start_frame >= (int)mAudioBuffer->length()) {
-         mVerticies[index] = 
-            mVerticies[index + 1] =
-            mVerticies[index + 2] = 
-            mVerticies[index + 3] = -1;
-      } else {
-         int end_frame = std::min(start_frame + mFramesPerLine, mAudioBuffer->length());
-         float value = 0;
-         for (int frame = start_frame; frame < end_frame; frame++) {
-            value = std::max(value, mAudioBuffer->sample(0, frame));
-            value = std::max(value, mAudioBuffer->sample(1, frame));
-         }
-         mVerticies[index] = mVerticies[index + 2] = line;
-         mVerticies[index + 1] = value;
-         mVerticies[index + 3] = -value;
+GLfloat WaveFormViewGL::line_value(int line_index) {
+   //this is only called with a valid audio buffer
+   int start_frame = line_index * mFramesPerLine;
+
+   if (start_frame < 0 || start_frame >= (int)mAudioBuffer->length()) {
+      return (GLfloat)0.0;
+   } else {
+      int end_frame = std::min(start_frame + mFramesPerLine, (int)mAudioBuffer->length());
+      float value = 0;
+      for (int frame = start_frame; frame < end_frame; frame++) {
+         value = std::max(value, mAudioBuffer->sample(0, frame));
+         value = std::max(value, mAudioBuffer->sample(1, frame));
       }
+      return (GLfloat)value;
    }
 }
