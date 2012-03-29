@@ -96,11 +96,14 @@ void WaveFormViewGL::paintGL(){
       update_waveform();
 
       //draw waveform
+      glPushMatrix();
+      glTranslatef(-mVerticies[0], 0, 0);
       qglColor(mColorWaveform);
       glLineWidth(1.0);
       glEnableClientState(GL_VERTEX_ARRAY);
       glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
       glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+      glPopMatrix();
    }
 
    //draw cursor
@@ -153,8 +156,9 @@ void WaveFormViewGL::update_waveform() {
    //this is only called with a valid audio buffer
    for(int line = 0; line < (int)mVerticies.size() / 4; line++) {
       int index = line * 4;
-      GLfloat value = line_value(line + first_line);
-      mVerticies[index] = mVerticies[index + 2] = line;
+      int line_index = line + first_line;
+      GLfloat value = line_value(line_index);
+      mVerticies[index] = mVerticies[index + 2] = line_index;
       mVerticies[index + 1] = value;
       mVerticies[index + 3] = -value;
    }
