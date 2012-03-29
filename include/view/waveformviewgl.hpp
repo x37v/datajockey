@@ -34,6 +34,8 @@ namespace DataJockey {
             int mCursorOffset;
             bool mVertical;
             std::vector<GLfloat> mVerticies;
+            int mFirstLineIndex; //which is the first line
+            bool mVerticiesValid;
             int mFramesPerLine;
             int mFrame;
             QColor mColorBackgroud;

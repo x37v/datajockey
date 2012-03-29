@@ -17,6 +17,8 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mWidth(400),
    mCursorOffset(50),
    mVertical(vertical),
+   mFirstLineIndex(0),
+   mVerticiesValid(false),
    mFramesPerLine(256),
    mFrame(0),
    mColorBackgroud(QColor::fromRgb(0,0,0)),
@@ -54,6 +56,7 @@ void WaveFormViewGL::set_frames_per_line(int num_frames) {
    if (num_frames < 1)
       num_frames = 1;
    if (mFramesPerLine != num_frames) {
+      mVerticiesValid = false;
       mFramesPerLine = num_frames;
       update();
    }
@@ -95,15 +98,17 @@ void WaveFormViewGL::paintGL(){
       //TODO treat vertices as a circular buffer and only update what we need to
       update_waveform();
 
-      //draw waveform
-      glPushMatrix();
-      glTranslatef(-mVerticies[0], 0, 0);
-      qglColor(mColorWaveform);
-      glLineWidth(1.0);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
-      glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
-      glPopMatrix();
+      if (mVerticiesValid) {
+         //draw waveform
+         glPushMatrix();
+         glTranslatef(-mVerticies[mFirstLineIndex * 4], 0, 0);
+         qglColor(mColorWaveform);
+         glLineWidth(1.0);
+         glEnableClientState(GL_VERTEX_ARRAY);
+         glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
+         glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+         glPopMatrix();
+      }
    }
 
    //draw cursor
@@ -128,6 +133,18 @@ void WaveFormViewGL::paintGL(){
 void WaveFormViewGL::resizeGL(int width, int height) {
    QMutexLocker lock(&mAudioBufferMutex);
 
+   if (mVertical) {
+      if (mHeight != height) {
+         mVerticies.resize(4 * height);
+         mVerticiesValid = false;
+      }
+   } else {
+      if (mWidth != width) {
+         mVerticies.resize(4 * width);
+         mVerticiesValid = false;
+      }
+   }
+
    mWidth = width;
    mHeight = height;
 
@@ -138,8 +155,6 @@ void WaveFormViewGL::resizeGL(int width, int height) {
    glDisable(GL_DEPTH_TEST);
 
    glViewport(0, 0, mWidth, mHeight);
-
-   mVerticies.resize(4 * (mVertical ? mHeight : mWidth));
 }
 
 /*
@@ -162,6 +177,7 @@ void WaveFormViewGL::update_waveform() {
       mVerticies[index + 1] = value;
       mVerticies[index + 3] = -value;
    }
+   mVerticiesValid = true;
 }
 
 GLfloat WaveFormViewGL::line_value(int line_index) {
