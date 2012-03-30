@@ -31,8 +31,13 @@ namespace DataJockey {
             void initializeGL();
             void paintGL();
             void resizeGL(int width, int height);
-            //void mousePressEvent(QMouseEvent *event);
-            //void mouseMoveEvent(QMouseEvent *event);
+            //virtual void wheelEvent(QWheelEvent * event);
+            virtual void mouseMoveEvent(QMouseEvent * event);
+            virtual void mousePressEvent(QMouseEvent * event);
+            virtual void mouseReleaseEvent(QMouseEvent * event);
+         signals:
+            void seek_relative(int);
+            void mouse_down(bool);
          private:
             QMutex mMutex;
 
@@ -58,6 +63,8 @@ namespace DataJockey {
             QColor mColorCursor;
             QColor mColorCenterLine;
             QColor mColorBeats;
+
+            int mLastMousePos;
 
             void update_waveform();
             void update_beats();

@@ -30,7 +30,8 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mColorWaveform(QColor::fromRgb(255,0,0).dark()),
    mColorCursor(QColor::fromRgb(0,255,0)),
    mColorCenterLine(QColor::fromRgb(0,0,255)),
-   mColorBeats(QColor::fromRgb(255,255,0))
+   mColorBeats(QColor::fromRgb(255,255,0)),
+   mLastMousePos(0)
 {
 }
 
@@ -192,13 +193,22 @@ void WaveFormViewGL::resizeGL(int width, int height) {
    glViewport(0, 0, mWidth, mHeight);
 }
 
-/*
-void WaveFormViewGL::mousePressEvent(QMouseEvent *event){
+
+void WaveFormViewGL::mouseMoveEvent(QMouseEvent * event) {
+   int diff = event->y() - mLastMousePos;
+   mLastMousePos = event->y();
+   int frames = mFramesPerLine * diff;
+   emit(seek_relative(frames));
 }
 
-void WaveFormViewGL::mouseMoveEvent(QMouseEvent *event){
+void WaveFormViewGL::mousePressEvent(QMouseEvent * event) {
+   mLastMousePos = event->y();
+   emit(mouse_down(true));
 }
-*/
+
+void WaveFormViewGL::mouseReleaseEvent(QMouseEvent * event) {
+   emit(mouse_down(false));
+}
 
 void WaveFormViewGL::update_waveform() {
    int first_line = ((mFrame / mFramesPerLine) - mCursorOffset);

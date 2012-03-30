@@ -93,7 +93,6 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mTopLayout->addWidget(mWaveFormView, 10);
    setLayout(mTopLayout);
 
-   /*
    QObject::connect(mWaveFormView,
          SIGNAL(seek_relative(int)),
          this,
@@ -102,7 +101,6 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
          SIGNAL(mouse_down(bool)),
          this,
          SLOT(relay_mouse_button(bool)));
-         */
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
