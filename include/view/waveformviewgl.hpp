@@ -43,7 +43,7 @@ namespace DataJockey {
             QColor mColorCursor;
             QColor mColorCenterLine;
             Audio::AudioBufferReference mAudioBuffer;
-            QMutex mAudioBufferMutex;
+            QMutex mMutex;
             void update_waveform();
             GLfloat line_value(int line_index);
       };

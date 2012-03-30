@@ -25,7 +25,7 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mColorWaveform(QColor::fromRgb(255,0,0).dark()),
    mColorCursor(QColor::fromRgb(0,255,0)),
    mColorCenterLine(QColor::fromRgb(0,0,255)),
-   mAudioBufferMutex()
+   mMutex()
 {
 }
 
@@ -34,14 +34,16 @@ QSize WaveFormViewGL::sizeHint() const { return mVertical ? QSize(100, 400) : QS
 void WaveFormViewGL::setVertical(bool vert) { mVertical = vert; }
 
 void WaveFormViewGL::clear_audio() {
-   QMutexLocker lock(&mAudioBufferMutex);
+   QMutexLocker lock(&mMutex);
    mAudioBuffer.release();
+   mVerticiesValid = false;
    update();
 }
 
 void WaveFormViewGL::set_audio_file(QString file_name) { 
-   QMutexLocker lock(&mAudioBufferMutex);
+   QMutexLocker lock(&mMutex);
    mAudioBuffer.reset(file_name); 
+   mVerticiesValid = false;
    update();
 }
 
@@ -63,7 +65,7 @@ void WaveFormViewGL::set_frames_per_line(int num_frames) {
 }
 
 void WaveFormViewGL::initializeGL(){
-   QMutexLocker lock(&mAudioBufferMutex);
+   QMutexLocker lock(&mMutex);
 
    qglClearColor(mColorBackgroud);
 
@@ -78,7 +80,7 @@ void WaveFormViewGL::initializeGL(){
 }
 
 void WaveFormViewGL::paintGL(){
-   QMutexLocker lock(&mAudioBufferMutex);
+   QMutexLocker lock(&mMutex);
 
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glLoadIdentity();
@@ -131,7 +133,7 @@ void WaveFormViewGL::paintGL(){
 }
 
 void WaveFormViewGL::resizeGL(int width, int height) {
-   QMutexLocker lock(&mAudioBufferMutex);
+   QMutexLocker lock(&mMutex);
 
    if (mVertical) {
       if (mHeight != height) {
@@ -167,10 +169,57 @@ void WaveFormViewGL::mouseMoveEvent(QMouseEvent *event){
 
 void WaveFormViewGL::update_waveform() {
    int first_line = ((mFrame / mFramesPerLine) - mCursorOffset);
+   const int total_lines = (int)mVerticies.size() / 4;
+   int compute_lines = total_lines;
+   int compute_line_offset = 0;
+
+   if (mVerticiesValid) {
+      //XXX should we just store this value to not have to convert back from a float?
+      int current_first_line = (int)mVerticies[mFirstLineIndex * 4];
+      if (current_first_line <= first_line) {
+         //our new first line is at or after our current first line
+         //there is data to keep
+         if (current_first_line + total_lines > first_line) {
+            int offset = first_line - current_first_line;
+            mFirstLineIndex = (mFirstLineIndex + offset) % total_lines;
+            //the new data to fill is between first_line and current_first_line
+            compute_lines = offset;
+            compute_line_offset = total_lines - offset + mFirstLineIndex;
+            first_line = current_first_line + total_lines;
+         } else {
+            //totally wipe out what we have
+            mFirstLineIndex = 0;
+         }
+      } else {
+         //our new first line is before our current first line
+         //there is data to keep
+         if (first_line + total_lines > current_first_line) {
+            int offset = current_first_line - first_line;
+            mFirstLineIndex -= offset;
+            if (mFirstLineIndex < 0)
+               mFirstLineIndex += total_lines;
+            //the new data to fill is between first_line and current_first_line
+            compute_lines = offset;
+            compute_line_offset = mFirstLineIndex;
+         } else {
+            //totally wipe out what we have
+            mFirstLineIndex = 0;
+         }
+      }
+   } else {
+      if (first_line >= 0) {
+         mFirstLineIndex = first_line % total_lines;
+      } else {
+         mFirstLineIndex = first_line;
+         while(mFirstLineIndex < 0)
+            mFirstLineIndex += total_lines;
+      }
+      compute_line_offset = mFirstLineIndex;
+   }
 
    //this is only called with a valid audio buffer
-   for(int line = 0; line < (int)mVerticies.size() / 4; line++) {
-      int index = line * 4;
+   for(int line = 0; line < compute_lines; line++) {
+      int index = ((line + compute_line_offset) % total_lines) * 4;
       int line_index = line + first_line;
       GLfloat value = line_value(line_index);
       mVerticies[index] = mVerticies[index + 2] = line_index;
