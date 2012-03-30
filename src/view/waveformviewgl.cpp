@@ -62,9 +62,16 @@ void WaveFormViewGL::clear_beats() {
 void WaveFormViewGL::set_beat_buffer(Audio::BeatBuffer & buffer) {
    QMutexLocker lock(&mMutex);
    mBeatBuffer = buffer;
-   if (mBeatBuffer.length() > 2)
+   if (mBeatBuffer.length() > 2) {
+
+      //XXX make configurable
+      //XXX dependent on 44100 sampling rate
+      double frames_per_view = mBeatBuffer.median_difference() * 8.0 * 44100.0;
+      mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
+      mVerticiesValid = false;
+
       update_beats();
-   else
+   } else
       mBeatVerticiesValid = false;
    update();
 }
