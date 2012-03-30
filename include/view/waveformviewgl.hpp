@@ -7,6 +7,7 @@
 #include <QColor>
 #include <vector>
 #include "audiobufferreference.hpp"
+#include "beatbuffer.hpp"
 
 namespace DataJockey {
    namespace View {
@@ -20,6 +21,10 @@ namespace DataJockey {
          public slots:
             void clear_audio();
             void set_audio_file(QString file_name);
+
+            void clear_beats();
+            void set_beat_buffer(Audio::BeatBuffer & buffer);
+
             void set_frame(int frame);
             void set_frames_per_line(int num_frames);
          protected:
@@ -29,22 +34,33 @@ namespace DataJockey {
             //void mousePressEvent(QMouseEvent *event);
             //void mouseMoveEvent(QMouseEvent *event);
          private:
+            QMutex mMutex;
+
             int mHeight;
             int mWidth;
             int mCursorOffset;
             bool mVertical;
+
+            Audio::AudioBufferReference mAudioBuffer;
             std::vector<GLfloat> mVerticies;
             int mFirstLineIndex; //which is the first line
             bool mVerticiesValid;
+
+            Audio::BeatBuffer mBeatBuffer;
+            std::vector<GLfloat> mBeatVerticies;
+            bool mBeatVerticiesValid;
+
             int mFramesPerLine;
             int mFrame;
+
             QColor mColorBackgroud;
             QColor mColorWaveform;
             QColor mColorCursor;
             QColor mColorCenterLine;
-            Audio::AudioBufferReference mAudioBuffer;
-            QMutex mMutex;
+            QColor mColorBeats;
+
             void update_waveform();
+            void update_beats();
             GLfloat line_value(int line_index);
       };
    }

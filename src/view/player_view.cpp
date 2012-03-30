@@ -133,7 +133,7 @@ void Player::set_audio_frame(int frame) {
 }
 
 void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
-   //mWaveFormView->set_beat_buffer(buffer);
+   mWaveFormView->set_beat_buffer(buffer);
 }
 
 void Player::set_song_description(QString description) {

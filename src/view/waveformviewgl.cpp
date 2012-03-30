@@ -9,23 +9,28 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
+
 using namespace DataJockey::View;
 
 WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    QGLWidget(parent),
+   mMutex(),
    mHeight(100),
    mWidth(400),
    mCursorOffset(50),
    mVertical(vertical),
    mFirstLineIndex(0),
    mVerticiesValid(false),
+   mBeatBuffer(),
+   mBeatVerticies(),
+   mBeatVerticiesValid(false),
    mFramesPerLine(256),
    mFrame(0),
    mColorBackgroud(QColor::fromRgb(0,0,0)),
    mColorWaveform(QColor::fromRgb(255,0,0).dark()),
    mColorCursor(QColor::fromRgb(0,255,0)),
    mColorCenterLine(QColor::fromRgb(0,0,255)),
-   mMutex()
+   mColorBeats(QColor::fromRgb(255,255,0))
 {
 }
 
@@ -44,6 +49,22 @@ void WaveFormViewGL::set_audio_file(QString file_name) {
    QMutexLocker lock(&mMutex);
    mAudioBuffer.reset(file_name); 
    mVerticiesValid = false;
+   update();
+}
+
+void WaveFormViewGL::clear_beats() {
+   QMutexLocker lock(&mMutex);
+   mBeatVerticiesValid = false;
+   update();
+}
+            
+void WaveFormViewGL::set_beat_buffer(Audio::BeatBuffer & buffer) {
+   QMutexLocker lock(&mMutex);
+   mBeatBuffer = buffer;
+   if (mBeatBuffer.length() > 2)
+      update_beats();
+   else
+      mBeatVerticiesValid = false;
    update();
 }
 
@@ -109,6 +130,18 @@ void WaveFormViewGL::paintGL(){
          glEnableClientState(GL_VERTEX_ARRAY);
          glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
          glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+
+         //draw beats if we have them
+         if (mBeatVerticiesValid) {
+            glPushMatrix();
+            qglColor(mColorBeats);
+            glLineWidth(1.0);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_FLOAT, 0, &mBeatVerticies.front());
+            glDrawArrays(GL_LINES, 0, mBeatVerticies.size() / 2);
+            glPopMatrix();
+         }
+
          glPopMatrix();
       }
    }
@@ -227,6 +260,20 @@ void WaveFormViewGL::update_waveform() {
       mVerticies[index + 3] = -value;
    }
    mVerticiesValid = true;
+}
+
+void WaveFormViewGL::update_beats() {
+   mBeatVerticies.resize(4 * mBeatBuffer.length());
+   for(unsigned int i = 0; i < mBeatBuffer.length(); i++) {
+      int line_index = i * 4;
+      //XXX assuming that the audio file is sampled at 44100
+      //how do we resolve this?
+      GLfloat pos = (44100.0 * mBeatBuffer[i]) / mFramesPerLine;
+      mBeatVerticies[line_index] = mBeatVerticies[line_index + 2] = pos;
+      mBeatVerticies[line_index + 1] = static_cast<GLfloat>(1.0);
+      mBeatVerticies[line_index + 3] = static_cast<GLfloat>(-1.0);
+   }
+   mBeatVerticiesValid = true;
 }
 
 GLfloat WaveFormViewGL::line_value(int line_index) {
