@@ -12,6 +12,7 @@ class QDoubleSpinBox;
 namespace DataJockey {
    namespace View {
       class Player;
+      class AudioLevel;
 
       class MixerPanel : public QWidget {
          Q_OBJECT
@@ -54,6 +55,7 @@ namespace DataJockey {
             QSlider * mMasterVolume;
             QDoubleSpinBox * mMasterTempo;
             bool mSettingTempo;
+            AudioLevel * mAudioLevel;
             
             //map senders to indices for relaying
             QMap<QObject *, int> mSenderToIndex;

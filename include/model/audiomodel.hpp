@@ -27,7 +27,7 @@ namespace DataJockey {
             class PlayerState;
             class ConsumeThread;
             class AudioLoaderThread;
-            class QueryPlayerStates;
+            class QueryPlayState;
 
             //singleton
             AudioModel();
@@ -83,6 +83,7 @@ namespace DataJockey {
             void relay_player_audio_file_changed(int player_index, QString fileName);
             void relay_player_position_changed(int player_index, int frame_index);
             void relay_player_audio_level(int player_index, int percent);
+            void relay_master_audio_level(int percent);
 
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals

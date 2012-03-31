@@ -27,6 +27,7 @@ Master::Master(){
    mCrossFade = false;
    mCrossFadeMixers[0] = 0;
    mCrossFadeMixers[1] = 1;
+   mMaxSampleValue = 0.0f;
 
    //set up lv2
    mLV2World = slv2_world_new();
@@ -175,6 +176,8 @@ void Master::audio_compute_and_fill(
                   mCrossFadeBuffer[0][frame] *
                   mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
                outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
+               //store the max sample value
+               mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
             }
          }
       } else if(p == mCrossFadeMixers[1]){
@@ -184,6 +187,8 @@ void Master::audio_compute_and_fill(
                   mCrossFadeBuffer[1][frame] *
                   mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
                outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
+               //store the max sample value
+               mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
             }
          }
       } else {
@@ -192,6 +197,8 @@ void Master::audio_compute_and_fill(
                outBufferVector[chan][frame] += 
                   mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
                outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
+               //store the max sample value
+               mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
             }
          }
       }
@@ -235,6 +242,10 @@ SLV2Plugins Master::lv2_plugins() const {
    return mLV2Plugins;
 }
 
+float Master::max_sample_value() const {
+   return mMaxSampleValue;
+}
+
 //setters
 void Master::master_volume(float val){
    mMasterVolume = val;
@@ -258,6 +269,8 @@ void Master::cross_fade_mixers(unsigned int left, unsigned int right){
       mCrossFadeMixers[1] = right;
    }
 }
+
+void Master::max_sample_value_reset() { mMaxSampleValue = 0.0; }
 
 //commands
 

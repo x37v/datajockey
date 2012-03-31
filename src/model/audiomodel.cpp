@@ -86,24 +86,27 @@ class AudioModel::PlayerState {
 };
 
 //TODO how to get it to run at the end of the frame?
-class AudioModel::QueryPlayerStates : public MasterCommand {
+class AudioModel::QueryPlayState : public MasterCommand {
    private:
       AudioModel * mAudioModel;
    public:
       std::vector<AudioModel::PlayerState* > mStates;
       unsigned int mNumPlayers;
+      float mMasterMaxVolume;
 
-      QueryPlayerStates(AudioModel * model) : mAudioModel(model) {
+      QueryPlayState(AudioModel * model) : mAudioModel(model), mMasterMaxVolume(0.0) {
          mNumPlayers = mAudioModel->player_count();
          for(unsigned int i = 0; i < mNumPlayers; i++)
             mStates.push_back(new AudioModel::PlayerState);
          mStates.resize(mNumPlayers);
       }
-      virtual ~QueryPlayerStates() {
+      virtual ~QueryPlayState() {
          for(unsigned int i = 0; i < mNumPlayers; i++)
             delete mStates[i];
       }
       virtual void execute(){
+         mMasterMaxVolume = master()->max_sample_value();
+         master()->max_sample_value_reset();
          for(unsigned int i = 0; i < mNumPlayers; i++) {
             mStates[i]->mCurrentFrame = master()->players()[i]->frame();
             mStates[i]->mMaxSampleValue = master()->players()[i]->max_sample_value();
@@ -113,6 +116,13 @@ class AudioModel::QueryPlayerStates : public MasterCommand {
       virtual void execute_done() {
          for(unsigned int i = 0; i < mNumPlayers; i++)
             mAudioModel->update_player_state(i, mStates[i]);
+
+         int master_level = static_cast<int>(100.0 * mMasterMaxVolume);
+         if (master_level > 0) {
+            QMetaObject::invokeMethod(mAudioModel, "relay_master_audio_level", 
+                  Qt::QueuedConnection,
+                  Q_ARG(int, master_level));
+         }
       }
       //this command shouldn't be stored
       virtual bool store(CommandIOData& /* data */) const { return false; }
@@ -127,7 +137,7 @@ class AudioModel::ConsumeThread : public QThread {
 
       void run() {
          while(true) {
-            AudioModel::QueryPlayerStates * cmd = new AudioModel::QueryPlayerStates(mModel);
+            AudioModel::QueryPlayState * cmd = new AudioModel::QueryPlayState(mModel);
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
             msleep(15);
@@ -480,6 +490,10 @@ void AudioModel::relay_player_position_changed(int player_index, int frame_index
 
 void AudioModel::relay_player_audio_level(int player_index, int percent) {
    emit(player_value_changed(player_index, "audio_level", percent));
+}
+
+void AudioModel::relay_master_audio_level(int percent) {
+   emit(master_value_changed("audio_level", percent));
 }
 
 void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){

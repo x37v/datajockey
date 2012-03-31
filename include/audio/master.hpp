@@ -43,6 +43,7 @@ namespace DataJockey {
             Transport * transport();
             SLV2World lv2_world() const;
             SLV2Plugins lv2_plugins() const;
+            float max_sample_value() const;
 
             //setters
             void master_volume(float val);
@@ -51,6 +52,7 @@ namespace DataJockey {
             void cross_fade_position(float val);
             void cross_fade_mixers(unsigned int left, unsigned int right);
             //void sync_to_player(unsigned int player_index);
+            void max_sample_value_reset();
          private:
             //internal buffers
             std::vector<float **> mPlayerBuffers;
@@ -66,6 +68,7 @@ namespace DataJockey {
             unsigned int mCrossFadeMixers[2];
             bool mCrossFade;
             float mCrossFadePosition;
+            float mMaxSampleValue;
 
             SLV2World mLV2World;
             SLV2Plugins mLV2Plugins;

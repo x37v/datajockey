@@ -1,6 +1,7 @@
 #include "mixerpanel.hpp"
 #include "audiomodel.hpp"
 #include "player_view.hpp"
+#include "audiolevel.hpp"
 #include "defines.hpp"
 
 #include <QSlider>
@@ -90,11 +91,20 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    mMasterTempo->setDecimals(3);
    master_layout->addWidget(mMasterTempo, 0, Qt::AlignHCenter);
 
-
    mMasterVolume = new QSlider(Qt::Vertical, this);
    mMasterVolume->setRange(0, 1.5 * one_scale);
    mMasterVolume->setValue(one_scale);
-   master_layout->addWidget(mMasterVolume, 10, Qt::AlignHCenter);
+
+   mAudioLevel = new AudioLevel(this);
+
+   QBoxLayout * slider_level_layout = new QBoxLayout(QBoxLayout::LeftToRight);
+   slider_level_layout->addStretch(10);
+   slider_level_layout->addWidget(mMasterVolume, 1, Qt::AlignHCenter);
+   slider_level_layout->addWidget(mAudioLevel, 1, Qt::AlignHCenter);
+   slider_level_layout->addStretch(10);
+   slider_level_layout->setContentsMargins(0,0,0,0);
+
+   master_layout->addLayout(slider_level_layout);
 
    mixer_layout->addLayout(master_layout);
    top_layout->addLayout(mixer_layout);
@@ -163,6 +173,8 @@ void MixerPanel::master_set(QString name, int val) {
       mMasterVolume->setValue(val);
    else if (name == "crossfade_position")
       mCrossFadeSlider->setValue(val);
+   else if (name == "audio_level")
+      mAudioLevel->set_level(val);
 }
 
 void MixerPanel::master_set(QString name, double val) {
