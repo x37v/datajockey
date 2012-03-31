@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPen>
 #include <QBrush>
+#include <QTimer>
 
 namespace DataJockey {
    namespace View {
@@ -17,13 +18,19 @@ namespace DataJockey {
          public slots:
             void set_level(int percent);
 
+         protected slots:
+            void fade_out();
+
          protected:
             void paintEvent(QPaintEvent *event);
 
          private:
             int mPercent;
+            int mPercentLast;
             QPen mPen;
             QBrush mBrush;
+            QTimer mDrawTimeout;
+            QTimer mColorTimeout;
       };
    }
 }
