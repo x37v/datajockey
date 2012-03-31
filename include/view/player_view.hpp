@@ -20,6 +20,7 @@ class QTimer;
 namespace DataJockey {
    namespace View {
       class WaveFormViewGL;
+      class AudioLevel;
       class Player : public QWidget {
          Q_OBJECT
          public:
@@ -32,6 +33,7 @@ namespace DataJockey {
             QSlider * volume_slider() const;
             QProgressBar * progress_bar() const;
          public slots:
+            void set_audio_level(int percent);
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
             void set_beat_buffer(Audio::BeatBuffer buffer);
@@ -52,6 +54,7 @@ namespace DataJockey {
             QSlider * mVolumeSlider;
             QMap<QString, QDial *> mEqDials;
             WaveFormViewGL * mWaveFormView;
+            AudioLevel * mAudioLevelView;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
       };

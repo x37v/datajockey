@@ -137,6 +137,8 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
       player->eq_dial("mid")->setValue(value);
    else if (name == "eq_high")
       player->eq_dial("high")->setValue(value);
+   else if (name == "audio_level")
+      player->set_audio_level(value);
 }
 
 void MixerPanel::player_set(int player_index, QString name, QString value) {

@@ -1,5 +1,5 @@
 #include "player.hpp"
-#include <math.h>
+#include <cmath>
 #include "master.hpp"
 #include "stretcher.hpp"
 #include "stretcher_rate.hpp"
@@ -15,7 +15,8 @@ using namespace DataJockey::Audio;
 Player::Player() : 
    mPosition(0.0),
    mTransportOffset(0,0),
-   mEqInstance(NULL)
+   mEqInstance(NULL),
+   mMaxSampleValue(0.0)
 {
    //states
    mPlayState = PAUSE;
@@ -199,11 +200,15 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
    if(mOutState == CUE){
       for(unsigned int i = 0; i < 2; i++){
          for(unsigned int j = 0; j < numFrames; j++){
+            float sample_with_volume = mixBuffer[i][j] * mVolumeBuffer[j];
+
             cueBuffer[i][j] = mixBuffer[i][j];
+            mMaxSampleValue = std::max(mMaxSampleValue, fabsf(sample_with_volume));
+
             if (mCueMutesMain)
                mixBuffer[i][j] = 0.0f;
             else
-               mixBuffer[i][j] *= mVolumeBuffer[j];
+               mixBuffer[i][j] = sample_with_volume;
          }
       }
    } else {
@@ -211,6 +216,7 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
          for(unsigned int j = 0; j < numFrames; j++) {
             cueBuffer[i][j] = 0.0f;
             mixBuffer[i][j] *= mVolumeBuffer[j];
+            mMaxSampleValue = std::max(mMaxSampleValue, fabsf(mixBuffer[i][j]));
          }
       }
    }
@@ -230,6 +236,7 @@ const TimePoint& Player::end_position() const { return mEndPosition; }
 const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
 const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
+float Player::max_sample_value() const { return mMaxSampleValue; }
 
 AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); }
 BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
@@ -376,6 +383,7 @@ void Player::eq(eq_band_t band, double value) {
    }
 }
 
+void Player::max_sample_value_reset() { mMaxSampleValue = 0.0; };
 
 //misc
 void Player::position_relative(TimePoint amt){

@@ -3,6 +3,7 @@
 #include "waveformviewgl.hpp"
 #include "audiobufferreference.hpp"
 #include "audiobuffer.hpp"
+#include "audiolevel.hpp"
 
 #include <QPushButton>
 #include <QGridLayout>
@@ -82,7 +83,17 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mVolumeSlider = new QSlider(Qt::Vertical, this);
    mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
    mVolumeSlider->setValue(one_scale);
-   mControlLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+
+   mAudioLevelView = new AudioLevel(this);
+
+   QBoxLayout * slider_level_layout = new QBoxLayout(QBoxLayout::LeftToRight);
+   slider_level_layout->addStretch(10);
+   slider_level_layout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+   slider_level_layout->addWidget(mAudioLevelView, 1, Qt::AlignHCenter);
+   slider_level_layout->addStretch(10);
+   slider_level_layout->setContentsMargins(0,0,0,0);
+
+   mControlLayout->addLayout(slider_level_layout);
    mControlLayout->setContentsMargins(0,0,0,0);
 
    mWaveFormView = new WaveFormViewGL(this, true);
@@ -107,6 +118,8 @@ QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
+
+void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent); }
 
 void Player::set_audio_file(const QString& file_name) {
    Audio::AudioBufferReference ref(file_name);

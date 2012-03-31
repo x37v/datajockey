@@ -56,6 +56,7 @@ HEADERS += include/application.hpp \
            include/controller/audioloaderthread.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
+           include/view/audiolevel.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
            include/view/waveformviewgl.hpp \
@@ -95,6 +96,7 @@ SOURCES += src/application.cpp \
            src/controller/audioloaderthread.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
+           src/view/audiolevel.cpp \
            src/view/main.cpp \
            src/view/mixerpanel.cpp \
            src/view/player_view.cpp \

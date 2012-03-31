@@ -69,6 +69,7 @@ namespace DataJockey {
             const TimePoint& loop_start_position() const;
             const TimePoint& loop_end_position() const;
             unsigned int frame() const;
+            float max_sample_value() const;
             double bpm() const;
 
             AudioBuffer * audio_buffer() const;
@@ -91,6 +92,7 @@ namespace DataJockey {
             void audio_buffer(AudioBuffer * buf);
             void beat_buffer(BeatBuffer * buf);
             void eq(eq_band_t band, double value);
+            void max_sample_value_reset();
 
             //misc
             void position_relative(TimePoint amt); //go to a position relative to the current position
@@ -126,6 +128,7 @@ namespace DataJockey {
             float * mVolumeBuffer;
             BeatBuffer * mBeatBuffer;
             Stretcher * mStretcher;
+            float mMaxSampleValue;
 
             //the eq instance
             SLV2Instance   mEqInstance;

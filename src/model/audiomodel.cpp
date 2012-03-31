@@ -70,7 +70,8 @@ class AudioModel::PlayerState {
       PlayerState() :
          mFileName(),
          mBeatBuffer(),
-         mCurrentFrame(0) { }
+         mCurrentFrame(0),
+         mMaxSampleValue(0.0) { }
       //not okay to update in audio thread
       QString mFileName;
       Audio::BeatBuffer mBeatBuffer;
@@ -81,6 +82,7 @@ class AudioModel::PlayerState {
 
       //okay to update in audio thread
       unsigned int mCurrentFrame;
+      float mMaxSampleValue;
 };
 
 //TODO how to get it to run at the end of the frame?
@@ -102,8 +104,11 @@ class AudioModel::QueryPlayerStates : public MasterCommand {
             delete mStates[i];
       }
       virtual void execute(){
-         for(unsigned int i = 0; i < mNumPlayers; i++)
+         for(unsigned int i = 0; i < mNumPlayers; i++) {
             mStates[i]->mCurrentFrame = master()->players()[i]->frame();
+            mStates[i]->mMaxSampleValue = master()->players()[i]->max_sample_value();
+            master()->players()[i]->max_sample_value_reset();
+         }
       }
       virtual void execute_done() {
          for(unsigned int i = 0; i < mNumPlayers; i++)
@@ -343,6 +348,14 @@ void AudioModel::update_player_state(int player_index, PlayerState * state){
             Q_ARG(int, player_index),
             Q_ARG(int, frame));
    }
+
+   int audio_level = static_cast<int>(state->mMaxSampleValue * 100.0);
+   if (audio_level > 0) {
+      QMetaObject::invokeMethod(this, "relay_player_audio_level", 
+            Qt::QueuedConnection,
+            Q_ARG(int, player_index),
+            Q_ARG(int, audio_level));
+   }
 }
 
 void AudioModel::set_player_audio_file(int player_index, QString location){
@@ -463,6 +476,10 @@ void AudioModel::relay_player_audio_file_changed(int player_index, QString fileN
 
 void AudioModel::relay_player_position_changed(int player_index, int frame_index){
    emit(player_value_changed(player_index, "frame", frame_index));
+}
+
+void AudioModel::relay_player_audio_level(int player_index, int percent) {
+   emit(player_value_changed(player_index, "audio_level", percent));
 }
 
 void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){
