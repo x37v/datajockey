@@ -8,6 +8,7 @@
 
 class QSlider;
 class QDoubleSpinBox;
+class QBoxLayout;
 
 namespace DataJockey {
    namespace View {
@@ -40,6 +41,9 @@ namespace DataJockey {
             void relay_volume_changed(int value);
             void relay_tempo_changed(double value);
 
+         protected:
+            virtual void resizeEvent(QResizeEvent * event);
+
          signals:
             void player_triggered(int player_index, QString name);
             void player_toggled(int player_index, QString name, bool val);
@@ -56,6 +60,7 @@ namespace DataJockey {
             QDoubleSpinBox * mMasterTempo;
             bool mSettingTempo;
             AudioLevel * mAudioLevel;
+            QBoxLayout * mSliderLevelLayout;
             
             //map senders to indices for relaying
             QMap<QObject *, int> mSenderToIndex;

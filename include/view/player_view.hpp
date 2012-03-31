@@ -32,6 +32,7 @@ namespace DataJockey {
             QList<QDial *> eq_dials() const;
             QSlider * volume_slider() const;
             QProgressBar * progress_bar() const;
+            QRect slider_level_geometry() const;
          public slots:
             void set_audio_level(int percent);
             void set_audio_file(const QString& file_name);
@@ -55,6 +56,7 @@ namespace DataJockey {
             QMap<QString, QDial *> mEqDials;
             WaveFormViewGL * mWaveFormView;
             AudioLevel * mAudioLevelView;
+            QBoxLayout * mSliderLevelLayout;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
       };

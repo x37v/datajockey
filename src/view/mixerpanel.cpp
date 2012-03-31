@@ -92,21 +92,23 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    master_layout->addWidget(mMasterTempo, 0, Qt::AlignHCenter);
 
    mMasterVolume = new QSlider(Qt::Vertical, this);
-   mMasterVolume->setRange(0, 1.5 * one_scale);
+   mMasterVolume->setRange(0, static_cast<int>(1.5 * (float)one_scale));
    mMasterVolume->setValue(one_scale);
 
    mAudioLevel = new AudioLevel(this);
 
-   QBoxLayout * slider_level_layout = new QBoxLayout(QBoxLayout::LeftToRight);
-   slider_level_layout->addStretch(10);
-   slider_level_layout->addWidget(mMasterVolume, 1, Qt::AlignHCenter);
-   slider_level_layout->addWidget(mAudioLevel, 1, Qt::AlignHCenter);
-   slider_level_layout->addStretch(10);
-   slider_level_layout->setContentsMargins(0,0,0,0);
+   mSliderLevelLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->addWidget(mMasterVolume, 1, Qt::AlignHCenter);
+   mSliderLevelLayout->addWidget(mAudioLevel, 1, Qt::AlignHCenter);
+   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->setContentsMargins(0,0,0,0);
 
-   master_layout->addLayout(slider_level_layout);
+   master_layout->addStretch(10);
+   master_layout->addLayout(mSliderLevelLayout);
 
    mixer_layout->addLayout(master_layout);
+   mixer_layout->setContentsMargins(0, 0, 0, 0);
    top_layout->addLayout(mixer_layout);
 
    mCrossFadeSlider = new QSlider(Qt::Horizontal, this);
@@ -248,5 +250,16 @@ void MixerPanel::relay_volume_changed(int value) {
 
 void MixerPanel::relay_tempo_changed(double value) {
    emit(master_value_changed("bpm", value));
+}
+
+void MixerPanel::resizeEvent(QResizeEvent * event) {
+   QWidget::resizeEvent(event);
+
+   QRect rect = mPlayers[0]->slider_level_geometry();
+   QRect mrect_orig = mSliderLevelLayout->geometry();
+   QRect mrect = mrect_orig;
+   mrect.setHeight(rect.height());
+   mrect.translate(0, mrect_orig.height() - mrect.height());
+   mSliderLevelLayout->setGeometry(mrect);
 }
 

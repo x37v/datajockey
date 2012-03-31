@@ -81,19 +81,19 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    }
 
    mVolumeSlider = new QSlider(Qt::Vertical, this);
-   mVolumeSlider->setRange(0, (int)(1.5 * (float)one_scale));
+   mVolumeSlider->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
    mVolumeSlider->setValue(one_scale);
 
    mAudioLevelView = new AudioLevel(this);
 
-   QBoxLayout * slider_level_layout = new QBoxLayout(QBoxLayout::LeftToRight);
-   slider_level_layout->addStretch(10);
-   slider_level_layout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
-   slider_level_layout->addWidget(mAudioLevelView, 1, Qt::AlignHCenter);
-   slider_level_layout->addStretch(10);
-   slider_level_layout->setContentsMargins(0,0,0,0);
+   mSliderLevelLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
+   mSliderLevelLayout->addWidget(mAudioLevelView, 1, Qt::AlignHCenter);
+   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->setContentsMargins(0,0,0,0);
 
-   mControlLayout->addLayout(slider_level_layout);
+   mControlLayout->addLayout(mSliderLevelLayout);
    mControlLayout->setContentsMargins(0,0,0,0);
 
    mWaveFormView = new WaveFormViewGL(this, true);
@@ -102,6 +102,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
    mTopLayout->addLayout(mControlLayout, 0);
    mTopLayout->addWidget(mWaveFormView, 10);
+   mTopLayout->setContentsMargins(0,0,0,0);
    setLayout(mTopLayout);
 
    QObject::connect(mWaveFormView,
@@ -118,6 +119,7 @@ QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
+QRect Player::slider_level_geometry() const { return mSliderLevelLayout->geometry(); }
 
 void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent); }
 
