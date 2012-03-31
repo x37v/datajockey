@@ -1,0 +1,272 @@
+#!/usr/bin/env ruby
+
+=begin
+
+  Copyright (c) 2008 Alex Norman.  All rights reserved.
+	http://www.x37v.info/datajockey
+
+	This file is part of Data Jockey.
+	
+	Data Jockey is free software: you can redistribute it and/or modify it
+	under the terms of the GNU General Public License as published by the
+	Free Software Foundation, either version 3 of the License, or (at your
+	option) any later version.
+	
+	Data Jockey is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+	Public License for more details.
+	
+	You should have received a copy of the GNU General Public License along
+	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
+=end
+
+$: << "ruby" if File.directory?("ruby")
+$: << "swig" if File.directory?("swig")
+$: << "utils-swig" if File.directory?("utils-swig")
+
+require 'rubygems'
+require 'active_record'
+require 'yaml'
+require 'datajockey/base'
+require 'datajockey/annotation/create_annotation'
+require 'fileutils'
+
+module Datajockey
+  def Datajockey::importAudioFile(audioFile, 
+                                  compute_beats = true, 
+                                  compute_descriptors = true, 
+                                  title = nil, artist_name = nil, album_name = nil, album_track = nil)
+    unless File.exists?(audioFile)
+      raise "#{audioFile} does not exist, aborting import"
+    end
+
+    #connect to the database
+    Datajockey::connect
+
+    unless Datajockey::config["annotation"]["files"]
+      raise 'Datajockey::config["annotation"]["files"] is not set'
+    end
+    annotation_files = File.expand_path(Datajockey::config["annotation"]["files"])
+    unless File.directory?(annotation_files) and
+      File.writable?(annotation_files)
+      puts "Datajockey::config[\"annotation\"][\"files\"] : #{annotation_files} is not a valid, writable directory"
+      puts "Create the directory? (y/n)"
+      if STDIN.gets() !~ /^y/
+        puts "aborting"
+        exit
+      else
+        FileUtils.mkdir_p(annotation_files)
+      end
+    end
+
+    #make sure we haven't already imported this
+    if !AudioFile.find_by_location(audioFile)
+      annotation =  Datajockey::Annotation::createAnnotation(audioFile, compute_beats, compute_descriptors)
+      title = annotation["title"] unless title
+      artist_name = annotation["artist"] unless artist_name
+      album_name = annotation["album"]["name"] unless album_name
+      album_track =  annotation["album"]["track"] unless album_track
+
+      #create the audio file
+      audio_file = AudioFile.find_or_create_by_location(audioFile)
+      #store the time in milliseconds
+      audio_file.milliseconds = annotation["seconds"] * 1000
+
+      #try to figure out the file type
+      file_extension = audioFile.slice(/\w+$/)
+      aft = AudioFileType.get_valid(file_extension)
+      audio_file.audio_file_type = aft if aft
+      audio_file.channels = annotation["channels"] if annotation["channels"]
+      audio_file.save
+
+      #create the work
+      work = AudioWork.create(:name => title, :audio_file => audio_file)
+
+      if annotation["tags"]
+        annotation["tags"].each do |class_name, t|
+          tag_class = TagClass.find_or_create_by_name(class_name)
+          #make an array just to reduce code
+          t = [t] unless t.is_a?(Array)
+          t.each do |tag|
+            work.tags << Tag.find_or_create_by_name_and_tag_class_id(tag, tag_class.id)
+          end
+        end
+      end
+
+      if annotation["descriptors"]
+        annotation["descriptors"].each do |name, h|
+          ["average", "median"].each do |t|
+            if h[t]
+              dt = DescriptorType.find_or_create_by_name("#{name} #{t}")
+              d = Descriptor.find(:first, :conditions => {:audio_work_id => work.id, :descriptor_type_id => dt.id})
+              d = Descriptor.new(:audio_work_id => work.id, :descriptor_type_id => dt.id) unless d
+              d.update_attribute(:float_value, h[t])
+            end
+          end
+        end
+      end
+
+      artist = nil
+      if artist_name
+        #find or create the artist
+        artist = Artist.find_or_create_by_name(artist_name)
+
+        artist_work = ArtistAudioWork.find_or_create_by_audio_work_id(work.id)
+        artist.artist_audio_works << artist_work unless artist.artist_audio_works.member?(artist_work)
+      end
+      if album_name
+        #create or find the album
+        album = Album.find_or_create_by_name(album_name)
+        #insert the work into the album
+        album.audio_works << work
+        #set the track number
+        work.album_audio_work.update_attribute(:track, album_track) if album_track
+        album.artists << artist if artist
+      end
+      #create the annotation file info
+      #write the annotation file
+      annotation_file = AnnotationFile.find_or_create_by_audio_work_id(work.id)
+      location = File.join(File.expand_path(Datajockey::config["annotation"]["files"]), work.id.to_s + ".yaml")
+      annotation_file.update_attribute(:location, location)
+      File.open(location, "w") { |f| f.print annotation.to_yaml }
+    else
+      puts "#{audioFile} already exists in the database, skipping"
+    end
+  end
+end
+
+if __FILE__ == $0
+  require 'optparse'
+
+  def recursively_add_files(dir)
+    files = []
+    entries = Dir.entries(dir)
+    #delete any entries prefixed by .
+    entries.delete_if{|e| e =~ /^\./}
+    entries = entries.collect {|f| File.join(dir, f)}
+    entries.each do |f|
+      if File.directory?(f)
+        files = files + recursively_add_files(f)
+      else
+        files << File.expand_path(f)
+      end
+    end
+    return files
+  end
+
+  config_file = nil
+  recursive = false
+  force = false
+  descriptors = true
+  beats = true
+
+  opts = OptionParser.new do |opts|
+    opts.on("-h", "--help", "Display this help") do
+      puts opts
+      exit
+    end
+    opts.on("-f", "--force", "Don't ask the user for any info, just import the files") do
+      force = true
+    end
+    opts.on("-b", "--no-beats", "Don't compute beat locations [or tempo descriptors]") do
+      beats = false
+    end
+    opts.on("-d", "--no-descriptors", "Don't compute spectral descriptors") do
+      descriptors = false
+    end
+    opts.on("-r", "--recursive", "Recursively add contents of directories to items to import") do
+      recursive = true
+    end
+    opts.on("-c <file>", "--config <file>", "Set config file") do |c|
+      if File.exists?(c)
+        config_file = c
+      else
+        raise c.to_s + " is not a valid file"
+      end
+    end
+  end
+
+  begin
+    opts.parse!(ARGV)
+  rescue => e
+    puts "error parsing options: " + e.to_s
+    exit
+  end
+
+  if config_file != nil
+    Datajockey::setConfFile(File.expand_path(config_file))
+  else
+    Datajockey::setDefaultConfFile
+  end
+
+  badFiles = []
+  in_files = Array.new
+
+  if ARGV.size < 1
+    puts "You must provide at least one input file"
+    exit
+  end
+
+  #if there is the recursive switch then add the directory contents
+  if recursive
+    ARGV.each do |f|
+      if File.directory?(f)
+        in_files = in_files + recursively_add_files(f)
+      elsif File.exists?(f)
+        in_files << File.expand_path(f)
+      else
+        puts "#{f} is not a valid file. Aborting"
+        exit
+      end
+    end
+  else
+    ARGV.each do |f|
+      if File.exists?(f) and not File.directory?(f)
+        in_files << File.expand_path(f)
+      else
+        puts "#{f} is not a normal, valid file. Aborting"
+        exit
+      end
+    end
+  end
+
+  #ditch log files, m3u, jpg, gif, cue, txt, nfo
+  in_files.delete_if {|f| 
+    f =~ /\.log$/ or
+    f =~ /\.m3u$/ or 
+    f =~ /\.jpg$/ or 
+    f =~ /\.jpeg$/ or 
+    f =~ /\.gif$/ or 
+    f =~ /\.cue$/ or
+    f =~ /\.txt$/ or
+    f =~ /\.nfo$/
+  }
+
+  #make sure they files are unique
+  in_files.uniq!
+  #sort them
+  in_files.sort!
+
+  unless force
+    puts "files:"
+    puts "\t" + in_files.join("\n\t")
+    puts "\nImporting the files listed above, continue? (yes/no)"
+    responce = STDIN.readline.chomp.gsub(/\s*/,"")
+    if not(responce == "y" || responce == "yes")
+      puts "Aborting"
+      exit
+    end
+  end
+
+  in_files.each do |f|
+    begin
+      puts "attempting import of #{f}"
+      Datajockey::importAudioFile(f, beats, descriptors)
+      puts "success"
+    rescue
+      puts "could not import #{f}: #{$!}"
+      badFiles << f
+    end
+  end
+end

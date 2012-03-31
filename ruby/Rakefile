@@ -1,0 +1,2 @@
+require 'rake'
+load 'tasks/databases.rake'
