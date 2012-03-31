@@ -92,7 +92,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    master_layout->addWidget(mMasterTempo, 0, Qt::AlignHCenter);
 
    mMasterVolume = new QSlider(Qt::Vertical, this);
-   mMasterVolume->setRange(0, static_cast<int>(1.5 * (float)one_scale));
+   mMasterVolume->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
    mMasterVolume->setValue(one_scale);
 
    mAudioLevel = new AudioLevel(this);
