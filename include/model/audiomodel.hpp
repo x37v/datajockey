@@ -109,10 +109,18 @@ namespace DataJockey {
             QMap<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
             QMap<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
 
+
             //make sure that player states/audio buffer manager access is thread safe
             QMutex mPlayerStatesMutex;
 
+            //maintain master state info
             double mMasterBPM;
+            bool mCrossFadeEnabled;
+            int mCrossFadePosition;
+            int mCrossFadePlayers[2];
+
+            int mPlayerAudibleThresholdVolume;
+            int mCrossfadeAudibleThresholdPosition;
 
             //**** private methods
 
@@ -135,6 +143,8 @@ namespace DataJockey {
             void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
             void set_player_position_frame(int player_index, int frame, bool absolute = true);
             void set_player_position_beat_relative(int player_index, int beats);
+
+            void player_eval_audible(int player_index);
       };
    }
 }
