@@ -7,6 +7,7 @@
 #include <QMutexLocker>
 #include <vector>
 #include <QMetaObject>
+#include <QTimer>
 
 using namespace DataJockey;
 using namespace DataJockey::Audio;
@@ -14,6 +15,10 @@ using namespace DataJockey::Audio;
 #include <iostream>
 using std::cerr;
 using std::endl;
+
+namespace {
+   const int audible_timeout_ms = 200;
+}
 
 template <typename T>
 T clamp(T val, T bottom, T top) {
@@ -72,6 +77,7 @@ class AudioModel::PlayerState {
          mAudioBuffer(),
          mBeatBuffer(),
          mCurrentFrame(0),
+         mNumFrames(0),
          mMaxSampleValue(0.0) { }
       //not okay to update in audio thread
       QString mFileName;
@@ -84,6 +90,7 @@ class AudioModel::PlayerState {
 
       //okay to update in audio thread
       unsigned int mCurrentFrame;
+      unsigned int mNumFrames;
       float mMaxSampleValue;
 };
 
@@ -142,7 +149,9 @@ class AudioModel::ConsumeThread : public QThread {
             AudioModel::QueryPlayState * cmd = new AudioModel::QueryPlayState(mModel);
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
-            msleep(15);
+            //XXX can we decrease this value and still have a responsive UI? [pause is laggy with 15ms]
+            msleep(50);
+            //msleep(15);
          }
       }
 };
@@ -228,7 +237,14 @@ AudioModel::AudioModel() :
    mConsumeThread = new ConsumeThread(this, mMaster->scheduler());
    mConsumeThread->start();
 
+   mAudibleTimer = new QTimer(this);
+   mAudibleTimer->setInterval(audible_timeout_ms);
+   QObject::connect(mAudibleTimer, SIGNAL(timeout()), SLOT(players_eval_audible()));
+   mAudibleTimer->start();
+
    //internal signal connections
+   
+
    /*
    QObject::connect(this, SIGNAL(relay_player_audio_file_changed(int, QString)),
          this, SIGNAL(player_audio_file_changed(int, QString)),
@@ -409,6 +425,7 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
          //if the file isn't already loading then start up our thread and load it
          if (!loading) {
             mPlayerStates[player_index]->mAudioBuffer.release();
+            mPlayerStates[player_index]->mNumFrames = 0;
             if (mThreadPool[player_index]->isRunning()) {
                mThreadPool[player_index]->abort();
                mThreadPool[player_index]->wait();
@@ -429,6 +446,8 @@ void AudioModel::set_player_audio_file(int player_index, QString location){
          //update player state
          mPlayerStates[player_index]->mFileName = location;
          mPlayerStates[player_index]->mAudioBuffer.reset(location);
+         if (mPlayerStates[player_index]->mAudioBuffer.valid())
+            mPlayerStates[player_index]->mNumFrames = mPlayerStates[player_index]->mAudioBuffer->length();
 
          //notify
          emit(player_value_changed(player_index, "audio_file", location));
@@ -447,6 +466,7 @@ void AudioModel::player_clear_buffers(int player_index) {
       queue_command(new PlayerClearBuffersCommand(player_index, this, oldFileName));
       mPlayerStates[player_index]->mFileName.clear();
       mPlayerStates[player_index]->mAudioBuffer.release();
+      mPlayerStates[player_index]->mNumFrames = 0;
       //notify
       emit(player_triggered(player_index, "audio_file_cleared"));
    }
@@ -494,13 +514,13 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
 void AudioModel::relay_player_audio_file_changed(int player_index, QString fileName){
    player_trigger(player_index, "reset");
    mPlayerStates[player_index]->mAudioBuffer.reset(fileName);
+   if (mPlayerStates[player_index]->mAudioBuffer.valid())
+      mPlayerStates[player_index]->mNumFrames = mPlayerStates[player_index]->mAudioBuffer->length();
    emit(player_value_changed(player_index, "audio_file", fileName));
 }
 
 void AudioModel::relay_player_position_changed(int player_index, int frame_index){
    emit(player_value_changed(player_index, "frame", frame_index));
-   //XXX only update every x relays?
-   player_eval_audible(player_index);
 }
 
 void AudioModel::relay_player_audio_level(int player_index, int percent) {
@@ -517,6 +537,11 @@ void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){
       if (mPlayerStates[player_index]->mFileName == fileName)
          emit(player_value_changed(player_index, "progress", percent));
    }
+}
+
+void AudioModel::players_eval_audible() {
+   for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++)
+      player_eval_audible(player_index);
 }
 
 //called from another thread
@@ -561,8 +586,6 @@ void AudioModel::master_set(QString name, bool value) {
       if (value != mCrossFadeEnabled) {
          mCrossFadeEnabled = value;
          queue_command(new MasterBoolCommand(value ? MasterBoolCommand::XFADE : MasterBoolCommand::NO_XFADE));
-         player_eval_audible(mCrossFadePlayers[0]);
-         player_eval_audible(mCrossFadePlayers[1]);
       }
    } else
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not a master_set (bool) arg" << endl;
@@ -585,8 +608,6 @@ void AudioModel::master_set(QString name, int value) {
          mCrossFadePosition = value;
          queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
          emit(master_value_changed("crossfade_position", value));
-         player_eval_audible(mCrossFadePlayers[0]);
-         player_eval_audible(mCrossFadePlayers[1]);
       }
    } else if (name == "sync_to_player") {
       if (value < 0 || value >= (int)mNumPlayers)
@@ -707,9 +728,6 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    //queue the actual command [who's action is stored in the action_itr]
    queue_command(new DataJockey::Audio::PlayerStateCommand(player_index, value ? action_itr->first : action_itr->second));
    emit(player_toggled(player_index, name, value));
-
-   //XXX only eval on state changes that apply?
-   player_eval_audible(player_index);
 }
 
 void AudioModel::player_set(int player_index, QString name, int value) {
@@ -749,9 +767,14 @@ void AudioModel::player_set(int player_index, QString name, int value) {
          return;
       }
 
+      if (name == "volume") {
+         if(pstate->mParamInt["volume"] != value)
+            pstate->mParamInt["volume"] = value;
+         else
+            return;
+      }
+
       queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, *action_itr, (double)value / double(one_scale)));
-      if (name == "volume")
-         player_eval_audible(player_index);
    }
 }
 
@@ -841,25 +864,29 @@ void AudioModel::queue_command(DataJockey::Audio::Command * cmd){
 void AudioModel::player_eval_audible(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+
    QMutexLocker lock(&mPlayerStatesMutex);
 
    PlayerState * state = mPlayerStates[player_index];
    bool audible = true;
 
-   if(!state->mAudioBuffer.valid() ||
-         state->mCurrentFrame >= state->mAudioBuffer->length() ||
+   if(state->mNumFrames == 0 ||
+         state->mCurrentFrame >= state->mNumFrames ||
          state->mParamBool["mute"] ||
          state->mParamBool["pause"] ||
          //XXX detect player cue style: player->mParamBool["cue"]
          state->mParamInt["volume"] < mPlayerAudibleThresholdVolume ||
-         (mCrossFadePlayers[0] == player_index && mCrossFadePosition < mCrossfadeAudibleThresholdPosition) ||
-         (mCrossFadePlayers[1] == player_index && mCrossFadePosition > (one_scale - mCrossfadeAudibleThresholdPosition))) {
+         (mCrossFadeEnabled && 
+          ((mCrossFadePlayers[1] == player_index && mCrossFadePosition < mCrossfadeAudibleThresholdPosition) ||
+          (mCrossFadePlayers[0] == player_index && mCrossFadePosition > (one_scale - mCrossfadeAudibleThresholdPosition))))
+         ) {
       audible = false;
    }
 
    if (state->mParamBool["audible"] != audible) {
       state->mParamBool["audible"] = audible;
       emit(player_toggled(player_index, "audible", audible));
+      cerr << player_index << " audible " << audible << endl;
    } 
 }
 

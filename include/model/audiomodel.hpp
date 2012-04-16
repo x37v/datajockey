@@ -15,6 +15,8 @@
 #include "scheduler.hpp"
 #include <vector>
 
+class QTimer;
+
 namespace DataJockey {
    namespace Audio {
       class AudioModel : public QObject {
@@ -88,6 +90,7 @@ namespace DataJockey {
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals
             void relay_audio_file_load_progress(QString fileName, int percent);
+            void players_eval_audible();
 
          private:
             friend class PlayerClearBuffersCommand;
@@ -121,6 +124,8 @@ namespace DataJockey {
 
             int mPlayerAudibleThresholdVolume;
             int mCrossfadeAudibleThresholdPosition;
+
+            QTimer * mAudibleTimer;
 
             //**** private methods
 
