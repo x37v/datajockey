@@ -154,8 +154,8 @@ AudioModel::AudioModel() :
    mPlayerStates(),
    mPlayerStatesMutex(QMutex::Recursive),
    mMasterBPM(0.0),
-   mCrossFadeEnabled(true),
-   mCrossFadePosition(one_scale / 2),
+   mCrossFadeEnabled(false),
+   mCrossFadePosition(0),
    mPlayerAudibleThresholdVolume(0.05 * one_scale), //XXX make this configurable?
    mCrossfadeAudibleThresholdPosition(0.05 * one_scale)
 {
