@@ -24,6 +24,7 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mBeatBuffer(),
    mBeatVerticies(),
    mBeatVerticiesValid(false),
+   mSampleRate(44100.0),
    mFramesPerLine(256),
    mFrame(0),
    mColorBackgroud(QColor::fromRgb(0,0,0)),
@@ -49,6 +50,15 @@ void WaveFormViewGL::clear_audio() {
 void WaveFormViewGL::set_audio_file(QString file_name) { 
    QMutexLocker lock(&mMutex);
    mAudioBuffer.reset(file_name); 
+   if (mAudioBuffer.valid()) {
+      float sample_rate = mAudioBuffer->sample_rate();
+      if (sample_rate != mSampleRate) {
+         mSampleRate = sample_rate;
+         //if the beat buffer was set before the audio buffer, we'll need to redraw
+         if (mBeatVerticiesValid)
+            update_beats();
+      }
+   }
    mVerticiesValid = false;
    update();
 }
@@ -65,8 +75,7 @@ void WaveFormViewGL::set_beat_buffer(Audio::BeatBuffer & buffer) {
    if (mBeatBuffer.length() > 2) {
 
       //XXX make configurable
-      //XXX dependent on 44100 sampling rate
-      double frames_per_view = mBeatBuffer.median_difference() * 8.0 * 44100.0;
+      double frames_per_view = mBeatBuffer.median_difference() * 8.0 * mSampleRate;
       mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
       mVerticiesValid = false;
 
@@ -283,9 +292,7 @@ void WaveFormViewGL::update_beats() {
    mBeatVerticies.resize(4 * mBeatBuffer.length());
    for(unsigned int i = 0; i < mBeatBuffer.length(); i++) {
       int line_index = i * 4;
-      //XXX assuming that the audio file is sampled at 44100
-      //how do we resolve this?
-      GLfloat pos = (44100.0 * mBeatBuffer[i]) / mFramesPerLine;
+      GLfloat pos = (mSampleRate * mBeatBuffer[i]) / mFramesPerLine;
       mBeatVerticies[line_index] = mBeatVerticies[line_index + 2] = pos;
       mBeatVerticies[line_index + 1] = static_cast<GLfloat>(1.0);
       mBeatVerticies[line_index + 3] = static_cast<GLfloat>(-1.0);

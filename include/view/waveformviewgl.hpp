@@ -54,6 +54,7 @@ namespace DataJockey {
             Audio::BeatBuffer mBeatBuffer;
             std::vector<GLfloat> mBeatVerticies;
             bool mBeatVerticiesValid;
+            float mSampleRate;
 
             int mFramesPerLine;
             int mFrame;
