@@ -387,6 +387,8 @@ void Player::max_sample_value_reset() { mMaxSampleValue = 0.0; };
 
 //misc
 void Player::position_relative(TimePoint amt){
+   if (!mBeatBuffer)
+      return;
    mPosition = mBeatBuffer->position_at_time(
          ((double)mStretcher->frame()) / (double)mSampleRate, mPosition);
    position(mPosition + amt);
