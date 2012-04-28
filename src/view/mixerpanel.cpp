@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QDial>
 #include <QProgressBar>
+#include <QLineEdit>
 
 #include <iostream>
 using std::cout;
@@ -17,7 +18,7 @@ using std::endl;
 
 using namespace DataJockey::View;
 
-MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false) {
+MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false), mMasterPositionLast(0,0,0) {
    unsigned int num_players = Audio::AudioModel::instance()->player_count();
 
    QBoxLayout * top_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
@@ -80,6 +81,12 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    //master
    QBoxLayout * master_layout = new QBoxLayout(QBoxLayout::TopToBottom);
    master_layout->setAlignment(Qt::AlignCenter);
+
+   //position
+   mMasterPosition = new QLineEdit("000:0", this);
+   master_layout->addWidget(mMasterPosition, 0, Qt::AlignHCenter);
+   mMasterPosition->setReadOnly(true);
+   mMasterPosition->setAlignment(Qt::AlignRight);
 
    QLabel * lab = new QLabel("Tempo", this);
    master_layout->addWidget(lab, 0, Qt::AlignHCenter);
@@ -186,6 +193,17 @@ void MixerPanel::master_set(QString name, double val) {
 
 void MixerPanel::master_set(QString name, Audio::TimePoint val) {
    if (name == "transport_position") {
+      //ignore position within beat
+      val.pos_in_beat(0);
+      if (val != mMasterPositionLast) {
+         QString bar;
+         QString beat;
+         bar.setNum(val.bar());
+         beat.setNum(val.beat() + 1);
+         //mMasterPosition->setCursorPosition(0);
+         mMasterPosition->setText(bar + ":" + beat);
+         mMasterPositionLast = val;
+      }
    }
 }
 

@@ -10,6 +10,7 @@
 class QSlider;
 class QDoubleSpinBox;
 class QBoxLayout;
+class QLineEdit;
 
 namespace DataJockey {
    namespace View {
@@ -65,6 +66,8 @@ namespace DataJockey {
             bool mSettingTempo;
             AudioLevel * mAudioLevel;
             QBoxLayout * mSliderLevelLayout;
+            QLineEdit * mMasterPosition;
+            TimePoint mMasterPositionLast;
             
             //map senders to indices for relaying
             QMap<QObject *, int> mSenderToIndex;
