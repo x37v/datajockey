@@ -79,6 +79,7 @@ namespace DataJockey {
 
             void master_value_changed(QString name, int value);
             void master_value_changed(QString name, double value);
+            void master_value_changed(QString name, TimePoint timepoint);
 
          protected slots:
             //only for internal use
@@ -86,6 +87,7 @@ namespace DataJockey {
             void relay_player_position_changed(int player_index, int frame_index);
             void relay_player_audio_level(int player_index, int percent);
             void relay_master_audio_level(int percent);
+            void relay_master_position(TimePoint position);
 
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals

@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMap>
 #include "beatbuffer.hpp"
+#include "timepoint.hpp"
 
 class QSlider;
 class QDoubleSpinBox;
@@ -12,6 +13,8 @@ class QBoxLayout;
 
 namespace DataJockey {
    namespace View {
+      using DataJockey::Audio::TimePoint;
+
       class Player;
       class AudioLevel;
 
@@ -28,6 +31,7 @@ namespace DataJockey {
 
             void master_set(QString name, int val);
             void master_set(QString name, double val);
+            void master_set(QString name, TimePoint val);
 
          protected slots:
             void relay_player_toggled(bool state);

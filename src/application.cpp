@@ -75,6 +75,10 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(master_value_changed(QString, double)),
          mMixerPanel,
          SLOT(master_set(QString, double)));
+   QObject::connect(mAudioModel,
+         SIGNAL(master_value_changed(QString, TimePoint)),
+         mMixerPanel,
+         SLOT(master_set(QString, TimePoint)));
 
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,

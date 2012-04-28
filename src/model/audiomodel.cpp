@@ -102,6 +102,7 @@ class AudioModel::QueryPlayState : public MasterCommand {
       std::vector<AudioModel::PlayerState* > mStates;
       unsigned int mNumPlayers;
       float mMasterMaxVolume;
+      TimePoint mMasterTransportPosition;
 
       QueryPlayState(AudioModel * model) : mAudioModel(model), mMasterMaxVolume(0.0) {
          mNumPlayers = mAudioModel->player_count();
@@ -114,6 +115,7 @@ class AudioModel::QueryPlayState : public MasterCommand {
             delete mStates[i];
       }
       virtual void execute(){
+         mMasterTransportPosition = master()->transport()->position();
          mMasterMaxVolume = master()->max_sample_value();
          master()->max_sample_value_reset();
          for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -132,6 +134,10 @@ class AudioModel::QueryPlayState : public MasterCommand {
                   Qt::QueuedConnection,
                   Q_ARG(int, master_level));
          }
+
+         QMetaObject::invokeMethod(mAudioModel, "relay_master_position", 
+               Qt::QueuedConnection,
+               Q_ARG(TimePoint, mMasterTransportPosition));
       }
       //this command shouldn't be stored
       virtual bool store(CommandIOData& /* data */) const { return false; }
@@ -169,6 +175,9 @@ AudioModel::AudioModel() :
    mCrossfadeAudibleThresholdPosition(0.05 * one_scale)
 {
    unsigned int num_players = 2;
+
+   //register signal types
+   qRegisterMetaType<TimePoint>("TimePoint");
 
    mCrossFadePlayers[0] = 0;
    mCrossFadePlayers[1] = 1;
@@ -529,6 +538,10 @@ void AudioModel::relay_player_audio_level(int player_index, int percent) {
 
 void AudioModel::relay_master_audio_level(int percent) {
    emit(master_value_changed("audio_level", percent));
+}
+
+void AudioModel::relay_master_position(TimePoint position) {
+   emit(master_value_changed("transport_position", position));
 }
 
 void AudioModel::relay_audio_file_load_progress(QString fileName, int percent){

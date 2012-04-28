@@ -184,6 +184,11 @@ void MixerPanel::master_set(QString name, double val) {
       mMasterTempo->setValue(val);
 }
 
+void MixerPanel::master_set(QString name, Audio::TimePoint val) {
+   if (name == "transport_position") {
+   }
+}
+
 void MixerPanel::relay_player_toggled(bool checked) {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    if (!button)
