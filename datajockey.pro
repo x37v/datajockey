@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lrubberband -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 CONFIG += debug
@@ -13,10 +13,12 @@ DEPENDPATH += . \
               include/controller \
               include/view \
               include/old \
+              include/util \
               src/audio \
               src/controller \
               src/view \
-              src/old
+              src/old \
+              src/util
 MOC_DIR = moc/
 OBJECTS_DIR = obj/
 INCLUDEPATH += . \
@@ -26,6 +28,7 @@ INCLUDEPATH += . \
    include/model \
    include/view \
    include/old \
+   include/util \
    /usr/include/rubberband /usr/include/rasqal/ \
    /usr/local/include/oscpack/
 
@@ -56,6 +59,7 @@ HEADERS += include/application.hpp \
            include/controller/audioloaderthread.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
+           include/util/audiofiletag.hpp \
            include/view/audiolevel.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
@@ -96,6 +100,7 @@ SOURCES += src/application.cpp \
            src/controller/audioloaderthread.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
+           src/util/audiofiletag.cpp \
            src/view/audiolevel.cpp \
            src/view/main.cpp \
            src/view/mixerpanel.cpp \
