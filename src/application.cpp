@@ -47,7 +47,8 @@ Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
 {
-   Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
+   //Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
+   Model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
    mFileQuery = new QSqlQuery("", Model::db::get());
    mWorkInfoQuery = new QSqlQuery("", Model::db::get());
 
