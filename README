@@ -1,0 +1,3 @@
+vamp ubuntu:
+headers are in vamp-plugin-sdk
+you'll also want libvamp-hostsdk3 installed
