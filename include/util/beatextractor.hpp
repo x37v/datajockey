@@ -6,6 +6,7 @@
 #include "audiobufferreference.hpp"
 #include "beatbuffer.hpp"
 #include <stdexcept>
+#include <vector>
 
 namespace DataJockey {
 	namespace Util {
@@ -20,10 +21,10 @@ namespace DataJockey {
 			private:
 				Vamp::Plugin * mPlugin;
 				unsigned int mSampleRate;
-				unsigned int mChannels;
 				size_t mBlockSize;
 				size_t mStepSize;
-				void allocate_plugin(int sample_rate, unsigned int num_channels) throw(std::runtime_error);
+				std::vector<float> mAnalBuffer;
+				void allocate_plugin(int sample_rate) throw(std::runtime_error);
 		};
 	}
 }

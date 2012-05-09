@@ -29,7 +29,7 @@ INCLUDEPATH += . \
    include/view \
    include/old \
    include/util \
-   /usr/include/rubberband /usr/include/rasqal/ \
+	/usr/include/rasqal/ \
    /usr/local/include/oscpack/
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
