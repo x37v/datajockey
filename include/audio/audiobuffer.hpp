@@ -26,6 +26,11 @@ namespace DataJockey {
             float sample(unsigned int channel, unsigned int index) const;
             float sample(unsigned int channel, unsigned int index, double subsample) const;
 
+				//fill a buffer, mixing to mono, starting at index start_index
+				//expects the buffer to be resized to its desired fill size
+				//zero pads the output buffer if you pass the end of the valid data
+				void fill_mono(data_buffer_t& buffer, unsigned int start_index);
+
             bool valid() const;
 
             //get the data buffer

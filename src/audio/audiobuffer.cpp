@@ -61,6 +61,25 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
    return linear_interp(sample0, sample1, subsample);
 }
 
+void AudioBuffer::fill_mono(data_buffer_t& buffer, unsigned int start_index) {
+	const unsigned int num_channels = channels();
+	const unsigned int frames = buffer.size();
+	const unsigned int frames_total = mAudioData.size() / num_channels;
+	const unsigned int valid_frames = ((frames + start_index) <= frames_total) ? frames : frames_total - start_index;
+
+	unsigned int i = 0;
+	float mult = 1.0f / (float)num_channels;
+	for (; i < valid_frames; i++) {
+		buffer[i] = 0.0f;
+		for (unsigned int j = 0; j < num_channels; j++)
+			buffer[i] += mAudioData[(start_index + i) * num_channels + j];
+		buffer[i] *= mult;
+	}
+	//zero pad
+	for (; i < frames; i++)
+		buffer[i] = 0.0f;
+}
+
 bool AudioBuffer::valid() const {
    return loaded() && mSoundFile.valid();
 }
