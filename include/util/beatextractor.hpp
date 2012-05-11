@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <vamp-hostsdk/PluginHostAdapter.h>
-#include "audiobufferreference.hpp"
+#include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include <stdexcept>
 #include <vector>
@@ -15,7 +15,7 @@ namespace DataJockey {
 			public:
 				BeatExtractor();
 				virtual ~BeatExtractor();
-				bool process(Audio::AudioBufferReference audio_buffer, Audio::BeatBuffer& beat_buffer) throw(std::runtime_error);
+				bool process(const Audio::AudioBuffer& audio_buffer, Audio::BeatBuffer& beat_buffer) throw(std::runtime_error);
 			signals:
 				void progress(int percent);
 			private:
