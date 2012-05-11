@@ -2,7 +2,6 @@
 #define DATAJOCKEY_APPLICATION_HPP
 
 #include <QApplication>
-#include <QSqlQuery>
 #include "mixerpanel.hpp"
 
 class QWidget;
@@ -24,8 +23,6 @@ namespace DataJockey {
          View::MixerPanel * mMixerPanel;
          QWidget * mTop;
          int mCurrentwork;
-         QSqlQuery * mFileQuery;
-         QSqlQuery * mWorkInfoQuery;
    };
 }
 

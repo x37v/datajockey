@@ -22,26 +22,8 @@
 #include <QWidget>
 #include <QSplitter>
 #include <QTabWidget>
-#include <QSqlRecord>
 
 using namespace DataJockey;
-
-namespace {
-   const QString cFileQueryString(
-         "select audio_files.location audio_file, annotation_files.location beat_file\n"
-         "from audio_works\n"
-         "\tjoin audio_files on audio_files.id = audio_works.audio_file_id\n"
-         "\tjoin annotation_files on annotation_files.audio_work_id = audio_works.id\n"
-         "where audio_works.id = ");
-
-   const QString cWorkInfoQueryString(
-         "select audio_works.name title,\n"
-         "\tartists.name\n"
-         "artist from audio_works"
-         "\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id\n"
-         "\tinner join artists on artists.id = artist_audio_works.artist_id\n"
-         "where audio_works.id = ");
-}
 
 Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
@@ -49,8 +31,6 @@ Application::Application(int & argc, char ** argv) :
 {
    //Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
    Model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
-   mFileQuery = new QSqlQuery("", Model::db::get());
-   mWorkInfoQuery = new QSqlQuery("", Model::db::get());
 
    mAudioModel = Audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
@@ -226,44 +206,28 @@ void Application::select_work(int work_id) {
 using namespace std;
 
 void Application::set_player_trigger(int player_index, QString name) {
-   if (name != "load")
-      return;
+	if (name != "load")
+		return;
 
-   //build up query
-   QString fileQueryStr(cFileQueryString);
-   QString workQueryStr(cWorkInfoQueryString);
-   QString id;
-   id.setNum(mCurrentwork);
-   fileQueryStr.append(id);
-   workQueryStr.append(id);
-   //execute
-   mFileQuery->exec(fileQueryStr);
-   QSqlRecord rec = mFileQuery->record();
-   int audioFileCol = rec.indexOf("audio_file");
-   int beatFileCol = rec.indexOf("beat_file");
+	//find the file locations
+	QString audio_file;
+	QString annotation_file;
+	if (!Model::db::find_locations_by_id(mCurrentwork, audio_file, annotation_file))
+		return;
+	mAudioModel->set_player_buffers(player_index,
+			audio_file,
+			annotation_file);
 
-   if(mFileQuery->first()){
-      QString audiobufloc = mFileQuery->value(audioFileCol).toString();
-      QString beatbufloc = mFileQuery->value(beatFileCol).toString();
-
-      mAudioModel->set_player_buffers(player_index,
-            audiobufloc,
-            beatbufloc);
-
-      mWorkInfoQuery->exec(workQueryStr);
-
-      if(mWorkInfoQuery->first()){
-         rec = mWorkInfoQuery->record();
-         int titleCol = rec.indexOf("title");
-         int artistCol = rec.indexOf("artist");
-         //XXX invoke or is this okay?
-         mMixerPanel->player_set(player_index,
-               "song_description",
-               mWorkInfoQuery->value(artistCol).toString() + "\n" + mWorkInfoQuery->value(titleCol).toString());
-      } else {
-         mMixerPanel->player_set(player_index, "song_description", "unknown");
-      }
-   }
+	//find the work info
+	QString artist_name;
+	QString work_title;
+	if (Model::db::find_artist_and_title_by_id(mCurrentwork, artist_name, work_title)) {
+		//XXX invoke or is this okay?
+		mMixerPanel->player_set(player_index,
+				"song_description",
+				artist_name + "\n" + work_title);
+	} else
+		mMixerPanel->player_set(player_index, "song_description", "unknown");
 }
 
 void Application::relay_player_trigger(int player_index, QString name) {
