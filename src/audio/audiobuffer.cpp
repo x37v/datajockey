@@ -61,7 +61,7 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
    return linear_interp(sample0, sample1, subsample);
 }
 
-void AudioBuffer::fill_mono(data_buffer_t& buffer, unsigned int start_index) {
+void AudioBuffer::fill_mono(data_buffer_t& buffer, unsigned int start_index) const {
 	const unsigned int num_channels = channels();
 	const unsigned int frames = buffer.size();
 	const unsigned int frames_total = mAudioData.size() / num_channels;
