@@ -29,8 +29,8 @@ Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
 {
-   //Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
-   Model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
+   Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
+   //Model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
 
    mAudioModel = Audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
@@ -201,9 +201,6 @@ void Application::pre_quit_actions() {
 void Application::select_work(int work_id) {
    mCurrentwork = work_id;
 }
-
-#include <iostream>
-using namespace std;
 
 void Application::set_player_trigger(int player_index, QString name) {
 	if (name != "load")
