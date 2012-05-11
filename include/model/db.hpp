@@ -13,7 +13,7 @@ namespace DataJockey {
                QString username = "",
                QString password = "", 
                int port = -1, 
-               QString host = QString("localhost"));
+               QString host = QString("localhost")) throw(std::runtime_error);
 
          QSqlDatabase get();
          void close();
