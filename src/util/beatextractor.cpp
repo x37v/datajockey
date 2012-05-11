@@ -60,21 +60,33 @@ bool BeatExtractor::process(const Audio::AudioBuffer& audio_buffer, Audio::BeatB
 	beat_buffer.clear();
 
 	Vamp::Plugin::FeatureSet features;
-	const unsigned int last_block = (audio_buffer.length() - mBlockSize);
-	unsigned int i = 0;
-	//TODO report progress
-	for (; i <= last_block; i += mStepSize) {
+	const unsigned int audio_frames = audio_buffer.length();
+	const unsigned int last_block = (audio_frames - mBlockSize);
+
+	unsigned int progress_last = 0;
+	unsigned int progress_report = audio_buffer.length() / 100;
+	if (progress_report == 0)
+		progress_report = 1;
+
+	for (unsigned int i = 0; i <= last_block; i += mStepSize) {
 		audio_buffer.fill_mono(mAnalBuffer, i);
 		const float * bufptr = &mAnalBuffer.front();
 		features = mPlugin->process(&bufptr, Vamp::RealTime::frame2RealTime(i, mSampleRate));
 		for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
 			beat_buffer.insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
+
+		//TODO make this based on block size and a modulus for less math?
+		if ((i - progress_last) >= progress_report) {
+			emit(progress(i * 100 / audio_frames));
+			progress_last = i;
+		}
 	}
 
 	features = mPlugin->getRemainingFeatures();
 	for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
 		beat_buffer.insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
-	
+
+	emit(progress(100));
 	return true;
 }
 
