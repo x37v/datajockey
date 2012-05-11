@@ -27,7 +27,7 @@ namespace {
 	}
 
 	inline double vamp_realtime_to_seconds(const Vamp::RealTime& rt) {
-		return (double)rt.usec() / 1000000.0;
+		return (double)rt.sec + (double)rt.usec() / 1000000.0;
 	}
 }
 
