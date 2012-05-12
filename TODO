@@ -1,0 +1,10 @@
+collapse audio_file and annotation file into work.. 
+
+Work:
+  title
+  ..
+  milliseconds
+  channels
+  audio_file_location
+  audio_file_type_id
+  annotation_file_location
