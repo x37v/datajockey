@@ -3,6 +3,9 @@
 
 #include <QSqlDatabase>
 #include <QString>
+#include <QMap>
+#include <QVariant>
+#include <stdexcept>
 
 namespace DataJockey {
    namespace Model {
@@ -26,6 +29,42 @@ namespace DataJockey {
 					int work_id,
 					QString& artist_name,
 					QString& work_title);
+
+			//XXX use active record to get query strings!!!
+
+			namespace work {
+				int create(
+						const QMap<QString, QVariant>& attributes,
+						const QString& audio_file_location,
+						const QString& annotation_file_location
+						);
+				void descriptor_create_or_update(
+						int work_id,
+						const QString& descriptor_type,
+						float value);
+				void tag(
+						int work_id,
+						const QString& tag_class,
+						const QString& tag_value);
+			}
+
+			namespace audio_file {
+				int create(const QString& location);
+				QString location_by_work_id(int work_id);
+			}
+
+			namespace annotation_file {
+				int create(const QString& location);
+				QString location_by_work_id(int work_id);
+			}
+
+			namespace artist {
+				int find(const QString& name, bool create = false);
+			}
+
+			namespace album {
+				int find(const QString& name, bool create = false);
+			}
       }
    }
 }

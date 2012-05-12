@@ -45,8 +45,8 @@ void db::setup(
       QString name, 
       QString username,
       QString password,
-      int port,
-      QString host) {
+      int /* port */,
+      QString /* host */) throw(std::runtime_error) {
 
 	cDB = QSqlDatabase::addDatabase(type);
 	cDB.setDatabaseName(name);
@@ -108,4 +108,66 @@ bool db::find_artist_and_title_by_id(
 	work_title = query.value(titleCol).toString();
 
 	return true;
+}
+
+int db::work::create(
+		const QMap<QString, QVariant>& attributes,
+		const QString& audio_file_location,
+		const QString& annotation_file_location
+		) {
+	int artist_id = 0;
+	int album_id = 0;
+	int audio_file_id = 0;
+	int annotation_file_id = 0;
+
+	QMap<QString, QVariant>::const_iterator i;
+
+	i = attributes.find("artist");
+	if (i != attributes.end())
+		artist_id = artist::find(i.value().toString(), true);
+
+	i = attributes.find("album");
+	if (i != attributes.end())
+		album_id = album::find(i.value().toString(), true);
+
+	audio_file_id = audio_file::create(audio_file_location);
+	annotation_file_id = annotation_file::create(annotation_file_location);
+
+	return 0;
+}
+
+void db::work::descriptor_create_or_update(
+		int work_id,
+		const QString& descriptor_type,
+		float value) {
+}
+
+void db::work::tag(
+		int work_id,
+		const QString& tag_class,
+		const QString& tag_value) {
+}
+
+int db::audio_file::create(const QString& location) {
+	return 0;
+}
+
+QString db::audio_file::location_by_work_id(int work_id) {
+	return QString("");
+}
+
+int db::annotation_file::create(const QString& location) {
+	return 0;
+}
+
+QString db::annotation_file::location_by_work_id(int work_id) {
+	return QString("");
+}
+
+int db::artist::find(const QString& name, bool create) {
+	return 0;
+}
+
+int db::album::find(const QString& name, bool create) {
+	return 0;
 }
