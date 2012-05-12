@@ -1,10 +1,13 @@
 collapse audio_file and annotation file into work.. 
 
+Also put primary artist in there.. later down the line we could create an 'additional artist' relationship table that would map artist ---[type]---> work where type could be 'original artist' for a remix or cover, producer, etc. etc.
+
 Work:
   title
   ..
-  milliseconds
-  channels
+  artist_id
   audio_file_location
   audio_file_type_id
+  audio_file_milliseconds
+  audio_file_channels
   annotation_file_location
