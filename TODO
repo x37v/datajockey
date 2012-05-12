@@ -11,3 +11,25 @@ Work:
   audio_file_milliseconds
   audio_file_channels
   annotation_file_location
+
+
+Tags:
+  Relationships between tags and songs have type [genre, theme, etc].
+    How to differentiate 'metal' the material with 'metal' the genre?  postfix all genre's with 'music'?
+    'metal music', 'house music' ?
+    'speed' is a slang drug term.. how to differentiate?
+      Maybe tags should allow for duplicates? 'metal' the genre and 'metal' the material?
+      speed is a slang term for methamphetamine which is type of drug, a different speed is a scalar of distance over time
+  Tag -> Tag relationships:
+    computers and radios are types of electronic devices
+    love, anger, fear are types of emotions
+    'Computer Love' by Kraftwerk has lyrical theme tags: love, computer
+      selecting 'electronic devices' and 'emotions' for lyrical themes, when allowing for children in filters, would include 'Computer Love'
+
+Track Selections [playlists].
+  Groupings of tracks, can be ordered..
+  Baby Rave
+  Dark Mix
+  Emily's 2nd Electro mix..
+  etc.
+  Why not use tags??
