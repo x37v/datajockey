@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 16) do
+ActiveRecord::Schema.define(:version => 17) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -23,17 +23,14 @@ ActiveRecord::Schema.define(:version => 16) do
     t.integer "track"
   end
 
-  add_index "album_audio_works", ["album_id"], :name => "index_album_audio_works_on_album_id"
-  add_index "album_audio_works", ["audio_work_id"], :name => "index_album_audio_works_on_audio_work_id"
+  add_index "album_audio_works", ["album_id"], :name => "album"
+  add_index "album_audio_works", ["audio_work_id"], :name => "audio_work"
 
-# Could not dump table "albums" because of following StandardError
-#   Unknown type 'year' for column 'year'
-
-  create_table "annotation_files", :force => true do |t|
-    t.integer  "audio_work_id"
-    t.string   "location"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+  create_table "albums", :force => true do |t|
+    t.string  "name"
+    t.integer "year"
+    t.integer "tracks"
+    t.boolean "compilation", :default => false
   end
 
   create_table "artist_audio_works", :force => true do |t|
@@ -42,8 +39,8 @@ ActiveRecord::Schema.define(:version => 16) do
     t.integer "artist_role_id"
   end
 
-  add_index "artist_audio_works", ["artist_id"], :name => "index_artist_audio_works_on_artist_id"
-  add_index "artist_audio_works", ["audio_work_id"], :name => "index_artist_audio_works_on_audio_work_id"
+  add_index "artist_audio_works", ["artist_id"], :name => "artist"
+  add_index "artist_audio_works", ["audio_work_id"], :name => "audio_work"
 
   create_table "artist_roles", :force => true do |t|
     t.string "name"
@@ -57,15 +54,6 @@ ActiveRecord::Schema.define(:version => 16) do
     t.string "name"
   end
 
-  create_table "audio_files", :force => true do |t|
-    t.integer  "audio_file_type_id"
-    t.string   "location"
-    t.integer  "milliseconds"
-    t.integer  "channels",           :default => 2
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "audio_work_tags", :force => true do |t|
     t.integer "audio_work_id"
     t.integer "tag_id"
@@ -75,12 +63,23 @@ ActiveRecord::Schema.define(:version => 16) do
     t.integer "audio_file_id"
     t.string  "name"
     t.date    "year"
+    t.integer "audio_file_type_id"
+    t.string  "audio_file_location"
+    t.integer "audio_file_milliseconds"
+    t.integer "audio_file_channels",      :default => 2
+    t.string  "annotation_file_location"
+    t.integer "artist_id"
   end
 
-  add_index "audio_works", ["audio_file_id"], :name => "index_audio_works_on_audio_file_id"
+  add_index "audio_works", ["audio_file_id"], :name => "audio_file"
 
   create_table "descriptor_types", :force => true do |t|
     t.string "name"
+  end
+
+  create_table "descriptor_types_backup", :id => false, :force => true do |t|
+    t.integer "id",   :default => 0, :null => false
+    t.string  "name"
   end
 
   create_table "descriptors", :force => true do |t|
@@ -90,9 +89,17 @@ ActiveRecord::Schema.define(:version => 16) do
     t.integer "int_value"
   end
 
-  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "index_descriptors_on_audio_work_id_and_descriptor_type_id"
-  add_index "descriptors", ["audio_work_id"], :name => "index_descriptors_on_audio_work_id"
-  add_index "descriptors", ["descriptor_type_id"], :name => "index_descriptors_on_descriptor_type_id"
+  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "ad1"
+  add_index "descriptors", ["audio_work_id"], :name => "audio_work"
+  add_index "descriptors", ["descriptor_type_id"], :name => "descriptor"
+
+  create_table "descriptors_backup", :id => false, :force => true do |t|
+    t.integer "id",                 :default => 0, :null => false
+    t.integer "descriptor_type_id"
+    t.integer "audio_work_id"
+    t.float   "float_value"
+    t.integer "int_value"
+  end
 
   create_table "tag_classes", :force => true do |t|
     t.string "name"
