@@ -34,8 +34,7 @@
 const QString WorkDetailView::cWorkQuery(
 		"select audio_works.id id, audio_works.name title, artists.name artist\n"
 		"from audio_works\n"
-		"\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id\n"
-		"\tinner join artists on artists.id = artist_audio_works.artist_id\n"
+		"\tinner join artists on artists.id = audio_works.artist_id\n"
 		"\twhere audio_works.id = ");
 
 WorkDetailView::WorkDetailView(
