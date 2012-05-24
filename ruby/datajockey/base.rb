@@ -23,28 +23,6 @@ require 'yaml'
 require 'rubygems'
 require 'active_record'
 
-=begin
-[
-  "datajockey/database/album_artist", 
-  "datajockey/database/album_audio_work", 
-  "datajockey/database/album", 
-  "datajockey/database/annotation_file", 
-  "datajockey/database/artist_audio_work", 
-  "datajockey/database/artist", 
-  "datajockey/database/artist_role", 
-  "datajockey/database/audio_file", 
-  "datajockey/database/audio_file_type", 
-  "datajockey/database/audio_work", 
-  "datajockey/database/audio_work_tag", 
-  "datajockey/database/descriptor", 
-  "datajockey/database/descriptor_type", 
-  "datajockey/database/tag_class", 
-  "datajockey/database/tag", 
-].each do |m|
-  require m
-end
-=end
-
 module Datajockey
   #datajockey config stuff
   @@conf_file = nil

@@ -46,9 +46,10 @@ module Datajockey
   end
 
   class AudioWork < ActiveRecord::Base
-    belongs_to :audio_file
-    has_many :artist_audio_works, :dependent => :destroy
-    has_many :artists, :through => :artist_audio_works
+    #has_many :artist_audio_works, :dependent => :destroy
+    #has_many :artists, :through => :artist_audio_works
+
+    belongs_to :artist
 
     has_one :album_audio_work, :dependent => :destroy
 

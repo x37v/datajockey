@@ -20,6 +20,7 @@
 $: << "."
 
 require 'datajockey/base'
+require 'datajockey/db'
 require 'irb'
 
 #connect to the database then jump to IRB

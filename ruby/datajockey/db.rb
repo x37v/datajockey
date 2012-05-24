@@ -1,6 +1,5 @@
 =begin
-
-  Copyright (c) 2008 Alex Norman.  All rights reserved.
+  Copyright (c) 2012 Alex Norman.  All rights reserved.
 	http://www.x37v.info/datajockey
 
 	This file is part of Data Jockey.
@@ -19,17 +18,9 @@
 	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-module Datajockey
-  class Artist < ActiveRecord::Base
-    validates_uniqueness_of :name
-
-    has_many :audio_works
-
-    #has_many :artist_audio_works, :dependent => :destroy
-    #has_many :audio_works, :through => :artist_audio_works
-
-    #album representations
-    has_many :album_artists, :dependent => :destroy
-    has_many :albums, :through => :album_artists
-  end
+db_dir = File.join(File.dirname(__FILE__), 'database')
+Dir.entries(db_dir).each do |m|
+  next unless m =~ /rb\z/
+  require File.join(db_dir, m)
 end
+
