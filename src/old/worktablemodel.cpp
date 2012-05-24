@@ -69,7 +69,7 @@ void WorkTableModel::init(const QSqlDatabase & db){
 		"\taudio_works.name as title,\n"
 		"\talbums.name as album, \n"
 		"\talbum_audio_works.track as track, \n"
-		"\taudio_files.milliseconds as duration, \n"
+		"\taudio_file_milliseconds as duration, \n"
 		"\taudio_file_types.name as \"file type\", ");
 
 	for(unsigned int i = 0; i < descriptorFieldNames.size() - 1; i++){
@@ -82,10 +82,8 @@ void WorkTableModel::init(const QSqlDatabase & db){
 	queryStr.append(" \n");
 
 	queryStr.append("from audio_works \n"
-		"\tinner join audio_files on audio_files.id = audio_works.audio_file_id \n"
-		"\tinner join audio_file_types on audio_file_types.id = audio_files.audio_file_type_id \n"
-		"\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id  \n"
-		"\tinner join artists on artists.id = artist_audio_works.artist_id \n"
+		"\tinner join audio_file_types on audio_file_types.id = audio_works.audio_file_type_id \n"
+		"\tinner join artists on artists.id = audio_works.artist_id \n"
 		"\tinner join album_audio_works on audio_works.id = album_audio_works.audio_work_id \n"
 		"\tinner join albums on album_audio_works.album_id = albums.id \n");
 	for(unsigned int i = 0; i < descriptorJoinClauses.size(); i++){

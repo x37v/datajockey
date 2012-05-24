@@ -9,19 +9,16 @@ namespace {
    QSqlDatabase cDB;
 
    const QString cFileQueryString(
-         "select audio_files.location audio_file, annotation_files.location annotation_file\n"
-         "from audio_works\n"
-         "\tjoin audio_files on audio_files.id = audio_works.audio_file_id\n"
-         "\tjoin annotation_files on annotation_files.audio_work_id = audio_works.id\n"
-         "where audio_works.id = :id");
+         "SELECT audio_file_location, annotation_file_location\n"
+         "FROM audio_works\n"
+         "WHERE audio_works.id = :id");
 
    const QString cWorkInfoQueryString(
          "select audio_works.name title,\n"
          "\tartists.name artist \n"
-         "from audio_works"
-         "\tinner join artist_audio_works on artist_audio_works.audio_work_id = audio_works.id\n"
-         "\tinner join artists on artists.id = artist_audio_works.artist_id\n"
-         "where audio_works.id = :id");
+         "FROM `audio_works`\n"
+         "\tINNER JOIN `artists` ON `artists`.`id` = `audio_works`.`artist_id`\n"
+         "WHERE audio_works.id = :id");
 
 	bool setup_query(
 			QSqlQuery& query,
@@ -77,8 +74,8 @@ bool db::find_locations_by_id(
 		return false;
 
    QSqlRecord rec = query.record();
-   int audioFileCol = rec.indexOf("audio_file");
-   int annotationFileCol = rec.indexOf("annotation_file");
+   int audioFileCol = rec.indexOf("audio_file_location");
+   int annotationFileCol = rec.indexOf("annotation_file_location");
 
 	audio_file_loc = query.value(audioFileCol).toString();
    annotation_file_loc = query.value(annotationFileCol).toString();
