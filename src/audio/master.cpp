@@ -1,7 +1,7 @@
 #include "master.hpp"
 #include <math.h>
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 #define DEFAULT_NUM_PLAYERS 2
 Master * Master::cInstance = NULL;

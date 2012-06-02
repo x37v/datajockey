@@ -8,8 +8,8 @@
 #include "slv2/slv2.h"
 #include <vector>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class Master {
          private:
             //singleton

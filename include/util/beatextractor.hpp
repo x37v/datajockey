@@ -8,14 +8,14 @@
 #include <stdexcept>
 #include <vector>
 
-namespace DataJockey {
-	namespace Util {
+namespace dj {
+	namespace util {
 		class BeatExtractor : public QObject {
 			Q_OBJECT
 			public:
 				BeatExtractor();
 				virtual ~BeatExtractor();
-				bool process(const Audio::AudioBuffer& audio_buffer, Audio::BeatBuffer& beat_buffer) throw(std::runtime_error);
+				bool process(const audio::AudioBuffer& audio_buffer, audio::BeatBuffer& beat_buffer) throw(std::runtime_error);
 			signals:
 				void progress(int percent);
 			private:

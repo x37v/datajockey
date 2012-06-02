@@ -1,7 +1,7 @@
 #include "audioloaderthread.hpp"
 #include <QMutexLocker>
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 AudioModel::AudioLoaderThread::AudioLoaderThread(AudioModel * model)
 : mAudioBuffer(NULL), mAudioModel(model), mFileName(), mMutex(QMutex::Recursive) { }
@@ -27,7 +27,7 @@ void AudioModel::AudioLoaderThread::relay_load_progress(QString fileName, int pe
    emit(load_progress(fileName, percent));
 }
 
-DataJockey::Audio::AudioBuffer * AudioModel::AudioLoaderThread::load(QString location){
+dj::audio::AudioBuffer * AudioModel::AudioLoaderThread::load(QString location){
    QMutexLocker lock(&mMutex);
    mAborted = false;
 
@@ -39,7 +39,7 @@ DataJockey::Audio::AudioBuffer * AudioModel::AudioLoaderThread::load(QString loc
    mFileName = location;
 
    try {
-      mAudioBuffer = new DataJockey::Audio::AudioBuffer(location.toStdString());
+      mAudioBuffer = new dj::audio::AudioBuffer(location.toStdString());
       start();
    } catch (...){ return NULL; }
    return mAudioBuffer;

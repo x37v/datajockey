@@ -17,8 +17,8 @@ class QProgressBar;
 class QGraphicsScene;
 class QTimer;
 
-namespace DataJockey {
-   namespace View {
+namespace dj {
+   namespace view {
       class WaveFormViewGL;
       class AudioLevel;
       class Player : public QWidget {
@@ -37,7 +37,7 @@ namespace DataJockey {
             void set_audio_level(int percent);
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
-            void set_beat_buffer(Audio::BeatBuffer buffer);
+            void set_beat_buffer(audio::BeatBuffer buffer);
             void set_song_description(QString description);
          signals:
             void seek_frame_relative(int frames);

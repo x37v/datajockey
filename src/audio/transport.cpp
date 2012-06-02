@@ -1,6 +1,6 @@
 #include "transport.hpp"
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 Transport::Transport(){
    mPosition.at_bar(0);

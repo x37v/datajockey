@@ -4,7 +4,7 @@
 #include <QMutexLocker>
 #include <math.h>
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 //#define MIN(x,y) MAX(y,x)

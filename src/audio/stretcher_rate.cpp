@@ -1,7 +1,7 @@
 #include "stretcher_rate.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       StretcherRate::~StretcherRate() { }
 
       void StretcherRate::compute_frame(float * frame, unsigned int new_index, double new_index_subsample, unsigned int last_index, double last_index_subsample) {

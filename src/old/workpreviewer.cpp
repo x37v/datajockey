@@ -25,7 +25,7 @@
 
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
-WorkPreviewerThread::WorkPreviewerThread(DataJockey::AudioIO * audioIO, QObject * parent) : QThread(parent){
+WorkPreviewerThread::WorkPreviewerThread(dj::audioIO * audioIO, QObject * parent) : QThread(parent){
 	mAudioIO = audioIO;
 	mPreviewFrames = audioIO->previewFrames();
 	mPreviewBuffer = new jack_default_audio_sample_t[mPreviewFrames * 2];
@@ -100,7 +100,7 @@ QString WorkPreviewer::cFileQueryString(
 	"\tjoin audio_files on audio_files.id = audio_works.audio_file_id\n"
 	"where audio_works.id = ");
 
-WorkPreviewer::WorkPreviewer(const QSqlDatabase &db, MixerPanelModel * mixerModel, DataJockey::AudioIO * audioIO) :
+WorkPreviewer::WorkPreviewer(const QSqlDatabase &db, MixerPanelModel * mixerModel, dj::audioIO * audioIO) :
 	mThread(audioIO, this), mFileQuery("", db) 
 {
 	mWork = -1;

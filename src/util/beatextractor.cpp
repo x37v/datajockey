@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-using namespace DataJockey::Util;
+using namespace dj::util;
 
 namespace {
 	QMutex loaderMutex;
@@ -44,7 +44,7 @@ BeatExtractor::~BeatExtractor() {
 		delete mPlugin;
 }
 
-bool BeatExtractor::process(const Audio::AudioBuffer& audio_buffer, Audio::BeatBuffer& beat_buffer)
+bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatBuffer& beat_buffer)
 	throw(std::runtime_error)
 {
 	//make sure we have a valid plugin and that its rate is correct

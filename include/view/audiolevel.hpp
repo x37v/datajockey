@@ -6,8 +6,8 @@
 #include <QBrush>
 #include <QTimer>
 
-namespace DataJockey {
-   namespace View {
+namespace dj {
+   namespace view {
       class AudioLevel : public QWidget {
          Q_OBJECT
          public:

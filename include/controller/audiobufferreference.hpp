@@ -6,8 +6,8 @@
 #include <QMap>
 #include <QPair>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
 
       //forward declarations
       class AudioBuffer;
@@ -24,7 +24,7 @@ namespace DataJockey {
             static void set_or_increment_count(const QString& fileName, AudioBuffer * buffer);
          private:
             //filename => [refcount, buffer pointer]
-            typedef QPair<int,  DataJockey::Audio::AudioBuffer *> ref_cnt_audio_buffer_t;
+            typedef QPair<int,  dj::audio::AudioBuffer *> ref_cnt_audio_buffer_t;
             typedef QMap<QString, ref_cnt_audio_buffer_t > manager_map_t;
             static manager_map_t mBufferManager;
             static QMutex mMutex;
@@ -37,7 +37,7 @@ namespace DataJockey {
             void reset(const QString& newFileName);
             void release();
             bool valid();
-            DataJockey::Audio::AudioBuffer * operator->() const;
+            dj::audio::AudioBuffer * operator->() const;
          private:
             QString mFileName;
             AudioBuffer * mAudioBuffer;

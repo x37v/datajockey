@@ -9,8 +9,8 @@
 #include <QMetaObject>
 #include <QTimer>
 
-using namespace DataJockey;
-using namespace DataJockey::Audio;
+using namespace dj;
+using namespace dj::audio;
 
 #include <iostream>
 using std::cerr;
@@ -29,12 +29,12 @@ T clamp(T val, T bottom, T top) {
    return val;
 }
 
-class AudioModel::PlayerClearBuffersCommand : public DataJockey::Audio::PlayerCommand {
+class AudioModel::PlayerClearBuffersCommand : public dj::audio::PlayerCommand {
    public:
       PlayerClearBuffersCommand(unsigned int idx,
             AudioModel * model,
             QString oldFileName = QString()) :
-         DataJockey::Audio::PlayerCommand(idx),
+         dj::audio::PlayerCommand(idx),
          mAudioModel(model),
          mOldFileName(oldFileName),
          mOldBeatBuffer(NULL) { }
@@ -82,7 +82,7 @@ class AudioModel::PlayerState {
       //not okay to update in audio thread
       QString mFileName;
       AudioBufferReference mAudioBuffer;
-      Audio::BeatBuffer mBeatBuffer;
+      audio::BeatBuffer mBeatBuffer;
 
       QMap<QString, int> mParamInt;
       QMap<QString, bool> mParamBool;
@@ -182,8 +182,8 @@ AudioModel::AudioModel() :
    mCrossFadePlayers[0] = 0;
    mCrossFadePlayers[1] = 1;
 
-   mAudioIO = DataJockey::Audio::AudioIO::instance();
-   mMaster = DataJockey::Audio::Master::instance();
+   mAudioIO = dj::audio::AudioIO::instance();
+   mMaster = dj::audio::Master::instance();
 
    mNumPlayers = num_players;
    for(unsigned int i = 0; i < mNumPlayers; i++) {
@@ -216,7 +216,7 @@ AudioModel::AudioModel() :
    mPlayerPositionActionMapping["loop_end"] = PlayerPositionCommand::LOOP_END;
 
    for(unsigned int i = 0; i < mNumPlayers; i++) {
-      DataJockey::Audio::Player * player = mMaster->players()[i];
+      dj::audio::Player * player = mMaster->players()[i];
       player->sync(true);
       player->out_state(Player::MAIN_MIX);
       player->play_state(Player::PLAY);
@@ -226,8 +226,8 @@ AudioModel::AudioModel() :
       mPlayerStates[i]->mParamBool["mute"] = player->muted();
       mPlayerStates[i]->mParamBool["sync"] = player->syncing();
       mPlayerStates[i]->mParamBool["loop"] = player->looping();
-      mPlayerStates[i]->mParamBool["cue"] = (player->out_state() == DataJockey::Audio::Player::CUE);
-      mPlayerStates[i]->mParamBool["pause"] = (player->play_state() == DataJockey::Audio::Player::PAUSE);
+      mPlayerStates[i]->mParamBool["cue"] = (player->out_state() == dj::audio::Player::CUE);
+      mPlayerStates[i]->mParamBool["pause"] = (player->play_state() == dj::audio::Player::PAUSE);
       mPlayerStates[i]->mParamBool["audible"] = false;
 
       //int
@@ -301,10 +301,10 @@ void AudioModel::set_player_position(int player_index, const TimePoint &val, boo
 
    Command * cmd = NULL;
    if (absolute)
-      cmd = new DataJockey::Audio::PlayerPositionCommand(
+      cmd = new dj::audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::PLAY, val);
    else
-      cmd = new DataJockey::Audio::PlayerPositionCommand(
+      cmd = new dj::audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::PLAY_RELATIVE, val);
    queue_command(cmd);
 }
@@ -324,10 +324,10 @@ void AudioModel::set_player_position_frame(int player_index, int frame, bool abs
 
    Command * cmd = NULL;
    if (absolute)
-      cmd = new DataJockey::Audio::PlayerPositionCommand(
+      cmd = new dj::audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::PLAY, frame);
    else
-      cmd = new DataJockey::Audio::PlayerPositionCommand(
+      cmd = new dj::audio::PlayerPositionCommand(
             player_index, PlayerPositionCommand::PLAY_RELATIVE, frame);
    queue_command(cmd);
 }
@@ -368,7 +368,7 @@ void AudioModel::set_player_beat_buffer(int player_index, QString buffer_file) {
       player_state->mBeatBuffer.clear();
    else
       player_state->mBeatBuffer.load(buffer_file.toStdString());
-   BeatBuffer * player_buf = new DataJockey::Audio::BeatBuffer(player_state->mBeatBuffer);
+   BeatBuffer * player_buf = new dj::audio::BeatBuffer(player_state->mBeatBuffer);
    queue_command(new PlayerSetBeatBufferCommand(player_index, player_buf, true));
 
    emit(player_triggered(player_index, "beat_buffer_changed"));
@@ -709,10 +709,10 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
       //pause while seeking
       if (value) {
          if (!pstate->mParamBool["pause"])
-            queue_command(new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PAUSE));
+            queue_command(new dj::audio::PlayerStateCommand(player_index, PlayerStateCommand::PAUSE));
       } else {
          if (!pstate->mParamBool["pause"])
-            queue_command(new DataJockey::Audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY));
+            queue_command(new dj::audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY));
       }
       return;
    }
@@ -739,7 +739,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    *state_itr = value;
 
    //queue the actual command [who's action is stored in the action_itr]
-   queue_command(new DataJockey::Audio::PlayerStateCommand(player_index, value ? action_itr->first : action_itr->second));
+   queue_command(new dj::audio::PlayerStateCommand(player_index, value ? action_itr->first : action_itr->second));
    emit(player_toggled(player_index, name, value));
 }
 
@@ -787,7 +787,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
             return;
       }
 
-      queue_command(new DataJockey::Audio::PlayerDoubleCommand(player_index, *action_itr, (double)value / double(one_scale)));
+      queue_command(new dj::audio::PlayerDoubleCommand(player_index, *action_itr, (double)value / double(one_scale)));
    }
 }
 
@@ -798,16 +798,16 @@ void AudioModel::player_set(int player_index, QString name, double value) {
    if (name == "play_position") {
       if (value < 0.0)
          value = 0.0;
-      queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, TimePoint(value)));
+      queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, TimePoint(value)));
    } else if (name == "play_position_relative") {
-      queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, TimePoint(value)));
+      queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, TimePoint(value)));
    } else {
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (double) arg" << endl;
       return;
    }
 }
 
-void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::TimePoint value) {
+void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
@@ -822,9 +822,9 @@ void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::T
    }
    
    if (name == "play") {
-      queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, value));
+      queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, value));
    } else if (name == "play_relative") {
-      queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, value));
+      queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, value));
    } else {
       //get the state for this name
       QMap<QString, TimePoint>::iterator state_itr = pstate->mParamPosition.find(name);
@@ -840,7 +840,7 @@ void AudioModel::player_set(int player_index, QString name, DataJockey::Audio::T
       *state_itr = value;
 
       //queue the actual command [who's action is stored in the action_itr]
-      queue_command(new DataJockey::Audio::PlayerPositionCommand(player_index, *action_itr, value));
+      queue_command(new dj::audio::PlayerPositionCommand(player_index, *action_itr, value));
 
       //XXX TODO emit(player_position_changed(player_index, name, value));
    }
@@ -870,7 +870,7 @@ void AudioModel::stop_audio() {
    usleep(500000);
 }
 
-void AudioModel::queue_command(DataJockey::Audio::Command * cmd){
+void AudioModel::queue_command(dj::audio::Command * cmd){
    mMaster->scheduler()->execute(cmd);
 }
 

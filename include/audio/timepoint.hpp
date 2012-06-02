@@ -1,8 +1,8 @@
 #ifndef DATAJOCKEY_TIMEPOINT_HPP
 #define DATAJOCKEY_TIMEPOINT_HPP
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class TimePoint {
          public:
             enum time_type {BEAT_BAR, SECONDS};

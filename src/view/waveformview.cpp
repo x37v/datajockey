@@ -6,7 +6,7 @@
 #include <QResizeEvent>
 #include <QGraphicsLineItem>
 
-using namespace DataJockey::View;
+using namespace dj::view;
 
 WaveFormView::WaveFormView(QWidget * parent) : mLastMousePos(0), mBeatBuffer(), mSampleRate(44100.0) {
    rotate(-90);
@@ -35,7 +35,7 @@ WaveFormView::~WaveFormView() {
 
 void WaveFormView::set_audio_file(const QString& file_name) {
 
-   mSampleRate = (double)Audio::AudioModel::instance()->sample_rate();
+   mSampleRate = (double)audio::AudioModel::instance()->sample_rate();
 
    mWaveForm->setAudioFile(file_name);
 
@@ -51,7 +51,7 @@ void WaveFormView::set_audio_file(const QString& file_name) {
 
 }
 
-void WaveFormView::set_beat_buffer(Audio::BeatBuffer & buffer) {
+void WaveFormView::set_beat_buffer(audio::BeatBuffer & buffer) {
    mBeatBuffer = buffer;
    int index = 0;
    //update the current ones

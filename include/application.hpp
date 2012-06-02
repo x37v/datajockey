@@ -6,8 +6,8 @@
 
 class QWidget;
 
-namespace DataJockey {
-   namespace Audio { class AudioModel; }
+namespace dj {
+   namespace audio { class AudioModel; }
    class Application : public QApplication {
       Q_OBJECT
       public:
@@ -19,8 +19,8 @@ namespace DataJockey {
       protected slots:
          void relay_player_trigger(int player_index, QString name);
       private:
-         Audio::AudioModel * mAudioModel;
-         View::MixerPanel * mMixerPanel;
+         audio::AudioModel * mAudioModel;
+         view::MixerPanel * mMixerPanel;
          QWidget * mTop;
          int mCurrentwork;
    };

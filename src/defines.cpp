@@ -1,6 +1,6 @@
 #include "defines.hpp"
 
-namespace DataJockey {
+namespace dj {
    const unsigned int one_scale = 1000;
 }
 

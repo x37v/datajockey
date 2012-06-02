@@ -61,7 +61,7 @@ float floatFromOscNumber(const osc::ReceivedMessageArgument a){
 }
 
 OscReceiver::OscReceiver(){
-   mModel = DataJockey::Audio::AudioModel::instance();
+   mModel = dj::audio::AudioModel::instance();
 }
 
 
@@ -107,7 +107,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 		if(boost::regex_match(remain.c_str(), matches, volume_re)){
 			//make sure our matches list is long enough and that we have an argument
 			if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-            int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
+            int vol = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
             //"" == absolute, otherwise, relative
             if(strcmp("", matches[1].str().c_str()) != 0)
                vol += mModel->player_state_int(mixer, "volume");
@@ -143,7 +143,7 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
 					//absolute
 					if(arg_it == m.ArgumentsEnd())
 						throw osc::MissingArgumentException();
-               int val = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
+               int val = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
                QString sband = "eq_high";
                switch(band) {
                   case 0:
@@ -283,7 +283,7 @@ void OscReceiver::processXFadeMessage(const std::string addr, const osc::Receive
 	if(boost::regex_match(addr.c_str(), matches, position_re)){
 		if(arg_it == m.ArgumentsEnd())
 			throw osc::MissingArgumentException();
-		int pos = (float)DataJockey::one_scale * floatFromOscNumber(*arg_it);
+		int pos = (float)dj::one_scale * floatFromOscNumber(*arg_it);
 		if(strcmp("", matches[1].str().c_str()) == 0) {
          QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
                Q_ARG(QString, "crossfade_position"),
@@ -332,7 +332,7 @@ void OscReceiver::processMasterMessage(const std::string addr, const osc::Receiv
 	if(boost::regex_match(addr.c_str(), matches, volume_re)){
 		//make sure our matches list is long enough and that we have an argument
 		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			int vol = floatFromOscNumber(*arg_it) * (float)DataJockey::one_scale;
+			int vol = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
 			//"" == absolute, otherwise, relative
 			if(strcmp("", matches[1].str().c_str()) == 0) {
             QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,

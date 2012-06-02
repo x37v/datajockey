@@ -10,7 +10,7 @@
 using std::cerr;
 using std::endl;
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 Player::Player() : 
    mPosition(0.0),

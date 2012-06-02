@@ -17,8 +17,8 @@
 
 class QTimer;
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class AudioModel : public QObject {
          Q_OBJECT
          Q_CLASSINFO("D-Bus Interface", "org.x37v.datajockey.audio")
@@ -56,7 +56,7 @@ namespace DataJockey {
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
-            void player_set(int player_index, QString name, DataJockey::Audio::TimePoint value);
+            void player_set(int player_index, QString name, dj::audio::TimePoint value);
             void set_player_beat_buffer(int player_index, QString buffer_file);
             void set_player_buffers(int player_index, QString audio_file, QString beat_file);
 
@@ -98,8 +98,8 @@ namespace DataJockey {
             friend class PlayerClearBuffersCommand;
             friend class AudioLoaderThread;
             //pointers to other internal singletons
-            DataJockey::Audio::AudioIO * mAudioIO;
-            DataJockey::Audio::Master * mMaster;
+            dj::audio::AudioIO * mAudioIO;
+            dj::audio::Master * mMaster;
 
             unsigned int mNumPlayers;
             std::vector<AudioLoaderThread *> mThreadPool;
@@ -133,13 +133,13 @@ namespace DataJockey {
 
             //returns true if the buffer is actually loaded anywhere
             //this is called from one of many audio loader threads
-            bool audio_file_load_complete(QString fileName, DataJockey::Audio::AudioBuffer * buffer);
+            bool audio_file_load_complete(QString fileName, dj::audio::AudioBuffer * buffer);
 
             //convenience method for executing commands in the master's scheduler
-            void queue_command(DataJockey::Audio::Command * cmd);
+            void queue_command(dj::audio::Command * cmd);
 
             void set_player_audio_file(int player_index, QString location);
-            void set_player_audio_buffer(int player_index, DataJockey::Audio::AudioBuffer * buf);
+            void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
 
             void update_player_state(int player_index, PlayerState * state);
             void player_clear_buffers(int player_index);
@@ -147,7 +147,7 @@ namespace DataJockey {
             //not threadsafe, expects to have mutex already locked
             //eq the eq 0 is the lowest, 2 is high, one_scale is the top
             void set_player_eq(int player_index, int band, int value);
-            void set_player_position(int player_index, const DataJockey::Audio::TimePoint &val, bool absolute = true);
+            void set_player_position(int player_index, const dj::audio::TimePoint &val, bool absolute = true);
             void set_player_position_frame(int player_index, int frame, bool absolute = true);
             void set_player_position_beat_relative(int player_index, int beats);
 

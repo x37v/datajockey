@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <cmath>
 
-using namespace DataJockey::View;
+using namespace dj::view;
 
 namespace {
    const int draw_timeout_ms = 100;

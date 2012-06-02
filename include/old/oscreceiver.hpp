@@ -25,8 +25,8 @@
 #include <string>
 #include <QThread>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class AudioModel;
    }
 }
@@ -41,7 +41,7 @@ class OscReceiver : public osc::OscPacketListener {
 		void processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m);
 		void processMasterMessage(const std::string addr, const osc::ReceivedMessage& m);
 	private:
-      DataJockey::Audio::AudioModel * mModel;
+      dj::audio::AudioModel * mModel;
       void player_trigger(int player_index, QString name);
       void player_set(int player_index, QString name, bool value);
       void player_set(int player_index, QString name, int value);

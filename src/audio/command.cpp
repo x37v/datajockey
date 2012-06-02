@@ -1,6 +1,6 @@
 #include "command.hpp"
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 Command::~Command(){
 }

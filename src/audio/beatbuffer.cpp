@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <fstream>
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 template<typename Type>
 Type linear_interp(Type v0, Type v1, double dist){

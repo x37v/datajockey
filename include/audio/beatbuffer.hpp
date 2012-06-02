@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include <deque>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       //XXX assuming 4/4 for now
       class BeatBuffer {
          public:

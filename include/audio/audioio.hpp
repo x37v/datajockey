@@ -5,8 +5,8 @@
 #include "master.hpp"
 #include <vector>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class AudioIO : public JackCpp::AudioIO {
          private:
             AudioIO();

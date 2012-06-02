@@ -3,8 +3,8 @@
 
 #include "audiobuffer.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class Stretcher {
          public:
             Stretcher();

@@ -23,18 +23,37 @@
 #include <QSplitter>
 #include <QTabWidget>
 
-using namespace DataJockey;
+using namespace dj;
 
 Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
 {
-   Model::db::setup("QMYSQL", "datajockey", "developer", "pass");
-   //Model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
+#if 0
+   model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
 
-   mAudioModel = Audio::AudioModel::instance();
+   QMap<QString, QVariant> attributes;
+   attributes["name"] = "Bullshit Name";
+   attributes["year"] = 2012;
+   attributes["channels"] = 2;
+   attributes["milliseconds"] = 200;
+   attributes["artist"] = "Toad Soda";
+   attributes["album"] = "Bitch Face";
+   attributes["track"] = 1;
+
+   int val = model::db::work::create(
+         attributes,
+         "bullshit/location.flac",
+         "another one"
+         );
+   if (val == 0)
+      qDebug("CRAP");
+#else
+   model::db::setup("QMYSQL", "datajockey", "developer", "pass");
+
+   mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
-   mMixerPanel = new View::MixerPanel(mTop);
+   mMixerPanel = new view::MixerPanel(mTop);
 
    setStyle("plastique");
 
@@ -110,10 +129,10 @@ Application::Application(int & argc, char ** argv) :
          //"/media/x/music/low_end_theory/3455/07-suck_it.flac",
          //"/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
 
-   TagModel * tag_model = new TagModel(Model::db::get(), mTop);
-   WorkTableModel * work_table_model = new WorkTableModel(Model::db::get(), mTop);
+   TagModel * tag_model = new TagModel(model::db::get(), mTop);
+   WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
 	WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
-   WorkDetailView * work_detail = new WorkDetailView(tag_model, Model::db::get(), mTop);
+   WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
    WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
@@ -191,11 +210,12 @@ Application::Application(int & argc, char ** argv) :
 
    mTop->setLayout(top_layout);
    mTop->show();
+#endif
 }
 
 void Application::pre_quit_actions() {
    mAudioModel->stop_audio();
-   Model::db::close();
+   model::db::close();
 }
 
 void Application::select_work(int work_id) {
@@ -209,7 +229,7 @@ void Application::set_player_trigger(int player_index, QString name) {
 	//find the file locations
 	QString audio_file;
 	QString annotation_file;
-	if (!Model::db::find_locations_by_id(mCurrentwork, audio_file, annotation_file))
+	if (!model::db::find_locations_by_id(mCurrentwork, audio_file, annotation_file))
 		return;
 	mAudioModel->set_player_buffers(player_index,
 			audio_file,
@@ -218,7 +238,7 @@ void Application::set_player_trigger(int player_index, QString name) {
 	//find the work info
 	QString artist_name;
 	QString work_title;
-	if (Model::db::find_artist_and_title_by_id(mCurrentwork, artist_name, work_title)) {
+	if (model::db::find_artist_and_title_by_id(mCurrentwork, artist_name, work_title)) {
 		//XXX invoke or is this okay?
 		mMixerPanel->player_set(player_index,
 				"song_description",

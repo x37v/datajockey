@@ -4,8 +4,8 @@
 #include "timepoint.hpp"
 #include "command.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class Transport {
          public:
             Transport();

@@ -1,7 +1,7 @@
 #include "stretcher.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       Stretcher::Stretcher() :
          mFrame(0),
          mFrameSubsample(0.0),

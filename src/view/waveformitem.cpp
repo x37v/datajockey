@@ -10,7 +10,7 @@
 
 using std::cout;
 using std::endl;
-using namespace DataJockey::View;
+using namespace dj::view;
 
 #define WIDTH 12 * 1024
 #define MAX(x,y) ((x) > (y) ? (x) : (y))

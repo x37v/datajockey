@@ -4,8 +4,8 @@
 #include "timepoint.hpp"
 #include "types.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class Command {
          public:
             virtual ~Command();

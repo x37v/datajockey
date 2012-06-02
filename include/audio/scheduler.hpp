@@ -9,8 +9,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class Scheduler {
          public:
             typedef unsigned long node_id_t;

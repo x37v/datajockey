@@ -4,9 +4,9 @@
 #include "types.hpp"
 #include "schedulenode.hpp"
 
-namespace DataJockey {
-   namespace Audio {
-      namespace ScheduleDataParser {
+namespace dj {
+   namespace audio {
+      namespace scheduledata_parser {
          /**
           * register_command_parser registers a command parser. 
           * When the parser is running, it will match input against the "key"
@@ -15,7 +15,7 @@ namespace DataJockey {
           * a command object, or null on failure.
           *
           * @param key The string that identifies this command parser.  If this
-          * string is matched by the ScheduleDataParser, its corresponding data
+          * string is matched by the scheduledata_parser, its corresponding data
           * will be passed to the parse_function.
           * @param parse_function The function that will be called to produce a
           * command from the input data.

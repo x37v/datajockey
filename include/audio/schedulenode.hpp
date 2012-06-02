@@ -4,8 +4,8 @@
 #include "command.hpp"
 #include "timepoint.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class ScheduleNode {
          public:
             ScheduleNode(Command * c, const TimePoint& t);

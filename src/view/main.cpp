@@ -1,5 +1,5 @@
 #include "application.hpp"
-using namespace DataJockey;
+using namespace dj;
 
 int main(int argc, char * argv[]){
    Application app(argc, argv);

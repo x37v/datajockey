@@ -61,7 +61,7 @@ namespace {
 
 }
 
-using namespace DataJockey::Model;
+using namespace dj::model;
 
 void db::setup(
       QString type, 

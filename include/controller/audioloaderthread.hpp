@@ -6,15 +6,15 @@
 #include <QString>
 #include "audiomodel.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
 
       class AudioBuffer;
       class AudioModel::AudioLoaderThread : public QThread {
          Q_OBJECT
          public:
             AudioLoaderThread(AudioModel * model);
-            DataJockey::Audio::AudioBuffer * load(QString location);
+            dj::audio::AudioBuffer * load(QString location);
             void run();
             static void progress_callback(int percent, void *objPtr);
             void abort();
@@ -23,7 +23,7 @@ namespace DataJockey {
             void load_progress(QString fileName, int percent);
          protected:
             void relay_load_progress(QString fileName, int percent);
-            DataJockey::Audio::AudioBuffer * mAudioBuffer;
+            dj::audio::AudioBuffer * mAudioBuffer;
             AudioModel * model();
          private:
             AudioModel * mAudioModel;

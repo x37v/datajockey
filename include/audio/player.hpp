@@ -12,8 +12,8 @@
 #include <slv2/plugin.h>
 #include <slv2/plugininstance.h>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       struct EqControl {
          EqControl() : low(0.0), mid(0.0), high(0.0){}
          float low;

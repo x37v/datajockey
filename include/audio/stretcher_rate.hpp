@@ -3,8 +3,8 @@
 
 #include "stretcher.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class StretcherRate : public Stretcher {
          public:
             virtual ~StretcherRate();

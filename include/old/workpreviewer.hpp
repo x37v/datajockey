@@ -35,7 +35,7 @@ class QTimer;
 class WorkPreviewerThread : public QThread {
 	Q_OBJECT
 	public:
-		WorkPreviewerThread(DataJockey::AudioIO * audioIO, QObject * parent);
+		WorkPreviewerThread(dj::audioIO * audioIO, QObject * parent);
 		virtual ~WorkPreviewerThread();
 	signals:
 		void playing(bool playing);
@@ -49,7 +49,7 @@ class WorkPreviewerThread : public QThread {
 	private:
 		size_t mPreviewFrames;
 		jack_default_audio_sample_t * mPreviewBuffer;
-		DataJockey::AudioIO * mAudioIO;
+		dj::audioIO * mAudioIO;
 		QTimer * mFillTimer;
 		SoundFile * mSoundFile;
 };
@@ -57,7 +57,7 @@ class WorkPreviewerThread : public QThread {
 class WorkPreviewer : public QObject {
 	Q_OBJECT
 	public:
-		WorkPreviewer(const QSqlDatabase &db, MixerPanelModel * mixerModel, DataJockey::AudioIO * audioIO);
+		WorkPreviewer(const QSqlDatabase &db, MixerPanelModel * mixerModel, dj::audioIO * audioIO);
 	signals:
 		void previewing(bool p);
 		void playingFile(QString file_location);

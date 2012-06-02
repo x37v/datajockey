@@ -6,9 +6,9 @@
 #include <QMap>
 #include <QVariant>
 
-namespace DataJockey {
-	namespace Util {
-		namespace AudioFileTag {
+namespace dj {
+	namespace util {
+		namespace audiofile_tag {
 			void extract(const QString& path_to_file, QMap<QString, QVariant>& tag_data) throw(std::runtime_error);
 		}
 	}

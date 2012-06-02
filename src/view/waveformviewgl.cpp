@@ -10,7 +10,7 @@
 #endif
 
 
-using namespace DataJockey::View;
+using namespace dj::view;
 
 WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    QGLWidget(parent),
@@ -69,7 +69,7 @@ void WaveFormViewGL::clear_beats() {
    update();
 }
             
-void WaveFormViewGL::set_beat_buffer(Audio::BeatBuffer & buffer) {
+void WaveFormViewGL::set_beat_buffer(audio::BeatBuffer & buffer) {
    QMutexLocker lock(&mMutex);
    mBeatBuffer = buffer;
    if (mBeatBuffer.length() > 2) {

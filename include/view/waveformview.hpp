@@ -10,8 +10,8 @@ class QGraphicsScene;
 class QResizeEvent;
 class QGraphicsLineItem;
 
-namespace DataJockey {
-   namespace View {
+namespace dj {
+   namespace view {
       class WaveFormItem;
 
       class WaveFormView : public QGraphicsView {
@@ -21,7 +21,7 @@ namespace DataJockey {
             virtual ~WaveFormView();
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
-            void set_beat_buffer(Audio::BeatBuffer & buffer);
+            void set_beat_buffer(audio::BeatBuffer & buffer);
 
             virtual void resizeEvent(QResizeEvent * event);
             virtual void wheelEvent(QWheelEvent * event);
@@ -36,7 +36,7 @@ namespace DataJockey {
             WaveFormItem * mWaveForm;
             QGraphicsScene * mScene;
             QGraphicsLineItem * mCursor;
-            Audio::BeatBuffer mBeatBuffer;
+            audio::BeatBuffer mBeatBuffer;
             QList<QGraphicsLineItem * > mBeatLines;
             double mSampleRate;
       };

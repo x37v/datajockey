@@ -16,10 +16,10 @@
 using std::cout;
 using std::endl;
 
-using namespace DataJockey::View;
+using namespace dj::view;
 
 MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false), mMasterPositionLast(0,0,0) {
-   unsigned int num_players = Audio::AudioModel::instance()->player_count();
+   unsigned int num_players = audio::AudioModel::instance()->player_count();
 
    QBoxLayout * top_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
    QBoxLayout * mixer_layout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -171,7 +171,7 @@ void MixerPanel::player_set(int player_index, QString name, QString value) {
       player->set_song_description(value);
 }
 
-void MixerPanel::player_set_beat_buffer(int player_index, Audio::BeatBuffer buffer){
+void MixerPanel::player_set_beat_buffer(int player_index, audio::BeatBuffer buffer){
    if (player_index >= mPlayers.size())
       return;
    mPlayers[player_index]->set_beat_buffer(buffer);
@@ -191,7 +191,7 @@ void MixerPanel::master_set(QString name, double val) {
       mMasterTempo->setValue(val);
 }
 
-void MixerPanel::master_set(QString name, Audio::TimePoint val) {
+void MixerPanel::master_set(QString name, audio::TimePoint val) {
    if (name == "transport_position") {
       //ignore position within beat
       val.pos_in_beat(0);

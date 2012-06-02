@@ -26,8 +26,8 @@
 #include <QList>
 #include <QSqlQuery>
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class AudioModel;
    }
 }
@@ -66,7 +66,7 @@ class TempoRangeFilter : public WorkFilterModel {
 		float mBelow;
 		float mAbove;
 		float mPrevTempo;
-      DataJockey::Audio::AudioModel * mAudioModel;
+      dj::audio::AudioModel * mAudioModel;
 };
 
 

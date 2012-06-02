@@ -7,8 +7,8 @@
 #include <QVariant>
 #include <stdexcept>
 
-namespace DataJockey {
-   namespace Model {
+namespace dj {
+   namespace model {
       namespace db {
          void setup(
                QString type, 

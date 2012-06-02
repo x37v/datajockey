@@ -12,8 +12,8 @@ class QPainter;
 class QStyleOptionGraphicsItem;
 class QWidget;
 
-namespace DataJockey {
-   namespace View {
+namespace dj {
+   namespace view {
       class WaveFormItem : public QGraphicsItem {
          public:
             WaveFormItem(QGraphicsItem * parent = NULL);
@@ -32,7 +32,7 @@ namespace DataJockey {
          private:
             QPen mPen;
             QRectF mBoundingRect;
-            Audio::AudioBufferReference mAudioBuffer;
+            audio::AudioBufferReference mAudioBuffer;
             unsigned int mZoom;
       };
    }

@@ -1,6 +1,6 @@
 #include "schedulenode.hpp"
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 ScheduleNode::ScheduleNode(Command * c, const TimePoint& t){
    next = prev = NULL;

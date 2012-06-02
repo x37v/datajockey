@@ -5,8 +5,8 @@
 #include <vector>
 #include "soundfile.hpp"
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       class AudioBuffer {
          public:
             typedef std::vector<float > data_buffer_t; 

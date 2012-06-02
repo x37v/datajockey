@@ -12,7 +12,7 @@
 #include <QProgressBar>
 #include <QTimer>
 
-using namespace DataJockey::View;
+using namespace dj::view;
 
 struct button_info {
    int row;
@@ -124,7 +124,7 @@ QRect Player::slider_level_geometry() const { return mSliderLevelLayout->geometr
 void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent); }
 
 void Player::set_audio_file(const QString& file_name) {
-   Audio::AudioBufferReference ref(file_name);
+   audio::AudioBufferReference ref(file_name);
 
    mWaveFormView->set_audio_file(file_name);
    if (ref.valid())
@@ -143,7 +143,7 @@ void Player::set_audio_frame(int frame) {
       mProgressBar->setValue(0);
 }
 
-void Player::set_beat_buffer(Audio::BeatBuffer buffer) {
+void Player::set_beat_buffer(audio::BeatBuffer buffer) {
    mWaveFormView->set_beat_buffer(buffer);
 }
 

@@ -6,7 +6,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 Scheduler::Scheduler() : 
    mCommandsIn(1024), mCommandsOut(1024)

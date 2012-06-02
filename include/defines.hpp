@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-namespace DataJockey {
+namespace dj {
    //this is the value we use to scale from an int to a double, this
    //represents 'one' as a double in int terms.
    extern const unsigned int one_scale;
@@ -18,6 +18,6 @@ namespace DataJockey {
 }
 
 
-#define DJ_FILEANDLINE std::string(std::string(__FILE__) + " " + DataJockey::to_string(__LINE__) + " ")
+#define DJ_FILEANDLINE std::string(std::string(__FILE__) + " " + dj::to_string(__LINE__) + " ")
 
 #endif

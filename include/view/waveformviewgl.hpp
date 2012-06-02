@@ -9,8 +9,8 @@
 #include "audiobufferreference.hpp"
 #include "beatbuffer.hpp"
 
-namespace DataJockey {
-   namespace View {
+namespace dj {
+   namespace view {
       class WaveFormViewGL : public QGLWidget {
          Q_OBJECT
          public:
@@ -23,7 +23,7 @@ namespace DataJockey {
             void set_audio_file(QString file_name);
 
             void clear_beats();
-            void set_beat_buffer(Audio::BeatBuffer & buffer);
+            void set_beat_buffer(audio::BeatBuffer & buffer);
 
             void set_frame(int frame);
             void set_frames_per_line(int num_frames);
@@ -46,12 +46,12 @@ namespace DataJockey {
             int mCursorOffset;
             bool mVertical;
 
-            Audio::AudioBufferReference mAudioBuffer;
+            audio::AudioBufferReference mAudioBuffer;
             std::vector<GLfloat> mVerticies;
             int mFirstLineIndex; //which is the first line
             bool mVerticiesValid;
 
-            Audio::BeatBuffer mBeatBuffer;
+            audio::BeatBuffer mBeatBuffer;
             std::vector<GLfloat> mBeatVerticies;
             bool mBeatVerticiesValid;
             float mSampleRate;

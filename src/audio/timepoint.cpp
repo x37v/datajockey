@@ -1,7 +1,7 @@
 #include "timepoint.hpp"
 #include <stdlib.h>
 
-using namespace DataJockey::Audio;
+using namespace dj::audio;
 
 TimePoint::TimePoint(time_type t){
    mType = t;
@@ -300,8 +300,8 @@ TimePoint& TimePoint::operator-=(const TimePoint &other) {
    return *this;
 }
 
-namespace DataJockey {
-   namespace Audio {
+namespace dj {
+   namespace audio {
       TimePoint operator-(const TimePoint &timepoint) {
          TimePoint output(0,0);
          output -= timepoint;

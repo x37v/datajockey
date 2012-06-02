@@ -12,9 +12,9 @@ class QDoubleSpinBox;
 class QBoxLayout;
 class QLineEdit;
 
-namespace DataJockey {
-   namespace View {
-      using DataJockey::Audio::TimePoint;
+namespace dj {
+   namespace view {
+      using dj::audio::TimePoint;
 
       class Player;
       class AudioLevel;
@@ -28,7 +28,7 @@ namespace DataJockey {
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, QString value);
-            void player_set_beat_buffer(int player_index, Audio::BeatBuffer buffer);
+            void player_set_beat_buffer(int player_index, audio::BeatBuffer buffer);
 
             void master_set(QString name, int val);
             void master_set(QString name, double val);
