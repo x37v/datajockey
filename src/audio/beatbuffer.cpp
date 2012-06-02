@@ -1,5 +1,5 @@
 #include "beatbuffer.hpp"
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 #include <vector>
 #include <algorithm>
 #include <fstream>

@@ -9,11 +9,13 @@ DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 CONFIG += debug
 DEPENDPATH += . \
+              include/ \
               include/audio \
               include/controller \
               include/view \
               include/old \
               include/util \
+              src/ \
               src/audio \
               src/controller \
               src/view \
@@ -38,6 +40,7 @@ RESOURCES = datajockey.qrc
 
 # Input
 HEADERS += include/application.hpp \
+           include/config.hpp \
            include/defines.hpp \
            include/audio/audiobuffer.hpp \
            include/audio/audioio.hpp \
@@ -82,6 +85,7 @@ HEADERS += include/application.hpp \
            include/old/worktablemodel.hpp \
            include/old/worktagmodelfilter.hpp
 SOURCES += src/application.cpp \
+           src/config.cpp \
            src/defines.cpp \
            src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \

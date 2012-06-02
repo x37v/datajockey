@@ -16,6 +16,7 @@
 #include "defaultworkfilters.hpp"
 #include "tageditor.hpp"
 #include "oscreceiver.hpp"
+#include "config.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -29,9 +30,15 @@ Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
 {
-#if 0
-   model::db::setup("QSQLITE", "/home/alex/.datajockey/database.sqlite3", "developer", "pass");
+   Configuration * config = Configuration::instance();
+   config->loadDefault();
 
+   model::db::setup(
+         config->databaseAdapter(),
+         config->databaseName(),
+         config->databaseUserName(),
+         config->databasePassword());
+#if 0
    QMap<QString, QVariant> attributes;
    attributes["name"] = "Bullshit Name";
    attributes["year"] = 2012;
@@ -49,8 +56,6 @@ Application::Application(int & argc, char ** argv) :
    if (val == 0)
       qDebug("CRAP");
 #else
-   model::db::setup("QMYSQL", "datajockey", "developer", "pass");
-
    mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
    mMixerPanel = new view::MixerPanel(mTop);
