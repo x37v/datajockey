@@ -19,9 +19,9 @@ class CreateAlbums < ActiveRecord::Migration
   def self.up
     create_table :albums do |t|
       t.column :name, :string
-      t.column :year, :year
+      t.column :year, :integer
       t.column :tracks, :integer
-      t.column :compilation, :bool, :default => 0
+      t.column :compilation, :boolean, :default => 0
     end
   end
 

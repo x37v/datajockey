@@ -15,6 +15,8 @@
 	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
+class ArtistRole < ActiveRecord::Base; end
+
 class CreateArtistAudioWorks < ActiveRecord::Migration
   def self.up
     create_table :artist_roles do |t|

@@ -15,6 +15,8 @@
 	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
+class DescriptorType < ActiveRecord::Base; end
+
 class AddRatingDescriptor < ActiveRecord::Migration
   def self.up
     #create a 'rating' descriptor type

@@ -15,6 +15,9 @@
 	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
+#declare model so we can use it
+class AudioFileType < ActiveRecord::Base; end
+
 class CreateFileIdTable < ActiveRecord::Migration
   def self.up
 		create_table :audio_files do |t|

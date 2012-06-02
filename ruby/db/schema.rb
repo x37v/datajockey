@@ -23,8 +23,8 @@ ActiveRecord::Schema.define(:version => 17) do
     t.integer "track"
   end
 
-  add_index "album_audio_works", ["album_id"], :name => "album"
-  add_index "album_audio_works", ["audio_work_id"], :name => "audio_work"
+  add_index "album_audio_works", ["album_id"], :name => "index_album_audio_works_on_album_id"
+  add_index "album_audio_works", ["audio_work_id"], :name => "index_album_audio_works_on_audio_work_id"
 
   create_table "albums", :force => true do |t|
     t.string  "name"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(:version => 17) do
     t.integer "artist_role_id"
   end
 
-  add_index "artist_audio_works", ["artist_id"], :name => "artist"
-  add_index "artist_audio_works", ["audio_work_id"], :name => "audio_work"
+  add_index "artist_audio_works", ["artist_id"], :name => "index_artist_audio_works_on_artist_id"
+  add_index "artist_audio_works", ["audio_work_id"], :name => "index_artist_audio_works_on_audio_work_id"
 
   create_table "artist_roles", :force => true do |t|
     t.string "name"
@@ -71,15 +71,10 @@ ActiveRecord::Schema.define(:version => 17) do
     t.integer "artist_id"
   end
 
-  add_index "audio_works", ["audio_file_id"], :name => "audio_file"
+  add_index "audio_works", ["audio_file_id"], :name => "index_audio_works_on_audio_file_id"
 
   create_table "descriptor_types", :force => true do |t|
     t.string "name"
-  end
-
-  create_table "descriptor_types_backup", :id => false, :force => true do |t|
-    t.integer "id",   :default => 0, :null => false
-    t.string  "name"
   end
 
   create_table "descriptors", :force => true do |t|
@@ -89,17 +84,9 @@ ActiveRecord::Schema.define(:version => 17) do
     t.integer "int_value"
   end
 
-  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "ad1"
-  add_index "descriptors", ["audio_work_id"], :name => "audio_work"
-  add_index "descriptors", ["descriptor_type_id"], :name => "descriptor"
-
-  create_table "descriptors_backup", :id => false, :force => true do |t|
-    t.integer "id",                 :default => 0, :null => false
-    t.integer "descriptor_type_id"
-    t.integer "audio_work_id"
-    t.float   "float_value"
-    t.integer "int_value"
-  end
+  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "index_descriptors_on_audio_work_id_and_descriptor_type_id"
+  add_index "descriptors", ["audio_work_id"], :name => "index_descriptors_on_audio_work_id"
+  add_index "descriptors", ["descriptor_type_id"], :name => "index_descriptors_on_descriptor_type_id"
 
   create_table "tag_classes", :force => true do |t|
     t.string "name"

@@ -18,6 +18,7 @@ task :environment do
   Datajockey::connect
   # set a logger for STDOUT
   ActiveRecord::Base.logger = Logger.new(STDOUT)
+  ActiveRecord::Base.timestamped_migrations = false
 end
 
 namespace :db do
