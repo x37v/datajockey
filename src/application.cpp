@@ -31,13 +31,13 @@ Application::Application(int & argc, char ** argv) :
    mCurrentwork(0)
 {
    Configuration * config = Configuration::instance();
-   config->loadDefault();
+   config->load_default();
 
    model::db::setup(
-         config->databaseAdapter(),
-         config->databaseName(),
-         config->databaseUserName(),
-         config->databasePassword());
+         config->db_adapter(),
+         config->db_name(),
+         config->db_username(),
+         config->db_password());
 #if 0
    QMap<QString, QVariant> attributes;
    attributes["name"] = "Bullshit Name";
@@ -208,7 +208,7 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(work_db_view);
    top_layout->addWidget(splitter);
 
-   OscThread * osc_thread = new OscThread(12000);
+   OscThread * osc_thread = new OscThread(config->osc_port());
 
    mAudioModel->start_audio();
    osc_thread->start();

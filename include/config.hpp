@@ -33,22 +33,22 @@ namespace dj {
 		public:
 			static Configuration * instance();
 			//this finds a config file in a default location
-			void loadDefault() throw(std::runtime_error);
+			void load_default() throw(std::runtime_error);
 			//void load(QString yaml_data);
-			void loadFile(const QString& path) throw(std::runtime_error);
+			void load_file(const QString& path) throw(std::runtime_error);
 			bool valid();
 
          //returns the path to the config file has been loaded
-         static QString getFile();
+         static QString file();
 
 			//get database data
-			QString databaseAdapter() throw(std::runtime_error);
-			QString databaseName() throw(std::runtime_error);
-			QString databaseUserName();
-			QString databasePassword();
-			unsigned int oscPort();
+			QString db_adapter() throw(std::runtime_error);
+			QString db_name() throw(std::runtime_error);
+			QString db_username();
+			QString db_password();
+			unsigned int osc_port();
 		private:
-			bool databaseGet(QString entry, QString &result) throw(std::runtime_error);
+			bool db_get(QString entry, QString &result) throw(std::runtime_error);
          QString mFile;
 
 		protected:

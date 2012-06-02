@@ -55,7 +55,7 @@ void Configuration::load(QString yaml_data){
 ///usr/local/share/datajockey/config.yaml
 ///usr/share/datajockey/config.yaml
 
-void Configuration::loadDefault() throw(std::runtime_error) {
+void Configuration::load_default() throw(std::runtime_error) {
 	std::vector<QString> search_paths;
 	QString homeConfig(QDir::homePath());
 	homeConfig.append("/.datajockey/config.yaml");
@@ -69,7 +69,7 @@ void Configuration::loadDefault() throw(std::runtime_error) {
 		try {
          QFileInfo file_info(*it);
          if (file_info.exists() && file_info.isFile()) {
-				loadFile(*it);
+				load_file(*it);
             mFile = *it;
 				return;
 			} 
@@ -87,7 +87,7 @@ void Configuration::loadDefault() throw(std::runtime_error) {
 	throw std::runtime_error(str);
 }
 
-void Configuration::loadFile(const QString& path) throw(std::runtime_error) {
+void Configuration::load_file(const QString& path) throw(std::runtime_error) {
 	try {
       std::ifstream fin(path.toStdString().c_str());
 		YAML::Parser p(fin);
@@ -102,7 +102,7 @@ void Configuration::loadFile(const QString& path) throw(std::runtime_error) {
 	}
 }
 
-QString Configuration::getFile(){
+QString Configuration::file(){
    if(!instance()->mValid)
       return QString();
    else
@@ -113,7 +113,7 @@ bool Configuration::valid(){
 	return mValid;
 }
 
-bool Configuration::databaseGet(QString element, QString &result) throw(std::runtime_error){
+bool Configuration::db_get(QString element, QString &result) throw(std::runtime_error){
 	if(!mValid)
 		throw std::runtime_error("trying to access data from an invalid configuration");
 	try {
@@ -134,9 +134,9 @@ bool Configuration::databaseGet(QString element, QString &result) throw(std::run
 	}
 }
 
-QString Configuration::databaseAdapter() throw(std::runtime_error){
+QString Configuration::db_adapter() throw(std::runtime_error){
 	QString adapter;
-	if(!databaseGet("adapter", adapter))
+	if(!db_get("adapter", adapter))
 		throw std::runtime_error("could not find database adapter");
 	else if (adapter.contains("mysql"))
 		return QString("QMYSQL");
@@ -146,25 +146,25 @@ QString Configuration::databaseAdapter() throw(std::runtime_error){
 		throw std::runtime_error("invalid database adapter");
 }
 
-QString Configuration::databaseName() throw(std::runtime_error){
+QString Configuration::db_name() throw(std::runtime_error){
 	QString name;
-	if(!databaseGet("database", name))
+	if(!db_get("database", name))
 		throw std::runtime_error("could not get database name");
 	else
 		return name;
 }
 
-QString Configuration::databasePassword() {
+QString Configuration::db_password() {
 	//we don't need to have a password entry
 	try {
 		QString pass;
-		if(databaseGet("password", pass))
+		if(db_get("password", pass))
 			return pass;
 	} catch (...) { /* don't do anything */}
 	return QString("");
 }
 
-unsigned int Configuration::oscPort(){
+unsigned int Configuration::osc_port(){
 	unsigned int port = DEFAULT_OSC_PORT;
    try {
       mRoot["osc_port"] >> port;
@@ -175,11 +175,11 @@ unsigned int Configuration::oscPort(){
 	return port;
 }
 
-QString Configuration::databaseUserName() {
+QString Configuration::db_username() {
 	//we don't need to have a username entry
 	try {
 		QString user;
-		if(databaseGet("username", user))
+		if(db_get("username", user))
 			return user;
 	} catch (...) { /* don't do anything */}
 	return QString("");
