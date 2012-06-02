@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 17) do
+ActiveRecord::Schema.define(:version => 18) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -60,7 +60,6 @@ ActiveRecord::Schema.define(:version => 17) do
   end
 
   create_table "audio_works", :force => true do |t|
-    t.integer "audio_file_id"
     t.string  "name"
     t.date    "year"
     t.integer "audio_file_type_id"
@@ -70,8 +69,6 @@ ActiveRecord::Schema.define(:version => 17) do
     t.string  "annotation_file_location"
     t.integer "artist_id"
   end
-
-  add_index "audio_works", ["audio_file_id"], :name => "index_audio_works_on_audio_file_id"
 
   create_table "descriptor_types", :force => true do |t|
     t.string "name"
