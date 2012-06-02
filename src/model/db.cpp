@@ -1,9 +1,11 @@
 #include "db.hpp"
+#include "defines.hpp"
 #include <stdexcept>
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QMap>
 #include <QVariant>
+#include <QSqlError>
 
 namespace {
    QSqlDatabase cDB;
@@ -14,11 +16,28 @@ namespace {
          "WHERE audio_works.id = :id");
 
    const QString cWorkInfoQueryString(
-         "select audio_works.name title,\n"
+         "SELECT audio_works.name title,\n"
          "\tartists.name artist \n"
          "FROM `audio_works`\n"
          "\tINNER JOIN `artists` ON `artists`.`id` = `audio_works`.`artist_id`\n"
          "WHERE audio_works.id = :id");
+
+   const QString cWorkInsertString(
+         "INSERT INTO audio_works\n"
+         "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, annotation_file_location, artist_id)\n"
+         "VALUES\n"
+         "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :annotation_file_location, :artist_id)\n"
+         );
+
+   const QString cArtistFindString("SELECT id FROM artists where name = :name");
+   const QString cArtistInsertString("INSERT INTO artists (name) values (:name)");
+
+   const QString cAlbumFindString("SELECT id FROM albums where name = :name");
+   const QString cAlbumInsertString("INSERT INTO albums (name) values (:name)");
+   const QString cAlbumInsertTrackString(
+         "INSERT INTO album_audio_works\n"
+         "(album_id, audio_work_id, track)\n"
+         "values (:album_id, :audio_work_id, :track)\n");
 
 	bool setup_query(
 			QSqlQuery& query,
@@ -111,26 +130,76 @@ int db::work::create(
 		const QMap<QString, QVariant>& attributes,
 		const QString& audio_file_location,
 		const QString& annotation_file_location
-		) {
-	int artist_id = 0;
+		) throw(std::runtime_error) {
+	int  = 0;
 	int album_id = 0;
-	int audio_file_id = 0;
-	int annotation_file_id = 0;
 
 	QMap<QString, QVariant>::const_iterator i;
 
-	i = attributes.find("artist");
+	QSqlQuery query(get());
+	if(!query.prepare(cWorkInsertString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+
+   query.bindValue(":audio_file_location", audio_file_location);
+   query.bindValue(":annotation_file_location", annotation_file_location);
+
+	i = attributes.find("name");
 	if (i != attributes.end())
-		artist_id = artist::find(i.value().toString(), true);
+      query.bindValue(":name", i.value());
+   else
+      throw(std::runtime_error("you must provide a work name"));
+
+	i = attributes.find("year");
+	if (i != attributes.end())
+      query.bindValue(":year", i.value());
+   else
+      query.bindValue(":year", "NULL");
+
+	i = attributes.find("channels");
+	if (i != attributes.end())
+      query.bindValue(":audio_file_channels", i.value());
+   else
+      query.bindValue(":audio_file_channels", 2);
+
+	i = attributes.find("milliseconds");
+	if (i != attributes.end())
+      query.bindValue(":audio_file_milliseconds", i.value());
+   else
+      query.bindValue(":audio_file_milliseconds", "NULL");
+
+	i = attributes.find("file_type");
+	if (i != attributes.end())
+      query.bindValue(":audio_file_type", i.value());
+   else {
+      //XXX actually parse the file location string?
+      query.bindValue(":audio_file_type", "NULL");
+   }
+
+	i = attributes.find("artist_id");
+	if (i != attributes.end())
+      query.bindValue(":artist_id", i.value());
+   else {
+      i = attributes.find("artist");
+      if (i != attributes.end()) {
+         query.bindValue(":artist_id", artist::find(i.value().toString(), true));
+      } else {
+         query.bindValue(":artist_id", "NULL");
+      }
+   }
+
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   int work_id = query.lastInsertId().toInt();
 
 	i = attributes.find("album");
-	if (i != attributes.end())
+	if (i != attributes.end()) {
 		album_id = album::find(i.value().toString(), true);
+      i = attributes.find("track");
+      int track_num = (i != attributes.end()) ? i.value().toInt() : 0;
+      db::album::add_work(album_id, work_id, track_num);
+   }
 
-	audio_file_id = audio_file::create(audio_file_location);
-	annotation_file_id = annotation_file::create(annotation_file_location);
-
-	return 0;
+	return work_id;
 }
 
 void db::work::descriptor_create_or_update(
@@ -145,26 +214,71 @@ void db::work::tag(
 		const QString& tag_value) {
 }
 
-int db::audio_file::create(const QString& location) {
-	return 0;
+int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
+	QSqlQuery query(get());
+
+   //try to find an artist by the same name
+	if(!query.prepare(cArtistFindString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":name", name);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+
+   //if it is found, return the index
+   if (query.first())
+      return query.value(0).toInt();
+
+   //otherwise, if we aren't creating a new record, return 0
+   if (!create)
+      return 0;
+
+   //otherwise, create a new artist
+   if(!query.prepare(cArtistInsertString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":name", name);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   return query.lastInsertId().toInt();
 }
 
-QString db::audio_file::location_by_work_id(int work_id) {
-	return QString("");
+int db::album::find(const QString& name, bool create)  throw(std::runtime_error) {
+	QSqlQuery query(get());
+
+   //try to find an album by the same name
+	if(!query.prepare(cAlbumFindString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":name", name);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+
+   //if it is found, return the index
+   if (query.first())
+      return query.value(0).toInt();
+
+   //otherwise, if we aren't creating a new record, return 0
+   if (!create)
+      return 0;
+
+   //otherwise, create a new album
+   if(!query.prepare(cAlbumInsertString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":name", name);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   return query.lastInsertId().toInt();
 }
 
-int db::annotation_file::create(const QString& location) {
-	return 0;
+void db::album::add_work(int album_id, int work_id, int track_num)  throw(std::runtime_error) {
+	QSqlQuery query(get());
+
+   //try to find an album by the same name
+	if(!query.prepare(cAlbumInsertTrackString))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":album_id", album_id);
+   query.bindValue(":audio_work_id", work_id);
+   query.bindValue(":track", track_num);
+
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
 }
 
-QString db::annotation_file::location_by_work_id(int work_id) {
-	return QString("");
-}
-
-int db::artist::find(const QString& name, bool create) {
-	return 0;
-}
-
-int db::album::find(const QString& name, bool create) {
-	return 0;
-}

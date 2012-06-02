@@ -37,7 +37,7 @@ namespace DataJockey {
 						const QMap<QString, QVariant>& attributes,
 						const QString& audio_file_location,
 						const QString& annotation_file_location
-						);
+						) throw(std::runtime_error);
 				void descriptor_create_or_update(
 						int work_id,
 						const QString& descriptor_type,
@@ -48,22 +48,13 @@ namespace DataJockey {
 						const QString& tag_value);
 			}
 
-			namespace audio_file {
-				int create(const QString& location);
-				QString location_by_work_id(int work_id);
-			}
-
-			namespace annotation_file {
-				int create(const QString& location);
-				QString location_by_work_id(int work_id);
-			}
-
 			namespace artist {
-				int find(const QString& name, bool create = false);
+				int find(const QString& name, bool create = false) throw(std::runtime_error);
 			}
 
 			namespace album {
-				int find(const QString& name, bool create = false);
+				int find(const QString& name, bool create = false) throw(std::runtime_error);
+            void add_work(int album_id, int work_id, int track_num) throw(std::runtime_error);
 			}
       }
    }
