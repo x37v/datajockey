@@ -56,7 +56,6 @@ module Datajockey
     has_many :audio_work_tags, :dependent => :destroy
 
     has_many :descriptor_types, :through => :descriptors
-    has_one :annotation_file, :dependent => :destroy
 
     has_many :tags, :through => :audio_work_tags, :extend => AudioWorkTagsAssociationExtension
 =begin
