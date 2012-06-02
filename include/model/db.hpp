@@ -56,6 +56,10 @@ namespace DataJockey {
 				int find(const QString& name, bool create = false) throw(std::runtime_error);
             void add_work(int album_id, int work_id, int track_num) throw(std::runtime_error);
 			}
+
+         namespace file_type {
+            int find(const QString& name, bool create = false) throw(std::runtime_error);
+         }
       }
    }
 }
