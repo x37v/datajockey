@@ -11,12 +11,6 @@
 #include <QStringList>
 #include <QSqlTableModel>
 
-//can build from 2 arrays?
-//selects[] = {"audio_works.*", "albums.id AS album_id", .., descriptors_tempo_median.float_value tempo_median}
-//from[] = {"audio_works, "INNER JOIN...", "INNER JOIN descriptors AS descriptors_tempo_median ON ....}
-//
-//CREATE TEMPORARY TABLE works AS SELECT audio_works.*, albums.id AS album_id, album_audio_works.track AS track FROM audio_works INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id
-
 namespace {
    QSqlDatabase cDB;
    bool has_transactions = false;
