@@ -23,8 +23,12 @@
 #include <QWidget>
 #include <QSplitter>
 #include <QTabWidget>
+#include <QSqlRelationalTableModel>
+#include <QSqlRelation>
 
 using namespace dj;
+using std::endl;
+using std::cout;
 
 Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
@@ -135,12 +139,23 @@ Application::Application(int & argc, char ** argv) :
          //"/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
-   WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
-	WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
+   //WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
+	//WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
-   WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
+
+   QSqlRelationalTableModel * rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
+   rtable_model->setTable("works");
+   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+   rtable_model->select();
+
+   WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
+
+   //WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
+   /*
    WorkFilterList * filter_list = new WorkFilterList(work_table_model);
 	TagSelectionFilter * tag_filter = new TagSelectionFilter(work_table_model);
 	TempoRangeFilter * tempo_filter = new TempoRangeFilter(work_table_model);
@@ -157,6 +172,7 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(tagSelectionChanged(QList<int>)),
          tag_filter,
          SLOT(setTags(QList<int>)));
+         */
 
    //work selection
    QObject::connect(
@@ -170,6 +186,7 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(workSelected(int)),
          SLOT(select_work(int)));
 
+   /*
    //filter application
    QObject::connect(
          filter_list,
@@ -181,7 +198,7 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(filter_state_changed(bool)),
          filtered_work_model,
          SLOT(filter(bool)));
-
+   */
 
    QFile file(":/style.qss");
    if(file.open(QFile::ReadOnly)){
@@ -192,7 +209,7 @@ Application::Application(int & argc, char ** argv) :
    QTabWidget * left_tab_view = new QTabWidget(mTop);
    left_tab_view->addTab(mMixerPanel, "mixer");
    left_tab_view->addTab(tag_editor, "tags");
-   left_tab_view->addTab(filter_list_view, "filters");
+   //left_tab_view->addTab(filter_list_view, "filters");
 
    QBoxLayout * left_layout = new QBoxLayout(QBoxLayout::TopToBottom);
    QSplitter * splitter = new QSplitter(Qt::Vertical);

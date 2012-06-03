@@ -70,9 +70,12 @@ void WorkTableModel::init(const QSqlDatabase & db){
 		"\talbums.name as album, \n"
 		"\talbum_audio_works.track as track, \n"
 		"\taudio_file_milliseconds as duration, \n"
+#if 1
+		"\taudio_file_types.name as \"file type\" ");
+#else
 		"\taudio_file_types.name as \"file type\", ");
 
-	for(unsigned int i = 0; i < descriptorFieldNames.size() - 1; i++){
+	for(int i = 0; i < descriptorFieldNames.size() - 1; i++){
 		queryStr.append("\t");
 		queryStr.append(descriptorFieldNames[i]);
 		queryStr.append(", \n");
@@ -80,6 +83,7 @@ void WorkTableModel::init(const QSqlDatabase & db){
 	queryStr.append("\t");
 	queryStr.append(descriptorFieldNames.back());
 	queryStr.append(" \n");
+#endif
 
 	queryStr.append("from audio_works \n"
 		"\tinner join audio_file_types on audio_file_types.id = audio_works.audio_file_type_id \n"

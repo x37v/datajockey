@@ -30,9 +30,8 @@ namespace dj {
 					QString& artist_name,
 					QString& work_title);
 
-			//XXX use active record to get query strings!!!
-
 			namespace work {
+            int temp_table_id_column(QString id_name);
 				int create(
 						const QMap<QString, QVariant>& attributes,
 						const QString& audio_file_location,

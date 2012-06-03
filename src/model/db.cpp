@@ -8,6 +8,14 @@
 #include <QSqlError>
 #include <QSqlDriver>
 #include <QFileInfo>
+#include <QStringList>
+#include <QSqlTableModel>
+
+//can build from 2 arrays?
+//selects[] = {"audio_works.*", "albums.id AS album_id", .., descriptors_tempo_median.float_value tempo_median}
+//from[] = {"audio_works, "INNER JOIN...", "INNER JOIN descriptors AS descriptors_tempo_median ON ....}
+//
+//CREATE TEMPORARY TABLE works AS SELECT audio_works.*, albums.id AS album_id, album_audio_works.track AS track FROM audio_works INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id
 
 namespace {
    QSqlDatabase cDB;
@@ -45,6 +53,12 @@ namespace {
    const QString cFileTypeFindString("SELECT id FROM audio_file_types where name = :name");
    const QString cFileTypeInsertString("INSERT INTO audio_file_types (name) values (:name)");
 
+   const QString cDescriptorTypesQueryString("SELECT id, name FROM descriptor_types");
+
+   int cWorkArtistIdColumn = 0;
+   int cWorkAlbumIdColumn = 0;
+   int cWorkAudioFileTypeIdColumn = 0;
+
 	bool setup_query(
 			QSqlQuery& query,
 			const QString& query_string, 
@@ -59,6 +73,42 @@ namespace {
 		return true;
 	}
 
+   void build_work_table() throw(std::runtime_error) {
+      //build up query
+      QSqlQuery query(cDB);
+
+      QStringList selects;
+      QStringList joins;
+
+      selects << "audio_works.*";
+      joins << "audio_works";
+
+      selects << "albums.id AS album_id";
+      selects << "album_audio_works.track AS track";
+      joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
+
+      //build up descriptor joins
+      if(!query.prepare(cDescriptorTypesQueryString) || !query.exec())
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to query: " + query.lastError().text().toStdString()));
+      while(query.next()) {
+         QString name = query.value(1).toString();
+         QString id = query.value(0).toString();
+         joins << "LEFT JOIN descriptors as `" + name + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
+         selects << "`" + name + "`.float_value as `" + name + "`";
+      }
+
+      QString query_string = "CREATE TEMPORARY TABLE works AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ");
+      
+      //actually create the table
+      if(!query.prepare(query_string) || !query.exec())
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to query: " + query.lastError().text().toStdString()));
+
+      QSqlTableModel tab;
+      tab.setTable("works");
+      cWorkArtistIdColumn = tab.fieldIndex("artist_id");
+      cWorkAlbumIdColumn = tab.fieldIndex("album_id");
+      cWorkAudioFileTypeIdColumn = tab.fieldIndex("audio_file_type_id");
+   };
 }
 
 using namespace dj::model;
@@ -82,6 +132,8 @@ void db::setup(
 
    if(cDB.driver()->hasFeature(QSqlDriver::Transactions))
       has_transactions = true;
+
+   build_work_table();
 }
 
 QSqlDatabase db::get() { return cDB; }
@@ -134,6 +186,16 @@ bool db::find_artist_and_title_by_id(
 	work_title = query.value(titleCol).toString();
 
 	return true;
+}
+
+int db::work::temp_table_id_column(QString id_name) {
+   if (id_name == "artist")
+      return cWorkArtistIdColumn;
+   else if (id_name == "album")
+      return cWorkAlbumIdColumn;
+   else if (id_name == "audio_file_type")
+      return cWorkAudioFileTypeIdColumn;
+   return 0;
 }
 
 int db::work::create(
