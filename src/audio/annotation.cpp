@@ -54,12 +54,14 @@ namespace {
 void Annotation::update_attributes(QMap<QString, QVariant>& attributes) {
    //XXX deal with descriptors
    foreach (const QString &str, attributes.keys()) {
+      //flat genre -> tags: - genre: value
       if (str == "genre") {
          QMap<QString, QVariant> tags;
          if (mAttrs.contains("tags"))
             tags = mAttrs["tags"].toMap();
          tags[str] = attributes.value(str).toString().toLower();
          mAttrs["tags"] = tags;
+      //flat album/track to album: name: v, track: n
       } else if (
             (str == "album" && static_cast<QMetaType::Type>(attributes.value(str).type()) != QMetaType::QVariantMap) ||
             str == "track") {
