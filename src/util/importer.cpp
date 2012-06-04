@@ -49,35 +49,39 @@ namespace {
          QMap<QString, QVariant> tag_data;
          audiofile_tag::extract(audio_file_path, tag_data);
 
-         //grab
+         //grab audio
          audio::AudioBuffer audio_buffer(audio_file_path.toStdString());
          if(!audio_buffer.load())
             throw(std::runtime_error(DJ_FILEANDLINE + " failed to load audio buffer " + audio_file_path.toStdString()));
          tag_data["milliseconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer.length() * 1000) / static_cast<double>(audio_buffer.sample_rate()));
 
+         //extract beats
          audio::BeatBuffer beat_buffer;
          BeatExtractor extractor;
          extractor.process(audio_buffer, beat_buffer);
 
+         //create annotation file
          audio::Annotation annotation;
          annotation.update_attributes(tag_data);
          annotation.beat_buffer(beat_buffer);
 
+         //create db entry
          int work_id = model::db::work::create(
                tag_data,
                audio_file_path);
 
+         //write annotation file and store the location in the db
          QString annotation_file_location = annotation.default_file_location(work_id);
          annotation.write_file(annotation_file_location);
-
          model::db::work::update_attribute(
                work_id,
                "annotation_file_location",
                annotation_file_location);
+
       } catch (std::exception& e) {
          qDebug() << "failed to import file " << audio_file_path << " " << e.what();
       } catch (...) {
-         //XXX report failure?
+         qDebug() << "failed to import file " << audio_file_path;
       }
    }
 }
