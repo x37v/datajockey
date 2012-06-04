@@ -23,6 +23,8 @@
 #include <fstream>
 #include <QFileInfo>
 #include <QDir>
+#include <QString>
+#include <QRegExp>
 
 using namespace dj;
 
@@ -173,6 +175,21 @@ unsigned int Configuration::osc_port(){
    }
 	
 	return port;
+}
+
+QString Configuration::annotation_dir() {
+   QString home_path = QDir::homePath();
+   try {
+      std::string dir_name;
+      mRoot["annotation"]["files"] >> dir_name;
+      QString qdir = QString::fromStdString(dir_name).trimmed();
+      QDir dir(qdir.replace(QRegExp("^~"), home_path));
+      return dir.absolutePath();
+   } catch (...) {
+      QString an(home_path);
+      an.append("/.datajockey/annotation");
+      return an;
+   }
 }
 
 QString Configuration::db_username() {

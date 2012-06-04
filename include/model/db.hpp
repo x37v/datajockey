@@ -34,9 +34,14 @@ namespace dj {
             int temp_table_id_column(QString id_name);
 				int create(
 						const QMap<QString, QVariant>& attributes,
-						const QString& audio_file_location,
-						const QString& annotation_file_location
+						const QString& audio_file_location
 						) throw(std::runtime_error);
+            int find_by_audio_file_location(
+                  const QString& audio_file_location) throw(std::runtime_error);
+            void update_attribute(
+                  int work_id,
+                  const QString& name,
+                  const QVariant& value);
 				void descriptor_create_or_update(
 						int work_id,
 						const QString& descriptor_type,

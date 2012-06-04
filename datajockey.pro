@@ -34,14 +34,15 @@ INCLUDEPATH += . \
 	/usr/include/rasqal/ \
    /usr/local/include/oscpack/
 
-QMAKE_CXXFLAGS += $$DENORMAL_FLAGS
-QMAKE_CFLAGS += $$DENORMAL_FLAGS
+QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions
+QMAKE_CFLAGS += $$DENORMAL_FLAGS -fexceptions
 RESOURCES = datajockey.qrc
 
 # Input
 HEADERS += include/application.hpp \
            include/config.hpp \
            include/defines.hpp \
+           include/audio/annotation.hpp \
            include/audio/audiobuffer.hpp \
            include/audio/audioio.hpp \
            include/audio/beatbuffer.hpp \
@@ -64,6 +65,7 @@ HEADERS += include/application.hpp \
            include/model/db.hpp \
            include/util/audiofiletag.hpp \
            include/util/beatextractor.hpp \
+           include/util/importer.hpp \
            include/view/audiolevel.hpp \
            include/view/mixerpanel.hpp \
            include/view/player_view.hpp \
@@ -87,6 +89,7 @@ HEADERS += include/application.hpp \
 SOURCES += src/application.cpp \
            src/config.cpp \
            src/defines.cpp \
+           src/audio/annotation.cpp \
            src/audio/audiobuffer.cpp \
            src/audio/audioio.cpp \
            src/audio/beatbuffer.cpp \
@@ -107,6 +110,7 @@ SOURCES += src/application.cpp \
            src/model/db.cpp \
            src/util/audiofiletag.cpp \
            src/util/beatextractor.cpp \
+           src/util/importer.cpp \ 
            src/view/audiolevel.cpp \
            src/view/main.cpp \
            src/view/mixerpanel.cpp \

@@ -11,7 +11,12 @@ namespace {
 	}
 }
 
+#include <iostream>
+using namespace std;
+
 void audiofile_tag::extract(const QString& path_to_file, QMap<QString, QVariant>& tag_data) throw(std::runtime_error) {
+   cout << path_to_file.toStdString() << endl;
+
 	TagLib::FileRef tag_file(path_to_file.toAscii());
 	if (tag_file.isNull())
 		throw std::runtime_error("audiofile_tag::extract cannot open file: " + path_to_file.toStdString());
@@ -22,7 +27,7 @@ void audiofile_tag::extract(const QString& path_to_file, QMap<QString, QVariant>
 	if (tags->isEmpty())
 		throw std::runtime_error("audiofile_tag::extract empty tags: " + path_to_file.toStdString());
 
-	fill_entry("title", tags->title(), tag_data);
+	fill_entry("name", tags->title(), tag_data);
 	fill_entry("artist", tags->artist(), tag_data);
 	fill_entry("album", tags->album(), tag_data);
 	fill_entry("genre", tags->genre(), tag_data);

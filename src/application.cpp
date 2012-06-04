@@ -17,6 +17,7 @@
 #include "tageditor.hpp"
 #include "oscreceiver.hpp"
 #include "config.hpp"
+#include "annotation.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -25,6 +26,9 @@
 #include <QTabWidget>
 #include <QSqlRelationalTableModel>
 #include <QSqlRelation>
+#include <QDebug>
+
+#include "importer.hpp"
 
 using namespace dj;
 using std::endl;
@@ -42,24 +46,14 @@ Application::Application(int & argc, char ** argv) :
          config->db_name(),
          config->db_username(),
          config->db_password());
-#if 0
-   QMap<QString, QVariant> attributes;
-   attributes["name"] = "Bullshit Name";
-   attributes["year"] = 2012;
-   attributes["channels"] = 2;
-   attributes["milliseconds"] = 200;
-   attributes["artist"] = "Toad Soda";
-   attributes["album"] = "Bitch Face";
-   attributes["track"] = 1;
 
-   int val = model::db::work::create(
-         attributes,
-         "bullshit/location.flac",
-         "another one"
-         );
-   if (val == 0)
-      qDebug("CRAP");
+#if 0
+   util::Importer * importer = new util::Importer(this);
+   QObject::connect(importer, SIGNAL(finished()),
+         SLOT(quit()));
+   importer->import(QStringList() << "/media/x/music/2_live_crew/");
 #else
+
    mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
    mMixerPanel = new view::MixerPanel(mTop);

@@ -46,7 +46,10 @@ namespace dj {
 			QString db_name() throw(std::runtime_error);
 			QString db_username();
 			QString db_password();
+
 			unsigned int osc_port();
+
+         QString annotation_dir();
 		private:
 			bool db_get(QString entry, QString &result) throw(std::runtime_error);
          QString mFile;

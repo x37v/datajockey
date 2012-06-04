@@ -10,9 +10,13 @@
 #include <QFileInfo>
 #include <QStringList>
 #include <QSqlTableModel>
+#include <QDebug>
+#include <QMutex>
+#include <QMutexLocker>
 
 namespace {
    QSqlDatabase cDB;
+   QMutex mMutex(QMutex::Recursive);
    bool has_transactions = false;
 
    const QString cFileQueryString(
@@ -29,10 +33,12 @@ namespace {
 
    const QString cWorkInsertString(
          "INSERT INTO audio_works\n"
-         "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, annotation_file_location, artist_id)\n"
+         "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, artist_id)\n"
          "VALUES\n"
-         "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :annotation_file_location, :artist_id)\n"
+         "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :artist_id)\n"
          );
+
+   const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
 
    const QString cArtistFindString("SELECT id FROM artists where name = :name");
    const QString cArtistInsertString("INSERT INTO artists (name) values (:name)");
@@ -68,6 +74,7 @@ namespace {
 	}
 
    void build_work_table() throw(std::runtime_error) {
+      QMutexLocker lock(&mMutex);
       //build up query
       QSqlQuery query(cDB);
 
@@ -114,6 +121,7 @@ void db::setup(
       QString password,
       int /* port */,
       QString /* host */) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
 
 	cDB = QSqlDatabase::addDatabase(type);
 	cDB.setDatabaseName(name);
@@ -137,6 +145,7 @@ bool db::find_locations_by_id(
 		int work_id,
 		QString& audio_file_loc,
 		QString& annotation_file_loc) {
+   QMutexLocker lock(&mMutex);
 
    //build up query
 	QSqlQuery query(get());
@@ -161,6 +170,7 @@ bool db::find_artist_and_title_by_id(
 		int work_id,
 		QString& artist_name,
 		QString& work_title) {
+   QMutexLocker lock(&mMutex);
 
    //build up query
 	QSqlQuery query(get());
@@ -194,9 +204,10 @@ int db::work::temp_table_id_column(QString id_name) {
 
 int db::work::create(
 		const QMap<QString, QVariant>& attributes,
-		const QString& audio_file_location,
-		const QString& annotation_file_location
+		const QString& audio_file_location
 		) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
+
 	int work_id = 0;
    QSqlDriver * db_driver = get().driver();
 
@@ -212,7 +223,6 @@ int db::work::create(
          throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
 
       query.bindValue(":audio_file_location", audio_file_location);
-      query.bindValue(":annotation_file_location", annotation_file_location);
 
       i = attributes.find("name");
       if (i != attributes.end())
@@ -276,25 +286,65 @@ int db::work::create(
    } catch (std::exception& e) {
       if (has_transactions)
          db_driver->rollbackTransaction();
-      throw e;
+      throw;
    }
 
    return work_id;
+}
+
+int db::work::find_by_audio_file_location(
+      const QString& audio_file_location) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
+
+	QSqlQuery query(get());
+	if(!query.prepare(cWorkIDFromLocation))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":audio_file_location", audio_file_location);
+
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   if (!query.first())
+      return 0;
+   return query.value(0).toInt();
+}
+
+void db::work::update_attribute(
+      int work_id,
+      const QString& name,
+      const QVariant& value) {
+   QMutexLocker lock(&mMutex);
+
+	QSqlQuery query(get());
+
+   QString update_string("UPDATE audio_works SET " + name + " = :value WHERE audio_works.id = :id");
+
+   //try to find an artist by the same name
+	if(!query.prepare(update_string))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+
+   query.bindValue(":value", value);
+   query.bindValue(":id", work_id);
+
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
 }
 
 void db::work::descriptor_create_or_update(
 		int work_id,
 		const QString& descriptor_type,
 		float value) {
+   QMutexLocker lock(&mMutex);
 }
 
 void db::work::tag(
 		int work_id,
 		const QString& tag_class,
 		const QString& tag_value) {
+   QMutexLocker lock(&mMutex);
 }
 
 int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
 	QSqlQuery query(get());
 
    //try to find an artist by the same name
@@ -322,6 +372,7 @@ int db::artist::find(const QString& name, bool create) throw(std::runtime_error)
 }
 
 int db::album::find(const QString& name, bool create)  throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
 	QSqlQuery query(get());
 
    //try to find an album by the same name
@@ -349,6 +400,7 @@ int db::album::find(const QString& name, bool create)  throw(std::runtime_error)
 }
 
 void db::album::add_work(int album_id, int work_id, int track_num)  throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
 	QSqlQuery query(get());
 
    //try to find an album by the same name
@@ -363,6 +415,7 @@ void db::album::add_work(int album_id, int work_id, int track_num)  throw(std::r
 }
 
 int db::file_type::find(const QString& name, bool create) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
 	QSqlQuery query(get());
 
    //try to find an album by the same name

@@ -1,15 +1,15 @@
 database:
-  adapter: mysql2
-  database: datajockey
-  username: developer
-  password: pass
-#  adapter: sqlite3
-#  database: /home/alex/.datajockey/database.sqlite3
-#  pool: 5
-#  timeout: 5000
+#  adapter: mysql2
+#  database: datajockey
+#  username: developer
+#  password: pass
+  adapter: sqlite3
+  database: /home/alex/.datajockey/database.sqlite3
+  pool: 5
+  timeout: 5000
 osc_port: 10001
 annotation:
-  files: ~/.datajockey/annotation-new/
-  beat locations:
+  files: ~/.datajockey/annotation/
+  beat_locations:
     smoothing: 10
 interpreter: false
