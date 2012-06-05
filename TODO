@@ -1,3 +1,14 @@
+Beat Extraction:
+   Smooth
+   Extract Tempo Descriptors
+Importer:
+   Provide any sort of UI?  At least list the tracks before importing? Display progress.
+   GUI importer, integrate into main app
+Works:
+   Better sorting.. field hiding and reorder?  Save field settings?
+   Filter views
+License:
+   Figure out all that we have to display.  Attribution in the GUI?  What about command line?
 Tags:
   Relationships between tags and songs have type [genre, theme, etc].
     How to differentiate 'metal' the material with 'metal' the genre?  postfix all genre's with 'music'?
