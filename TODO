@@ -4,6 +4,8 @@ Beat Extraction:
 Importer:
    Provide any sort of UI?  At least list the tracks before importing? Display progress.
    GUI importer, integrate into main app
+Audio:
+   lilv replace slv2
 Works:
    Better sorting.. field hiding and reorder?  Save field settings?
    Filter views
