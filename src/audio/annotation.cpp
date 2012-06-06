@@ -11,16 +11,16 @@
 using namespace dj::audio;
 
 namespace {
-   void recursively_add(YAML::Emitter& yaml, const QMap<QString, QVariant>& attributes) {
+   void recursively_add(YAML::Emitter& yaml, const QHash<QString, QVariant>& attributes) {
       foreach (const QString &key, attributes.keys()) {
          yaml << YAML::Key << key.toStdString();
          yaml << YAML::Value;
 
          QVariant val = attributes.value(key);
          switch (static_cast<QMetaType::Type>(val.type())) {
-            case QMetaType::QVariantMap:
+            case QMetaType::QVariantHash:
                yaml << YAML::BeginMap;
-               recursively_add(yaml, val.toMap());
+               recursively_add(yaml, val.toHash());
                yaml << YAML::EndMap;
                break;
             case QMetaType::Float:
@@ -51,23 +51,23 @@ namespace {
    }
 }
 
-void Annotation::update_attributes(QMap<QString, QVariant>& attributes) {
+void Annotation::update_attributes(QHash<QString, QVariant>& attributes) {
    //XXX deal with descriptors
    foreach (const QString &str, attributes.keys()) {
       //flat genre -> tags: - genre: value
       if (str == "genre") {
-         QMap<QString, QVariant> tags;
+         QHash<QString, QVariant> tags;
          if (mAttrs.contains("tags"))
-            tags = mAttrs["tags"].toMap();
+            tags = mAttrs["tags"].toHash();
          tags[str] = attributes.value(str).toString().toLower();
          mAttrs["tags"] = tags;
       //flat album/track to album: name: v, track: n
       } else if (
-            (str == "album" && static_cast<QMetaType::Type>(attributes.value(str).type()) != QMetaType::QVariantMap) ||
+            (str == "album" && static_cast<QMetaType::Type>(attributes.value(str).type()) != QMetaType::QVariantHash) ||
             str == "track") {
-         QMap<QString, QVariant> album;
+         QHash<QString, QVariant> album;
          if (mAttrs.contains("album"))
-            album = mAttrs["album"].toMap();
+            album = mAttrs["album"].toHash();
          album.insert(str == "album" ? "name" : str, attributes.value(str));
          mAttrs["album"] = album;
       } else {
@@ -116,7 +116,7 @@ QString Annotation::default_file_location(int work_id) {
    QString file_name;
    file_name.setNum(work_id);
 
-   QMap<QString, QVariant>::const_iterator i;
+   QHash<QString, QVariant>::const_iterator i;
 
    i = mAttrs.find("artist");
    if (i != mAttrs.end())
@@ -124,8 +124,8 @@ QString Annotation::default_file_location(int work_id) {
    
    i = mAttrs.find("album");
    if (i != mAttrs.end()) {
-      QMap<QString, QVariant> album = i->toMap();
-      QMap<QString, QVariant>::const_iterator j = album.find("name");
+      QHash<QString, QVariant> album = i->toHash();
+      QHash<QString, QVariant>::const_iterator j = album.find("name");
       if (j != album.end())
          file_name.append("-" + fmt_string(j->toString().toLower()));
    }

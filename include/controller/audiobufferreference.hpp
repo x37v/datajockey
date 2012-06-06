@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QMutex>
-#include <QMap>
+#include <QHash>
 #include <QPair>
 
 namespace dj {
@@ -25,7 +25,7 @@ namespace dj {
          private:
             //filename => [refcount, buffer pointer]
             typedef QPair<int,  dj::audio::AudioBuffer *> ref_cnt_audio_buffer_t;
-            typedef QMap<QString, ref_cnt_audio_buffer_t > manager_map_t;
+            typedef QHash<QString, ref_cnt_audio_buffer_t > manager_map_t;
             static manager_map_t mBufferManager;
             static QMutex mMutex;
          public:

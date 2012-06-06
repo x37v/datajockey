@@ -2,7 +2,7 @@
 #define PLAYER_VIEW_HPP
 
 #include <QWidget>
-#include <QMap>
+#include <QHash>
 #include <QString>
 #include <QBoxLayout>
 #include <QLineEdit>
@@ -48,12 +48,12 @@ namespace dj {
             void relay_mouse_button(bool down); //from waveform
          private:
             QProgressBar * mProgressBar;
-            QMap<QString, QPushButton *> mButtons;
+            QHash<QString, QPushButton *> mButtons;
             QBoxLayout * mTopLayout;
             QBoxLayout * mControlLayout;
             QLineEdit * mTrackDescription[2];
             QSlider * mVolumeSlider;
-            QMap<QString, QDial *> mEqDials;
+            QHash<QString, QDial *> mEqDials;
             WaveFormViewGL * mWaveFormView;
             AudioLevel * mAudioLevelView;
             QBoxLayout * mSliderLevelLayout;

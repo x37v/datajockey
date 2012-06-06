@@ -84,9 +84,9 @@ class AudioModel::PlayerState {
       AudioBufferReference mAudioBuffer;
       audio::BeatBuffer mBeatBuffer;
 
-      QMap<QString, int> mParamInt;
-      QMap<QString, bool> mParamBool;
-      QMap<QString, TimePoint> mParamPosition;
+      QHash<QString, int> mParamInt;
+      QHash<QString, bool> mParamBool;
+      QHash<QString, TimePoint> mParamPosition;
 
       //okay to update in audio thread
       unsigned int mCurrentFrame;
@@ -158,6 +158,7 @@ class AudioModel::ConsumeThread : public QThread {
             //XXX can we decrease this value and still have a responsive UI? [pause is laggy with 15ms]
             msleep(50);
             //msleep(15);
+
          }
       }
 };
@@ -663,7 +664,7 @@ bool AudioModel::player_state_bool(int player_index, QString name) {
    QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
-   QMap<QString, bool>::const_iterator itr = pstate->mParamBool.find(name);
+   QHash<QString, bool>::const_iterator itr = pstate->mParamBool.find(name);
    if (itr == pstate->mParamBool.end())
       return false;
    return *itr;
@@ -679,7 +680,7 @@ int AudioModel::player_state_int(int player_index, QString name) {
       return pstate->mCurrentFrame;
    }
 
-   QMap<QString, int>::const_iterator itr = pstate->mParamInt.find(name);
+   QHash<QString, int>::const_iterator itr = pstate->mParamInt.find(name);
    if (itr == pstate->mParamInt.end())
       return 0;
    return *itr;
@@ -718,7 +719,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    }
 
    //get the state for this name
-   QMap<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
+   QHash<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
    if (state_itr == pstate->mParamBool.end()) {
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (bool) arg" << endl;
       return;
@@ -729,7 +730,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
       return;
 
    //get the actions
-   QMap<QString, player_onoff_action_pair_t>::const_iterator action_itr = mPlayerStateActionMapping.find(name);
+   QHash<QString, player_onoff_action_pair_t>::const_iterator action_itr = mPlayerStateActionMapping.find(name);
    if (action_itr == mPlayerStateActionMapping.end()) {
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (bool) arg [action not found]" << endl;
       return;
@@ -763,7 +764,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       set_player_position_beat_relative(player_index, value);
    } else {
       //get the state for this name
-      QMap<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
+      QHash<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
       if (state_itr == pstate->mParamInt.end()) {
          cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (int) arg" << endl;
          return;
@@ -774,7 +775,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
          return;
 
       //get the action
-      QMap<QString, PlayerDoubleCommand::action_t>::const_iterator action_itr = mPlayerDoubleActionMapping.find(name);
+      QHash<QString, PlayerDoubleCommand::action_t>::const_iterator action_itr = mPlayerDoubleActionMapping.find(name);
       if (action_itr == mPlayerDoubleActionMapping.end()) {
          cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (int) arg [action not found]" << endl;
          return;
@@ -815,7 +816,7 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
    PlayerState * pstate = mPlayerStates[player_index];
 
    //get the action
-   QMap<QString, PlayerPositionCommand::position_t>::const_iterator action_itr = mPlayerPositionActionMapping.find(name);
+   QHash<QString, PlayerPositionCommand::position_t>::const_iterator action_itr = mPlayerPositionActionMapping.find(name);
    if (action_itr == mPlayerPositionActionMapping.end()) {
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg [action not found]" << endl;
       return;
@@ -827,7 +828,7 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
       queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, value));
    } else {
       //get the state for this name
-      QMap<QString, TimePoint>::iterator state_itr = pstate->mParamPosition.find(name);
+      QHash<QString, TimePoint>::iterator state_itr = pstate->mParamPosition.find(name);
       if (state_itr == pstate->mParamPosition.end()) {
          cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg" << endl;
          return;

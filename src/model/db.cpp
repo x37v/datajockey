@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <QMap>
+#include <QHash>
 #include <QVariant>
 #include <QSqlError>
 #include <QSqlDriver>
@@ -62,11 +62,11 @@ namespace {
 	bool setup_query(
 			QSqlQuery& query,
 			const QString& query_string, 
-			const QMap<QString, QVariant>& bindValues) {
+			const QHash<QString, QVariant>& bindValues) {
 		if(!query.prepare(query_string))
 			return false;
 
-		QMapIterator<QString, QVariant> i(bindValues);
+		QHashIterator<QString, QVariant> i(bindValues);
 		while (i.hasNext())
 			query.bindValue(i.key(), i.value());
 
@@ -203,7 +203,7 @@ int db::work::temp_table_id_column(QString id_name) {
 }
 
 int db::work::create(
-		const QMap<QString, QVariant>& attributes,
+		const QHash<QString, QVariant>& attributes,
 		const QString& audio_file_location
 		) throw(std::runtime_error) {
    QMutexLocker lock(&mMutex);
@@ -213,7 +213,7 @@ int db::work::create(
 
    try {
       int album_id = 0;
-      QMap<QString, QVariant>::const_iterator i;
+      QHash<QString, QVariant>::const_iterator i;
 
       if (has_transactions)
          db_driver->beginTransaction();

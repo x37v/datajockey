@@ -110,9 +110,9 @@ namespace dj {
             //maintain player state information
             std::vector<PlayerState *> mPlayerStates;
             typedef QPair<PlayerStateCommand::action_t, PlayerStateCommand::action_t> player_onoff_action_pair_t;
-            QMap<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
-            QMap<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
-            QMap<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
+            QHash<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
+            QHash<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
+            QHash<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
 
 
             //make sure that player states/audio buffer manager access is thread safe

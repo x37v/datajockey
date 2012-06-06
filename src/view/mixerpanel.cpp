@@ -212,7 +212,7 @@ void MixerPanel::relay_player_toggled(bool checked) {
    if (!button)
       return;
 
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
    if (player_index == mSenderToIndex.end())
       return;
 
@@ -224,7 +224,7 @@ void MixerPanel::relay_player_triggered() {
    if (!button)
       return;
 
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(button);
    if (player_index == mSenderToIndex.end())
       return;
 
@@ -232,7 +232,7 @@ void MixerPanel::relay_player_triggered() {
 }
 
 void MixerPanel::relay_player_volume(int val) {
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
    if (player_index == mSenderToIndex.end())
       return;
 
@@ -240,7 +240,7 @@ void MixerPanel::relay_player_volume(int val) {
 }
 
 void MixerPanel::relay_player_seek_frame_relative(int frames) {
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
    if (player_index == mSenderToIndex.end())
       return;
 
@@ -248,7 +248,7 @@ void MixerPanel::relay_player_seek_frame_relative(int frames) {
 }
 
 void MixerPanel::relay_player_seeking(bool state) {
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
    if (player_index == mSenderToIndex.end())
       return;
 
@@ -256,7 +256,7 @@ void MixerPanel::relay_player_seeking(bool state) {
 }
 
 void MixerPanel::relay_player_eq(int val) {
-   QMap<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
    if (player_index == mSenderToIndex.end())
       return;
 

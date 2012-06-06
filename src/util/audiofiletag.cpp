@@ -5,7 +5,7 @@
 using namespace dj::util;
 
 namespace {
-	void fill_entry(const QString& tag_name, const TagLib::String& tag, QMap<QString, QVariant>& tag_data) {
+	void fill_entry(const QString& tag_name, const TagLib::String& tag, QHash<QString, QVariant>& tag_data) {
 		if (!tag.isEmpty())
 			tag_data[tag_name] = QVariant(TStringToQString(tag.stripWhiteSpace()));
 	}
@@ -14,7 +14,7 @@ namespace {
 #include <iostream>
 using namespace std;
 
-void audiofile_tag::extract(const QString& path_to_file, QMap<QString, QVariant>& tag_data) throw(std::runtime_error) {
+void audiofile_tag::extract(const QString& path_to_file, QHash<QString, QVariant>& tag_data) throw(std::runtime_error) {
    cout << path_to_file.toStdString() << endl;
 
 	TagLib::FileRef tag_file(path_to_file.toAscii());

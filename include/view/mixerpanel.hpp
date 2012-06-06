@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QList>
-#include <QMap>
+#include <QHash>
 #include "beatbuffer.hpp"
 #include "timepoint.hpp"
 
@@ -70,7 +70,7 @@ namespace dj {
             TimePoint mMasterPositionLast;
             
             //map senders to indices for relaying
-            QMap<QObject *, int> mSenderToIndex;
+            QHash<QObject *, int> mSenderToIndex;
       };
    }
 }

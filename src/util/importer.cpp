@@ -46,7 +46,7 @@ namespace {
             return;
          }
          //grab tag data
-         QMap<QString, QVariant> tag_data;
+         QHash<QString, QVariant> tag_data;
          audiofile_tag::extract(audio_file_path, tag_data);
 
          //grab audio

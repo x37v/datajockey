@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <QObject>
 #include <QString>
-#include <QMap>
+#include <QHash>
 #include <QVariant>
 #include "beatbuffer.hpp"
 
@@ -17,12 +17,12 @@ namespace dj {
             //void load_from_file(QString& file_path);
             
             //pass data like tags, artist, etc..
-            void update_attributes(QMap<QString, QVariant>& attributes);
+            void update_attributes(QHash<QString, QVariant>& attributes);
             void beat_buffer(const BeatBuffer& buffer);
             void write_file(const QString& file_path) throw(std::runtime_error);
             QString default_file_location(int work_id);
          private:
-            QMap<QString, QVariant> mAttrs;
+            QHash<QString, QVariant> mAttrs;
             BeatBuffer mBeatBuffer;
       };
    }

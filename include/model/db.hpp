@@ -3,7 +3,7 @@
 
 #include <QSqlDatabase>
 #include <QString>
-#include <QMap>
+#include <QHash>
 #include <QVariant>
 #include <stdexcept>
 
@@ -33,7 +33,7 @@ namespace dj {
 			namespace work {
             int temp_table_id_column(QString id_name);
 				int create(
-						const QMap<QString, QVariant>& attributes,
+						const QHash<QString, QVariant>& attributes,
 						const QString& audio_file_location
 						) throw(std::runtime_error);
             int find_by_audio_file_location(
