@@ -155,10 +155,8 @@ class AudioModel::ConsumeThread : public QThread {
             AudioModel::QueryPlayState * cmd = new AudioModel::QueryPlayState(mModel);
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
-            //XXX can we decrease this value and still have a responsive UI? [pause is laggy with 15ms]
-            msleep(50);
-            //msleep(15);
-
+            //XXX if the UI becomes unresponsive, increase this value
+            msleep(15);
          }
       }
 };
