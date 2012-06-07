@@ -51,7 +51,7 @@ Application::Application(int & argc, char ** argv) :
    util::Importer * importer = new util::Importer(this);
    QObject::connect(importer, SIGNAL(finished()),
          SLOT(quit()));
-   importer->import(QStringList() << "/media/x/music/2_live_crew/");
+   importer->import(QStringList() << "/media/x/music-oldtoast/compilations/street_jams_electric_funk/part_1/");
 #else
 
    mAudioModel = audio::AudioModel::instance();

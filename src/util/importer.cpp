@@ -60,6 +60,8 @@ namespace {
          BeatExtractor extractor;
          extractor.process(audio_buffer, beat_buffer);
 
+         //TODO smooth beat buffer
+
          //create annotation file
          audio::Annotation annotation;
          annotation.update_attributes(tag_data);
@@ -70,6 +72,29 @@ namespace {
                tag_data,
                audio_file_path);
 
+         //create tempo descriptors
+         if (beat_buffer.length() > 2) {
+            try {
+            double median, mean;
+            beat_buffer.median_and_mean(median, mean);
+            //XXX assuming 4/4 time
+            if (median > 0.0) {
+               model::db::work::descriptor_create_or_update(
+                     work_id,
+                     "tempo median",
+                     60.0 / median);
+            }
+            if (mean > 0.0) {
+               model::db::work::descriptor_create_or_update(
+                     work_id,
+                     "tempo average",
+                     60.0 / mean);
+            }
+            } catch (std::exception& e) {
+               qDebug() << "failed to create tempo descriptors for " << audio_file_path << " " << e.what();
+            }
+         }
+
          //write annotation file and store the location in the db
          QString annotation_file_location = annotation.default_file_location(work_id);
          annotation.write_file(annotation_file_location);
@@ -77,6 +102,8 @@ namespace {
                work_id,
                "annotation_file_location",
                annotation_file_location);
+
+         qDebug() << "complete: " << audio_file_path;
 
       } catch (std::exception& e) {
          qDebug() << "failed to import file " << audio_file_path << " " << e.what();

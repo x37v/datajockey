@@ -44,8 +44,8 @@ namespace dj {
                   const QVariant& value);
 				void descriptor_create_or_update(
 						int work_id,
-						const QString& descriptor_type,
-						float value);
+						const QString& descriptor_type_name,
+						double value);
 				void tag(
 						int work_id,
 						const QString& tag_class,

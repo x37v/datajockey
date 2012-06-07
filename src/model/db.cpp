@@ -19,19 +19,19 @@ namespace {
    QMutex mMutex(QMutex::Recursive);
    bool has_transactions = false;
 
-   const QString cFileQueryString(
+   const QString cFileQuery(
          "SELECT audio_file_location, annotation_file_location\n"
          "FROM audio_works\n"
          "WHERE audio_works.id = :id");
 
-   const QString cWorkInfoQueryString(
+   const QString cWorkInfoQuery(
          "SELECT audio_works.name title,\n"
          "\tartists.name artist \n"
          "FROM `audio_works`\n"
          "\tINNER JOIN `artists` ON `artists`.`id` = `audio_works`.`artist_id`\n"
          "WHERE audio_works.id = :id");
 
-   const QString cWorkInsertString(
+   const QString cWorkInsert(
          "INSERT INTO audio_works\n"
          "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, artist_id)\n"
          "VALUES\n"
@@ -40,20 +40,25 @@ namespace {
 
    const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
 
-   const QString cArtistFindString("SELECT id FROM artists where name = :name");
-   const QString cArtistInsertString("INSERT INTO artists (name) values (:name)");
+   const QString cArtistFind("SELECT id FROM artists where name = :name");
+   const QString cArtistInsert("INSERT INTO artists (name) values (:name)");
 
-   const QString cAlbumFindString("SELECT id FROM albums where name = :name");
-   const QString cAlbumInsertString("INSERT INTO albums (name) values (:name)");
-   const QString cAlbumInsertTrackString(
+   const QString cAlbumFind("SELECT id FROM albums where name = :name");
+   const QString cAlbumInsert("INSERT INTO albums (name) values (:name)");
+   const QString cAlbumInsertTrack(
          "INSERT INTO album_audio_works\n"
          "(album_id, audio_work_id, track)\n"
          "values (:album_id, :audio_work_id, :track)\n");
 
-   const QString cFileTypeFindString("SELECT id FROM audio_file_types where name = :name");
-   const QString cFileTypeInsertString("INSERT INTO audio_file_types (name) values (:name)");
+   const QString cFileTypeFind("SELECT id FROM audio_file_types where name = :name");
+   const QString cFileTypeInsert("INSERT INTO audio_file_types (name) values (:name)");
 
-   const QString cDescriptorTypesQueryString("SELECT id, name FROM descriptor_types");
+   const QString cDescriptorTypesAll("SELECT id, name FROM descriptor_types");
+   const QString cDescriptorTypeFind("SELECT id FROM descriptor_types WHERE name = :name");
+   const QString cDescriptorTypeCreate("INSERT INTO descriptor_types (name) VALUES ( :name )");
+   const QString cDescriptorFindByWorkId("SELECT id FROM descriptors WHERE descriptor_type_id = :descriptor_type_id AND audio_work_id = :audio_work_id");
+   const QString cDescriptorUpdateValueById("UPDATE descriptors SET float_value = :value WHERE id = :id");
+   const QString cDescriptorInsert("INSERT INTO descriptors (descriptor_type_id, audio_work_id, float_value) VALUES(:descriptor_type_id, :audio_work_id, :value)");
 
    int cWorkArtistIdColumn = 0;
    int cWorkAlbumIdColumn = 0;
@@ -89,7 +94,7 @@ namespace {
       joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
 
       //build up descriptor joins
-      if(!query.prepare(cDescriptorTypesQueryString) || !query.exec())
+      if(!query.prepare(cDescriptorTypesAll) || !query.exec())
          throw(std::runtime_error(DJ_FILEANDLINE + " failed to query: " + query.lastError().text().toStdString()));
       while(query.next()) {
          QString name = query.value(1).toString();
@@ -149,7 +154,7 @@ bool db::find_locations_by_id(
 
    //build up query
 	QSqlQuery query(get());
-	if(!query.prepare(cFileQueryString))
+	if(!query.prepare(cFileQuery))
 		return false;
 	query.bindValue(":id", work_id);
 
@@ -174,7 +179,7 @@ bool db::find_artist_and_title_by_id(
 
    //build up query
 	QSqlQuery query(get());
-	if(!query.prepare(cWorkInfoQueryString))
+	if(!query.prepare(cWorkInfoQuery))
 		return false;
 	query.bindValue(":id", work_id);
 
@@ -219,7 +224,7 @@ int db::work::create(
          db_driver->beginTransaction();
 
       QSqlQuery query(get());
-      if(!query.prepare(cWorkInsertString))
+      if(!query.prepare(cWorkInsert))
          throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
 
       query.bindValue(":audio_file_location", audio_file_location);
@@ -331,9 +336,59 @@ void db::work::update_attribute(
 
 void db::work::descriptor_create_or_update(
 		int work_id,
-		const QString& descriptor_type,
-		float value) {
+		const QString& descriptor_type_name,
+		double value) {
    QMutexLocker lock(&mMutex);
+	QSqlQuery query(get());
+
+   //find the descriptor type named
+	if(!query.prepare(cDescriptorTypeFind))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+   query.bindValue(":name", descriptor_type_name);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+
+   //if it was found, get the id, otherwise create a descriptor type with this name
+   int descriptor_type_id = 0;
+   if (query.first())
+      descriptor_type_id = query.value(0).toInt();
+   else {
+      if(!query.prepare(cDescriptorTypeCreate))
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+      query.bindValue(":name", descriptor_type_name);
+      if (!query.exec())
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+      descriptor_type_id = query.lastInsertId().toInt();
+   }
+
+   //see if there is an existing descriptor to update
+   if(!query.prepare(cDescriptorFindByWorkId))
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+
+   query.bindValue(":descriptor_type_id", descriptor_type_id);
+   query.bindValue(":audio_work_id", work_id);
+   if (!query.exec())
+      throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+
+   if (query.first()) {
+      int descriptor_id = query.value(0).toInt();
+      if(!query.prepare(cDescriptorUpdateValueById))
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+      query.bindValue(":id", descriptor_id);
+      query.bindValue(":value", value);
+
+      if (!query.exec())
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   } else {
+      if(!query.prepare(cDescriptorInsert))
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
+      query.bindValue(":descriptor_type_id", descriptor_type_id);
+      query.bindValue(":audio_work_id", work_id);
+      query.bindValue(":value", value);
+      if (!query.exec())
+         throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
+   }
+
 }
 
 void db::work::tag(
@@ -341,6 +396,7 @@ void db::work::tag(
 		const QString& tag_class,
 		const QString& tag_value) {
    QMutexLocker lock(&mMutex);
+   QSqlQuery query(get());
 }
 
 int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
@@ -348,7 +404,7 @@ int db::artist::find(const QString& name, bool create) throw(std::runtime_error)
 	QSqlQuery query(get());
 
    //try to find an artist by the same name
-	if(!query.prepare(cArtistFindString))
+	if(!query.prepare(cArtistFind))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
@@ -363,7 +419,7 @@ int db::artist::find(const QString& name, bool create) throw(std::runtime_error)
       return 0;
 
    //otherwise, create a new artist
-   if(!query.prepare(cArtistInsertString))
+   if(!query.prepare(cArtistInsert))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
@@ -376,7 +432,7 @@ int db::album::find(const QString& name, bool create)  throw(std::runtime_error)
 	QSqlQuery query(get());
 
    //try to find an album by the same name
-	if(!query.prepare(cAlbumFindString))
+	if(!query.prepare(cAlbumFind))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
@@ -391,7 +447,7 @@ int db::album::find(const QString& name, bool create)  throw(std::runtime_error)
       return 0;
 
    //otherwise, create a new album
-   if(!query.prepare(cAlbumInsertString))
+   if(!query.prepare(cAlbumInsert))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
@@ -404,7 +460,7 @@ void db::album::add_work(int album_id, int work_id, int track_num)  throw(std::r
 	QSqlQuery query(get());
 
    //try to find an album by the same name
-	if(!query.prepare(cAlbumInsertTrackString))
+	if(!query.prepare(cAlbumInsertTrack))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":album_id", album_id);
    query.bindValue(":audio_work_id", work_id);
@@ -419,7 +475,7 @@ int db::file_type::find(const QString& name, bool create) throw(std::runtime_err
 	QSqlQuery query(get());
 
    //try to find an album by the same name
-	if(!query.prepare(cFileTypeFindString))
+	if(!query.prepare(cFileTypeFind))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
@@ -434,7 +490,7 @@ int db::file_type::find(const QString& name, bool create) throw(std::runtime_err
       return 0;
 
    //otherwise, create a new album
-   if(!query.prepare(cFileTypeInsertString))
+   if(!query.prepare(cFileTypeInsert))
       throw(std::runtime_error(DJ_FILEANDLINE + " failed to prepare query: " + query.lastError().text().toStdString()));
    query.bindValue(":name", name);
    if (!query.exec())
