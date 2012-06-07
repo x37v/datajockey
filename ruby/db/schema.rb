@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 18) do
+ActiveRecord::Schema.define(:version => 19) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -23,8 +23,8 @@ ActiveRecord::Schema.define(:version => 18) do
     t.integer "track"
   end
 
-  add_index "album_audio_works", ["album_id"], :name => "index_album_audio_works_on_album_id"
-  add_index "album_audio_works", ["audio_work_id"], :name => "index_album_audio_works_on_audio_work_id"
+  add_index "album_audio_works", ["album_id"], :name => "album"
+  add_index "album_audio_works", ["audio_work_id"], :name => "audio_work"
 
   create_table "albums", :force => true do |t|
     t.string  "name"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(:version => 18) do
     t.integer "artist_role_id"
   end
 
-  add_index "artist_audio_works", ["artist_id"], :name => "index_artist_audio_works_on_artist_id"
-  add_index "artist_audio_works", ["audio_work_id"], :name => "index_artist_audio_works_on_audio_work_id"
+  add_index "artist_audio_works", ["artist_id"], :name => "artist"
+  add_index "artist_audio_works", ["audio_work_id"], :name => "audio_work"
 
   create_table "artist_roles", :force => true do |t|
     t.string "name"
@@ -77,13 +77,12 @@ ActiveRecord::Schema.define(:version => 18) do
   create_table "descriptors", :force => true do |t|
     t.integer "descriptor_type_id"
     t.integer "audio_work_id"
-    t.float   "float_value"
-    t.integer "int_value"
+    t.float   "value"
   end
 
-  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "index_descriptors_on_audio_work_id_and_descriptor_type_id"
-  add_index "descriptors", ["audio_work_id"], :name => "index_descriptors_on_audio_work_id"
-  add_index "descriptors", ["descriptor_type_id"], :name => "index_descriptors_on_descriptor_type_id"
+  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "ad1"
+  add_index "descriptors", ["audio_work_id"], :name => "audio_work"
+  add_index "descriptors", ["descriptor_type_id"], :name => "descriptor"
 
   create_table "tag_classes", :force => true do |t|
     t.string "name"

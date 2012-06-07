@@ -57,8 +57,8 @@ namespace {
    const QString cDescriptorTypeFind("SELECT id FROM descriptor_types WHERE name = :name");
    const QString cDescriptorTypeCreate("INSERT INTO descriptor_types (name) VALUES ( :name )");
    const QString cDescriptorFindByWorkId("SELECT id FROM descriptors WHERE descriptor_type_id = :descriptor_type_id AND audio_work_id = :audio_work_id");
-   const QString cDescriptorUpdateValueById("UPDATE descriptors SET float_value = :value WHERE id = :id");
-   const QString cDescriptorInsert("INSERT INTO descriptors (descriptor_type_id, audio_work_id, float_value) VALUES(:descriptor_type_id, :audio_work_id, :value)");
+   const QString cDescriptorUpdateValueById("UPDATE descriptors SET value = :value WHERE id = :id");
+   const QString cDescriptorInsert("INSERT INTO descriptors (descriptor_type_id, audio_work_id, value) VALUES(:descriptor_type_id, :audio_work_id, :value)");
 
    int cWorkArtistIdColumn = 0;
    int cWorkAlbumIdColumn = 0;
@@ -100,7 +100,7 @@ namespace {
          QString name = query.value(1).toString();
          QString id = query.value(0).toString();
          joins << "LEFT JOIN descriptors as `" + name + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
-         selects << "`" + name + "`.float_value as `" + name + "`";
+         selects << "`" + name + "`.value as `" + name + "`";
       }
 
       QString query_string = "CREATE TEMPORARY TABLE works AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ");
