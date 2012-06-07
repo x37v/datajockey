@@ -335,11 +335,11 @@ void db::work::update_attribute(
 }
 
 void db::work::descriptor_create_or_update(
-		int work_id,
-		const QString& descriptor_type_name,
-		double value) {
+      int work_id,
+      const QString& descriptor_type_name,
+      double value) throw(std::runtime_error) {
    QMutexLocker lock(&mMutex);
-	QSqlQuery query(get());
+   QSqlQuery query(get());
 
    //find the descriptor type named
 	if(!query.prepare(cDescriptorTypeFind))
@@ -388,7 +388,6 @@ void db::work::descriptor_create_or_update(
       if (!query.exec())
          throw(std::runtime_error(DJ_FILEANDLINE + " failed to execute query: " + query.lastError().text().toStdString()));
    }
-
 }
 
 void db::work::tag(

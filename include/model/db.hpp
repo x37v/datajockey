@@ -42,15 +42,15 @@ namespace dj {
                   int work_id,
                   const QString& name,
                   const QVariant& value);
-				void descriptor_create_or_update(
-						int work_id,
-						const QString& descriptor_type_name,
-						double value);
-				void tag(
-						int work_id,
-						const QString& tag_class,
-						const QString& tag_value);
-			}
+            void descriptor_create_or_update(
+                  int work_id,
+                  const QString& descriptor_type_name,
+                  double value) throw(std::runtime_error);
+            void tag(
+                  int work_id,
+                  const QString& tag_class,
+                  const QString& tag_value);
+         }
 
 			namespace artist {
 				int find(const QString& name, bool create = false) throw(std::runtime_error);

@@ -4,6 +4,8 @@ Beat Extraction:
 Importer:
    Provide any sort of UI?  At least list the tracks before importing? Display progress.
    GUI importer, integrate into main app
+   apply genre tags during import
+   smooth beat buffer?
 Audio:
    lilv replace slv2
 Recently Played Filter:
