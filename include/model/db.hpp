@@ -24,11 +24,11 @@ namespace dj {
 			bool find_locations_by_id(
 					int work_id,
 					QString& audio_file_loc,
-					QString& annotation_file_loc);
+					QString& annotation_file_loc) throw(std::runtime_error);
 			bool find_artist_and_title_by_id(
 					int work_id,
 					QString& artist_name,
-					QString& work_title);
+					QString& work_title) throw(std::runtime_error);
 
 			namespace work {
             int temp_table_id_column(QString id_name);
@@ -41,7 +41,7 @@ namespace dj {
             void update_attribute(
                   int work_id,
                   const QString& name,
-                  const QVariant& value);
+                  const QVariant& value) throw(std::runtime_error);
             void descriptor_create_or_update(
                   int work_id,
                   const QString& descriptor_type_name,
@@ -49,7 +49,7 @@ namespace dj {
             void tag(
                   int work_id,
                   const QString& tag_class,
-                  const QString& tag_value);
+                  const QString& tag_value) throw(std::runtime_error);
          }
 
 			namespace artist {
