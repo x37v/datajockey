@@ -142,6 +142,7 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
    rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
    rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+   //XXX quite slow rtable_model->setFilter("works.id IN (select audio_work_id from audio_work_tags where audio_work_tags.tag_id in (2,3,4))");
    rtable_model->select();
 
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
