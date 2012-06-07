@@ -48,6 +48,7 @@ namespace dj {
 
             //not real time save
             double median_difference();
+            void median_and_mean(double& median, double& mean);
 
          private:
             //the start beat lets us offset the data

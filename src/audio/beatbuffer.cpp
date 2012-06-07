@@ -185,19 +185,33 @@ void BeatBuffer::insert_beat(double seconds) {
 }
 
 double BeatBuffer::median_difference() {
-   if (mBeatData.size() < 2)
-      return 0.1; //XXX is there a better value?
+   double median, mean;
+   median_and_mean(median, mean);
+   return median;
+}
+
+void BeatBuffer::median_and_mean(double& median, double& mean) {
+   if (mBeatData.size() < 2) {
+      //XXX is there a better value?
+      median = mean = 0.1;
+   }
 
    std::vector<double> distances;
-   for (unsigned int i = 0; i < mBeatData.size() - 1; i++)
-      distances.push_back(mBeatData[i + 1] - mBeatData[i]);
+   double sum = 0.0;
+   for (unsigned int i = 0; i < mBeatData.size() - 1; i++) {
+      double dist = mBeatData[i + 1] - mBeatData[i];
+      distances.push_back(dist);;
+      sum += dist;
+   }
 
+   mean = sum / distances.size();
+
+   //median
    sort(distances.begin(), distances.end());
-
    if (distances.size() % 2 == 1)
-      return distances[distances.size() / 2];
+      median = distances[distances.size() / 2];
    else
-      return (distances[distances.size() / 2] + distances[distances.size() / 2 + 1]) / 2.0;
+      median = (distances[distances.size() / 2] + distances[distances.size() / 2 + 1]) / 2.0;
 }
 
 #if 0
