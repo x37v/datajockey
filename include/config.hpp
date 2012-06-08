@@ -54,7 +54,7 @@ namespace dj {
 
          QString annotation_dir();
 		private:
-			bool db_get(QString entry, QString &result);
+			bool db_get(YAML::Node& doc, QString entry, QString &result);
          QString mFile;
 
          QString mDBAdapter;
@@ -74,7 +74,6 @@ namespace dj {
 		private:
          void restore_defaults();
 			static Configuration * cInstance;
-			YAML::Node mRoot;
 			bool mValidFile;
 	};
 }

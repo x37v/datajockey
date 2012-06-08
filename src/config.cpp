@@ -19,7 +19,6 @@
  */
 
 #include "config.hpp"
-#include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <QFileInfo>
 #include <QDir>
@@ -90,13 +89,14 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
 	try {
       std::ifstream fin(path.toStdString().c_str());
 		YAML::Parser p(fin);
-		p.GetNextDocument(mRoot);
+      YAML::Node root;
+		p.GetNextDocument(root);
 		mValidFile = true;
       mFile = path;
 
       //fill in the db entries
       QString adapter;
-      if (db_get("adapter", adapter)) {
+      if (db_get(root, "adapter", adapter)) {
          if (adapter.contains("mysql"))
             mDBAdapter = "QMYSQL";
          else if (adapter.contains("sqlite"))
@@ -104,18 +104,18 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
          else
             qWarning() << "config file " << path << " contains invalid adapter type: " << adapter;
       }
-      db_get("database", mDBName);
-      db_get("username", mDBUserName);
-      db_get("password", mDBPassword);
+      db_get(root, "database", mDBName);
+      db_get(root, "username", mDBUserName);
+      db_get(root, "password", mDBPassword);
 
       //fill in the rest
       try {
-         mRoot["osc_port"] >> mOscPort;
+         root["osc_port"] >> mOscPort;
       } catch (...) { /* do nothing */ }
 
       try {
          std::string dir_name;
-         mRoot["annotation"]["files"] >> dir_name;
+         root["annotation"]["files"] >> dir_name;
          QString qdir = QString::fromStdString(dir_name).trimmed();
          QDir dir(qdir.replace(QRegExp("^~"), QDir::homePath()));
          mAnnotationDir = dir.absolutePath();
@@ -140,9 +140,9 @@ bool Configuration::valid_file(){
 	return mValidFile;
 }
 
-bool Configuration::db_get(QString element, QString &result) {
+bool Configuration::db_get(YAML::Node& doc, QString element, QString &result) {
 	try {
-      const YAML::Node& db = mRoot["database"];
+      const YAML::Node& db = doc["database"];
       if(const YAML::Node *n = db.FindValue(element.toStdString())) {
          std::string r;
          *n >> r;
@@ -159,7 +159,7 @@ QString Configuration::db_password() { return mDBPassword; }
 QString Configuration::db_username() { return mDBUserName; }
 
 unsigned int Configuration::osc_port(){ return mOscPort; }
-QString Configuration::annotation_dir() { mAnnotationDir; }
+QString Configuration::annotation_dir() { return mAnnotationDir; }
 
 void Configuration::restore_defaults() {
    mDBUserName = "user";
