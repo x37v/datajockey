@@ -60,6 +60,15 @@ namespace {
    const QString cDescriptorUpdateValueById("UPDATE descriptors SET value = :value WHERE id = :id");
    const QString cDescriptorInsert("INSERT INTO descriptors (descriptor_type_id, audio_work_id, value) VALUES(:descriptor_type_id, :audio_work_id, :value)");
 
+   const QString cTagClassFind("SELECT id FROM tag_classes WHERE name = :name");
+   const QString cTagClassCreate("INSERT INTO tag_classes (name) VALUES (:name)");
+
+   const QString cTagFind("SELECT id FROM tags WHERE name = :name AND tag_class_id = :tag_class_id");
+   const QString cTagCreate("INSERT INTO tags (name, tag_class_id) VALUES (:name, :tag_class_id)");
+
+   const QString cWorkTagFind("SELECT id FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
+   const QString cWorkTagCreate("INSERT INTO audio_work_tags (tag_id, audio_work_id) VALUES (:tag_id, :audio_work_id)");
+
    int cWorkArtistIdColumn = 0;
    int cWorkAlbumIdColumn = 0;
    int cWorkAudioFileTypeIdColumn = 0;
@@ -243,7 +252,7 @@ int db::work::create(
       if (i != attributes.end())
          query.bindValue(":year", i.value());
       else
-         query.bindValue(":year", "NULL");
+         query.bindValue(":year", QVariant::Int);
 
       i = attributes.find("channels");
       if (i != attributes.end())
@@ -255,7 +264,7 @@ int db::work::create(
       if (i != attributes.end())
          query.bindValue(":audio_file_milliseconds", i.value());
       else
-         query.bindValue(":audio_file_milliseconds", "NULL");
+         query.bindValue(":audio_file_milliseconds", QVariant::Int);
 
       i = attributes.find("file_type");
       QString file_type_name;
@@ -273,7 +282,7 @@ int db::work::create(
          if (i != attributes.end()) {
             query.bindValue(":artist_id", artist::find(i.value().toString(), true));
          } else {
-            query.bindValue(":artist_id", "NULL");
+            query.bindValue(":artist_id", QVariant::Int);
          }
       }
 
@@ -383,6 +392,52 @@ void db::work::tag(
 		const QString& tag_value) throw(std::runtime_error) {
    QMutexLocker lock(&mMutex);
    MySqlQuery query(get());
+
+   //find the tag class named
+	query.prepare(cTagClassFind);
+   query.bindValue(":name", tag_class);
+   query.exec();
+
+   //if it was found, get the id, otherwise create one
+   int tag_class_id = 0;
+   if (query.first())
+      tag_class_id = query.value(0).toInt();
+   else {
+      query.prepare(cTagClassCreate);
+      query.bindValue(":name", tag_class);
+      query.exec();
+      tag_class_id = query.lastInsertId().toInt();
+   }
+
+   //find the tag, if it exists
+   query.prepare(cTagFind);
+   query.bindValue(":name", tag_value);
+   query.bindValue(":tag_class_id", tag_class_id);
+   query.exec();
+
+   int tag_id = 0;
+   if (query.first()) {
+      tag_id = query.value(0).toInt();
+
+      //see if the work already has this tag
+      query.prepare(cWorkTagFind);
+      query.bindValue(":tag_id", tag_id);
+      query.bindValue(":audio_work_id", work_id);
+      query.exec();
+      if (query.first())
+         return;  //the work already has this tag
+   } else {
+      query.prepare(cTagCreate);
+      query.bindValue(":name", tag_value);
+      query.bindValue(":tag_class_id", tag_class_id);
+      query.exec();
+      tag_id = query.lastInsertId().toInt();
+   }
+
+   query.prepare(cWorkTagCreate);
+   query.bindValue(":tag_id", tag_id);
+   query.bindValue(":audio_work_id", work_id);
+   query.exec();
 }
 
 int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
