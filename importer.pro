@@ -4,9 +4,10 @@
 
 TEMPLATE = app
 TARGET = datajockey_importer
-LIBS += -lsndfile -lvorbisfile -lmad -lyaml-cpp -ltag -lvamp-hostsdk
+LIBS += -lsndfile -lvorbisfile -lmad -lyaml-cpp -ltag -lvamp-hostsdk -lboost_program_options-mt
 QT += sql
 QT -= gui
+CONFIG += console
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 
 DEPENDPATH += . \

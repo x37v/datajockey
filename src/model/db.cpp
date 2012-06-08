@@ -147,7 +147,10 @@ void db::setup(
 }
 
 QSqlDatabase db::get() { return cDB; }
-void db::close() { cDB.close(); }
+void db::close() {
+   cDB.close();
+   cDB = QSqlDatabase();
+}
 
 bool db::find_locations_by_id(
 		int work_id,

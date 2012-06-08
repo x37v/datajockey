@@ -22,8 +22,10 @@ namespace {
 
       foreach(const QString &item, file_list) {
          QFileInfo info(item);
-         if (!info.exists())
+         if (!info.exists()) {
+            qWarning() << item << " not a valid file or directory, skipping" << endl;
             continue;
+         }
          if (info.isDir()) {
             QDir dir(item);
             QStringList entries = dir.entryList(QDir::AllEntries | QDir::Readable | QDir::NoDotAndDotDot);
@@ -42,7 +44,7 @@ namespace {
    void import_file(const QString& audio_file_path) {
       try {
          if (model::db::work::find_by_audio_file_location(audio_file_path) != 0) {
-            qDebug() << audio_file_path << " already in database, skipping";
+            qWarning() << audio_file_path << " already in database, skipping";
             return;
          }
          //grab tag data
@@ -91,7 +93,7 @@ namespace {
                      60.0 / mean);
             }
             } catch (std::exception& e) {
-               qDebug() << "failed to create tempo descriptors for " << audio_file_path << " " << e.what();
+               qWarning() << "failed to create tempo descriptors for " << audio_file_path << " " << e.what();
             }
          }
 
@@ -103,12 +105,12 @@ namespace {
                "annotation_file_location",
                annotation_file_location);
 
-         qDebug() << "complete: " << audio_file_path;
+         cout << "complete: " << audio_file_path.toStdString() << endl;;
 
       } catch (std::exception& e) {
-         qDebug() << "failed to import file " << audio_file_path << " " << e.what();
+         qWarning() << "failed to import file " << audio_file_path << " " << e.what();
       } catch (...) {
-         qDebug() << "failed to import file " << audio_file_path;
+         qWarning() << "failed to import file " << audio_file_path;
       }
    }
 }
