@@ -32,7 +32,7 @@ Configuration * Configuration::cInstance = NULL;
 
 Configuration::Configuration(){ 
    restore_defaults();
-	mValidFile = false;
+   mValidFile = false;
 }
 
 Configuration::Configuration(const Configuration&){ }
@@ -40,17 +40,17 @@ Configuration::Configuration(const Configuration&){ }
 Configuration::~Configuration(){ } 
 
 Configuration * Configuration::instance(){
-	if(!cInstance)
-		cInstance = new Configuration();
-	return cInstance;
+   if(!cInstance)
+      cInstance = new Configuration();
+   return cInstance;
 }
 
 /*
-void Configuration::load(QString yaml_data){
-	Configuration * self = Configuration::instance();
-	return false;
-}
-*/
+   void Configuration::load(QString yaml_data){
+   Configuration * self = Configuration::instance();
+   return false;
+   }
+   */
 
 //search for (in order):
 //~/.datajockey/config.yaml
@@ -59,39 +59,39 @@ void Configuration::load(QString yaml_data){
 ///usr/share/datajockey/config.yaml
 
 void Configuration::load_default() {
-	std::vector<QString> search_paths;
-	QString homeConfig(QDir::homePath());
-	homeConfig.append("/.datajockey/config.yaml");
+   std::vector<QString> search_paths;
+   QString homeConfig(QDir::homePath());
+   homeConfig.append("/.datajockey/config.yaml");
 
-	search_paths.push_back(homeConfig);
-	search_paths.push_back("./config.yaml");
-	//search_paths.push_back("/usr/local/share/datajockey/config.yaml");
-	//search_paths.push_back("/usr/share/datajockey/config.yaml");
+   search_paths.push_back(homeConfig);
+   search_paths.push_back("./config.yaml");
+   //search_paths.push_back("/usr/local/share/datajockey/config.yaml");
+   //search_paths.push_back("/usr/share/datajockey/config.yaml");
 
-	for(std::vector<QString>::iterator it = search_paths.begin(); it != search_paths.end(); it++){
-		try {
+   for(std::vector<QString>::iterator it = search_paths.begin(); it != search_paths.end(); it++){
+      try {
          QFileInfo file_info(*it);
          if (file_info.exists() && file_info.isFile()) {
-				load_file(*it);
+            load_file(*it);
             mFile = *it;
-				return;
-			} 
-		} catch (...){
-			//we don't actually do anything because we're going to try another location
-			std::cerr << it->toStdString() << " is not a valid configuration file, trying the next location" << std::endl;
-		}
-	}
+            return;
+         } 
+      } catch (...){
+         //we don't actually do anything because we're going to try another location
+         std::cerr << it->toStdString() << " is not a valid configuration file, trying the next location" << std::endl;
+      }
+   }
    restore_defaults();
 }
 
 void Configuration::load_file(const QString& path) throw(std::runtime_error) {
    restore_defaults();
-	try {
+   try {
       std::ifstream fin(path.toStdString().c_str());
-		YAML::Parser p(fin);
+      YAML::Parser p(fin);
       YAML::Node root;
-		p.GetNextDocument(root);
-		mValidFile = true;
+      p.GetNextDocument(root);
+      mValidFile = true;
       mFile = path;
 
       //fill in the db entries
@@ -121,12 +121,12 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
          mAnnotationDir = dir.absolutePath();
       } catch (...) { /* do nothing */ }
 
-	} catch (...){
+   } catch (...){
       mValidFile = false;
       std::string str("error reading config file: ");
-		str.append(path.toStdString());
-		throw std::runtime_error(str);
-	}
+      str.append(path.toStdString());
+      throw std::runtime_error(str);
+   }
 }
 
 QString Configuration::file(){
@@ -137,11 +137,11 @@ QString Configuration::file(){
 }
 
 bool Configuration::valid_file(){
-	return mValidFile;
+   return mValidFile;
 }
 
 bool Configuration::db_get(YAML::Node& doc, QString element, QString &result) {
-	try {
+   try {
       const YAML::Node& db = doc["database"];
       if(const YAML::Node *n = db.FindValue(element.toStdString())) {
          std::string r;

@@ -32,29 +32,29 @@
 #include <yaml-cpp/yaml.h>
 
 namespace dj {
-	class Configuration {
-		public:
-			static Configuration * instance();
-			//this finds a config file in a default location
-			void load_default();
-			//void load(QString yaml_data);
-			void load_file(const QString& path) throw(std::runtime_error);
-			bool valid_file();
+   class Configuration {
+      public:
+         static Configuration * instance();
+         //this finds a config file in a default location
+         void load_default();
+         //void load(QString yaml_data);
+         void load_file(const QString& path) throw(std::runtime_error);
+         bool valid_file();
 
          //returns the path to the config file has been loaded
          static QString file();
 
-			//get database data
-			QString db_adapter();
-			QString db_name();
-			QString db_username();
-			QString db_password();
+         //get database data
+         QString db_adapter();
+         QString db_name();
+         QString db_username();
+         QString db_password();
 
-			unsigned int osc_port();
+         unsigned int osc_port();
 
          QString annotation_dir();
-		private:
-			bool db_get(YAML::Node& doc, QString entry, QString &result);
+      private:
+         bool db_get(YAML::Node& doc, QString entry, QString &result);
          QString mFile;
 
          QString mDBAdapter;
@@ -66,16 +66,16 @@ namespace dj {
 
          QString mAnnotationDir;
 
-		protected:
-			Configuration();
-			Configuration(const Configuration&);
-			Configuration& operator=(const Configuration&);
-			virtual ~Configuration();
-		private:
+      protected:
+         Configuration();
+         Configuration(const Configuration&);
+         Configuration& operator=(const Configuration&);
+         virtual ~Configuration();
+      private:
          void restore_defaults();
-			static Configuration * cInstance;
-			bool mValidFile;
-	};
+         static Configuration * cInstance;
+         bool mValidFile;
+   };
 }
 
 #endif
