@@ -23,6 +23,9 @@
 #define DATAJOCKEY_CONFIGURATION_HPP
 
 #define DEFAULT_OSC_PORT 10001
+#define DEFAULT_DB_NAME (QDir::homePath() + "/.datajockey/database.sqlite3")
+#define DEFAULT_ANNOTATION_DIR (QDir::homePath() + "/.datajockey/annotation")
+
 
 #include <stdexcept>
 #include <QString>
@@ -33,17 +36,17 @@ namespace dj {
 		public:
 			static Configuration * instance();
 			//this finds a config file in a default location
-			void load_default() throw(std::runtime_error);
+			void load_default();
 			//void load(QString yaml_data);
 			void load_file(const QString& path) throw(std::runtime_error);
-			bool valid();
+			bool valid_file();
 
          //returns the path to the config file has been loaded
          static QString file();
 
 			//get database data
-			QString db_adapter() throw(std::runtime_error);
-			QString db_name() throw(std::runtime_error);
+			QString db_adapter();
+			QString db_name();
 			QString db_username();
 			QString db_password();
 
@@ -51,8 +54,17 @@ namespace dj {
 
          QString annotation_dir();
 		private:
-			bool db_get(QString entry, QString &result) throw(std::runtime_error);
+			bool db_get(QString entry, QString &result);
          QString mFile;
+
+         QString mDBAdapter;
+         QString mDBName;
+         QString mDBUserName;
+         QString mDBPassword;
+
+         unsigned int mOscPort;
+
+         QString mAnnotationDir;
 
 		protected:
 			Configuration();
@@ -60,9 +72,10 @@ namespace dj {
 			Configuration& operator=(const Configuration&);
 			virtual ~Configuration();
 		private:
+         void restore_defaults();
 			static Configuration * cInstance;
 			YAML::Node mRoot;
-			bool mValid;
+			bool mValidFile;
 	};
 }
 

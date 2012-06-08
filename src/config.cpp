@@ -25,13 +25,15 @@
 #include <QDir>
 #include <QString>
 #include <QRegExp>
+#include <QDebug>
 
 using namespace dj;
 
 Configuration * Configuration::cInstance = NULL;
 
 Configuration::Configuration(){ 
-	mValid = false;
+   restore_defaults();
+	mValidFile = false;
 }
 
 Configuration::Configuration(const Configuration&){ }
@@ -57,15 +59,15 @@ void Configuration::load(QString yaml_data){
 ///usr/local/share/datajockey/config.yaml
 ///usr/share/datajockey/config.yaml
 
-void Configuration::load_default() throw(std::runtime_error) {
+void Configuration::load_default() {
 	std::vector<QString> search_paths;
 	QString homeConfig(QDir::homePath());
 	homeConfig.append("/.datajockey/config.yaml");
 
 	search_paths.push_back(homeConfig);
 	search_paths.push_back("./config.yaml");
-	search_paths.push_back("/usr/local/share/datajockey/config.yaml");
-	search_paths.push_back("/usr/share/datajockey/config.yaml");
+	//search_paths.push_back("/usr/local/share/datajockey/config.yaml");
+	//search_paths.push_back("/usr/share/datajockey/config.yaml");
 
 	for(std::vector<QString>::iterator it = search_paths.begin(); it != search_paths.end(); it++){
 		try {
@@ -80,24 +82,47 @@ void Configuration::load_default() throw(std::runtime_error) {
 			std::cerr << it->toStdString() << " is not a valid configuration file, trying the next location" << std::endl;
 		}
 	}
-	//if we're here then we didn't find or successfully load a config file
-   std::string str("Cannot find a valid configuration file to load in one of the standard locations:");
-	for(std::vector<QString>::iterator it = search_paths.begin(); it != search_paths.end(); it++){
-		str.append("\n");
-		str.append(it->toStdString());
-	}
-	throw std::runtime_error(str);
+   restore_defaults();
 }
 
 void Configuration::load_file(const QString& path) throw(std::runtime_error) {
+   restore_defaults();
 	try {
       std::ifstream fin(path.toStdString().c_str());
 		YAML::Parser p(fin);
 		p.GetNextDocument(mRoot);
-		mValid = true;
+		mValidFile = true;
       mFile = path;
+
+      //fill in the db entries
+      QString adapter;
+      if (db_get("adapter", adapter)) {
+         if (adapter.contains("mysql"))
+            mDBAdapter = "QMYSQL";
+         else if (adapter.contains("sqlite"))
+            mDBAdapter = "QSQLITE";
+         else
+            qWarning() << "config file " << path << " contains invalid adapter type: " << adapter;
+      }
+      db_get("database", mDBName);
+      db_get("username", mDBUserName);
+      db_get("password", mDBPassword);
+
+      //fill in the rest
+      try {
+         mRoot["osc_port"] >> mOscPort;
+      } catch (...) { /* do nothing */ }
+
+      try {
+         std::string dir_name;
+         mRoot["annotation"]["files"] >> dir_name;
+         QString qdir = QString::fromStdString(dir_name).trimmed();
+         QDir dir(qdir.replace(QRegExp("^~"), QDir::homePath()));
+         mAnnotationDir = dir.absolutePath();
+      } catch (...) { /* do nothing */ }
+
 	} catch (...){
-		mValid = false;
+      mValidFile = false;
       std::string str("error reading config file: ");
 		str.append(path.toStdString());
 		throw std::runtime_error(str);
@@ -105,19 +130,17 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
 }
 
 QString Configuration::file(){
-   if(!instance()->mValid)
+   if(!instance()->mValidFile)
       return QString();
    else
       return instance()->mFile;
 }
 
-bool Configuration::valid(){
-	return mValid;
+bool Configuration::valid_file(){
+	return mValidFile;
 }
 
-bool Configuration::db_get(QString element, QString &result) throw(std::runtime_error){
-	if(!mValid)
-		throw std::runtime_error("trying to access data from an invalid configuration");
+bool Configuration::db_get(QString element, QString &result) {
 	try {
       const YAML::Node& db = mRoot["database"];
       if(const YAML::Node *n = db.FindValue(element.toStdString())) {
@@ -125,80 +148,29 @@ bool Configuration::db_get(QString element, QString &result) throw(std::runtime_
          *n >> r;
          result = QString::fromStdString(r);
          return true;
-      } else
-         return false;
-	} catch(std::exception &e){
-		throw;
-	} catch(...){
-      std::string str("unable to access database information for: ");
-		str.append(element.toStdString());
-		throw std::runtime_error(str);
-	}
+      }
+   } catch (...) { /* do nothing */ }
+   return false;
 }
 
-QString Configuration::db_adapter() throw(std::runtime_error){
-	QString adapter;
-	if(!db_get("adapter", adapter))
-		throw std::runtime_error("could not find database adapter");
-	else if (adapter.contains("mysql"))
-		return QString("QMYSQL");
-	else if (adapter.contains("sqlite"))
-		return QString("QSQLITE");
-	else
-		throw std::runtime_error("invalid database adapter");
-}
+QString Configuration::db_adapter() { return mDBAdapter; }
+QString Configuration::db_name() { return mDBName; }
+QString Configuration::db_password() { return mDBPassword; }
+QString Configuration::db_username() { return mDBUserName; }
 
-QString Configuration::db_name() throw(std::runtime_error){
-	QString name;
-	if(!db_get("database", name))
-		throw std::runtime_error("could not get database name");
-	else
-		return name;
-}
+unsigned int Configuration::osc_port(){ return mOscPort; }
+QString Configuration::annotation_dir() { mAnnotationDir; }
 
-QString Configuration::db_password() {
-	//we don't need to have a password entry
-	try {
-		QString pass;
-		if(db_get("password", pass))
-			return pass;
-	} catch (...) { /* don't do anything */}
-	return QString("");
-}
+void Configuration::restore_defaults() {
+   mDBUserName = "user";
+   mDBPassword = "";
+   mDBAdapter = "QSQLITE";
+   mDBName = DEFAULT_DB_NAME;
 
-unsigned int Configuration::osc_port(){
-	unsigned int port = DEFAULT_OSC_PORT;
-   try {
-      mRoot["osc_port"] >> port;
-   } catch (...) {
-      return DEFAULT_OSC_PORT;
-   }
-	
-	return port;
-}
+   mAnnotationDir = DEFAULT_ANNOTATION_DIR;
 
-QString Configuration::annotation_dir() {
-   QString home_path = QDir::homePath();
-   try {
-      std::string dir_name;
-      mRoot["annotation"]["files"] >> dir_name;
-      QString qdir = QString::fromStdString(dir_name).trimmed();
-      QDir dir(qdir.replace(QRegExp("^~"), home_path));
-      return dir.absolutePath();
-   } catch (...) {
-      QString an(home_path);
-      an.append("/.datajockey/annotation");
-      return an;
-   }
-}
+   mOscPort = DEFAULT_OSC_PORT;
 
-QString Configuration::db_username() {
-	//we don't need to have a username entry
-	try {
-		QString user;
-		if(db_get("username", user))
-			return user;
-	} catch (...) { /* don't do anything */}
-	return QString("");
+   mValidFile = false;
 }
 
