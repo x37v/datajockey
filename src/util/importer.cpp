@@ -97,6 +97,16 @@ namespace {
             }
          }
 
+         //create genre tag
+         QVariant genre = tag_data["genre"];
+         if (genre.isValid()) {
+            try {
+            model::db::work::tag(work_id, QString("genre"), genre.toString());
+            } catch (std::exception& e) {
+               qWarning() << "failed to genre tag for " << audio_file_path << " " << e.what();
+            }
+         }
+
          //write annotation file and store the location in the db
          QString annotation_file_location = annotation.default_file_location(work_id);
          annotation.write_file(annotation_file_location);

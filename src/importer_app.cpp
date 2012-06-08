@@ -89,7 +89,12 @@ int main(int argc, char * argv[]) {
          cout << "Initiating a recursive import of the following paths: " << endl;
          for(std::vector<std::string>::iterator it = import_paths.begin(); it != import_paths.end(); it++)
             cout << "\t" << *it << endl;
-         cout << endl << "Using " << config->db_name().toStdString() << " " << config->db_adapter().toStdString() << " database " << endl;
+
+         //mangle the db adapter name
+         QString db_adapter = config->db_adapter();
+         db_adapter = db_adapter.right(db_adapter.size() - 1).toLower();
+         cout << endl << "Using " << config->db_name().toStdString() << " " << db_adapter.toStdString() << " database " << endl;
+
          cout << "Note, files that are already in the database will be ignored." << endl;
          cout << "Type 'yes' to continue or anything else to exit" << endl;
 
