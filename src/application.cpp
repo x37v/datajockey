@@ -28,8 +28,6 @@
 #include <QSqlRelation>
 #include <QDebug>
 
-#include "importer.hpp"
-
 using namespace dj;
 using std::endl;
 using std::cout;
@@ -46,13 +44,6 @@ Application::Application(int & argc, char ** argv) :
          config->db_name(),
          config->db_username(),
          config->db_password());
-
-#if 0
-   util::Importer * importer = new util::Importer(this);
-   QObject::connect(importer, SIGNAL(finished()),
-         SLOT(quit()));
-   importer->import(QStringList() << "/media/x/music-oldtoast/compilations/street_jams_electric_funk/part_1/");
-#else
 
    mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
@@ -227,7 +218,6 @@ Application::Application(int & argc, char ** argv) :
 
    mTop->setLayout(top_layout);
    mTop->show();
-#endif
 }
 
 void Application::pre_quit_actions() {
