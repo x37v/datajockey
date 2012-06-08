@@ -9,10 +9,14 @@
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <stdexcept>
+#include <iostream>
 
 using namespace dj;
 using namespace dj::util;
 using namespace QtConcurrent;
+
+using std::cout;
+using std::endl;
 
 namespace {
    const QStringList valid_file_types = (QStringList() << "flac" << "mp3" << "ogg");
@@ -38,11 +42,11 @@ namespace {
       return files;
    }
 
-#include <iostream>
-   using namespace std;
-
    void import_file(const QString& audio_file_path) {
       try {
+         //XXX not thread safe, might not print all at once, use signals?
+         cout << "processing: " << audio_file_path.toStdString() << endl;
+
          if (model::db::work::find_by_audio_file_location(audio_file_path) != 0) {
             qWarning() << audio_file_path << " already in database, skipping";
             return;
@@ -115,6 +119,7 @@ namespace {
                "annotation_file_location",
                annotation_file_location);
 
+         //XXX not thread safe, might not print all at once, use signals?
          cout << "complete: " << audio_file_path.toStdString() << endl;;
 
       } catch (std::exception& e) {
