@@ -5,7 +5,9 @@ core.*
 a.out
 *.o
 /datajockey
+/datajockey_importer
 obj/
 moc/
 Makefile
+Makefile.*
 qrc_datajockey.cpp
