@@ -25,7 +25,24 @@ struct button_info {
 };
 
 SpeedSpinBox::SpeedSpinBox(QWidget * parent) : QSpinBox(parent) {
+   mValidator = new QDoubleValidator(this);
    setRange(-dj::one_scale, dj::one_scale);
+   mValidator->setRange(-100.0, 100.0, 1);
+}
+
+QString SpeedSpinBox::textFromValue(int value) const {
+   double dvalue = value * 100;
+   dvalue /= dj::one_scale;
+   return QString::number(dvalue, 'f', 1);
+}
+
+int SpeedSpinBox::valueFromText(const QString & text) const {
+   double dvalue = text.toDouble();
+   return (dvalue / 100.0) * dj::one_scale;
+}
+
+QValidator::State SpeedSpinBox::validate(QString & text, int & pos) const {
+   return mValidator->validate(text, pos);
 }
 
 Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent), mFrames(0) {

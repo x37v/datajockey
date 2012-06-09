@@ -9,6 +9,8 @@
 #include <QGraphicsView>
 #include <QList>
 #include <QSpinBox>
+#include <QValidator>
+#include <QDoubleValidator>
 #include "beatbuffer.hpp"
 
 class QPushButton;
@@ -24,6 +26,12 @@ namespace dj {
          Q_OBJECT
          public:
             SpeedSpinBox(QWidget * parent = NULL);
+         protected:
+            virtual QString textFromValue(int value) const;
+            virtual int valueFromText(const QString & text) const;
+            virtual QValidator::State validate(QString & text, int & pos) const;
+         private:
+            QDoubleValidator * mValidator;
       };
 
       class WaveFormViewGL;
