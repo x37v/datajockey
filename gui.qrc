@@ -1,0 +1,22 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>resources/icons/cue_off.png</file>
+	<file>resources/icons/cue.png</file>
+	<file>resources/icons/load_off.png</file>
+	<file>resources/icons/load.png</file>
+	<file>resources/icons/mute_off.png</file>
+	<file>resources/icons/mute.png</file>
+	<file>resources/icons/pause.png</file>
+	<file>resources/icons/play_off.png</file>
+	<file>resources/icons/play.png</file>
+	<file>resources/icons/reset_off.png</file>
+	<file>resources/icons/reset.png</file>
+	<file>resources/icons/seekbkd_off.png</file>
+	<file>resources/icons/seekbkd.png</file>
+	<file>resources/icons/seekfwd_off.png</file>
+	<file>resources/icons/seekfwd.png</file>
+	<file>resources/icons/sync_off.png</file>
+	<file>resources/icons/sync.png</file>
+	<file>resources/style.qss</file>
+</qresource>
+</RCC>

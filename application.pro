@@ -36,7 +36,7 @@ INCLUDEPATH += . \
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions
 QMAKE_CFLAGS += $$DENORMAL_FLAGS -fexceptions
-RESOURCES = datajockey.qrc
+RESOURCES = gui.qrc db.qrc
 
 # Input
 HEADERS += include/application.hpp \

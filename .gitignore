@@ -10,4 +10,4 @@ obj/
 moc/
 Makefile
 Makefile.*
-qrc_datajockey.cpp
+qrc_*.cpp

@@ -27,6 +27,7 @@ INCLUDEPATH += . \
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions
 QMAKE_CFLAGS += $$DENORMAL_FLAGS -fexceptions
+RESOURCES = db.qrc
 
 MOC_DIR = moc/
 OBJECTS_DIR = obj/
