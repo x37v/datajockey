@@ -406,7 +406,7 @@ void AudioModel::update_player_state(int player_index, PlayerState * new_state){
    //TODO maybe send 2 values after starting to run free so that we are sure?
    if (pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2) {
       pstate->mPostFreeSpeedUpdates += 1;
-      int speed_percent = ((new_state->mSpeed - 1.0)* one_scale);
+      int speed_percent = (new_state->mSpeed - 1.0) * one_scale;
       if (pstate->mParamInt["speed"] != speed_percent) {
          pstate->mParamInt["speed"] = speed_percent;
          QMetaObject::invokeMethod(this, "relay_player_value", 
