@@ -17,7 +17,7 @@ task :environment do
   if ENV["CONFIG"]
     Datajockey::setConfFile(ENV["CONFIG"])
   else
-    Datajockey::setConfFile("../config-default.yaml")
+    Datajockey::setConfFile("default_db.yaml")
   end
   Datajockey::connect
   # set a logger for STDOUT
