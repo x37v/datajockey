@@ -47,7 +47,12 @@ namespace {
    }
 
    QString fmt_string(const QString& input) {
-      return input.toLower().replace(QRegExp("\\s\\s*"), "_");
+      QString ret = input.toLower();
+      ret = ret.replace(QRegExp("\\s\\s*"), "_");
+      ret = ret.replace('\\', '_');
+      ret = ret.replace('/', '_');
+      ret = ret.replace(QRegExp("\\.+"), "_");
+      return QDir::cleanPath(ret);
    }
 }
 
