@@ -1,7 +1,6 @@
 Beat Extraction:
    Smooth
 UI:
-   playback speed setting when not in sync mode
    disable sync when there is no beat buffer
    provide nudge back/forward for auto syncing
    sync to playing track: sync master to track and then put track in sync mode?

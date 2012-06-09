@@ -91,6 +91,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mControlLayout->addLayout(button_layout);
 
    mSpeedView = new SpeedSpinBox(this);
+   mSpeedView->setDisabled(true);
+   QLabel * speed_lab = new QLabel("speed %", this);
+   mControlLayout->addWidget(speed_lab, 0, Qt::AlignHCenter);
    mControlLayout->addWidget(mSpeedView, 0, Qt::AlignHCenter);
 
    QString eq[3] = { "high", "mid", "low" };
@@ -137,6 +140,10 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    QObject::connect(mWaveFormView,
          SIGNAL(mouse_down(bool)),
          SLOT(relay_mouse_button(bool)));
+   QObject::connect(mButtons["sync"],
+         SIGNAL(toggled(bool)),
+         mSpeedView,
+         SLOT(setDisabled(bool)));
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
