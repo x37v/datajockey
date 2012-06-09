@@ -46,6 +46,8 @@ namespace dj {
             void clear();
             void insert_beat(double seconds);
 
+            void smooth(unsigned int iterations);
+
             //not real time save
             double median_difference();
             void median_and_mean(double& median, double& mean);

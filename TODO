@@ -1,5 +1,5 @@
 Beat Extraction:
-   Smooth
+   config based smoothing amount
 UI:
    disable sync when there is no beat buffer
    provide nudge back/forward for auto syncing
@@ -9,7 +9,6 @@ Loading:
 Importer:
    Provide any sort of UI?  At least list the tracks before importing? Display progress.
    GUI importer, integrate into main app
-   smooth beat buffer?
 Audio:
    lilv replace slv2
 Recently Played Filter:

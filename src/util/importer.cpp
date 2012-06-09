@@ -43,6 +43,7 @@ namespace {
    }
 
    void import_file(const QString& audio_file_path) {
+      unsigned int beat_smooth_iterations = 20; //XXX grab from config
       try {
          //XXX not thread safe, might not print all at once, use signals?
          cout << "processing: " << audio_file_path.toStdString() << endl;
@@ -66,7 +67,9 @@ namespace {
          BeatExtractor extractor;
          extractor.process(audio_buffer, beat_buffer);
 
-         //TODO smooth beat buffer
+         //smooth beat buffer
+         if (beat_smooth_iterations)
+            beat_buffer.smooth(beat_smooth_iterations);
 
          //create annotation file
          audio::Annotation annotation;

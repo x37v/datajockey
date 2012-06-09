@@ -11,6 +11,15 @@ Type linear_interp(Type v0, Type v1, double dist){
    return v0 + (v1 - v0) * dist;
 }
 
+namespace {
+   //find the mid point between the previous and next values
+   //find the difference between the data we have and that value, add 1/2 of that to the point
+   double smoothed_point(double cur, double prev, double next) {
+      double mid = (next - prev) / 2.0 + prev;
+      return cur + (mid - cur) / 2.0;
+   }
+}
+
 BeatBuffer::BeatBuffer() {
    mStartBeat = 0;
 }
@@ -181,6 +190,21 @@ void BeatBuffer::insert_beat(double seconds) {
          it++;
       //insert inserts before the iterator
       mBeatData.insert(it, seconds);
+   }
+}
+
+void BeatBuffer::smooth(unsigned int iterations) {
+   if (mBeatData.empty() || mBeatData.size() < 4)
+      return;
+   for (unsigned int i = 0; i < iterations; i++) {
+      //go forward, the backwards
+      if (i % 2 == 0) {
+         for (unsigned int j = 1; j < mBeatData.size() - 1; j++)
+            mBeatData[j] = smoothed_point(mBeatData[j], mBeatData[j - 1], mBeatData[j + 1]);
+      } else {
+         for (unsigned int j = mBeatData.size() - 2; j > 0; j--)
+            mBeatData[j] = smoothed_point(mBeatData[j], mBeatData[j - 1], mBeatData[j + 1]);
+      }
    }
 }
 
