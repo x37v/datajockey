@@ -38,11 +38,17 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
       //hacks, setting values to map objects to player indices
       mSenderToIndex[player] = i;
       mSenderToIndex[player->volume_slider()] = i;
+      mSenderToIndex[player->speed_view()] = i;
       
       QObject::connect(player->volume_slider(),
             SIGNAL(valueChanged(int)),
             this,
             SLOT(relay_player_volume(int)));
+
+      QObject::connect(player->speed_view(),
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(relay_player_speed(int)));
 
       QObject::connect(player,
             SIGNAL(seeking(bool)),
@@ -146,7 +152,9 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
    Player * player = mPlayers[player_index];
    if (name == "volume")
       player->volume_slider()->setValue(value);
-   else if (name == "frame")
+   else if (name == "speed") {
+      player->speed_view()->setValue(value);
+   } else if (name == "frame")
       player->set_audio_frame(value);
    else if (name == "progress")
       player->progress_bar()->setValue(value);
@@ -237,6 +245,14 @@ void MixerPanel::relay_player_volume(int val) {
       return;
 
    emit(player_value_changed(player_index.value(), "volume", val));
+}
+
+void MixerPanel::relay_player_speed(int val) {
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_value_changed(player_index.value(), "speed", val));
 }
 
 void MixerPanel::relay_player_seek_frame_relative(int frames) {

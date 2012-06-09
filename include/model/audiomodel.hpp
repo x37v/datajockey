@@ -84,8 +84,7 @@ namespace dj {
          protected slots:
             //only for internal use
             void relay_player_audio_file_changed(int player_index, QString fileName);
-            void relay_player_position_changed(int player_index, int frame_index);
-            void relay_player_audio_level(int player_index, int percent);
+            void relay_player_value(int player_index, QString name, int value);
             void relay_master_audio_level(int percent);
             void relay_master_position(TimePoint position);
 

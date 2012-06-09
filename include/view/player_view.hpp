@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QGraphicsView>
 #include <QList>
+#include <QSpinBox>
 #include "beatbuffer.hpp"
 
 class QPushButton;
@@ -19,6 +20,12 @@ class QTimer;
 
 namespace dj {
    namespace view {
+      class SpeedSpinBox : public QSpinBox {
+         Q_OBJECT
+         public:
+            SpeedSpinBox(QWidget * parent = NULL);
+      };
+
       class WaveFormViewGL;
       class AudioLevel;
       class Player : public QWidget {
@@ -31,6 +38,7 @@ namespace dj {
             QDial * eq_dial(QString name) const;
             QList<QDial *> eq_dials() const;
             QSlider * volume_slider() const;
+            QSpinBox * speed_view() const;
             QProgressBar * progress_bar() const;
             QRect slider_level_geometry() const;
          public slots:
@@ -53,6 +61,7 @@ namespace dj {
             QBoxLayout * mControlLayout;
             QLineEdit * mTrackDescription[2];
             QSlider * mVolumeSlider;
+            QSpinBox * mSpeedView;
             QHash<QString, QDial *> mEqDials;
             WaveFormViewGL * mWaveFormView;
             AudioLevel * mAudioLevelView;

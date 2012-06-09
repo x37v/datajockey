@@ -11,8 +11,10 @@
 #include <QDial>
 #include <QProgressBar>
 #include <QTimer>
+#include <QSpinBox>
 
 using namespace dj::view;
+
 
 struct button_info {
    int row;
@@ -21,6 +23,10 @@ struct button_info {
    QString label;
    QString name;
 };
+
+SpeedSpinBox::SpeedSpinBox(QWidget * parent) : QSpinBox(parent) {
+   setRange(-dj::one_scale, dj::one_scale);
+}
 
 Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent), mFrames(0) {
    button_info items[] = {
@@ -66,6 +72,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    button_layout->setColumnStretch(0, 100);
    button_layout->setColumnStretch(4, 100);
    mControlLayout->addLayout(button_layout);
+
+   mSpeedView = new SpeedSpinBox(this);
+   mControlLayout->addWidget(mSpeedView, 0, Qt::AlignHCenter);
 
    QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
@@ -118,6 +127,7 @@ QList<QPushButton *> Player::buttons() const { return mButtons.values(); }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
+QSpinBox * Player::speed_view() const { return mSpeedView; }
 QProgressBar * Player::progress_bar() const { return mProgressBar; }
 QRect Player::slider_level_geometry() const { return mSliderLevelLayout->geometry(); }
 

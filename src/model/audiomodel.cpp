@@ -78,6 +78,7 @@ class AudioModel::PlayerState {
          mBeatBuffer(),
          mCurrentFrame(0),
          mNumFrames(0),
+         mSpeed(0.0),
          mMaxSampleValue(0.0) { }
       //not okay to update in audio thread
       QString mFileName;
@@ -91,6 +92,7 @@ class AudioModel::PlayerState {
       //okay to update in audio thread
       unsigned int mCurrentFrame;
       unsigned int mNumFrames;
+      double mSpeed;
       float mMaxSampleValue;
 };
 
@@ -119,9 +121,11 @@ class AudioModel::QueryPlayState : public MasterCommand {
          mMasterMaxVolume = master()->max_sample_value();
          master()->max_sample_value_reset();
          for(unsigned int i = 0; i < mNumPlayers; i++) {
-            mStates[i]->mCurrentFrame = master()->players()[i]->frame();
-            mStates[i]->mMaxSampleValue = master()->players()[i]->max_sample_value();
-            master()->players()[i]->max_sample_value_reset();
+            Player * player = master()->players()[i];
+            mStates[i]->mCurrentFrame = player->frame();
+            mStates[i]->mMaxSampleValue = player->max_sample_value();
+            mStates[i]->mSpeed = player->play_speed();
+            player->max_sample_value_reset();
          }
       }
       virtual void execute_done() {
@@ -231,7 +235,7 @@ AudioModel::AudioModel() :
 
       //int
       mPlayerStates[i]->mParamInt["volume"] = one_scale * player->volume();
-      mPlayerStates[i]->mParamInt["speed"] = one_scale * player->play_speed();
+      mPlayerStates[i]->mParamInt["speed"] = one_scale + one_scale * player->play_speed(); //percent
 
       //position
       mPlayerStates[i]->mParamPosition["start"] = player->start_position();
@@ -378,26 +382,46 @@ void AudioModel::set_player_buffers(int player_index, QString audio_file, QStrin
    set_player_beat_buffer(player_index, beat_file);
 }
 
-void AudioModel::update_player_state(int player_index, PlayerState * state){
+#include <iostream>
+using namespace std;
+
+void AudioModel::update_player_state(int player_index, PlayerState * new_state){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   PlayerState * pstate = mPlayerStates[player_index];
 
    QMutexLocker lock(&mPlayerStatesMutex);
-   int frame = state->mCurrentFrame;
-   if ((unsigned int)frame != mPlayerStates[player_index]->mCurrentFrame) {
-      mPlayerStates[player_index]->mCurrentFrame = frame;
+   int frame = new_state->mCurrentFrame;
+   if ((unsigned int)frame != pstate->mCurrentFrame) {
+      pstate->mCurrentFrame = frame;
       //emit(relay_player_position_changed(player_index, frame));
-      QMetaObject::invokeMethod(this, "relay_player_position_changed", 
+      QMetaObject::invokeMethod(this, "relay_player_value", 
             Qt::QueuedConnection,
             Q_ARG(int, player_index),
+            Q_ARG(QString, "frame"),
             Q_ARG(int, frame));
    }
 
-   int audio_level = static_cast<int>(state->mMaxSampleValue * 100.0);
+   //only return rate info while syncing
+   //TODO maybe send 2 values after starting to run free so that we are sure?
+   if (pstate->mParamBool["sync"]) {
+      int speed_percent = ((new_state->mSpeed - 1.0)* one_scale);
+      if (pstate->mParamInt["speed"] != speed_percent) {
+         pstate->mParamInt["speed"] = speed_percent;
+         QMetaObject::invokeMethod(this, "relay_player_value", 
+               Qt::QueuedConnection,
+               Q_ARG(int, player_index),
+               Q_ARG(QString, "speed"),
+               Q_ARG(int, speed_percent));
+      }
+   }
+
+   int audio_level = static_cast<int>(new_state->mMaxSampleValue * 100.0);
    if (audio_level > 0) {
-      QMetaObject::invokeMethod(this, "relay_player_audio_level", 
+      QMetaObject::invokeMethod(this, "relay_player_value", 
             Qt::QueuedConnection,
             Q_ARG(int, player_index),
+            Q_ARG(QString, "audio_level"),
             Q_ARG(int, audio_level));
    }
 }
@@ -527,12 +551,8 @@ void AudioModel::relay_player_audio_file_changed(int player_index, QString fileN
    emit(player_value_changed(player_index, "audio_file", fileName));
 }
 
-void AudioModel::relay_player_position_changed(int player_index, int frame_index){
-   emit(player_value_changed(player_index, "frame", frame_index));
-}
-
-void AudioModel::relay_player_audio_level(int player_index, int percent) {
-   emit(player_value_changed(player_index, "audio_level", percent));
+void AudioModel::relay_player_value(int player_index, QString name, int value){
+   emit(player_value_changed(player_index, name, value));
 }
 
 void AudioModel::relay_master_audio_level(int percent) {
@@ -779,14 +799,23 @@ void AudioModel::player_set(int player_index, QString name, int value) {
          return;
       }
 
-      if (name == "volume") {
-         if(pstate->mParamInt["volume"] != value)
-            pstate->mParamInt["volume"] = value;
-         else
+      double dvalue = (double)value / double(one_scale);
+      //speed comes in percent
+      if (name == "speed") {
+         //don't send speed commands if we are syncing 
+         if(pstate->mParamBool["sync"])
             return;
+         dvalue += 1;
       }
 
-      queue_command(new dj::audio::PlayerDoubleCommand(player_index, *action_itr, (double)value / double(one_scale)));
+      //store value if it has changed
+      if(pstate->mParamInt[name] != value)
+         pstate->mParamInt[name] = value;
+      else
+         return;
+
+      queue_command(new dj::audio::PlayerDoubleCommand(player_index, *action_itr, dvalue));
+      emit(player_value_changed(player_index, name, value));
    }
 }
 
@@ -898,7 +927,6 @@ void AudioModel::player_eval_audible(int player_index) {
    if (state->mParamBool["audible"] != audible) {
       state->mParamBool["audible"] = audible;
       emit(player_toggled(player_index, "audible", audible));
-      cerr << player_index << " audible " << audible << endl;
    } 
 }
 

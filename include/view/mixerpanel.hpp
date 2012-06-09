@@ -40,6 +40,7 @@ namespace dj {
             void relay_player_seeking(bool state);
             void relay_player_triggered();
             void relay_player_volume(int val);
+            void relay_player_speed(int val);
             void relay_player_eq(int val);
 
             void relay_crossfade_changed(int value);
