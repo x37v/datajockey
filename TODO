@@ -1,12 +1,10 @@
 Beat Extraction:
    Smooth
-   Extract Tempo Descriptors
 Loading:
    display error message dialog when we cannot load an audio file or buffer.
 Importer:
    Provide any sort of UI?  At least list the tracks before importing? Display progress.
    GUI importer, integrate into main app
-   apply genre tags during import
    smooth beat buffer?
 Audio:
    lilv replace slv2
