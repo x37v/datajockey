@@ -79,6 +79,7 @@ class AudioModel::PlayerState {
          mCurrentFrame(0),
          mNumFrames(0),
          mSpeed(0.0),
+         mPostFreeSpeedUpdates(0),
          mMaxSampleValue(0.0) { }
       //not okay to update in audio thread
       QString mFileName;
@@ -93,6 +94,8 @@ class AudioModel::PlayerState {
       unsigned int mCurrentFrame;
       unsigned int mNumFrames;
       double mSpeed;
+      //we count the number of speed updates so that after going 'free' we get at least two updates to the gui
+      unsigned int mPostFreeSpeedUpdates;
       float mMaxSampleValue;
 };
 
@@ -382,15 +385,12 @@ void AudioModel::set_player_buffers(int player_index, QString audio_file, QStrin
    set_player_beat_buffer(player_index, beat_file);
 }
 
-#include <iostream>
-using namespace std;
-
 void AudioModel::update_player_state(int player_index, PlayerState * new_state){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
-   QMutexLocker lock(&mPlayerStatesMutex);
    int frame = new_state->mCurrentFrame;
    if ((unsigned int)frame != pstate->mCurrentFrame) {
       pstate->mCurrentFrame = frame;
@@ -404,7 +404,8 @@ void AudioModel::update_player_state(int player_index, PlayerState * new_state){
 
    //only return rate info while syncing
    //TODO maybe send 2 values after starting to run free so that we are sure?
-   if (pstate->mParamBool["sync"]) {
+   if (pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2) {
+      pstate->mPostFreeSpeedUpdates += 1;
       int speed_percent = ((new_state->mSpeed - 1.0)* one_scale);
       if (pstate->mParamInt["speed"] != speed_percent) {
          pstate->mParamInt["speed"] = speed_percent;
@@ -757,6 +758,11 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
    //set the new value
    *state_itr = value;
 
+   //if we'return going free, set our post free speed update index
+   if (name == "sync" && !value)
+      pstate->mPostFreeSpeedUpdates = 0;
+
+
    //queue the actual command [who's action is stored in the action_itr]
    queue_command(new dj::audio::PlayerStateCommand(player_index, value ? action_itr->first : action_itr->second));
    emit(player_toggled(player_index, name, value));
@@ -802,8 +808,8 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       double dvalue = (double)value / double(one_scale);
       //speed comes in percent
       if (name == "speed") {
-         //don't send speed commands if we are syncing 
-         if(pstate->mParamBool["sync"])
+         //don't send speed commands if we are syncing or getting speed after going free
+         if(pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2)
             return;
          dvalue += 1;
       }
