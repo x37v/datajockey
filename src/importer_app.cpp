@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <cctype>
 #include <QStringList>
+#include <QFileInfo>
+#include <QFile>
+#include <QDir>
 
 namespace po = boost::program_options;
 using std::cout;
@@ -24,6 +27,14 @@ ImporterApplication::ImporterApplication(int& argc, char ** argv) : QCoreApplica
          config->db_name(),
          config->db_username(),
          config->db_password());
+
+   //create the annotation directory if it doesn't already exist
+   QString annotation_dir_name = config->annotation_dir();
+   QDir annotation_dir(annotation_dir_name);
+   if (!annotation_dir.exists()) {
+      if (!annotation_dir.mkpath(annotation_dir.path()))
+         throw(std::runtime_error("cannot create path " + annotation_dir.path().toStdString()));
+   }
 }
 
 void ImporterApplication::import_paths(std::vector<std::string>& paths) {

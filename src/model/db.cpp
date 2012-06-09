@@ -134,15 +134,16 @@ using namespace dj::model;
 
 void db::setup(
       QString type, 
-      QString name, 
+      QString name_or_loc, 
       QString username,
       QString password,
       int /* port */,
       QString /* host */) throw(std::runtime_error) {
    QMutexLocker lock(&mMutex);
 
+   //create an empty sqlite db if it doesn't already exist at name_or_loc
    if (type == "QSQLITE") {
-      QFileInfo file_info(name);
+      QFileInfo file_info(name_or_loc);
       if (!file_info.exists()) {
          QDir dir(file_info.dir());
          if (!dir.exists()) {
@@ -150,13 +151,13 @@ void db::setup(
                throw(std::runtime_error("cannot create path " + dir.path().toStdString()));
          }
          QFile db_file(":/resources/datajockey.sqlite3");
-         if (!db_file.copy(name) || !QFile::setPermissions(name, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner))
-            throw(std::runtime_error("cannot create writable sqlite db :" + name.toStdString()));
+         if (!db_file.copy(name_or_loc) || !QFile::setPermissions(name_or_loc, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner))
+            throw(std::runtime_error("cannot create writable sqlite db :" + name_or_loc.toStdString()));
       }
    }
 
 	cDB = QSqlDatabase::addDatabase(type);
-	cDB.setDatabaseName(name);
+	cDB.setDatabaseName(name_or_loc);
 	if(!username.isEmpty())
 		cDB.setUserName(username);
 	if(!password.isEmpty())

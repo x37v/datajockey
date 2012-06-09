@@ -12,7 +12,7 @@ namespace dj {
       namespace db {
          void setup(
                QString type, 
-               QString name, 
+               QString name_or_location, 
                QString username = "",
                QString password = "", 
                int port = -1, 
