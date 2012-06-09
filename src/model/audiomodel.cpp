@@ -356,6 +356,14 @@ void AudioModel::set_player_position_beat_relative(int player_index, int beats) 
 void AudioModel::set_player_audio_buffer(int player_index, AudioBuffer * buf){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * player_state = mPlayerStates[player_index];
+
+   if (!player_state->mParamBool["sync"]) {
+      //if we are not sycning and we load a new buffer, set speed to 0% adjustment
+      player_state->mPostFreeSpeedUpdates = 100;
+      player_set(player_index, "speed", 0);
+   }
 
    queue_command(new PlayerSetAudioBufferCommand(player_index, buf));
 }
