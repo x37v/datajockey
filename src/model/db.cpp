@@ -8,6 +8,7 @@
 #include <QSqlError>
 #include <QSqlDriver>
 #include <QFileInfo>
+#include <QDir>
 #include <QStringList>
 #include <QSqlTableModel>
 #include <QDebug>
@@ -139,6 +140,20 @@ void db::setup(
       int /* port */,
       QString /* host */) throw(std::runtime_error) {
    QMutexLocker lock(&mMutex);
+
+   if (type == "QSQLITE") {
+      QFileInfo file_info(name);
+      if (!file_info.exists()) {
+         QDir dir(file_info.dir());
+         if (!dir.exists()) {
+            if (!dir.mkpath(dir.path()))
+               throw(std::runtime_error("cannot create path " + dir.path().toStdString()));
+         }
+         QFile db_file(":/resources/datajockey.sqlite3");
+         if (!db_file.copy(name) || !QFile::setPermissions(name, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner))
+            throw(std::runtime_error("cannot create writable sqlite db :" + name.toStdString()));
+      }
+   }
 
 	cDB = QSqlDatabase::addDatabase(type);
 	cDB.setDatabaseName(name);
