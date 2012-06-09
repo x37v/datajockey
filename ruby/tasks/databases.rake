@@ -14,7 +14,11 @@ RAILS_ENV = "database"
 desc  "set up the environment"
 task :environment do
   include Datajockey
-  Datajockey::setConfFile("../config.yaml")
+  if ENV["CONFIG"]
+    Datajockey::setConfFile(ENV["CONFIG"])
+  else
+    Datajockey::setConfFile("../config-default.yaml")
+  end
   Datajockey::connect
   # set a logger for STDOUT
   ActiveRecord::Base.logger = Logger.new(STDOUT)
