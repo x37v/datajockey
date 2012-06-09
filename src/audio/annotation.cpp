@@ -51,6 +51,7 @@ namespace {
       ret = ret.replace(QRegExp("\\s\\s*"), "_");
       ret = ret.replace('\\', '_');
       ret = ret.replace('/', '_');
+      ret = ret.replace('~', '_');
       ret = ret.replace(QRegExp("\\.+"), "_");
       return QDir::cleanPath(ret);
    }
