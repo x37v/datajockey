@@ -27,6 +27,8 @@
 #include <QSqlRelationalTableModel>
 #include <QSqlRelation>
 #include <QDebug>
+#include <stdexcept>
+#include <boost/program_options.hpp>
 
 using namespace dj;
 using std::endl;
@@ -37,7 +39,6 @@ Application::Application(int & argc, char ** argv) :
    mCurrentwork(0)
 {
    Configuration * config = Configuration::instance();
-   config->load_default();
 
    model::db::setup(
          config->db_adapter(),
@@ -258,6 +259,45 @@ void Application::relay_player_trigger(int player_index, QString name) {
    if (name == "beat_buffer_changed") {
       //XXX check bounds?
       mMixerPanel->player_set_beat_buffer(player_index, mAudioModel->player_beat_buffer(player_index));
+   }
+}
+
+namespace po = boost::program_options;
+
+int main(int argc, char * argv[]){
+   try {
+      dj::Configuration * config = dj::Configuration::instance();
+
+      po::options_description cmdline_options("Allowed options");
+      cmdline_options.add_options()
+         ("help,h", "print this help message")
+         ("config,c", po::value<std::string>(), "specify a config file")
+         ;
+
+      po::variables_map vm;
+      po::store(po::command_line_parser(argc, argv).
+            options(cmdline_options).run(), vm);
+      po::notify(vm);
+
+      if (vm.count("help")) {
+         cout << endl << "usage: " << argv[0] << " [options] " << endl << endl;
+         cout << cmdline_options << endl;
+         return 1;
+      }
+
+      if (vm.count("config"))
+         config->load_file(QString::fromStdString(vm["config"].as<std::string>()));
+      else
+         config->load_default();
+
+      int fake_argc = 1; //only passing the program name because we use the rest with boost
+      dj::Application app(fake_argc, argv);
+      app.exec();
+
+   } catch(std::exception& e) {
+      cout << "error ";
+      cout << e.what() << endl;
+      return 1;
    }
 }
 

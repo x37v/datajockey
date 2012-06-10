@@ -116,7 +116,7 @@ namespace {
          selects << "`" + name + "`.value as `" + name + "`";
       }
 
-      QString query_string = "CREATE TEMPORARY TABLE works AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ");
+      QString query_string = "CREATE TEMPORARY TABLE works AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ") + " ORDER BY album_id, track";
       
       //actually create the table
       query.prepare(query_string);

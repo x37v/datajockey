@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk -lboost_program_options-mt
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 CONFIG += debug
@@ -112,7 +112,6 @@ SOURCES += src/application.cpp \
            src/util/beatextractor.cpp \
            src/util/importer.cpp \ 
            src/view/audiolevel.cpp \
-           src/view/main.cpp \
            src/view/mixerpanel.cpp \
            src/view/player_view.cpp \
            src/view/waveformviewgl.cpp \
