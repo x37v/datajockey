@@ -18,12 +18,12 @@ namespace dj {
             
             //pass data like tags, artist, etc..
             void update_attributes(QHash<QString, QVariant>& attributes);
-            void beat_buffer(const BeatBuffer& buffer);
+            void beat_buffer(BeatBufferPtr buffer);
             void write_file(const QString& file_path) throw(std::runtime_error);
             QString default_file_location(int work_id);
          private:
             QHash<QString, QVariant> mAttrs;
-            BeatBuffer mBeatBuffer;
+            BeatBufferPtr mBeatBuffer;
       };
    }
 }

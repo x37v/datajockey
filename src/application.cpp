@@ -107,9 +107,6 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(player_value_changed(int, QString, QString)),
          mMixerPanel,
          SLOT(player_set(int, QString, QString)));
-   QObject::connect(mAudioModel,
-         SIGNAL(player_triggered(int, QString)),
-         SLOT(relay_player_trigger(int, QString)));
 
    mAudioModel->master_set("crossfade", true);
    mAudioModel->set_master_cross_fade_players(0, 1);
@@ -239,9 +236,10 @@ void Application::set_player_trigger(int player_index, QString name) {
 	QString annotation_file;
 	if (!model::db::find_locations_by_id(mCurrentwork, audio_file, annotation_file))
 		return;
-	mAudioModel->set_player_buffers(player_index,
-			audio_file,
-			annotation_file);
+   mAudioModel->player_load(
+         player_index,
+         audio_file,
+         annotation_file);
 
 	//find the work info
 	QString artist_name;
@@ -253,13 +251,6 @@ void Application::set_player_trigger(int player_index, QString name) {
 				artist_name + "\n" + work_title);
 	} else
 		mMixerPanel->player_set(player_index, "song_description", "unknown");
-}
-
-void Application::relay_player_trigger(int player_index, QString name) {
-   if (name == "beat_buffer_changed") {
-      //XXX check bounds?
-      mMixerPanel->player_set_beat_buffer(player_index, mAudioModel->player_beat_buffer(player_index));
-   }
 }
 
 namespace po = boost::program_options;

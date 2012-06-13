@@ -82,7 +82,7 @@ void Annotation::update_attributes(QHash<QString, QVariant>& attributes) {
    }
 }
 
-void Annotation::beat_buffer(const BeatBuffer& buffer) {
+void Annotation::beat_buffer(BeatBufferPtr buffer) {
    mBeatBuffer = buffer;
 }
 
@@ -94,11 +94,11 @@ void Annotation::write_file(const QString& file_path) throw(std::runtime_error) 
    recursively_add(yaml, mAttrs);
 
    //add beat buffer
-   if (mBeatBuffer.length()) {
+   if (mBeatBuffer && mBeatBuffer->length()) {
       yaml << YAML::Key << "beat_locations";
       yaml << YAML::Value << YAML::BeginMap << YAML::Key << "time_points";
       yaml << YAML::Value << YAML::BeginSeq;
-      for (BeatBuffer::const_iterator it = mBeatBuffer.begin(); it != mBeatBuffer.end(); it++)
+      for (BeatBuffer::const_iterator it = mBeatBuffer->begin(); it != mBeatBuffer->end(); it++)
          yaml << *it;
       yaml << YAML::EndSeq << YAML::EndMap;
    }

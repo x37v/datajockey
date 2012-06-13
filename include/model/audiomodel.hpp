@@ -10,8 +10,8 @@
 #include "timepoint.hpp"
 #include "player.hpp"
 #include "audiobuffer.hpp"
-#include "audiobufferreference.hpp"
 #include "beatbuffer.hpp"
+#include "loaderthread.hpp"
 #include "scheduler.hpp"
 #include <vector>
 
@@ -25,10 +25,9 @@ namespace dj {
 
          private:
             //forward declarations
-            class PlayerClearBuffersCommand;
+            class PlayerSetBuffersCommand;
             class PlayerState;
             class ConsumeThread;
-            class AudioLoaderThread;
             class QueryPlayState;
 
             //singleton
@@ -47,8 +46,6 @@ namespace dj {
 
             unsigned int player_count() const;
 
-            QString player_audio_file(int player_index);
-            BeatBuffer player_beat_buffer(int player_index);
             bool player_state_bool(int player_index, QString name);
             int player_state_int(int player_index, QString name);
 
@@ -57,8 +54,7 @@ namespace dj {
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
             void player_set(int player_index, QString name, dj::audio::TimePoint value);
-            void set_player_beat_buffer(int player_index, QString buffer_file);
-            void set_player_buffers(int player_index, QString audio_file, QString beat_file);
+            void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
 
             //***** MASTER COMMANDS
             void master_set(QString name, bool value);
@@ -76,6 +72,7 @@ namespace dj {
             void player_value_changed(int player_index, QString name, QString value);
             void player_toggled(int player_index, QString name, bool value);
             void player_triggered(int player_index, QString name);
+            void player_buffers_changed(int player_index, AudioBufferPtr audio_buffer, BeatBuffer beatbuffer);
 
             void master_value_changed(QString name, int value);
             void master_value_changed(QString name, double value);
@@ -83,25 +80,28 @@ namespace dj {
 
          protected slots:
             //only for internal use
-            void relay_player_audio_file_changed(int player_index, QString fileName);
+            void relay_player_buffers_loaded(int player_index,
+                  AudioBufferPtr audio_buffer,
+                  BeatBufferPtr beat_buffer);
             void relay_player_value(int player_index, QString name, int value);
             void relay_master_audio_level(int percent);
             void relay_master_position(TimePoint position);
 
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals
-            void relay_audio_file_load_progress(QString fileName, int percent);
+            void relay_audio_file_load_progress(int player_index, int percent);
             void players_eval_audible();
 
          private:
-            friend class PlayerClearBuffersCommand;
-            friend class AudioLoaderThread;
+            friend class PlayerSetBuffersCommand;
             //pointers to other internal singletons
             dj::audio::AudioIO * mAudioIO;
             dj::audio::Master * mMaster;
 
             unsigned int mNumPlayers;
-            std::vector<AudioLoaderThread *> mThreadPool;
+            std::vector<LoaderThread *> mThreadPool;
+            QList<AudioBufferPtr> mPlayingAudioFiles;
+            QList<BeatBufferPtr> mPlayingAnnotationFiles;
 
             //execute/consume the scheduler's done actions
             ConsumeThread * mConsumeThread;
@@ -141,7 +141,6 @@ namespace dj {
             void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
 
             void update_player_state(int player_index, PlayerState * state);
-            void player_clear_buffers(int player_index);
 
             //not threadsafe, expects to have mutex already locked
             //eq the eq 0 is the lowest, 2 is high, one_scale is the top

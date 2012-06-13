@@ -60,7 +60,7 @@ HEADERS += include/application.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
            include/controller/audiobufferreference.hpp \
-           include/controller/audioloaderthread.hpp \
+           include/controller/loaderthread.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
            include/util/audiofiletag.hpp \
@@ -105,7 +105,7 @@ SOURCES += src/application.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
            src/controller/audiobufferreference.cpp \
-           src/controller/audioloaderthread.cpp \
+           src/controller/loaderthread.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
            src/util/audiofiletag.cpp \

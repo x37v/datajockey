@@ -4,15 +4,18 @@
 #include <stdexcept>
 #include <vector>
 #include "soundfile.hpp"
+#include <QSharedData>
+#include <QExplicitlySharedDataPointer>
 
 namespace dj {
    namespace audio {
-      class AudioBuffer {
+      class AudioBuffer : public QSharedData {
          public:
             typedef std::vector<float > data_buffer_t; 
             typedef void (* progress_callback_t)(int percent, void * user_data);
 
             AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
+            virtual ~AudioBuffer();
             //returns true if completely loaded
             bool load(progress_callback_t progress_callback = NULL, void * user_data = NULL);
             void abort_load();
@@ -43,6 +46,8 @@ namespace dj {
             bool mAbort;
             unsigned int mNumChannels;
       };
+
+      typedef QExplicitlySharedDataPointer<AudioBuffer> AudioBufferPtr;
    }
 }
 

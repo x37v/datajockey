@@ -179,7 +179,7 @@ void MixerPanel::player_set(int player_index, QString name, QString value) {
       player->set_song_description(value);
 }
 
-void MixerPanel::player_set_beat_buffer(int player_index, audio::BeatBuffer buffer){
+void MixerPanel::player_set_beat_buffer(int player_index, audio::BeatBufferPtr buffer){
    if (player_index >= mPlayers.size())
       return;
    mPlayers[player_index]->set_beat_buffer(buffer);

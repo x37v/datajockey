@@ -44,7 +44,7 @@ BeatExtractor::~BeatExtractor() {
 		delete mPlugin;
 }
 
-bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatBuffer& beat_buffer)
+bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatBufferPtr beat_buffer)
 	throw(std::runtime_error)
 {
 	//make sure we have a valid plugin and that its rate is correct
@@ -57,7 +57,7 @@ bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatB
 		mPlugin->reset();
 	}
 
-	beat_buffer.clear();
+	beat_buffer->clear();
 
 	Vamp::Plugin::FeatureSet features;
 	const unsigned int audio_frames = audio_buffer.length();
@@ -73,7 +73,7 @@ bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatB
 		const float * bufptr = &mAnalBuffer.front();
 		features = mPlugin->process(&bufptr, Vamp::RealTime::frame2RealTime(i, mSampleRate));
 		for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
-			beat_buffer.insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
+			beat_buffer->insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
 
 		//TODO make this based on block size and a modulus for less math?
 		if ((i - progress_last) >= progress_report) {
@@ -84,7 +84,7 @@ bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatB
 
 	features = mPlugin->getRemainingFeatures();
 	for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
-		beat_buffer.insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
+		beat_buffer->insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
 
 	emit(progress(100));
 	return true;

@@ -28,6 +28,9 @@ AudioBuffer::AudioBuffer(std::string soundfileLocation)
    mNumChannels = mSoundFile.channels();
 }
 
+AudioBuffer::~AudioBuffer() {
+}
+
 //getters
 unsigned int AudioBuffer::sample_rate() const{
    return mSampleRate;

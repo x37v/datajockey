@@ -69,13 +69,13 @@ void WaveFormViewGL::clear_beats() {
    update();
 }
             
-void WaveFormViewGL::set_beat_buffer(audio::BeatBuffer & buffer) {
+void WaveFormViewGL::set_beat_buffer(audio::BeatBufferPtr buffer) {
    QMutexLocker lock(&mMutex);
    mBeatBuffer = buffer;
-   if (mBeatBuffer.length() > 2) {
+   if (mBeatBuffer && mBeatBuffer->length() > 2) {
 
       //XXX make configurable
-      double frames_per_view = mBeatBuffer.median_difference() * 8.0 * mSampleRate;
+      double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
       mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
       mVerticiesValid = false;
 
@@ -289,10 +289,10 @@ void WaveFormViewGL::update_waveform() {
 }
 
 void WaveFormViewGL::update_beats() {
-   mBeatVerticies.resize(4 * mBeatBuffer.length());
-   for(unsigned int i = 0; i < mBeatBuffer.length(); i++) {
+   mBeatVerticies.resize(4 * mBeatBuffer->length());
+   for(unsigned int i = 0; i < mBeatBuffer->length(); i++) {
       int line_index = i * 4;
-      GLfloat pos = (mSampleRate * mBeatBuffer[i]) / mFramesPerLine;
+      GLfloat pos = (mSampleRate * mBeatBuffer->at(i)) / mFramesPerLine;
       mBeatVerticies[line_index] = mBeatVerticies[line_index + 2] = pos;
       mBeatVerticies[line_index + 1] = static_cast<GLfloat>(1.0);
       mBeatVerticies[line_index + 3] = static_cast<GLfloat>(-1.0);

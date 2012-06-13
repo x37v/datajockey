@@ -53,7 +53,7 @@ namespace dj {
             void set_audio_level(int percent);
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
-            void set_beat_buffer(audio::BeatBuffer buffer);
+            void set_beat_buffer(audio::BeatBufferPtr buffer);
             void set_song_description(QString description);
          signals:
             void seek_frame_relative(int frames);

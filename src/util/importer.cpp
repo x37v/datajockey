@@ -63,13 +63,13 @@ namespace {
          tag_data["milliseconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer.length() * 1000) / static_cast<double>(audio_buffer.sample_rate()));
 
          //extract beats
-         audio::BeatBuffer beat_buffer;
+         audio::BeatBufferPtr beat_buffer(new audio::BeatBuffer);
          BeatExtractor extractor;
          extractor.process(audio_buffer, beat_buffer);
 
          //smooth beat buffer
          if (beat_smooth_iterations)
-            beat_buffer.smooth(beat_smooth_iterations);
+            beat_buffer->smooth(beat_smooth_iterations);
 
          //create annotation file
          audio::Annotation annotation;
@@ -82,10 +82,10 @@ namespace {
                audio_file_path);
 
          //create tempo descriptors
-         if (beat_buffer.length() > 2) {
+         if (beat_buffer->length() > 2) {
             try {
             double median, mean;
-            beat_buffer.median_and_mean(median, mean);
+            beat_buffer->median_and_mean(median, mean);
             //XXX assuming 4/4 time
             if (median > 0.0) {
                model::db::work::descriptor_create_or_update(

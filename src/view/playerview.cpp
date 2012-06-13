@@ -177,7 +177,7 @@ void Player::set_audio_frame(int frame) {
       mProgressBar->setValue(0);
 }
 
-void Player::set_beat_buffer(audio::BeatBuffer buffer) {
+void Player::set_beat_buffer(audio::BeatBufferPtr buffer) {
    mWaveFormView->set_beat_buffer(buffer);
 }
 

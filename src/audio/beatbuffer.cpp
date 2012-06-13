@@ -24,6 +24,9 @@ BeatBuffer::BeatBuffer() {
    mStartBeat = 0;
 }
 
+BeatBuffer::~BeatBuffer() {
+}
+
 bool BeatBuffer::load(std::string file_location) {
    clear();
    try {
@@ -158,7 +161,8 @@ BeatBuffer::iterator BeatBuffer::begin() { return mBeatData.begin(); }
 BeatBuffer::const_iterator BeatBuffer::end() const { return mBeatData.end(); }
 BeatBuffer::iterator BeatBuffer::end() { return mBeatData.end(); }
 
-double BeatBuffer::operator[](unsigned int i) const { return mBeatData[i]; }
+double BeatBuffer::at(unsigned int i) const { return mBeatData[i]; }
+double BeatBuffer::operator[](unsigned int i) const { return at(i); }
 
 unsigned int BeatBuffer::length() const { return mBeatData.size(); }
 

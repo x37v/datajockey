@@ -5,17 +5,20 @@
 #include <string>
 #include <stdexcept>
 #include <deque>
+#include <QSharedData>
+#include <QExplicitlySharedDataPointer>
 
 namespace dj {
    namespace audio {
       //XXX assuming 4/4 for now
-      class BeatBuffer {
+      class BeatBuffer : public QSharedData {
          public:
             typedef std::deque<double> beat_list_t;
             typedef beat_list_t::const_iterator const_iterator;
             typedef beat_list_t::iterator iterator;
 
             BeatBuffer();
+            virtual ~BeatBuffer();
             bool load(std::string file_location);
 
             double time_at_position(const TimePoint& position) const;
@@ -31,6 +34,7 @@ namespace dj {
             BeatBuffer::const_iterator end() const;
             BeatBuffer::iterator end();
 
+            double at(unsigned int i) const;
             double operator[](unsigned int i) const;
 
             unsigned int length() const;
@@ -58,6 +62,7 @@ namespace dj {
             unsigned int mStartBeat;
             beat_list_t mBeatData;
       };
+      typedef QExplicitlySharedDataPointer<BeatBuffer> BeatBufferPtr;
    }
 }
 

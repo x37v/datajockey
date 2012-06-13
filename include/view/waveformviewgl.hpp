@@ -23,7 +23,7 @@ namespace dj {
             void set_audio_file(QString file_name);
 
             void clear_beats();
-            void set_beat_buffer(audio::BeatBuffer & buffer);
+            void set_beat_buffer(audio::BeatBufferPtr buffer);
 
             void set_frame(int frame);
             void set_frames_per_line(int num_frames);
@@ -51,7 +51,7 @@ namespace dj {
             int mFirstLineIndex; //which is the first line
             bool mVerticiesValid;
 
-            audio::BeatBuffer mBeatBuffer;
+            audio::BeatBufferPtr mBeatBuffer;
             std::vector<GLfloat> mBeatVerticies;
             bool mBeatVerticiesValid;
             float mSampleRate;

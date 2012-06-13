@@ -21,7 +21,7 @@ namespace dj {
             virtual ~WaveFormView();
             void set_audio_file(const QString& file_name);
             void set_audio_frame(int frame);
-            void set_beat_buffer(audio::BeatBuffer & buffer);
+            void set_beat_buffer(audio::BeatBufferPtr buffer);
 
             virtual void resizeEvent(QResizeEvent * event);
             virtual void wheelEvent(QWheelEvent * event);
@@ -36,7 +36,7 @@ namespace dj {
             WaveFormItem * mWaveForm;
             QGraphicsScene * mScene;
             QGraphicsLineItem * mCursor;
-            audio::BeatBuffer mBeatBuffer;
+            audio::BeatBufferPtr mBeatBuffer;
             QList<QGraphicsLineItem * > mBeatLines;
             double mSampleRate;
       };
