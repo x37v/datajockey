@@ -159,6 +159,10 @@ void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent);
 void Player::set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) {
    mWaveFormView->set_buffers(audio_buffer, beat_buffer);
    mProgressBar->setValue(0);
+   if (audio_buffer)
+      mFrames = audio_buffer->length();
+   else
+      mFrames = 0;
 }
 
 void Player::set_audio_frame(int frame) {
