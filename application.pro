@@ -59,7 +59,6 @@ HEADERS += include/application.hpp \
            include/audio/timepoint.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
-           include/controller/audiobufferreference.hpp \
            include/controller/loaderthread.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
@@ -104,7 +103,6 @@ SOURCES += src/application.cpp \
            src/audio/stretcherrate.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
-           src/controller/audiobufferreference.cpp \
            src/controller/loaderthread.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \

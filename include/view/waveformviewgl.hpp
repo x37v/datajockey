@@ -6,7 +6,7 @@
 #include <QMutex>
 #include <QColor>
 #include <vector>
-#include "audiobufferreference.hpp"
+#include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 
 namespace dj {
@@ -20,10 +20,9 @@ namespace dj {
             void setVertical(bool vert);
          public slots:
             void clear_audio();
-            void set_audio_file(QString file_name);
+            void set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
 
             void clear_beats();
-            void set_beat_buffer(audio::BeatBufferPtr buffer);
 
             void set_frame(int frame);
             void set_frames_per_line(int num_frames);
@@ -46,7 +45,7 @@ namespace dj {
             int mCursorOffset;
             bool mVertical;
 
-            audio::AudioBufferReference mAudioBuffer;
+            audio::AudioBufferPtr mAudioBuffer;
             std::vector<GLfloat> mVerticies;
             int mFirstLineIndex; //which is the first line
             bool mVerticiesValid;

@@ -173,16 +173,14 @@ void MixerPanel::player_set(int player_index, QString name, QString value) {
       return;
 
    Player * player = mPlayers[player_index];
-   if (name == "audio_file")
-      player->set_audio_file(value);
-   else if (name == "song_description")
+   if (name == "song_description")
       player->set_song_description(value);
 }
 
-void MixerPanel::player_set_beat_buffer(int player_index, audio::BeatBufferPtr buffer){
+void MixerPanel::player_set_buffers(int player_index, audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) {
    if (player_index >= mPlayers.size())
       return;
-   mPlayers[player_index]->set_beat_buffer(buffer);
+   mPlayers[player_index]->set_buffers(audio_buffer, beat_buffer);
 }
 
 void MixerPanel::master_set(QString name, int val) {

@@ -12,6 +12,7 @@
 #include <QValidator>
 #include <QDoubleValidator>
 #include "beatbuffer.hpp"
+#include "audiobuffer.hpp"
 
 class QPushButton;
 class QSlider;
@@ -51,9 +52,8 @@ namespace dj {
             QRect slider_level_geometry() const;
          public slots:
             void set_audio_level(int percent);
-            void set_audio_file(const QString& file_name);
+            void set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
             void set_audio_frame(int frame);
-            void set_beat_buffer(audio::BeatBufferPtr buffer);
             void set_song_description(QString description);
          signals:
             void seek_frame_relative(int frames);

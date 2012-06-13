@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include <QHash>
+#include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "timepoint.hpp"
 
@@ -28,7 +29,7 @@ namespace dj {
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, QString value);
-            void player_set_beat_buffer(int player_index, audio::BeatBufferPtr buffer);
+            void player_set_buffers(int player_index, audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
 
             void master_set(QString name, int val);
             void master_set(QString name, double val);

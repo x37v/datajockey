@@ -1,6 +1,5 @@
 #include "audiomodel.hpp"
 #include "loaderthread.hpp"
-#include "audiobufferreference.hpp"
 #include "transport.hpp"
 #include "defines.hpp"
 
@@ -418,12 +417,17 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
       BeatBufferPtr beat_buffer) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   if (audio_buffer)
+      mPlayerStates[player_index]->mNumFrames = audio_buffer->length();
+   else
+      mPlayerStates[player_index]->mNumFrames = 0;
 
    mPlayingAudioFiles <<  audio_buffer;
    mPlayingAnnotationFiles << beat_buffer;
    queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
    player_trigger(player_index, "reset");
-   //XXX emit(player_buffers_changed(player_index, audio_buffer, beat_buffer));
+   emit(player_buffers_changed(player_index, audio_buffer, beat_buffer));
 }
 
 void AudioModel::relay_player_value(int player_index, QString name, int value){
@@ -718,9 +722,7 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
 void AudioModel::player_load(int player_index, QString audio_file_path, QString annotation_file_path) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-
    QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * pstate = mPlayerStates[player_index];
 
    player_trigger(player_index, "clear");
    mThreadPool[player_index]->load(player_index, audio_file_path, annotation_file_path);

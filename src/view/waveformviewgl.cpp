@@ -42,15 +42,26 @@ void WaveFormViewGL::setVertical(bool vert) { mVertical = vert; }
 
 void WaveFormViewGL::clear_audio() {
    QMutexLocker lock(&mMutex);
-   mAudioBuffer.release();
+   mAudioBuffer.reset();
    mVerticiesValid = false;
    update();
 }
 
-void WaveFormViewGL::set_audio_file(QString file_name) { 
+void WaveFormViewGL::set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) {
    QMutexLocker lock(&mMutex);
-   mAudioBuffer.reset(file_name); 
-   if (mAudioBuffer.valid()) {
+   mAudioBuffer.swap(audio_buffer);
+   mBeatBuffer.swap(beat_buffer);
+
+   if (mBeatBuffer && mBeatBuffer->length() > 2) {
+      //XXX make configurable
+      double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
+      mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
+      mVerticiesValid = false;
+      update_beats();
+   } else
+      mBeatVerticiesValid = false;
+
+   if (mAudioBuffer) {
       float sample_rate = mAudioBuffer->sample_rate();
       if (sample_rate != mSampleRate) {
          mSampleRate = sample_rate;
@@ -69,22 +80,6 @@ void WaveFormViewGL::clear_beats() {
    update();
 }
             
-void WaveFormViewGL::set_beat_buffer(audio::BeatBufferPtr buffer) {
-   QMutexLocker lock(&mMutex);
-   mBeatBuffer = buffer;
-   if (mBeatBuffer && mBeatBuffer->length() > 2) {
-
-      //XXX make configurable
-      double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
-      mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
-      mVerticiesValid = false;
-
-      update_beats();
-   } else
-      mBeatVerticiesValid = false;
-   update();
-}
-
 void WaveFormViewGL::set_frame(int frame) {
    int prev = mFrame;
    mFrame = frame;
@@ -134,7 +129,7 @@ void WaveFormViewGL::paintGL(){
       glScalef(1.0, mHeight / 2, 1.0);
    }
 
-   if (mAudioBuffer.valid()) {
+   if (mAudioBuffer) {
       //TODO treat vertices as a circular buffer and only update what we need to
       update_waveform();
 

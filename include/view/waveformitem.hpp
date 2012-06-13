@@ -6,7 +6,6 @@
 #include <QVariant>
 #include <QPen>
 #include <QString>
-#include "audiobufferreference.hpp"
 
 class QPainter;
 class QStyleOptionGraphicsItem;
@@ -32,7 +31,7 @@ namespace dj {
          private:
             QPen mPen;
             QRectF mBoundingRect;
-            audio::AudioBufferReference mAudioBuffer;
+            audio::AudioBufferPtr mAudioBuffer;
             unsigned int mZoom;
       };
    }

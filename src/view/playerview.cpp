@@ -1,7 +1,6 @@
 #include "playerview.hpp"
 #include "defines.hpp"
 #include "waveformviewgl.hpp"
-#include "audiobufferreference.hpp"
 #include "audiobuffer.hpp"
 #include "audiolevel.hpp"
 
@@ -157,14 +156,8 @@ QRect Player::slider_level_geometry() const { return mSliderLevelLayout->geometr
 
 void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent); }
 
-void Player::set_audio_file(const QString& file_name) {
-   audio::AudioBufferReference ref(file_name);
-
-   mWaveFormView->set_audio_file(file_name);
-   if (ref.valid())
-      mFrames = ref->length();
-   else
-      mFrames = 0;
+void Player::set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) {
+   mWaveFormView->set_buffers(audio_buffer, beat_buffer);
    mProgressBar->setValue(0);
 }
 
@@ -175,10 +168,6 @@ void Player::set_audio_frame(int frame) {
       mProgressBar->setValue(frame / (mFrames / 100));
    } else
       mProgressBar->setValue(0);
-}
-
-void Player::set_beat_buffer(audio::BeatBufferPtr buffer) {
-   mWaveFormView->set_beat_buffer(buffer);
 }
 
 void Player::set_song_description(QString description) {
