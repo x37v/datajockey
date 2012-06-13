@@ -44,15 +44,15 @@ BeatExtractor::~BeatExtractor() {
 		delete mPlugin;
 }
 
-bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatBufferPtr beat_buffer)
+bool BeatExtractor::process(const audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer)
 	throw(std::runtime_error)
 {
 	//make sure we have a valid plugin and that its rate is correct
 	if (mPlugin == NULL) {
-		allocate_plugin(audio_buffer.sample_rate());
-	} else if (mSampleRate != audio_buffer.sample_rate()) {
+		allocate_plugin(audio_buffer->sample_rate());
+	} else if (mSampleRate != audio_buffer->sample_rate()) {
 		delete mPlugin;
-		allocate_plugin(audio_buffer.sample_rate());
+		allocate_plugin(audio_buffer->sample_rate());
 	} else {
 		mPlugin->reset();
 	}
@@ -60,16 +60,16 @@ bool BeatExtractor::process(const audio::AudioBuffer& audio_buffer, audio::BeatB
 	beat_buffer->clear();
 
 	Vamp::Plugin::FeatureSet features;
-	const unsigned int audio_frames = audio_buffer.length();
+	const unsigned int audio_frames = audio_buffer->length();
 	const unsigned int last_block = (audio_frames - mBlockSize);
 
 	unsigned int progress_last = 0;
-	unsigned int progress_report = audio_buffer.length() / 100;
+	unsigned int progress_report = audio_buffer->length() / 100;
 	if (progress_report == 0)
 		progress_report = 1;
 
 	for (unsigned int i = 0; i <= last_block; i += mStepSize) {
-		audio_buffer.fill_mono(mAnalBuffer, i);
+		audio_buffer->fill_mono(mAnalBuffer, i);
 		const float * bufptr = &mAnalBuffer.front();
 		features = mPlugin->process(&bufptr, Vamp::RealTime::frame2RealTime(i, mSampleRate));
 		for (unsigned int f = 0; f < features[beat_output_index].size(); f++)

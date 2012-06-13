@@ -15,7 +15,7 @@ namespace dj {
 			public:
 				BeatExtractor();
 				virtual ~BeatExtractor();
-				bool process(const audio::AudioBuffer& audio_buffer, audio::BeatBufferPtr beat_buffer) throw(std::runtime_error);
+				bool process(const audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) throw(std::runtime_error);
 			signals:
 				void progress(int percent);
 			private:

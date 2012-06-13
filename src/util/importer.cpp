@@ -57,10 +57,10 @@ namespace {
          audiofile_tag::extract(audio_file_path, tag_data);
 
          //grab audio
-         audio::AudioBuffer audio_buffer(audio_file_path.toStdString());
-         if(!audio_buffer.load())
+         audio::AudioBufferPtr audio_buffer(new audio::AudioBuffer(audio_file_path.toStdString()));
+         if(!audio_buffer->load())
             throw(std::runtime_error(DJ_FILEANDLINE + " failed to load audio buffer " + audio_file_path.toStdString()));
-         tag_data["milliseconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer.length() * 1000) / static_cast<double>(audio_buffer.sample_rate()));
+         tag_data["milliseconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer->length() * 1000) / static_cast<double>(audio_buffer->sample_rate()));
 
          //extract beats
          audio::BeatBufferPtr beat_buffer(new audio::BeatBuffer);
