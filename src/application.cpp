@@ -108,6 +108,11 @@ Application::Application(int & argc, char ** argv) :
          mMixerPanel,
          SLOT(player_set(int, QString, QString)));
 
+   QObject::connect(mAudioModel,
+         SIGNAL(player_buffers_changed(int, AudioBufferPtr, BeatBufferPtr)),
+         mMixerPanel,
+         SLOT(player_set_buffers(int, AudioBufferPtr, BeatBufferPtr)));
+
    mAudioModel->master_set("crossfade", true);
    mAudioModel->set_master_cross_fade_players(0, 1);
    mAudioModel->master_set("crossfade_position", (int)one_scale / 2);

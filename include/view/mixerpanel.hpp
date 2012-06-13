@@ -16,6 +16,8 @@ class QLineEdit;
 namespace dj {
    namespace view {
       using dj::audio::TimePoint;
+      using dj::audio::AudioBufferPtr;
+      using dj::audio::BeatBufferPtr;
 
       class Player;
       class AudioLevel;
@@ -29,7 +31,7 @@ namespace dj {
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, QString value);
-            void player_set_buffers(int player_index, audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
+            void player_set_buffers(int player_index, AudioBufferPtr audio_buffer, BeatBufferPtr beat_buffer);
 
             void master_set(QString name, int val);
             void master_set(QString name, double val);
