@@ -100,6 +100,10 @@ namespace dj {
 
             unsigned int mNumPlayers;
             std::vector<LoaderThread *> mThreadPool;
+            //we keep a copy of the pointers for each time we push them into
+            //the audio thread we remove a copy each time they come out of the
+            //audio thread this is how we manage the reference counting and
+            //avoid having deallocation happen in the audio thread
             QList<AudioBufferPtr> mPlayingAudioFiles;
             QList<BeatBufferPtr> mPlayingAnnotationFiles;
 
