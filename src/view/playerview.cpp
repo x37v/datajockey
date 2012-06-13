@@ -1,4 +1,4 @@
-#include "player_view.hpp"
+#include "playerview.hpp"
 #include "defines.hpp"
 #include "waveformviewgl.hpp"
 #include "audiobufferreference.hpp"

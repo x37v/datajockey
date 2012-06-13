@@ -1,6 +1,6 @@
 #include "application.hpp"
 #include "mixerpanel.hpp"
-#include "player_view.hpp"
+#include "playerview.hpp"
 #include "audiomodel.hpp"
 #include "defines.hpp"
 #include "beatbuffer.hpp"

@@ -55,7 +55,7 @@ HEADERS += include/application.hpp \
            include/audio/scheduler.hpp \
            include/audio/soundfile.hpp \
            include/audio/stretcher.hpp \
-           include/audio/stretcher_rate.hpp \
+           include/audio/stretcherrate.hpp \
            include/audio/timepoint.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
@@ -68,7 +68,7 @@ HEADERS += include/application.hpp \
            include/util/importer.hpp \
            include/view/audiolevel.hpp \
            include/view/mixerpanel.hpp \
-           include/view/player_view.hpp \
+           include/view/playerview.hpp \
            include/view/waveformviewgl.hpp \
            include/old/defaultworkfilters.hpp \
            include/old/oscreceiver.hpp \
@@ -101,7 +101,7 @@ SOURCES += src/application.cpp \
            src/audio/scheduler.cpp \
            src/audio/soundfile.cpp \
            src/audio/stretcher.cpp \
-           src/audio/stretcher_rate.cpp \
+           src/audio/stretcherrate.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
            src/controller/audiobufferreference.cpp \
@@ -113,7 +113,7 @@ SOURCES += src/application.cpp \
            src/util/importer.cpp \ 
            src/view/audiolevel.cpp \
            src/view/mixerpanel.cpp \
-           src/view/player_view.cpp \
+           src/view/playerview.cpp \
            src/view/waveformviewgl.cpp \
            src/old/defaultworkfilters.cpp \
            src/old/oscreceiver.cpp \

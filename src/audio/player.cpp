@@ -2,7 +2,7 @@
 #include <cmath>
 #include "master.hpp"
 #include "stretcher.hpp"
-#include "stretcher_rate.hpp"
+#include "stretcherrate.hpp"
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 #define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
 

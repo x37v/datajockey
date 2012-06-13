@@ -1,4 +1,4 @@
-#include "stretcher_rate.hpp"
+#include "stretcherrate.hpp"
 
 namespace dj {
    namespace audio {

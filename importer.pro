@@ -33,7 +33,7 @@ MOC_DIR = moc/
 OBJECTS_DIR = obj/
 
 # Input
-HEADERS += include/importer_app.hpp \
+HEADERS += include/importerapp.hpp \
            include/config.hpp \
            include/defines.hpp \
            include/audio/annotation.hpp \
@@ -46,7 +46,7 @@ HEADERS += include/importer_app.hpp \
            include/util/audiofiletag.hpp \
            include/util/beatextractor.hpp \
            include/util/importer.hpp
-SOURCES += src/importer_app.cpp \
+SOURCES += src/importerapp.cpp \
            src/config.cpp \
            src/defines.cpp \
            src/audio/annotation.cpp \
