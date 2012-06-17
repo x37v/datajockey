@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -ljackcpp -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk -lboost_program_options-mt
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk -lboost_program_options-mt
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 CONFIG += debug
@@ -15,12 +15,14 @@ DEPENDPATH += . \
               include/view \
               include/old \
               include/util \
+              ext/jackcpp/include/ \
               src/ \
               src/audio \
               src/controller \
               src/view \
               src/old \
-              src/util
+              src/util \
+              ext/jackcpp/src/
 MOC_DIR = moc/
 OBJECTS_DIR = obj/
 INCLUDEPATH += . \
@@ -31,6 +33,7 @@ INCLUDEPATH += . \
    include/view \
    include/old \
    include/util \
+   ext/jackcpp/include/ \
 	/usr/include/rasqal/ \
    /usr/local/include/oscpack/
 
@@ -84,7 +87,11 @@ HEADERS += include/application.hpp \
            include/old/workfiltermodel.hpp \
            #include/old/workpreviewer.hpp \
            include/old/worktablemodel.hpp \
-           include/old/worktagmodelfilter.hpp
+           include/old/worktagmodelfilter.hpp \
+           ext/jackcpp/include/jackaudioio.hpp \
+           ext/jackcpp/include/jackmidiport.hpp \
+           ext/jackcpp/include/jackringbuffer.hpp \
+
 SOURCES += src/application.cpp \
            src/config.cpp \
            src/defines.cpp \
@@ -128,4 +135,7 @@ SOURCES += src/application.cpp \
            src/old/workfiltermodel.cpp \
            #src/old/workpreviewer.cpp \
            src/old/worktablemodel.cpp \
-           src/old/worktagmodelfilter.cpp
+           src/old/worktagmodelfilter.cpp \
+           ext/jackcpp/src/jackaudioio.cpp \
+           ext/jackcpp/src/jackmidiport.cpp
+
