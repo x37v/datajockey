@@ -8,6 +8,7 @@ class QWidget;
 
 namespace dj {
    namespace audio { class AudioModel; }
+   namespace controller { class MIDIMapper; }
    class Application : public QApplication {
       Q_OBJECT
       public:
@@ -19,6 +20,7 @@ namespace dj {
       private:
          audio::AudioModel * mAudioModel;
          view::MixerPanel * mMixerPanel;
+         controller::MIDIMapper * mMIDIMapper;
          QWidget * mTop;
          int mCurrentwork;
    };

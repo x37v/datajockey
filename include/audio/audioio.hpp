@@ -21,6 +21,8 @@ namespace dj {
             Master * master();
             void start();
             struct midi_event_buffer_t { uint8_t data[3]; };
+            typedef JackCpp::RingBuffer<midi_event_buffer_t> midi_ringbuff_t;
+            midi_ringbuff_t * midi_input_ringbuffer();
          protected:
             virtual int audioCallback(
                   jack_nframes_t nframes, 
@@ -29,7 +31,7 @@ namespace dj {
             Master * mMaster;
 
             JackCpp::MIDIInPort mMIDIIn;
-            JackCpp::RingBuffer<midi_event_buffer_t> mMIDIEventFromAudio;
+            midi_ringbuff_t mMIDIEventFromAudio;
       };
    }
 }

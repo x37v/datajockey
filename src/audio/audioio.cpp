@@ -73,7 +73,8 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
 
    //push any note or cc events into the ring buffer
    for (uint32_t i = 0; i < midi_in_cnt; i++) {
-      if (jack_midi_event_t * evt = mMIDIIn.get(midi_in_buffer, i)) {
+      jack_midi_event_t evt;
+      if (mMIDIIn.get(evt, midi_in_buffer, i)) {
          midi_event_buffer_t buf;
          switch(MIDIPort::status(evt)) {
             case MIDIPort::CC:
@@ -81,7 +82,7 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
             case MIDIPort::NOTEON:
                //if we have space, copy the event data and write it to our buffer
                if (mMIDIEventFromAudio.getWriteSpace()) {
-                  memcpy(buf.data, evt->buffer, 3);
+                  memcpy(buf.data, evt.buffer, 3);
                   mMIDIEventFromAudio.write(buf);
                } else {
                   //TODO report error
@@ -106,3 +107,6 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
    //return 0 on success
    return 0;
 }
+
+AudioIO::midi_ringbuff_t * AudioIO::midi_input_ringbuffer() { return &mMIDIEventFromAudio; }
+

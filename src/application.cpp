@@ -1,5 +1,6 @@
 #include "application.hpp"
 #include "mixerpanel.hpp"
+#include "midimapper.hpp"
 #include "playerview.hpp"
 #include "audiomodel.hpp"
 #include "defines.hpp"
@@ -49,6 +50,7 @@ Application::Application(int & argc, char ** argv) :
    mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
    mMixerPanel = new view::MixerPanel(mTop);
+   mMIDIMapper = new controller::MIDIMapper(mTop);
 
    setStyle("plastique");
 
@@ -117,6 +119,27 @@ Application::Application(int & argc, char ** argv) :
    mAudioModel->set_master_cross_fade_players(0, 1);
    mAudioModel->master_set("crossfade_position", (int)one_scale / 2);
    mAudioModel->master_set("bpm", 120.0);
+
+   //hook up mapper
+   QObject::connect(
+         mMIDIMapper, SIGNAL(player_value_changed(int, QString, int)),
+         mAudioModel, SLOT(player_set(int, QString, int)));
+   QObject::connect(
+         mMIDIMapper, SIGNAL(player_toggled(int, QString, bool)),
+         mAudioModel, SLOT(player_set(int, QString, bool)));
+   QObject::connect(
+         mMIDIMapper, SIGNAL(player_triggered(int, QString)),
+         mAudioModel, SLOT(player_trigger(int, QString)));
+
+   QObject::connect(
+         mMIDIMapper, SIGNAL(master_value_changed(QString, bool)),
+         mAudioModel, SLOT(master_set(QString, bool)));
+   QObject::connect(
+         mMIDIMapper, SIGNAL(master_value_changed(QString, int)),
+         mAudioModel, SLOT(master_set(QString, int)));
+   QObject::connect(
+         mMIDIMapper, SIGNAL(master_value_changed(QString, double)),
+         mAudioModel, SLOT(master_set(QString, double)));
 
 
    //mAudioModel->set_player_buffers(0,
@@ -218,6 +241,8 @@ Application::Application(int & argc, char ** argv) :
 
    mAudioModel->start_audio();
    osc_thread->start();
+
+   mMIDIMapper->start();
 
    mTop->setLayout(top_layout);
    mTop->show();

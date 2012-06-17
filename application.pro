@@ -63,6 +63,7 @@ HEADERS += include/application.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
            include/controller/loaderthread.hpp \
+           include/controller/midimapper.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
            include/util/audiofiletag.hpp \
@@ -111,6 +112,7 @@ SOURCES += src/application.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
            src/controller/loaderthread.cpp \
+           src/controller/midimapper.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
            src/util/audiofiletag.cpp \

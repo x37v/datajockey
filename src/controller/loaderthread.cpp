@@ -4,7 +4,8 @@
 using namespace dj::audio;
 
 LoaderThread::LoaderThread()
-: mPlayerIndex(0), mMutex(QMutex::Recursive) { }
+: mPlayerIndex(0), mMutex(QMutex::Recursive) { 
+}
 
 void LoaderThread::progress_callback(int percent, void *objPtr) {
    //XXX lock mutex?
@@ -39,6 +40,7 @@ void LoaderThread::load(int player_index, QString audio_file_location, QString a
 }
 
 void LoaderThread::run() {
+   setPriority(QThread::NormalPriority);
    try {
       mAudioBuffer.reset();
       mBeatBuffer.reset();
