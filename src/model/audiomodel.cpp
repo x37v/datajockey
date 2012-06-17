@@ -488,7 +488,7 @@ void AudioModel::master_set(QString name, int value) {
 
       if(!mPlayerStates[value]->mParamBool["sync"]) {
          mPlayerStates[value]->mParamBool["sync"] = true;
-         emit(player_toggled(value, "sync", true));
+         emit(player_value_changed(value, "sync", true));
       }
    } else
       cerr << name.toStdString() << " is not a master_set (int) arg" << endl;
@@ -604,7 +604,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
 
    //queue the actual command [who's action is stored in the action_itr]
    queue_command(new dj::audio::PlayerStateCommand(player_index, value ? action_itr->first : action_itr->second));
-   emit(player_toggled(player_index, name, value));
+   emit(player_value_changed(player_index, name, value));
 }
 
 void AudioModel::player_set(int player_index, QString name, int value) {
@@ -778,7 +778,7 @@ void AudioModel::player_eval_audible(int player_index) {
 
    if (state->mParamBool["audible"] != audible) {
       state->mParamBool["audible"] = audible;
-      emit(player_toggled(player_index, "audible", audible));
+      emit(player_value_changed(player_index, "audible", audible));
    } 
 }
 

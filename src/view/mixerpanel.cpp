@@ -66,7 +66,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
             QObject::connect(button,
                   SIGNAL(toggled(bool)),
                   this,
-                  SLOT(relay_player_toggled(bool)));
+                  SLOT(relay_player_value_changed(bool)));
          } else {
             QObject::connect(button,
                   SIGNAL(clicked()),
@@ -83,6 +83,13 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
                SLOT(relay_player_eq(int)));
       }
    }
+
+   //set up the midi map button
+   QPushButton * midi_map = new QPushButton("midi map", this);
+   midi_map->setCheckable(false);
+   QObject::connect(midi_map,
+         SIGNAL(pressed()),
+         SIGNAL(midi_map_triggered()));
 
    //master
    QBoxLayout * master_layout = new QBoxLayout(QBoxLayout::TopToBottom);
@@ -103,6 +110,8 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    mMasterTempo->setSingleStep(0.5);
    mMasterTempo->setDecimals(3);
    master_layout->addWidget(mMasterTempo, 0, Qt::AlignHCenter);
+
+   master_layout->addWidget(midi_map, 0, Qt::AlignHCenter);
 
    mMasterVolume = new QSlider(Qt::Vertical, this);
    mMasterVolume->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
@@ -213,7 +222,7 @@ void MixerPanel::master_set(QString name, audio::TimePoint val) {
    }
 }
 
-void MixerPanel::relay_player_toggled(bool checked) {
+void MixerPanel::relay_player_value_changed(bool checked) {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    if (!button)
       return;
@@ -222,7 +231,7 @@ void MixerPanel::relay_player_toggled(bool checked) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_toggled(player_index.value(), button->property("dj_name").toString(), checked));
+   emit(player_value_changed(player_index.value(), button->property("dj_name").toString(), checked));
 }
 
 void MixerPanel::relay_player_triggered() {
@@ -266,7 +275,7 @@ void MixerPanel::relay_player_seeking(bool state) {
    if (player_index == mSenderToIndex.end())
       return;
 
-   emit(player_toggled(player_index.value(), "seeking", state));
+   emit(player_value_changed(player_index.value(), "seeking", state));
 }
 
 void MixerPanel::relay_player_eq(int val) {

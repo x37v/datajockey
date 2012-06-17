@@ -14,19 +14,24 @@ namespace dj {
             MIDIMapper(QObject * parent = NULL);
             virtual ~MIDIMapper();
             virtual void run();
+
          public slots:
+            void map();
+
             void player_trigger(int player_index, QString name);
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
 
+            void master_trigger(QString name);
             void master_set(QString name, bool value);
             void master_set(QString name, int value);
             void master_set(QString name, double value);
 
          signals:
+            void player_value_changed(int player_index, QString name, bool value);
             void player_value_changed(int player_index, QString name, int value);
-            void player_toggled(int player_index, QString name, bool value);
+            void player_value_changed(int player_index, QString name, double value);
             void player_triggered(int player_index, QString name);
 
             void master_value_changed(QString name, bool value);
@@ -35,6 +40,13 @@ namespace dj {
             void master_triggered(QString name);
 
          private:
+            enum map_state_t {
+               IDLE,
+               WAITING_SLOT,
+               WAITING_MIDI
+            };
+            map_state_t mMappingState;
+
             audio::AudioIO::midi_ringbuff_t * mInputRingBuffer;
             bool mAbort;
             struct mapping_t {
@@ -52,13 +64,22 @@ namespace dj {
                double value_offset;
                double value_mul;
 
-               mapping_t() : value_offset(0), value_mul((double)one_scale / 127.0) {
+               void default_remaps() {
+                  value_offset = 0;
+                  value_mul = (double)one_scale;
+               }
+
+               mapping_t() {
+                  default_remaps();
                }
             };
 
             //(status byte << 8) || num -> mapping
             typedef QHash<uint32_t, mapping_t> mapping_hash_t;
             mapping_hash_t mMappings;
+            mapping_t mNextMapping;
+
+            void mapping_from_slot(int player_index, QString name, mapping_t::signal_val_t type);
       };
    }
 }

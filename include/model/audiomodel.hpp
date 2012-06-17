@@ -70,7 +70,7 @@ namespace dj {
          signals:
             void player_value_changed(int player_index, QString name, int value);
             void player_value_changed(int player_index, QString name, QString value);
-            void player_toggled(int player_index, QString name, bool value);
+            void player_value_changed(int player_index, QString name, bool value);
             void player_triggered(int player_index, QString name);
             void player_buffers_changed(int player_index, AudioBufferPtr audio_buffer, BeatBufferPtr beatbuffer);
 

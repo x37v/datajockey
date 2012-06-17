@@ -38,7 +38,7 @@ namespace dj {
             void master_set(QString name, TimePoint val);
 
          protected slots:
-            void relay_player_toggled(bool state);
+            void relay_player_value_changed(bool state);
             void relay_player_seek_frame_relative(int frames);
             void relay_player_seeking(bool state);
             void relay_player_triggered();
@@ -54,8 +54,10 @@ namespace dj {
             virtual void resizeEvent(QResizeEvent * event);
 
          signals:
+            void midi_map_triggered();
+
             void player_triggered(int player_index, QString name);
-            void player_toggled(int player_index, QString name, bool val);
+            void player_value_changed(int player_index, QString name, bool val);
             void player_value_changed(int player_index, QString name, int val);
 
             void tempo_changed(double);

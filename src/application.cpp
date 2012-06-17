@@ -88,7 +88,7 @@ Application::Application(int & argc, char ** argv) :
          mAudioModel,
          SLOT(player_trigger(int, QString)));
    QObject::connect(mMixerPanel,
-         SIGNAL(player_toggled(int, QString, bool)),
+         SIGNAL(player_value_changed(int, QString, bool)),
          mAudioModel,
          SLOT(player_set(int, QString, bool)));
    QObject::connect(mMixerPanel,
@@ -97,7 +97,7 @@ Application::Application(int & argc, char ** argv) :
          SLOT(player_set(int, QString, int)));
 
    QObject::connect(mAudioModel,
-         SIGNAL(player_toggled(int, QString, bool)),
+         SIGNAL(player_value_changed(int, QString, bool)),
          mMixerPanel,
          SLOT(player_set(int, QString, bool)));
    QObject::connect(mAudioModel,
@@ -121,19 +121,19 @@ Application::Application(int & argc, char ** argv) :
    mAudioModel->master_set("bpm", 120.0);
 
    //hook up mapper
+   //mapper out
    QObject::connect(
          mMIDIMapper, SIGNAL(player_value_changed(int, QString, int)),
          mAudioModel, SLOT(player_set(int, QString, int)),
          Qt::QueuedConnection);
    QObject::connect(
-         mMIDIMapper, SIGNAL(player_toggled(int, QString, bool)),
+         mMIDIMapper, SIGNAL(player_value_changed(int, QString, bool)),
          mAudioModel, SLOT(player_set(int, QString, bool)),
          Qt::QueuedConnection);
    QObject::connect(
          mMIDIMapper, SIGNAL(player_triggered(int, QString)),
          mAudioModel, SLOT(player_trigger(int, QString)),
          Qt::QueuedConnection);
-
    QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, bool)),
          mAudioModel, SLOT(master_set(QString, bool)),
@@ -145,6 +145,46 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, double)),
          mAudioModel, SLOT(master_set(QString, double)),
+         Qt::QueuedConnection);
+
+   //mapper in
+   QObject::connect(
+         mMixerPanel, SIGNAL(player_trigged(int, QString)),
+         mMIDIMapper, SLOT(player_trigger(int, QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, bool)),
+         mMIDIMapper, SLOT(player_set(int, QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, int)),
+         mMIDIMapper, SLOT(player_set(int, QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, double)),
+         mMIDIMapper, SLOT(player_set(int, QString, double)),
+         Qt::QueuedConnection);
+
+   QObject::connect(
+         mMixerPanel, SIGNAL(master_trigged(QString)),
+         mMIDIMapper, SLOT(player_trigger(QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, bool)),
+         mMIDIMapper, SLOT(master_set(QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, int)),
+         mMIDIMapper, SLOT(master_set(QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, double)),
+         mMIDIMapper, SLOT(master_set(QString, double)),
+         Qt::QueuedConnection);
+
+   QObject::connect(
+         mMixerPanel, SIGNAL(midi_map_triggered()),
+         mMIDIMapper, SLOT(map()),
          Qt::QueuedConnection);
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
