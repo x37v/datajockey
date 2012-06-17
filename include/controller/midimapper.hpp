@@ -32,6 +32,7 @@ namespace dj {
             void master_value_changed(QString name, bool value);
             void master_value_changed(QString name, int value);
             void master_value_changed(QString name, double value);
+            void master_triggered(QString name);
 
          private:
             audio::AudioIO::midi_ringbuff_t * mInputRingBuffer;

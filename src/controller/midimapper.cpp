@@ -11,7 +11,7 @@ MIDIMapper::MIDIMapper(QObject * parent): QThread(parent), mAbort(false) {
    mapping.player_index = 0;
    mapping.signal_name = "volume";
    mapping.value_type = mapping_t::INT_VAL;
-   mapping.value_mul = (double)dj::one_scale * 1.5 / 127.0;
+   mapping.value_mul = (double)dj::one_scale * 1.5;
    mMappings.insert(key, mapping);
 
    key = (0xB5 << 8) | 41;
@@ -38,11 +38,13 @@ void MIDIMapper::run() {
       mapping_hash_t::iterator it = mMappings.find(key);
       if (it != mMappings.end()) {
          uint8_t input_value = buff.data[2];
-         double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value);
+         double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
          switch(it->value_type) {
             case mapping_t::TRIGGER_VAL:
                if (it->player_index >= 0)
                   emit(player_triggered(it->player_index, it->signal_name));
+               else
+                  emit(master_triggered(it->signal_name));
                break;
             case mapping_t::BOOL_VAL:
                if (it->player_index >= 0)
