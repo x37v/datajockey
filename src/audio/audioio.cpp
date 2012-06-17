@@ -19,19 +19,24 @@
 #include <iostream>
 #include <stdlib.h>
 #include <jack/transport.h>
+#include <cstring>
 #include "audioio.hpp"
 
 using namespace dj::audio;
+using JackCpp::MIDIPort;
 
 AudioIO * AudioIO::cInstance = NULL;
 
 AudioIO::AudioIO() : 
-   JackCpp::AudioIO("datajockey", 0, 0){
+   JackCpp::AudioIO("datajockey", 0, 0),
+   mMIDIEventFromAudio(256) //TODO whats a good value for this?
+{
       addOutPort("output0");
       addOutPort("output1");
       addOutPort("cue0");
       addOutPort("cue1");
       mMaster = Master::instance();
+      mMIDIIn.init(this, "midi_in");
    }
 
 AudioIO::~AudioIO(){
@@ -57,7 +62,37 @@ int AudioIO::audioCallback(jack_nframes_t nframes,
       audioBufVector /*inBufs*/,
       // A vector of pointers to each output port.
       audioBufVector outBufs){
+
+   //compute the audio 
    mMaster->audio_compute_and_fill(outBufs, nframes);
+
+
+   //deal with midi
+   void * midi_in_buffer = mMIDIIn.port_buffer(nframes);
+   const uint32_t midi_in_cnt = mMIDIIn.event_count(midi_in_buffer);
+
+   //push any note or cc events into the ring buffer
+   for (uint32_t i = 0; i < midi_in_cnt; i++) {
+      if (jack_midi_event_t * evt = mMIDIIn.get(midi_in_buffer, i)) {
+         midi_event_buffer_t buf;
+         switch(MIDIPort::status(evt)) {
+            case MIDIPort::CC:
+            case MIDIPort::NOTEOFF:
+            case MIDIPort::NOTEON:
+               //if we have space, copy the event data and write it to our buffer
+               if (mMIDIEventFromAudio.getWriteSpace()) {
+                  memcpy(buf.data, evt->buffer, 3);
+                  mMIDIEventFromAudio.write(buf);
+               } else {
+                  //TODO report error
+               }
+               break;
+            default:
+               break;
+         }
+      }
+   }
+
 
    /*
       jack_position_t pos;
