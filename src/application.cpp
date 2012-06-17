@@ -123,31 +123,29 @@ Application::Application(int & argc, char ** argv) :
    //hook up mapper
    QObject::connect(
          mMIDIMapper, SIGNAL(player_value_changed(int, QString, int)),
-         mAudioModel, SLOT(player_set(int, QString, int)));
+         mAudioModel, SLOT(player_set(int, QString, int)),
+         Qt::QueuedConnection);
    QObject::connect(
          mMIDIMapper, SIGNAL(player_toggled(int, QString, bool)),
-         mAudioModel, SLOT(player_set(int, QString, bool)));
+         mAudioModel, SLOT(player_set(int, QString, bool)),
+         Qt::QueuedConnection);
    QObject::connect(
          mMIDIMapper, SIGNAL(player_triggered(int, QString)),
-         mAudioModel, SLOT(player_trigger(int, QString)));
+         mAudioModel, SLOT(player_trigger(int, QString)),
+         Qt::QueuedConnection);
 
    QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, bool)),
-         mAudioModel, SLOT(master_set(QString, bool)));
+         mAudioModel, SLOT(master_set(QString, bool)),
+         Qt::QueuedConnection);
    QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, int)),
-         mAudioModel, SLOT(master_set(QString, int)));
+         mAudioModel, SLOT(master_set(QString, int)),
+         Qt::QueuedConnection);
    QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, double)),
-         mAudioModel, SLOT(master_set(QString, double)));
-
-
-   //mAudioModel->set_player_buffers(0,
-         //"/media/x/music/dj_slugo/dance_mania_ghetto_classics_vol_1/11-freaky_ride.flac",
-         //"/media/x/datajockey_annotation/recovered/3981-dj_slugo-dance_mania_ghetto_classics_vol_1-freaky_ride.yaml");
-   //mAudioModel->set_player_buffers(1,
-         //"/media/x/music/low_end_theory/3455/07-suck_it.flac",
-         //"/media/x/datajockey_annotation/recovered/3973-low_end_theory-3455-suck_it.yaml");
+         mAudioModel, SLOT(master_set(QString, double)),
+         Qt::QueuedConnection);
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    //WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
