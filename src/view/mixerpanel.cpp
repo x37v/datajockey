@@ -85,7 +85,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    }
 
    //set up the midi map button
-   QPushButton * midi_map = new QPushButton("midi map", this);
+   QPushButton * midi_map = new QPushButton("midi learn", this);
    midi_map->setCheckable(false);
    QObject::connect(midi_map,
          SIGNAL(pressed()),
