@@ -50,7 +50,13 @@ Application::Application(int & argc, char ** argv) :
    mAudioModel = audio::AudioModel::instance();
    mTop = new QWidget(0, Qt::Window);
    mMixerPanel = new view::MixerPanel(mTop);
+
    mMIDIMapper = new controller::MIDIMapper(mTop);
+   mMIDIMapper->load_file(config->midi_mapping_file());
+   if (config->midi_mapping_auto_save())
+      mMIDIMapper->auto_save(config->midi_mapping_file());
+   else
+      mMIDIMapper->auto_save(false);
 
    setStyle("plastique");
 

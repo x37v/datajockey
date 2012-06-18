@@ -15,8 +15,36 @@ namespace dj {
             virtual ~MIDIMapper();
             virtual void run();
 
+            static const double value_multiplier_default;
+            static const double value_offset_default;
+
+            enum signal_val_t {
+               TRIGGER_VAL,
+               BOOL_VAL,
+               INT_VAL,
+               DOUBLE_VAL,
+            };
+
          public slots:
             void map();
+            void clear();
+            void map_player(
+                  int player_index,
+                  QString signal_name,
+                  int midi_status, int midi_param,
+                  signal_val_t value_type,
+                  double value_multiplier = value_multiplier_default,
+                  double value_offset = value_offset_default);
+            void map_master(
+                  QString signal_name,
+                  int midi_status, int midi_param,
+                  signal_val_t value_type,
+                  double value_multiplier = value_multiplier_default,
+                  double value_offset = value_offset_default); 
+            void load_file(QString file_path);
+            void save_file(QString file_path);
+            void auto_save(QString file_path);
+            void auto_save(bool save);
 
             void player_trigger(int player_index, QString name);
             void player_set(int player_index, QString name, bool value);
@@ -49,13 +77,10 @@ namespace dj {
 
             audio::AudioIO::midi_ringbuff_t * mInputRingBuffer;
             bool mAbort;
+            bool mAutoSave;
+            QString mAutoSaveFileName;
+
             struct mapping_t {
-               enum signal_val_t {
-                  TRIGGER_VAL,
-                  BOOL_VAL,
-                  INT_VAL,
-                  DOUBLE_VAL,
-               };
                QString signal_name;
                signal_val_t value_type;
                int player_index; //if < 0 it is a master command
@@ -79,7 +104,7 @@ namespace dj {
             mapping_hash_t mMappings;
             mapping_t mNextMapping;
 
-            void mapping_from_slot(int player_index, QString name, mapping_t::signal_val_t type);
+            void mapping_from_slot(int player_index, QString name, signal_val_t type);
       };
    }
 }

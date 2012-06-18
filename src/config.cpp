@@ -121,6 +121,17 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
          mAnnotationDir = dir.absolutePath();
       } catch (...) { /* do nothing */ }
 
+      try {
+         std::string file_name;
+         root["midi_map"]["file"] >> file_name;
+         mMIDIMapFile = 
+            QString::fromStdString(file_name).trimmed().replace(QRegExp("^~"), QDir::homePath());
+      } catch (...) { /* do nothing */ }
+
+      try {
+         root["midi_map"]["autosave"] >> mMIDIMapAutoSave;
+      } catch (...) { /* do nothing */ }
+
    } catch (...){
       mValidFile = false;
       std::string str("error reading config file: ");
@@ -161,6 +172,9 @@ QString Configuration::db_username() { return mDBUserName; }
 unsigned int Configuration::osc_port(){ return mOscPort; }
 QString Configuration::annotation_dir() { return mAnnotationDir; }
 
+QString Configuration::midi_mapping_file() { return mMIDIMapFile; }
+bool Configuration::midi_mapping_auto_save() { return mMIDIMapAutoSave; }
+
 void Configuration::restore_defaults() {
    mDBUserName = "user";
    mDBPassword = "";
@@ -170,6 +184,9 @@ void Configuration::restore_defaults() {
    mAnnotationDir = DEFAULT_ANNOTATION_DIR;
 
    mOscPort = DEFAULT_OSC_PORT;
+
+   mMIDIMapFile = DEFAULT_MIDI_MAPPING_FILE;
+   mMIDIMapAutoSave = DEFAULT_MIDI_AUTO_SAVE;
 
    mValidFile = false;
 }

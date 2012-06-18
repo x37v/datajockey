@@ -25,6 +25,8 @@
 #define DEFAULT_OSC_PORT 10001
 #define DEFAULT_DB_NAME (QDir::homePath() + "/.datajockey/database.sqlite3")
 #define DEFAULT_ANNOTATION_DIR (QDir::homePath() + "/.datajockey/annotation")
+#define DEFAULT_MIDI_MAPPING_FILE (QDir::homePath() + "/.datajockey/midimap.yaml")
+#define DEFAULT_MIDI_AUTO_SAVE true
 
 
 #include <stdexcept>
@@ -53,6 +55,8 @@ namespace dj {
          unsigned int osc_port();
 
          QString annotation_dir();
+         QString midi_mapping_file();
+         bool midi_mapping_auto_save();
       private:
          bool db_get(YAML::Node& doc, QString entry, QString &result);
          QString mFile;
@@ -65,6 +69,9 @@ namespace dj {
          unsigned int mOscPort;
 
          QString mAnnotationDir;
+
+         QString mMIDIMapFile;
+         bool mMIDIMapAutoSave;
 
       protected:
          Configuration();
