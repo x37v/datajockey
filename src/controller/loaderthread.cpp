@@ -10,7 +10,9 @@ LoaderThread::LoaderThread()
 void LoaderThread::progress_callback(int percent, void *objPtr) {
    //XXX lock mutex?
    LoaderThread * self = (LoaderThread *)objPtr;
-   self->relay_load_progress(percent);
+   //only every 5 percent
+   if (percent % 5 == 0)
+      self->relay_load_progress(percent);
 }
 
 void LoaderThread::abort() {
