@@ -62,8 +62,6 @@ namespace dj {
             void master_set(QString name, int value);
             void master_set(QString name, double value);
 
-            void set_master_cross_fade_players(int left, int right);
-
             //start and stop the audio processing
             void start_audio();
             void stop_audio();

@@ -122,7 +122,8 @@ Application::Application(int & argc, char ** argv) :
          SLOT(player_set_buffers(int, AudioBufferPtr, BeatBufferPtr)));
 
    mAudioModel->master_set("crossfade", true);
-   mAudioModel->set_master_cross_fade_players(0, 1);
+   mAudioModel->master_set("crossfade_player_left", 0);
+   mAudioModel->master_set("crossfade_player_right", 1);
    mAudioModel->master_set("crossfade_position", (int)one_scale / 2);
    mAudioModel->master_set("bpm", 120.0);
 

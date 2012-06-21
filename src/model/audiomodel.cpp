@@ -187,8 +187,9 @@ AudioModel::AudioModel() :
    qRegisterMetaType<AudioBufferPtr>("AudioBufferPtr");
    qRegisterMetaType<BeatBufferPtr>("BeatBufferPtr");
 
-   mCrossFadePlayers[0] = 0;
-   mCrossFadePlayers[1] = 1;
+   //set them to be out of range at first, this will be updated later via a slot
+   mCrossFadePlayers[0] = num_players;
+   mCrossFadePlayers[1] = num_players;
 
    mAudioIO = dj::audio::AudioIO::instance();
    mMaster = dj::audio::Master::instance();
@@ -472,6 +473,22 @@ void AudioModel::master_set(QString name, int value) {
       value = clamp(value, 0, (int)(1.5 * one_scale));
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::CUE_VOLUME, (double)value / (double)one_scale));
       emit(master_value_changed("cue_volume", value));
+   } else if (name == "crossfade_player_left" || name == "crossfade_player_right") {
+      if (value < 0 || (unsigned int)value >= mNumPlayers) {
+         cerr << DJ_FILEANDLINE << name.toStdString() << " " << value << " is out of range" << endl;
+         return;
+      }
+      if (name.contains("left")) {
+         if (mCrossFadePlayers[0] == value)
+            return;
+         mCrossFadePlayers[0] = value;
+      } else {
+         if (mCrossFadePlayers[1] == value)
+            return;
+         mCrossFadePlayers[1] = value;
+      }
+      queue_command(new MasterXFadeSelectCommand((unsigned int)mCrossFadePlayers[0], (unsigned int)mCrossFadePlayers[1]));
+      emit(master_value_changed(name, value));
    } else if (name == "crossfade_position") {
       value = clamp(value, 0, (int)one_scale);
       if (value != mCrossFadePosition) {
@@ -502,16 +519,6 @@ void AudioModel::master_set(QString name, double value) {
          emit(master_value_changed(name, value));
       }
    }
-}
-
-void AudioModel::set_master_cross_fade_players(int left, int right){
-   if (left < 0 || left >= (int)mNumPlayers)
-      return;
-   if (right < 0 || right >= (int)mNumPlayers)
-      return;
-   mCrossFadePlayers[0] = left;
-   mCrossFadePlayers[1] = right;
-   queue_command(new MasterXFadeSelectCommand((unsigned int)left, (unsigned int)right));
 }
 
 bool AudioModel::player_state_bool(int player_index, QString name) {
