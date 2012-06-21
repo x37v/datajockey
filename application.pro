@@ -9,6 +9,8 @@ DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 
 CONFIG += DEBUG
+//CONFIG += RELEASE
+
 #profiling:
 #QMAKE_CXXFLAGS_DEBUG += -pg
 #QMAKE_LFLAGS_DEBUG += -pg
@@ -41,6 +43,8 @@ INCLUDEPATH += . \
    ext/jackcpp/include/ \
 	/usr/include/rasqal/ \
    /usr/local/include/oscpack/
+
+QMAKE_CXXFLAGS_DEBUG += -DDEBUG
 
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions
 QMAKE_CFLAGS += $$DENORMAL_FLAGS -fexceptions

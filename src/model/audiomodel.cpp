@@ -163,7 +163,7 @@ class AudioModel::ConsumeThread : public QThread {
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
             //XXX if the UI becomes unresponsive, increase this value
-            msleep(15);
+            msleep(30);
          }
       }
 };
