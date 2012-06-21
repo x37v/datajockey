@@ -47,16 +47,27 @@ void MIDIMapper::run() {
             double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
             switch(it->value_type) {
                case TRIGGER_VAL:
-                  if (it->player_index >= 0)
-                     emit(player_triggered(it->player_index, it->signal_name));
-                  else
-                     emit(master_triggered(it->signal_name));
+                  //trigger when we cross the 0.5 mark
+                  if (it->value_last < 0.5 && value > 0.5) {
+                     if (it->player_index >= 0)
+                        emit(player_triggered(it->player_index, it->signal_name));
+                     else
+                        emit(master_triggered(it->signal_name));
+                  }
                   break;
                case BOOL_VAL:
-                  if (it->player_index >= 0)
-                     emit(player_value_changed(it->player_index, it->signal_name, input_value != 0));
-                  else
-                     emit(master_value_changed(it->signal_name, input_value != 0));
+                  //toggle when we cross the 0.5 boundary
+                  if (it->value_last < 0.5 && value > 0.5) {
+                     if (it->player_index >= 0)
+                        emit(player_value_changed(it->player_index, it->signal_name, true));
+                     else
+                        emit(master_value_changed(it->signal_name, true));
+                  } else if (it->value_last > 0.5 && value < 0.5) {
+                     if (it->player_index >= 0)
+                        emit(player_value_changed(it->player_index, it->signal_name, false));
+                     else
+                        emit(master_value_changed(it->signal_name, false));
+                  }
                   break;
                case INT_VAL:
                   if (it->player_index >= 0)
@@ -71,6 +82,7 @@ void MIDIMapper::run() {
                      emit(master_value_changed(it->signal_name, value));
                   break;
             }
+            it->value_last = value;
          }
       } else if (mMappingState == WAITING_MIDI) {
 
@@ -84,6 +96,9 @@ void MIDIMapper::run() {
          } else if (mNextMapping.signal_name.contains("eq_")) {
             mNextMapping.value_mul = 2.0 * (double)one_scale;
             mNextMapping.value_offset = -(double)one_scale;
+         } else if (mNextMapping.value_type == BOOL_VAL || mNextMapping.value_type == TRIGGER_VAL) {
+            mNextMapping.value_mul = 1.0;
+            mNextMapping.value_offset = 0.0;
          }
 
          mMappings.insert(key, mNextMapping);
@@ -269,13 +284,19 @@ void MIDIMapper::auto_save(QString file_path) {
 void MIDIMapper::auto_save(bool save) { mAutoSave = save; }
 
 void MIDIMapper::player_trigger(int player_index, QString name) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(player_index, name, TRIGGER_VAL);
 }
 
 void MIDIMapper::player_set(int player_index, QString name, bool /* value */) {
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(player_index, name, BOOL_VAL);
+   if (name.contains("update_"))
+      return;
+   if (mMappingState == WAITING_SLOT) {
+      mapping_from_slot(player_index, name, TRIGGER_VAL); //use a trigger instead of a bool now
+      //mapping_from_slot(player_index, name, BOOL_VAL);
+   }
 }
 
 void MIDIMapper::player_set(int player_index, QString name, int /* value */) {
@@ -286,25 +307,35 @@ void MIDIMapper::player_set(int player_index, QString name, int /* value */) {
 }
 
 void MIDIMapper::player_set(int player_index, QString name, double /* value */) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(player_index, name, DOUBLE_VAL);
 }
 
 void MIDIMapper::master_trigger(QString name) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT) mapping_from_slot(-1, name, TRIGGER_VAL);
 }
 
 void MIDIMapper::master_set(QString name, bool /* value */) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(-1, name, BOOL_VAL);
 }
 
 void MIDIMapper::master_set(QString name, int /* value */) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(-1, name, INT_VAL);
 }
 
 void MIDIMapper::master_set(QString name, double /* value */) {
+   if (name.contains("update_"))
+      return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(-1, name, DOUBLE_VAL);
 }

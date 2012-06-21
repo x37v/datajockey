@@ -89,13 +89,14 @@ namespace dj {
                //used to remap values
                double value_offset;
                double value_mul;
+               double value_last;
 
                void default_remaps() {
                   value_offset = 0;
                   value_mul = (double)one_scale;
                }
 
-               mapping_t() {
+               mapping_t() : value_last(-1.0) {
                   default_remaps();
                }
             };

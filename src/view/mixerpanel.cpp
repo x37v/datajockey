@@ -165,7 +165,7 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
       player->speed_view()->setValue(value);
    else if (name == "update_frame")
       player->set_audio_frame(value);
-   else if (name == "progress")
+   else if (name == "update_progress")
       player->progress_bar()->setValue(value);
    else if (name == "eq_low")
       player->eq_dial("low")->setValue(value);

@@ -443,7 +443,7 @@ void AudioModel::relay_master_position(TimePoint position) {
 }
 
 void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
-   emit(player_value_changed(player_index, "progress", percent));
+   emit(player_value_changed(player_index, "update_progress", percent));
 }
 
 void AudioModel::players_eval_audible() {
@@ -545,6 +545,7 @@ int AudioModel::player_state_int(int player_index, QString name) {
 void AudioModel::player_trigger(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+
    if (name == "reset")
       set_player_position_frame(player_index, 0);
    else if (name == "seek_forward")
@@ -553,8 +554,19 @@ void AudioModel::player_trigger(int player_index, QString name) {
       set_player_position_beat_relative(player_index, -1);
    else if (name == "clear")
       queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
-   else if (name != "load")
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_trigger arg" << endl;
+   else if (name != "load") {
+      QMutexLocker lock(&mPlayerStatesMutex);
+      PlayerState * pstate = mPlayerStates[player_index];
+      QHash<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
+      if (state_itr == pstate->mParamBool.end()) {
+         cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_trigger arg" << endl;
+         return;
+      }
+      //toggle
+      player_set(player_index, name, !*state_itr);
+   }
+
+   emit(player_triggered(player_index, name));
 }
 
 void AudioModel::player_set(int player_index, QString name, bool value) {

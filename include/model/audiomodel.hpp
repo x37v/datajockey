@@ -49,6 +49,7 @@ namespace dj {
             bool player_state_bool(int player_index, QString name);
             int player_state_int(int player_index, QString name);
 
+            //trigger also takes any player_set(..bool) params and toggles them
             void player_trigger(int player_index, QString name);
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);

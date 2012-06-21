@@ -154,12 +154,10 @@ Application::Application(int & argc, char ** argv) :
          Qt::QueuedConnection);
 
    //mapper in
-   /*
    QObject::connect(
-         mMixerPanel, SIGNAL(player_trigged(int, QString)),
+         mAudioModel, SIGNAL(player_triggered(int, QString)),
          mMIDIMapper, SLOT(player_trigger(int, QString)),
          Qt::QueuedConnection);
-         */
    QObject::connect(
          mAudioModel, SIGNAL(player_value_changed(int, QString, bool)),
          mMIDIMapper, SLOT(player_set(int, QString, bool)),
