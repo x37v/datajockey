@@ -83,6 +83,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col + 1);
+      //XXX tmp
+      if (items[i].name.contains("bump_"))
+         btn->setText(items[i].label);
       if (items[i].auto_repeat)
          btn->setAutoRepeat(true);
    }

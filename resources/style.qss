@@ -28,41 +28,35 @@ QPushButton {
 */
 
 QPushButton {
-	border-width: 0px;
-	border-style: none;
-	margin: 0 0 0 0;
-	padding: 0px;
+	border-width: 1px;
 	min-width: 24px;
 	min-height: 24px;
+   border-color: white;
 	background-color: #131313;
+   color: white;
+   padding: 2px;
+   margin: 1px 1px 1px 1px;
 }
 
 QPushButton::pressed {
 	border: 1px solid white;
 	border-radius: 3px;
 	/*background: #aa1717; */
-	color: black;
-	margin: 0 0 0 0;
-	padding: 0px;
+	color: white;
 }
 
-QPushButton::pressed, QPushButton::checked
-{
-	border-width: 0px;
-	border-style: none;
-	margin: 0 0 0 0;
-	padding: 0px;
-}
-
-/*
 QPushButton[dj_name="load"],
    QPushButton[dj_name="reset"],
    QPushButton[dj_name="cue"],
    QPushButton[dj_name="sync"],
    QPushButton[dj_name="pause"],
    QPushButton[dj_name="seek_back"],
-   QPushButton[dj_name="seek_forward"]
-   */
+   QPushButton[dj_name="seek_forward"] {
+	border-width: 0px;
+	border-style: none;
+	margin: 0 0 0 0;
+	padding: 0px;
+}
 
 QPushButton[dj_name="seek_forward"] { image: url(:resources/icons/seekfwd.png); }
 QPushButton[dj_name="seek_forward"]::pressed { image: url(:resources/icons/seekfwd_off.png); }
