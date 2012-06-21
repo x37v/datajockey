@@ -213,7 +213,6 @@ void MIDIMapper::load_file(QString file_path) {
 }
 
 void MIDIMapper::save_file(QString file_path) {
-   cerr << "saving to file " + file_path.toStdString() << endl;
    if (mMappings.empty())
       return;
 
