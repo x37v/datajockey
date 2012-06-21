@@ -161,9 +161,9 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
    Player * player = mPlayers[player_index];
    if (name == "volume")
       player->volume_slider()->setValue(value);
-   else if (name == "speed") {
+   else if (name == "speed" || name == "update_speed")
       player->speed_view()->setValue(value);
-   } else if (name == "frame")
+   else if (name == "update_frame")
       player->set_audio_frame(value);
    else if (name == "progress")
       player->progress_bar()->setValue(value);
@@ -173,7 +173,7 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
       player->eq_dial("mid")->setValue(value);
    else if (name == "eq_high")
       player->eq_dial("high")->setValue(value);
-   else if (name == "audio_level")
+   else if (name == "update_audio_level")
       player->set_audio_level(value);
 }
 
@@ -197,7 +197,7 @@ void MixerPanel::master_set(QString name, int val) {
       mMasterVolume->setValue(val);
    else if (name == "crossfade_position")
       mCrossFadeSlider->setValue(val);
-   else if (name == "audio_level")
+   else if (name == "update_audio_level")
       mAudioLevel->set_level(val);
 }
 

@@ -5,6 +5,7 @@
 #include "defines.hpp"
 #include <QThread>
 #include <QHash>
+#include <QString>
 
 namespace dj {
    namespace controller {

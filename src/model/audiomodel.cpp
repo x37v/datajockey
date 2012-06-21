@@ -344,7 +344,7 @@ void AudioModel::update_player_state(int player_index, PlayerState * new_state){
       QMetaObject::invokeMethod(this, "relay_player_value", 
             Qt::QueuedConnection,
             Q_ARG(int, player_index),
-            Q_ARG(QString, "frame"),
+            Q_ARG(QString, "update_frame"),
             Q_ARG(int, frame));
    }
 
@@ -358,7 +358,7 @@ void AudioModel::update_player_state(int player_index, PlayerState * new_state){
          QMetaObject::invokeMethod(this, "relay_player_value", 
                Qt::QueuedConnection,
                Q_ARG(int, player_index),
-               Q_ARG(QString, "speed"),
+               Q_ARG(QString, "update_speed"),
                Q_ARG(int, speed_percent));
       }
    }
@@ -368,7 +368,7 @@ void AudioModel::update_player_state(int player_index, PlayerState * new_state){
       QMetaObject::invokeMethod(this, "relay_player_value", 
             Qt::QueuedConnection,
             Q_ARG(int, player_index),
-            Q_ARG(QString, "audio_level"),
+            Q_ARG(QString, "update_audio_level"),
             Q_ARG(int, audio_level));
    }
 }
@@ -435,7 +435,7 @@ void AudioModel::relay_player_value(int player_index, QString name, int value){
 }
 
 void AudioModel::relay_master_audio_level(int percent) {
-   emit(master_value_changed("audio_level", percent));
+   emit(master_value_changed("update_audio_level", percent));
 }
 
 void AudioModel::relay_master_position(TimePoint position) {

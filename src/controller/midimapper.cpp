@@ -279,7 +279,7 @@ void MIDIMapper::player_set(int player_index, QString name, bool /* value */) {
 }
 
 void MIDIMapper::player_set(int player_index, QString name, int /* value */) {
-   if (name == "frame" || name == "speed") //TODO how to deal with speed?
+   if (name.contains("update_"))
       return;
    if (mMappingState == WAITING_SLOT)
       mapping_from_slot(player_index, name, INT_VAL);
