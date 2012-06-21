@@ -21,6 +21,7 @@ struct button_info {
    bool checkable;
    QString label;
    QString name;
+   bool auto_repeat;
 };
 
 SpeedSpinBox::SpeedSpinBox(QWidget * parent) : QSpinBox(parent) {
@@ -46,13 +47,15 @@ QValidator::State SpeedSpinBox::validate(QString & text, int & pos) const {
 
 Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWidget(parent), mFrames(0) {
    button_info items[] = {
-      {0, 0, false, "ld", "load"},
-      {0, 2, false, "rs", "reset"},
-      {1, 0, true,  "cu", "cue"},
-      {1, 1, true,  "sy", "sync"},
-      {1, 2, true,  "||", "pause"},
-      {2, 0, false, "<<", "seek_back"},
-      {2, 2, false, ">>", "seek_forward"},
+      {0, 0, false, "ld", "load", false},
+      {0, 2, false, "rs", "reset", false},
+      {1, 0, true,  "cu", "cue", false},
+      {1, 1, true,  "sy", "sync", false},
+      {1, 2, true,  "||", "pause", false},
+      {2, 0, false, "<<", "seek_back", true},
+      {2, 2, false, ">>", "seek_forward", true},
+      {3, 0, false, "<b", "bump_back", true},
+      {3, 2, false, "b>", "bump_forward", true},
    };
 
    mTopLayout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -80,6 +83,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       btn->setCheckable(items[i].checkable);
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col + 1);
+      if (items[i].auto_repeat)
+         btn->setAutoRepeat(true);
    }
    //sync is checked to start out with
    mButtons["sync"]->setChecked(true);
