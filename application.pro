@@ -7,7 +7,12 @@ TARGET = datajockey
 LIBS += -lsndfile -lvorbisfile -lmad -ljack -lslv2 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk -lboost_program_options-mt
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
-CONFIG += debug
+
+CONFIG += DEBUG
+#profiling:
+#QMAKE_CXXFLAGS_DEBUG += -pg
+#QMAKE_LFLAGS_DEBUG += -pg
+
 DEPENDPATH += . \
               include/ \
               include/audio \
