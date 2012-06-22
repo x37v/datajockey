@@ -20,6 +20,10 @@ namespace dj {
             //Command object
             //return true on actual storage, false on empty
             virtual bool store(CommandIOData& data) const = 0;
+
+            //if this returns true, the command will be deleted after execute_done,
+            //otherwise it will be pushed onto a list in the scheduler to be dealt with some other way
+            virtual bool delete_after_done() { return true; }
          private:
             TimePoint mTimeExecuted;
       };
