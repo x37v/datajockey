@@ -50,6 +50,7 @@ class TagSelectionFilter : public WorkFilterModel {
 		std::set<int> mSelectedWorks;
 };
 
+#if 0
 class TempoRangeFilter : public WorkFilterModel {
 	Q_OBJECT
 	public:
@@ -68,6 +69,7 @@ class TempoRangeFilter : public WorkFilterModel {
 		float mPrevTempo;
       dj::audio::AudioModel * mAudioModel;
 };
+#endif
 
 
 #endif

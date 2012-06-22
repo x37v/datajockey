@@ -94,6 +94,8 @@ void TagSelectionFilter::setTags(QList<int> tags){
 		mSelectedTags.push_back(tags[i]);
 }
 
+#if 0
+
 TempoRangeFilter::TempoRangeFilter(QObject * parent) :
 	WorkFilterModel(parent), mQuery("", dj::model::db::get())
 {
@@ -159,4 +161,5 @@ void TempoRangeFilter::setRange(float below, float above){
 	mBelow = fabsf(below);
 	mAbove = fabsf(above);
 }
+#endif
 

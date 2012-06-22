@@ -278,10 +278,6 @@ AudioModel * AudioModel::instance(){
 unsigned int AudioModel::sample_rate() const { return mAudioIO->getSampleRate(); }
 unsigned int AudioModel::player_count() const { return mNumPlayers; }
 
-double AudioModel::master_bpm() const {
-   return mMasterBPM;
-}
-
 void AudioModel::set_player_position(int player_index, const TimePoint &val, bool absolute){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
@@ -524,34 +520,6 @@ void AudioModel::master_set(QString name, double value) {
          emit(master_value_changed(name, value));
       }
    }
-}
-
-bool AudioModel::player_state_bool(int player_index, QString name) {
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return false;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * pstate = mPlayerStates[player_index];
-
-   QHash<QString, bool>::const_iterator itr = pstate->mParamBool.find(name);
-   if (itr == pstate->mParamBool.end())
-      return false;
-   return *itr;
-}
-
-int AudioModel::player_state_int(int player_index, QString name) {
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return 0;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * pstate = mPlayerStates[player_index];
-
-   if (name == "frame") {
-      return pstate->mCurrentFrame;
-   }
-
-   QHash<QString, int>::const_iterator itr = pstate->mParamInt.find(name);
-   if (itr == pstate->mParamInt.end())
-      return 0;
-   return *itr;
 }
 
 void AudioModel::player_trigger(int player_index, QString name) {
