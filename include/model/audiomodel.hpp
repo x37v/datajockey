@@ -129,6 +129,8 @@ namespace dj {
             int mPlayerAudibleThresholdVolume;
             int mCrossfadeAudibleThresholdPosition;
 
+            double mBumpSeconds;
+
             QTimer * mAudibleTimer;
 
             //**** private methods

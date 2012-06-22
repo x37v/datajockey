@@ -163,7 +163,7 @@ class AudioModel::ConsumeThread : public QThread {
             mScheduler->execute(cmd);
             mScheduler->execute_done_actions();
             //XXX if the UI becomes unresponsive, increase this value
-            msleep(30);
+            msleep(40);
          }
       }
 };
@@ -178,7 +178,8 @@ AudioModel::AudioModel() :
    mCrossFadeEnabled(false),
    mCrossFadePosition(0),
    mPlayerAudibleThresholdVolume(0.05 * one_scale), //XXX make this configurable?
-   mCrossfadeAudibleThresholdPosition(0.05 * one_scale)
+   mCrossfadeAudibleThresholdPosition(0.05 * one_scale),
+   mBumpSeconds(0.25)
 {
    unsigned int num_players = 2;
 
@@ -245,6 +246,7 @@ AudioModel::AudioModel() :
       //int
       mPlayerStates[i]->mParamInt["volume"] = one_scale * player->volume();
       mPlayerStates[i]->mParamInt["speed"] = one_scale + one_scale * player->play_speed(); //percent
+      mPlayerStates[i]->mParamInt["sample_rate"] = 44100;
 
       //position
       mPlayerStates[i]->mParamPosition["start"] = player->start_position();
@@ -424,6 +426,9 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
    else
       mPlayerStates[player_index]->mNumFrames = 0;
 
+   //store the sample rate
+   mPlayerStates[player_index]->mParamInt["sample_rate"] = audio_buffer->sample_rate();
+
    mPlayingAudioFiles <<  audio_buffer;
    mPlayingAnnotationFiles << beat_buffer;
    queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
@@ -552,6 +557,8 @@ int AudioModel::player_state_int(int player_index, QString name) {
 void AudioModel::player_trigger(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * pstate = mPlayerStates[player_index];
 
    if (name == "reset")
       set_player_position_frame(player_index, 0);
@@ -559,7 +566,24 @@ void AudioModel::player_trigger(int player_index, QString name) {
       set_player_position_beat_relative(player_index, 1);
    else if (name == "seek_back")
       set_player_position_beat_relative(player_index, -1);
-   else if (name == "clear")
+   else if (name.contains("bump_")) {
+      if(pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2)
+         return;
+
+      double seconds = mBumpSeconds;
+      if (name.contains("back")) {
+         seconds = -seconds;
+      }
+
+      /*
+      //scale by playback rate.. XXX should we do this?
+      double speed = 1.0 + (double)pstate->mParamInt["speed"] / (double)one_scale;
+      seconds *= speed;
+      */
+
+      unsigned int frames = seconds * (double)pstate->mParamInt["sample_rate"];
+      queue_command(new PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, frames));
+   } else if (name == "clear")
       queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
    else if (name != "load") {
       QMutexLocker lock(&mPlayerStatesMutex);
