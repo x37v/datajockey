@@ -141,16 +141,18 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mTopLayout->setContentsMargins(0,0,0,0);
    setLayout(mTopLayout);
 
-   QObject::connect(mWaveFormView,
-         SIGNAL(seek_relative(int)),
-         SLOT(relay_seek_relative(int)));
-   QObject::connect(mWaveFormView,
-         SIGNAL(mouse_down(bool)),
-         SLOT(relay_mouse_button(bool)));
-   QObject::connect(mButtons["sync"],
-         SIGNAL(toggled(bool)),
-         mSpeedView,
-         SLOT(setDisabled(bool)));
+   QObject::connect(mWaveFormView, SIGNAL(seek_relative(int)),
+         SIGNAL(seek_frame_relative(int)));
+   QObject::connect(mWaveFormView, SIGNAL(mouse_down(bool)),
+         SIGNAL(seeking(bool)));
+   QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
+         mSpeedView, SLOT(setDisabled(bool)));
+   QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
+         mButtons["bump_forward"], SLOT(setDisabled(bool)));
+   QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
+         mButtons["bump_back"], SLOT(setDisabled(bool)));
+   mButtons["bump_forward"]->setDisabled(true);
+   mButtons["bump_back"]->setDisabled(true);
 }
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
@@ -194,7 +196,4 @@ void Player::set_song_description(QString description) {
    mTrackDescription[0]->setCursorPosition(0);
    mTrackDescription[1]->setCursorPosition(0);
 }
-
-void Player::relay_seek_relative(int frames) { emit(seek_frame_relative(frames)); }
-void Player::relay_mouse_button(bool down) { emit(seeking(down)); }
 
