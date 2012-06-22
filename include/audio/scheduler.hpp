@@ -8,6 +8,7 @@
 #include <map>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QList>
 
 namespace dj {
    namespace audio {
@@ -17,6 +18,7 @@ namespace dj {
          private:
             JackCpp::RingBuffer<Command *> mCommandsIn;
             JackCpp::RingBuffer<Command *> mCommandsOut;
+            QList<Command *> mCommandsComplete;
             class AddCommand;
             //this is the main schedule, relative to the transport
             ScheduleNode * mSchedule;
@@ -29,6 +31,8 @@ namespace dj {
             //this maps the index given by the schedule for a node to a pointer
             //to the node itself
             std::map<node_id_t, ScheduleNode *> mNodeMap;
+            //make sure that don't try to write to the command queue from more than one thread once
+            QMutex mExecuteMutex;
          public:
             Scheduler();
             //this executes a command now, scheduler now owns this command
@@ -50,8 +54,9 @@ namespace dj {
             //incase we've jumped around in the transport
             void invalidate_schedule_pointers();
 
-            //make sure that don't try to write to the command queue from more than one thread once
-            QMutex mExecuteMutex;
+            //this must be called in the same thread as execute_done_actions
+            //get a command off the complete command list
+            Command * pop_complete_command();
 
             friend class AddCommand;
          private:

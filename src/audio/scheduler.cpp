@@ -153,7 +153,10 @@ void Scheduler::execute_done_actions(){
       //it should never be null, but just in case?
       if (cmd) {
          cmd->execute_done();
-         delete cmd;
+         if (cmd->delete_after_done())
+            delete cmd;
+         else
+            mCommandsComplete << cmd;
       }
    }
 }
@@ -161,6 +164,12 @@ void Scheduler::execute_done_actions(){
 void Scheduler::invalidate_schedule_pointers(){
    mScheduleCur = NULL;
    mLastScheduledTime.invalidate();
+}
+
+Command * Scheduler::pop_complete_command() {
+   if (mCommandsComplete.isEmpty())
+      return NULL;
+   return mCommandsComplete.takeFirst();
 }
 
 void Scheduler::add(ScheduleNode * node){
