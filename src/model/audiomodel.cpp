@@ -119,6 +119,7 @@ class AudioModel::QueryPlayState : public MasterCommand {
          for(unsigned int i = 0; i < mNumPlayers; i++)
             delete mStates[i];
       }
+      virtual bool delete_after_done() { return false; }
       virtual void execute(){
          mMasterTransportPosition = master()->transport()->position();
          mMasterMaxVolume = master()->max_sample_value();
@@ -158,12 +159,22 @@ class AudioModel::ConsumeThread : public QThread {
       ConsumeThread(AudioModel * model, Scheduler * scheduler) : mScheduler(scheduler), mModel(model) { }
 
       void run() {
+         AudioModel::QueryPlayState * query_cmd = new AudioModel::QueryPlayState(mModel);
          while(true) {
-            AudioModel::QueryPlayState * cmd = new AudioModel::QueryPlayState(mModel);
-            mScheduler->execute(cmd);
+            if (query_cmd) {
+               mScheduler->execute(query_cmd);
+               query_cmd = NULL;
+               msleep(5); //should give the command several execute cycles to get through
+            }
+
             mScheduler->execute_done_actions();
+            dj::audio::Command * cmd = mScheduler->pop_complete_command();
+            //if we got a command and the dynamic cast fails, delete the command
+            if (cmd && (query_cmd = dynamic_cast<AudioModel::QueryPlayState *>(cmd)) == NULL)
+               delete cmd;
+
             //XXX if the UI becomes unresponsive, increase this value
-            msleep(40);
+            msleep(35);
          }
       }
 };
