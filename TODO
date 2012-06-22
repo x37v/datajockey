@@ -1,3 +1,6 @@
+Waveform View:
+   interpolate values in between frame updates so we can reduce the number of frame updates:
+   we know the play rate, we know the sample rate, we just update the frame position when we get an update and guess in between updates
 Beat Extraction:
    config based smoothing amount
 UI:
