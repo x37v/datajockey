@@ -217,7 +217,7 @@ void WaveFormViewGL::mousePressEvent(QMouseEvent * event) {
    emit(mouse_down(true));
 }
 
-void WaveFormViewGL::mouseReleaseEvent(QMouseEvent * event) {
+void WaveFormViewGL::mouseReleaseEvent(QMouseEvent * /* event */) {
    emit(mouse_down(false));
 }
 

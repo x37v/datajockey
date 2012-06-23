@@ -317,7 +317,7 @@ void MasterIntCommand::execute() {
    */
 }
 
-bool MasterIntCommand::store(CommandIOData& data) const {
+bool MasterIntCommand::store(CommandIOData& /* data */) const {
    //XXX TODO
    return false;
 }

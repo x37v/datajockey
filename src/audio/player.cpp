@@ -15,8 +15,8 @@ using namespace dj::audio;
 Player::Player() : 
    mPosition(0.0),
    mTransportOffset(0,0),
-   mEqInstance(NULL),
-   mMaxSampleValue(0.0)
+   mMaxSampleValue(0.0),
+   mEqInstance(NULL)
 {
    //states
    mPlayState = PAUSE;
@@ -93,7 +93,7 @@ void Player::setup_audio(
 
 //the audio computation methods
 //setup for audio computation
-void Player::audio_pre_compute(unsigned int numFrames, float ** mixBuffer, const Transport& transport){ 
+void Player::audio_pre_compute(unsigned int /* numFrames */, float ** /* mixBuffer */, const Transport& transport){ 
 
    if(!mStretcher->audio_buffer())
       return;
