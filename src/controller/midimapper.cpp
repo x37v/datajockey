@@ -395,63 +395,41 @@ void MIDIMapper::auto_save(QString file_path) {
 void MIDIMapper::auto_save(bool save) { mAutoSave = save; }
 
 void MIDIMapper::player_trigger(int player_index, QString name) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(player_index, name, TRIGGER_VAL);
+   mapping_from_slot(player_index, name, TRIGGER_VAL);
 }
 
 void MIDIMapper::player_set(int player_index, QString name, bool /* value */) {
-   if (name.contains("update_"))
-      return;
    //we default to toggles for boolean
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(player_index, name, TRIGGER_VAL);
+   mapping_from_slot(player_index, name, TRIGGER_VAL);
 }
 
 void MIDIMapper::player_set(int player_index, QString name, int /* value */) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(player_index, name, INT_VAL);
+   mapping_from_slot(player_index, name, INT_VAL);
 }
 
 void MIDIMapper::player_set(int player_index, QString name, double /* value */) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(player_index, name, DOUBLE_VAL);
+   mapping_from_slot(player_index, name, DOUBLE_VAL);
 }
 
 void MIDIMapper::master_trigger(QString name) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(-1, name, TRIGGER_VAL);
+   mapping_from_slot(-1, name, TRIGGER_VAL);
 }
 
 void MIDIMapper::master_set(QString name, bool /* value */) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(-1, name, BOOL_VAL);
+   mapping_from_slot(-1, name, BOOL_VAL);
 }
 
 void MIDIMapper::master_set(QString name, int /* value */) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(-1, name, INT_VAL);
+   mapping_from_slot(-1, name, INT_VAL);
 }
 
 void MIDIMapper::master_set(QString name, double /* value */) {
-   if (name.contains("update_"))
-      return;
-   if (mMappingState == WAITING_SLOT)
-      mapping_from_slot(-1, name, DOUBLE_VAL);
+   mapping_from_slot(-1, name, DOUBLE_VAL);
 }
 
 void MIDIMapper::mapping_from_slot(int player_index, QString name, signal_val_t type) {
+   if (mMappingState != WAITING_SLOT || name.contains("update_"))
+      return;
    mNextMapping.signal_name = name;
    mNextMapping.player_index = player_index;
    mNextMapping.value_type = type;
