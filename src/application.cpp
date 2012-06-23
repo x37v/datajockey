@@ -288,9 +288,10 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(work_db_view);
    top_layout->addWidget(splitter);
 
-   OscThread * osc_thread = new OscThread(config->osc_port());
 
    mAudioModel->start_audio();
+
+   OscThread * osc_thread = new OscThread(config->osc_port());
    osc_thread->start();
 
    mMIDIMapper->start();

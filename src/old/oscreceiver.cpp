@@ -28,36 +28,36 @@
 #include "defines.hpp"
 
 bool boolFromBoolOrInt(const osc::ReceivedMessageArgument a){
-	if(a.IsBool())
-		return a.AsBool();
-	else if(a.IsInt32())
-		return (a.AsInt32() != 0);
-	else if(a.IsInt64())
-		return (a.AsInt64() != 0);
-	else
-		throw osc::WrongArgumentTypeException();
+   if(a.IsBool())
+      return a.AsBool();
+   else if(a.IsInt32())
+      return (a.AsInt32() != 0);
+   else if(a.IsInt64())
+      return (a.AsInt64() != 0);
+   else
+      throw osc::WrongArgumentTypeException();
 }
 
 int intFromOsc(const osc::ReceivedMessageArgument a){
-	if(a.IsInt32())
-		return a.AsInt32();
-	else if(a.IsInt64())
-		return a.AsInt64();
-	else
-		throw osc::WrongArgumentTypeException();
+   if(a.IsInt32())
+      return a.AsInt32();
+   else if(a.IsInt64())
+      return a.AsInt64();
+   else
+      throw osc::WrongArgumentTypeException();
 }
 
 float floatFromOscNumber(const osc::ReceivedMessageArgument a){
-	if(a.IsFloat())
-		return a.AsFloat();
-	if(a.IsDouble())
-		return (float)a.AsDouble();
-	else if(a.IsInt32())
-		return (float)a.AsInt32();
-	else if(a.IsInt64())
-		return (float)a.AsInt64();
-	else
-		throw osc::WrongArgumentTypeException();
+   if(a.IsFloat())
+      return a.AsFloat();
+   if(a.IsDouble())
+      return (float)a.AsDouble();
+   else if(a.IsInt32())
+      return (float)a.AsInt32();
+   else if(a.IsInt64())
+      return (float)a.AsInt64();
+   else
+      throw osc::WrongArgumentTypeException();
 }
 
 OscReceiver::OscReceiver(){
@@ -66,80 +66,80 @@ OscReceiver::OscReceiver(){
 
 
 void OscReceiver::ProcessMessage( const osc::ReceivedMessage& m, const IpEndpointName&  ){
-	boost::regex top_re("^/dj/(\\w*)(.*)$");
-	boost::regex mixer_re("^mixer$");
-	boost::regex xfade_re("^crossfade$");
-	boost::regex master_re("^master$");
-	boost::cmatch matches;
-	std::string addr;
-	try {
-		if(boost::regex_match(m.AddressPattern(), matches, top_re)){
-			std::string sub_match(matches[1]);
-			if(boost::regex_match(sub_match, mixer_re)){
-				processMixerMessage(matches[2], m);
-			} else if(boost::regex_match(sub_match, master_re)){
-				processMasterMessage(matches[2], m);
-			} else if(boost::regex_match(sub_match, xfade_re)){
-				processXFadeMessage(matches[2], m);
-			}
-		} 
-	} catch( osc::Exception& e ){
-		std::cerr << "An Exception occured while processing incoming OSC packets." << std::endl;
-		std::cerr << e.what() << std::endl;
-	}
+   boost::regex top_re("^/dj/(\\w*)(.*)$");
+   boost::regex mixer_re("^mixer$");
+   boost::regex xfade_re("^crossfade$");
+   boost::regex master_re("^master$");
+   boost::cmatch matches;
+   std::string addr;
+   try {
+      if(boost::regex_match(m.AddressPattern(), matches, top_re)){
+         std::string sub_match(matches[1]);
+         if(boost::regex_match(sub_match, mixer_re)){
+            processMixerMessage(matches[2], m);
+         } else if(boost::regex_match(sub_match, master_re)){
+            processMasterMessage(matches[2], m);
+         } else if(boost::regex_match(sub_match, xfade_re)){
+            processXFadeMessage(matches[2], m);
+         }
+      } 
+   } catch( osc::Exception& e ){
+      std::cerr << "An Exception occured while processing incoming OSC packets." << std::endl;
+      std::cerr << e.what() << std::endl;
+   }
 }
 
 void OscReceiver::processMixerMessage(const std::string addr, const osc::ReceivedMessage& m){
-	boost::regex mixer_re("^/(\\d+)/(.+)");
-	boost::regex volume_re("^volume(/relative){0,1}/{0,1}$");
-	boost::regex mute_re("^mute(/toggle){0,1}/{0,1}$");
-	boost::regex eq_re("^eq/(high|mid|low)(/relative|/cut|/cut/toggle){0,1}/{0,1}$");
-	boost::regex load_re("^load/{0,1}$");
-	boost::cmatch matches;
-	osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
+   boost::regex mixer_re("^/(\\d+)/(.+)");
+   boost::regex volume_re("^volume(/relative){0,1}/{0,1}$");
+   boost::regex mute_re("^mute(/toggle){0,1}/{0,1}$");
+   boost::regex eq_re("^eq/(high|mid|low)(/relative|/cut|/cut/toggle){0,1}/{0,1}$");
+   boost::regex load_re("^load/{0,1}$");
+   boost::cmatch matches;
+   osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
 
-	if(boost::regex_match(addr.c_str(), matches, mixer_re)){
-		unsigned int mixer = (unsigned int)atoi(matches[1].str().c_str());
-		std::string remain(matches[2].str());
-		//make sure we're in range
-		if(mixer >= mModel->player_count())
-			return;
-		if(boost::regex_match(remain.c_str(), matches, volume_re)){
-			//make sure our matches list is long enough and that we have an argument
-			if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
+   if(boost::regex_match(addr.c_str(), matches, mixer_re)){
+      unsigned int mixer = (unsigned int)atoi(matches[1].str().c_str());
+      std::string remain(matches[2].str());
+      //make sure we're in range
+      if(mixer >= mModel->player_count())
+         return;
+      if(boost::regex_match(remain.c_str(), matches, volume_re)){
+         //make sure our matches list is long enough and that we have an argument
+         if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
             int vol = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
             //"" == absolute, otherwise, relative
             if(strcmp("", matches[1].str().c_str()) != 0)
-               player_set(mixer, "volume_relative", vol);
+               emit(player_value_changed(mixer, "volume_relative", vol));
             else
-               player_set(mixer, "volume", vol);
-			} else
-				throw osc::MissingArgumentException();
-		} 
+               emit(player_value_changed(mixer, "volume", vol));
+         } else
+            throw osc::MissingArgumentException();
+      } 
       else if(boost::regex_match(remain.c_str(), matches, mute_re)){
-			//make sure our matches list is long enough to test
-			if(matches.size() == 2){
-				//if we have no argument then we're just setting the mute
-				//otherwise toggle mute
+         //make sure our matches list is long enough to test
+         if(matches.size() == 2){
+            //if we have no argument then we're just setting the mute
+            //otherwise toggle mute
             if(strcmp("", matches[1].str().c_str()) == 0) {
                if(arg_it == m.ArgumentsEnd())
                   throw osc::MissingArgumentException();
-               player_set(mixer, "mute", boolFromBoolOrInt(*arg_it));
+               emit(player_value_changed(mixer, "mute", boolFromBoolOrInt(*arg_it)));
             } else
-               player_trigger(mixer, "mute");
-			}
-		} else if(boost::regex_match(remain.c_str(), matches, eq_re)){
-			if(matches.size() == 3){
+               emit(player_triggered(mixer, "mute"));
+         }
+      } else if(boost::regex_match(remain.c_str(), matches, eq_re)){
+         if(matches.size() == 3){
             int band = 0;
-				if(strcmp(matches[1].str().c_str(), "mid") == 0)
+            if(strcmp(matches[1].str().c_str(), "mid") == 0)
                band = 1;
-				else if(strcmp(matches[1].str().c_str(), "high") == 0)
+            else if(strcmp(matches[1].str().c_str(), "high") == 0)
                band = 2;
 
-				if(strcmp(matches[2].str().c_str(), "") == 0){
-					//absolute
-					if(arg_it == m.ArgumentsEnd())
-						throw osc::MissingArgumentException();
+            if(strcmp(matches[2].str().c_str(), "") == 0){
+               //absolute
+               if(arg_it == m.ArgumentsEnd())
+                  throw osc::MissingArgumentException();
                int val = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
                QString sband = "eq_high";
                switch(band) {
@@ -150,243 +150,238 @@ void OscReceiver::processMixerMessage(const std::string addr, const osc::Receive
                      sband = "eq_mid";
                      break;
                }
-               player_set(mixer, sband, val);
+               emit(player_value_changed(mixer, sband, val));
             } 
 #if 0
             else if(strcmp(matches[2].str().c_str(), "/cut") == 0){
-					//cut
-					if(arg_it == m.ArgumentsEnd())
-						throw osc::MissingArgumentException();
-					else
-						eqModel->cut(band, boolFromBoolOrInt(*arg_it));
-				} else if(strcmp(matches[2].str().c_str(), "/cut/toggle") == 0){
-					//toggle cut
-					eqModel->toggleCut(band);
-				} else {
-					//otherwise it is relative
-					if(arg_it == m.ArgumentsEnd())
-						throw osc::MissingArgumentException();
-					else {
-						eqModel->set(band, 
-								eqModel->value(band) + floatFromOscNumber(*arg_it));
-					}
-				}
+               //cut
+               if(arg_it == m.ArgumentsEnd())
+                  throw osc::MissingArgumentException();
+               else
+                  eqModel->cut(band, boolFromBoolOrInt(*arg_it));
+            } else if(strcmp(matches[2].str().c_str(), "/cut/toggle") == 0){
+               //toggle cut
+               eqModel->toggleCut(band);
+            } else {
+               //otherwise it is relative
+               if(arg_it == m.ArgumentsEnd())
+                  throw osc::MissingArgumentException();
+               else {
+                  eqModel->set(band, 
+                        eqModel->value(band) + floatFromOscNumber(*arg_it));
+               }
+            }
 #endif
-			}
-		} else if(boost::regex_match(remain.c_str(), load_re)){
+         }
+      } else if(boost::regex_match(remain.c_str(), load_re)){
          /*
-			if(arg_it == m.ArgumentsEnd())
-				throw osc::MissingArgumentException();
-			int work = intFromOsc(*arg_it);
-			mModel->mixerChannels()->at(mixer)->loadWork(work);
-         */
-			//otherwise it is a djmixer control message [or not valid]
-		} else {
-			processDJControlMessage(remain.c_str(), mixer, m);
-		}
-	}
+            if(arg_it == m.ArgumentsEnd())
+            throw osc::MissingArgumentException();
+            int work = intFromOsc(*arg_it);
+            mModel->mixerChannels()->at(mixer)->loadWork(work);
+            */
+         //otherwise it is a djmixer control message [or not valid]
+      } else {
+         processDJControlMessage(remain.c_str(), mixer, m);
+      }
+   }
 }
 
 void OscReceiver::processDJControlMessage(const std::string addr, int mixer, const osc::ReceivedMessage& m){
-	boost::regex play_re("^play(/toggle){0,1}/{0,1}$");
-	boost::regex cue_re("^cue(/toggle){0,1}/{0,1}$");
-	boost::regex sync_re("^sync(/toggle){0,1}/{0,1}$");
-	boost::regex seek_re("^seek(/relative){0,1}/{0,1}$");
-	boost::regex reset_re("^reset$");
-	boost::regex beatoffset_re("^beatoffset(/relative){0,1}/{0,1}$");
-	boost::regex tempomul_re("^tempomul/{0,1}$");
-	boost::cmatch matches;
-	osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
+   boost::regex play_re("^play(/toggle){0,1}/{0,1}$");
+   boost::regex cue_re("^cue(/toggle){0,1}/{0,1}$");
+   boost::regex sync_re("^sync(/toggle){0,1}/{0,1}$");
+   boost::regex seek_re("^seek(/relative){0,1}/{0,1}$");
+   boost::regex reset_re("^reset$");
+   boost::regex beatoffset_re("^beatoffset(/relative){0,1}/{0,1}$");
+   boost::regex tempomul_re("^tempomul/{0,1}$");
+   boost::cmatch matches;
+   osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
 
-	if(boost::regex_match(addr.c_str(), matches, play_re)){
-		//"" == set else toggle
-		if(strcmp(matches[1].str().c_str(), "") == 0){
+   if(boost::regex_match(addr.c_str(), matches, play_re)){
+      //"" == set else toggle
+      if(strcmp(matches[1].str().c_str(), "") == 0){
          if(arg_it == m.ArgumentsEnd())
             throw osc::MissingArgumentException();
-         player_set(mixer, "pause", !boolFromBoolOrInt(*arg_it));
-		} else
-         player_trigger(mixer, "pause");
-	} else if(boost::regex_match(addr.c_str(), matches, reset_re)){
-      QMetaObject::invokeMethod(mModel, "set_player_position", Qt::QueuedConnection,
-            Q_ARG(int, mixer),
-            Q_ARG(double, 0.0));
-	} else if(boost::regex_match(addr.c_str(), matches, cue_re)){
-		if(strcmp(matches[1].str().c_str(), "") == 0){
-			if(arg_it == m.ArgumentsEnd())
-				throw osc::MissingArgumentException();
-         player_set(mixer, "cue", boolFromBoolOrInt(*arg_it));
-		} else 
-         player_trigger(mixer, "cue");
-	} else if(boost::regex_match(addr.c_str(), matches, sync_re)){
-		if(strcmp(matches[1].str().c_str(), "") == 0){
-			if(arg_it == m.ArgumentsEnd())
-				throw osc::MissingArgumentException();
-         player_set(mixer, "sync", boolFromBoolOrInt(*arg_it));
-		} else 
-         player_trigger(mixer, "sync");
-	} else if(boost::regex_match(addr.c_str(), matches, seek_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int beats = intFromOsc(*arg_it);
+         emit(player_value_changed(mixer, "pause", !boolFromBoolOrInt(*arg_it)));
+      } else
+         emit(player_triggered(mixer, "pause"));
+   } else if(boost::regex_match(addr.c_str(), matches, reset_re)){
+      emit(player_triggered(mixer, "reset"));
+   } else if(boost::regex_match(addr.c_str(), matches, cue_re)){
+      if(strcmp(matches[1].str().c_str(), "") == 0){
+         if(arg_it == m.ArgumentsEnd())
+            throw osc::MissingArgumentException();
+         emit(player_value_changed(mixer, "cue", boolFromBoolOrInt(*arg_it)));
+      } else 
+         emit(player_triggered(mixer, "cue"));
+   } else if(boost::regex_match(addr.c_str(), matches, sync_re)){
+      if(strcmp(matches[1].str().c_str(), "") == 0){
+         if(arg_it == m.ArgumentsEnd())
+            throw osc::MissingArgumentException();
+         emit(player_value_changed(mixer, "sync", boolFromBoolOrInt(*arg_it)));
+      } else 
+         emit(player_triggered(mixer, "sync"));
+   } else if(boost::regex_match(addr.c_str(), matches, seek_re)){
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      int beats = intFromOsc(*arg_it);
 
       //absolute
-		if(strcmp(matches[1].str().c_str(), "") == 0){
-			//control->setPlaybackPosition(arg);
-		} else {
-         player_set(mixer, "seek_beat_relative", beats);
-      }
-	} 
+      if(strcmp(matches[1].str().c_str(), "") == 0)
+         emit(player_value_changed(mixer, "seek_beat", beats));
+      else
+         emit(player_value_changed(mixer, "seek_beat_relative", beats));
+   } 
 #if 0
    else if(boost::regex_match(addr.c_str(), matches, beatoffset_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int arg = intFromOsc(*arg_it);
-		if(strcmp(matches[1].str().c_str(), "") == 0){
-			control->setBeatOffset(arg);
-		} else 
-			control->setBeatOffset(control->beatOffset() + arg);
-	} else if(boost::regex_match(addr.c_str(), tempomul_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		float mul = floatFromOscNumber(*arg_it);
-		control->setTempoMul(mul);
-	} else {
-		//XXX throw an error?
-	}
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      int arg = intFromOsc(*arg_it);
+      if(strcmp(matches[1].str().c_str(), "") == 0){
+         control->setBeatOffset(arg);
+      } else 
+         control->setBeatOffset(control->beatOffset() + arg);
+   } else if(boost::regex_match(addr.c_str(), tempomul_re)){
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      float mul = floatFromOscNumber(*arg_it);
+      control->setTempoMul(mul);
+   } else {
+      //XXX throw an error?
+   }
 #endif
 }
 
 void OscReceiver::processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m){
-	boost::regex position_re("^(/relative){0,1}/{0,1}$");
-	//boost::regex leftmixer_re("^/mixer/left/{0,1}$");
-	//boost::regex rightmixer_re("^/mixer/right/{0,1}$");
-	boost::regex mixers_re("^/mixers/{0,1}$");
-	boost::regex enable_re("^/enable/{0,1}$");
-	boost::cmatch matches;
-	osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
+   boost::regex position_re("^(/relative){0,1}/{0,1}$");
+   //boost::regex leftmixer_re("^/mixer/left/{0,1}$");
+   //boost::regex rightmixer_re("^/mixer/right/{0,1}$");
+   boost::regex mixers_re("^/mixers/{0,1}$");
+   boost::regex enable_re("^/enable/{0,1}$");
+   boost::cmatch matches;
+   osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
 
-	if(boost::regex_match(addr.c_str(), matches, position_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int pos = (float)dj::one_scale * floatFromOscNumber(*arg_it);
-		if(strcmp("", matches[1].str().c_str()) == 0) {
-         QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
-               Q_ARG(QString, "crossfade_position"),
-               Q_ARG(int, pos));
+   if(boost::regex_match(addr.c_str(), matches, position_re)){
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      int pos = (float)dj::one_scale * floatFromOscNumber(*arg_it);
+      if(strcmp("", matches[1].str().c_str()) == 0) {
+         emit(master_value_changed("crossfade_position", pos));
       }
-		//else
-			//mModel->crossFade()->setPosition(mModel->crossFade()->position() + arg);
-	} 
+      //else
+      //mModel->crossFade()->setPosition(mModel->crossFade()->position() + arg);
+   } 
 #if 0
    else if(boost::regex_match(addr.c_str(), mixers_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int left = intFromOsc(*arg_it);
-		arg_it++;
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int right = intFromOsc(*arg_it);
-		mModel->crossFade()->setMixers(left, right);
-		/*
-	} else if(boost::regex_match(addr.c_str(), leftmixer_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int arg = intFromOsc(*arg_it);
-		mModel->crossFade()->setLeftMixer(arg);
-	} else if(boost::regex_match(addr.c_str(), rightmixer_re)){
-		if(arg_it == m.ArgumentsEnd())
-			throw osc::MissingArgumentException();
-		int arg = intFromOsc(*arg_it);
-		mModel->crossFade()->setRightMixer(arg);
-		*/
-	} else if(boost::regex_match(addr.c_str(), enable_re)){
-		if(arg_it == m.ArgumentsEnd())
-			mModel->crossFade()->enable();
-		else
-			mModel->crossFade()->enable(boolFromBoolOrInt(*arg_it));
-	}
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      int left = intFromOsc(*arg_it);
+      arg_it++;
+      if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+      int right = intFromOsc(*arg_it);
+      mModel->crossFade()->setMixers(left, right);
+      /*
+         } else if(boost::regex_match(addr.c_str(), leftmixer_re)){
+         if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+         int arg = intFromOsc(*arg_it);
+         mModel->crossFade()->setLeftMixer(arg);
+         } else if(boost::regex_match(addr.c_str(), rightmixer_re)){
+         if(arg_it == m.ArgumentsEnd())
+         throw osc::MissingArgumentException();
+         int arg = intFromOsc(*arg_it);
+         mModel->crossFade()->setRightMixer(arg);
+         */
+   } else if(boost::regex_match(addr.c_str(), enable_re)){
+      if(arg_it == m.ArgumentsEnd())
+         mModel->crossFade()->enable();
+      else
+         mModel->crossFade()->enable(boolFromBoolOrInt(*arg_it));
+   }
 #endif
 }
 
 void OscReceiver::processMasterMessage(const std::string addr, const osc::ReceivedMessage& m){
-	boost::regex volume_re("^/volume(/relative){0,1}/{0,1}$");
-	boost::regex tempo_re("^/tempo(/relative){0,1}/{0,1}$");
-	boost::regex sync_re("^/syncsource/{0,1}$");
-	boost::cmatch matches;
-	osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
-	if(boost::regex_match(addr.c_str(), matches, volume_re)){
-		//make sure our matches list is long enough and that we have an argument
-		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			int vol = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
-			//"" == absolute, otherwise, relative
-			if(strcmp("", matches[1].str().c_str()) == 0) {
-            QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
-                  Q_ARG(QString, "volume"),
-                  Q_ARG(int, vol));
-         }
-			//else 
-				//mModel->master()->setVolume(mModel->master()->volume() + num);
-		} else
-			throw osc::MissingArgumentException();
-	} else if(boost::regex_match(addr.c_str(), matches, tempo_re)){
-		//make sure our matches list is long enough and that we have an argument
-		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			float bpm = floatFromOscNumber(*arg_it);
-			//"" == absolute, otherwise, relative
-         if(strcmp("", matches[1].str().c_str()) != 0) {
-            QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
-                  Q_ARG(QString, "bpm"),
-                  Q_ARG(double, bpm));
-         } else {
-            QMetaObject::invokeMethod(mModel, "master_set", Qt::QueuedConnection,
-                  Q_ARG(QString, "bpm_relative"),
-                  Q_ARG(double, bpm));
-         }
-		} else
-			throw osc::MissingArgumentException();
-	} else if(boost::regex_match(addr.c_str(), sync_re)){
+   boost::regex volume_re("^/volume(/relative){0,1}/{0,1}$");
+   boost::regex tempo_re("^/tempo(/relative){0,1}/{0,1}$");
+   boost::regex sync_re("^/syncsource/{0,1}$");
+   boost::cmatch matches;
+   osc::ReceivedMessage::const_iterator arg_it = m.ArgumentsBegin();
+   if(boost::regex_match(addr.c_str(), matches, volume_re)){
+      //make sure our matches list is long enough and that we have an argument
+      if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
+         int vol = floatFromOscNumber(*arg_it) * (float)dj::one_scale;
+         //"" == absolute, otherwise, relative
+         if(strcmp("", matches[1].str().c_str()) == 0)
+            emit(master_value_changed("volume", vol));
+         else 
+            emit(master_value_changed("volume_relative", vol));
+      } else
+         throw osc::MissingArgumentException();
+   } else if(boost::regex_match(addr.c_str(), matches, tempo_re)){
+      //make sure our matches list is long enough and that we have an argument
+      if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
+         float bpm = floatFromOscNumber(*arg_it);
+         //"" == absolute, otherwise, relative
+         if(strcmp("", matches[1].str().c_str()) != 0)
+            emit(master_value_changed("bpm", bpm));
+         else
+            emit(master_value_changed("bpm_relative", bpm));
+      } else
+         throw osc::MissingArgumentException();
+   } else if(boost::regex_match(addr.c_str(), sync_re)){
 #if 0
-		//make sure our matches list is long enough and that we have an argument
-		if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
-			int src = intFromOsc(*arg_it);
-			mModel->master()->setSyncSource(src);
-		} else
-			throw osc::MissingArgumentException();
+      //make sure our matches list is long enough and that we have an argument
+      if(matches.size() == 2 && arg_it != m.ArgumentsEnd()){
+         int src = intFromOsc(*arg_it);
+         mModel->master()->setSyncSource(src);
+      } else
+         throw osc::MissingArgumentException();
 #endif
-	} else {
-		//XXX throw an error?
-	}
-}
-
-void OscReceiver::player_trigger(int player_index, QString name) {
-   QMetaObject::invokeMethod(mModel, "player_trigger", Qt::QueuedConnection,
-         Q_ARG(int, player_index),
-         Q_ARG(QString, name));
-}
-
-void OscReceiver::player_set(int player_index, QString name, bool value) {
-   QMetaObject::invokeMethod(mModel, "player_set", Qt::QueuedConnection,
-         Q_ARG(int, player_index),
-         Q_ARG(QString, name),
-         Q_ARG(bool, value));
-}
-
-void OscReceiver::player_set(int player_index, QString name, int value) {
-   QMetaObject::invokeMethod(mModel, "player_set", Qt::QueuedConnection,
-         Q_ARG(int, player_index),
-         Q_ARG(QString, name),
-         Q_ARG(int, value));
+   } else {
+      //XXX throw an error?
+   }
 }
 
 #include "ip/UdpSocket.h"
 
 OscThread::OscThread(unsigned int port) {
-	mPort = port;
+   mPort = port;
 }
 
 void OscThread::run(){
-	UdpListeningReceiveSocket s(
-			IpEndpointName( IpEndpointName::ANY_ADDRESS, mPort ),
-			&mOscReceiver );
-	s.Run();
+   dj::audio::AudioModel * model = dj::audio::AudioModel::instance();
+
+   //set up connections
+   QObject::connect(
+         &mOscReceiver, SIGNAL(player_triggered(int, QString)),
+         model, SLOT(player_trigger(int, QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         &mOscReceiver, SIGNAL(player_value_changed(int, QString, bool)),
+         model, SLOT(player_set(int, QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         &mOscReceiver, SIGNAL(player_value_changed(int, QString, int)),
+         model, SLOT(player_set(int, QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         &mOscReceiver, SIGNAL(master_value_changed(QString, bool)),
+         model, SLOT(master_set(QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         &mOscReceiver, SIGNAL(master_value_changed(QString, int)),
+         model, SLOT(master_set(QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         &mOscReceiver, SIGNAL(master_value_changed(QString, double)),
+         model, SLOT(master_set(QString, double)),
+         Qt::QueuedConnection);
+
+   UdpListeningReceiveSocket s(
+         IpEndpointName( IpEndpointName::ANY_ADDRESS, mPort ),
+         &mOscReceiver );
+   s.Run();
 }

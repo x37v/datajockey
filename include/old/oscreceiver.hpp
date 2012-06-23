@@ -24,6 +24,7 @@
 #include "osc/OscPacketListener.h"
 #include <string>
 #include <QThread>
+#include <QObject>
 
 namespace dj {
    namespace audio {
@@ -31,30 +32,37 @@ namespace dj {
    }
 }
 
-class OscReceiver : public osc::OscPacketListener {
-	public:
-		OscReceiver();
-	protected:
-		virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint);
-		void processMixerMessage(const std::string addr, const osc::ReceivedMessage& m);
-		void processDJControlMessage(const std::string addr, int mixer, const osc::ReceivedMessage& m);
-		void processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m);
-		void processMasterMessage(const std::string addr, const osc::ReceivedMessage& m);
-	private:
+class OscReceiver : public QObject, public osc::OscPacketListener {
+   Q_OBJECT
+   public:
+      OscReceiver();
+   protected:
+      virtual void ProcessMessage(const osc::ReceivedMessage& m, const IpEndpointName& remoteEndpoint);
+      void processMixerMessage(const std::string addr, const osc::ReceivedMessage& m);
+      void processDJControlMessage(const std::string addr, int mixer, const osc::ReceivedMessage& m);
+      void processXFadeMessage(const std::string addr, const osc::ReceivedMessage& m);
+      void processMasterMessage(const std::string addr, const osc::ReceivedMessage& m);
+   signals:
+      void player_triggered(int player_index, QString name);
+      void player_value_changed(int player_index, QString name, bool value);
+      void player_value_changed(int player_index, QString name, int value);
+
+      void master_value_changed(QString name, bool value);
+      void master_value_changed(QString name, int value);
+      void master_value_changed(QString name, double value);
+
+   private:
       dj::audio::AudioModel * mModel;
-      void player_trigger(int player_index, QString name);
-      void player_set(int player_index, QString name, bool value);
-      void player_set(int player_index, QString name, int value);
 };
 
 class OscThread : public QThread {
-	Q_OBJECT
-	public:
-		OscThread(unsigned int port);
-		void run();
-	private:
-		OscReceiver mOscReceiver;
-		unsigned int mPort;
+   Q_OBJECT
+   public:
+      OscThread(unsigned int port);
+      void run();
+   private:
+      OscReceiver mOscReceiver;
+      unsigned int mPort;
 };
 
 #endif
