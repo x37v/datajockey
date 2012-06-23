@@ -244,6 +244,8 @@ void MIDIMapper::load_file(QString file_path) {
             double value_offset;
             double value_multiplier;
 
+            std::string signal_name; entry["signal"] >> signal_name;
+
             std::string midi_type_name; entry["midi_type"] >> midi_type_name;
             midimapping_t midi_type;
             if (midi_type_name == "note_on")
@@ -255,9 +257,12 @@ void MIDIMapper::load_file(QString file_path) {
             else
                throw (std::runtime_error(DJ_FILEANDLINE + midi_type_name + " is not a supported midi type for mapping"));
 
+            //XXX validate midi_type based on signal name
+
             int midi_param; entry["midi_param"] >> midi_param;
+            midi_param &= 0x7F;
             int midi_channel; entry["midi_channel"] >> midi_channel;
-            std::string signal_name; entry["signal"] >> signal_name;
+            midi_channel &= 0x0F;
 
             /*
             std::string value_type_name; entry["value_type"] >> value_type_name;
