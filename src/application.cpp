@@ -52,9 +52,11 @@ Application::Application(int & argc, char ** argv) :
    mMixerPanel = new view::MixerPanel(mTop);
 
    mMIDIMapper = new controller::MIDIMapper(mTop);
-   mMIDIMapper->load_file(config->midi_mapping_file());
+   QString midi_mapping_file = config->midi_mapping_file();
+   if (QFile::exists(midi_mapping_file))
+      mMIDIMapper->load_file(midi_mapping_file);
    if (config->midi_mapping_auto_save())
-      mMIDIMapper->auto_save(config->midi_mapping_file());
+      mMIDIMapper->auto_save(midi_mapping_file);
    else
       mMIDIMapper->auto_save(false);
 
