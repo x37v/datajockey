@@ -13,11 +13,14 @@
 #include "loaderthread.hpp"
 #include "scheduler.hpp"
 #include <vector>
+#include <QHash>
+#include <QStringList>
 
 class QTimer;
 
 namespace dj {
    namespace audio {
+
       class QueryPlayState;
 
       class AudioModel : public QObject {
@@ -36,6 +39,10 @@ namespace dj {
             ~AudioModel();
             static AudioModel * cInstance;
          public:
+
+            static QHash<QString, QStringList> player_signals; //type, name list
+            static QHash<QString, QStringList> master_signals; //type, name list
+
             class PlayerState;
             static AudioModel * instance();
 

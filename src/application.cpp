@@ -127,7 +127,7 @@ Application::Application(int & argc, char ** argv) :
          mMixerPanel,
          SLOT(player_set_buffers(int, AudioBufferPtr, BeatBufferPtr)));
 
-   mAudioModel->master_set("crossfade", true);
+   mAudioModel->master_set("crossfade_enabled", true);
    mAudioModel->master_set("crossfade_player_left", 0);
    mAudioModel->master_set("crossfade_player_right", 1);
    mAudioModel->master_set("crossfade_position", (int)one_scale / 2);

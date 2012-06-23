@@ -9,15 +9,18 @@
 
 namespace dj {
    namespace controller {
+      enum midimapping_t {
+         CONTROL_CHANGE, //crossing 0.5 in the positive triggers/toggles or turns on, crossing 0.5 in the negative turns off
+         NOTE_ON, //note on triggers/toggles
+         NOTE_TOGGLE //note on turns on, note off turns off
+      };
+
       class MIDIMapper : public QThread {
          Q_OBJECT
          public:
             MIDIMapper(QObject * parent = NULL);
             virtual ~MIDIMapper();
             virtual void run();
-
-            static const double value_multiplier_default;
-            static const double value_offset_default;
 
             enum signal_val_t {
                TRIGGER_VAL,
@@ -29,19 +32,27 @@ namespace dj {
          public slots:
             void map();
             void clear();
+
             void map_player(
                   int player_index,
                   QString signal_name,
-                  int midi_status, int midi_param,
-                  signal_val_t value_type,
-                  double value_multiplier = value_multiplier_default,
-                  double value_offset = value_offset_default);
+                  midimapping_t midi_type, int midi_channel, int midi_param);
+            void map_player(
+                  int player_index,
+                  QString signal_name,
+                  midimapping_t midi_type, int midi_channel, int midi_param,
+                  double value_multiplier,
+                  double value_offset);
+
             void map_master(
                   QString signal_name,
-                  int midi_status, int midi_param,
-                  signal_val_t value_type,
-                  double value_multiplier = value_multiplier_default,
-                  double value_offset = value_offset_default); 
+                  midimapping_t midi_type, int midi_channel, int midi_param);
+            void map_master(
+                  QString signal_name,
+                  midimapping_t midi_type, int midi_channel, int midi_param,
+                  double value_multiplier,
+                  double value_offset);
+
             void load_file(QString file_path);
             void save_file(QString file_path);
             void auto_save(QString file_path);
@@ -83,7 +94,10 @@ namespace dj {
 
             struct mapping_t {
                QString signal_name;
+
+               midimapping_t midi_type;
                signal_val_t value_type;
+
                int player_index; //if < 0 it is a master command
 
                //used to remap values
@@ -91,13 +105,7 @@ namespace dj {
                double value_mul;
                double value_last;
 
-               void default_remaps() {
-                  value_offset = 0;
-                  value_mul = (double)one_scale;
-               }
-
                mapping_t() : value_last(-1.0) {
-                  default_remaps();
                }
             };
 
@@ -107,6 +115,9 @@ namespace dj {
             mapping_t mNextMapping;
 
             void mapping_from_slot(int player_index, QString name, signal_val_t type);
+
+            signal_val_t player_value_type(QString signal_name);
+            signal_val_t master_value_type(QString signal_name);
       };
    }
 }
