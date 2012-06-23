@@ -19,6 +19,8 @@ class QTimer;
 
 namespace dj {
    namespace audio {
+      class QueryPlayState;
+
       class AudioModel : public QObject {
          Q_OBJECT
          Q_CLASSINFO("D-Bus Interface", "org.x37v.datajockey.audio")
@@ -26,9 +28,7 @@ namespace dj {
          private:
             //forward declarations
             class PlayerSetBuffersCommand;
-            class PlayerState;
             class ConsumeThread;
-            class QueryPlayState;
 
             //singleton
             AudioModel();
@@ -37,6 +37,7 @@ namespace dj {
             ~AudioModel();
             static AudioModel * cInstance;
          public:
+            class PlayerState;
             static AudioModel * instance();
 
          public slots:
@@ -48,7 +49,7 @@ namespace dj {
             void player_set(int player_index, QString name, bool value);
             void player_set(int player_index, QString name, int value);
             void player_set(int player_index, QString name, double value);
-            void player_set(int player_index, QString name, dj::audio::TimePoint value);
+            void player_set(int player_index, QString name, TimePoint value);
             void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
 
             //***** MASTER COMMANDS
@@ -77,8 +78,6 @@ namespace dj {
                   AudioBufferPtr audio_buffer,
                   BeatBufferPtr beat_buffer);
             void relay_player_value(int player_index, QString name, int value);
-            void relay_master_audio_level(int percent);
-            void relay_master_position(TimePoint position);
 
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals
@@ -139,16 +138,36 @@ namespace dj {
             void set_player_audio_file(int player_index, QString location);
             void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
 
-            void update_player_state(int player_index, PlayerState * state);
-
             //not threadsafe, expects to have mutex already locked
             //eq the eq 0 is the lowest, 2 is high, one_scale is the top
             void set_player_eq(int player_index, int band, int value);
-            void set_player_position(int player_index, const dj::audio::TimePoint &val, bool absolute = true);
+            void set_player_position(int player_index, const TimePoint &val, bool absolute = true);
             void set_player_position_frame(int player_index, int frame, bool absolute = true);
             void set_player_position_beat_relative(int player_index, int beats);
 
             void player_eval_audible(int player_index);
+      };
+
+      //TODO how to get it to run at the end of the frame?
+      class QueryPlayState : public QObject, public MasterCommand {
+         Q_OBJECT
+         public:
+            QueryPlayState(unsigned int num_players, QObject * parent = NULL);
+            virtual ~QueryPlayState();
+            virtual bool delete_after_done();
+            virtual void execute();
+            virtual void execute_done();
+            //this command shouldn't be stored
+            virtual bool store(CommandIOData& /* data */) const;
+         signals:
+            void player_value_update(int player_index, QString name, int val);
+            void master_value_update(QString name, int value);
+            void master_value_update(QString name, TimePoint timepoint);
+         private:
+            std::vector<AudioModel::PlayerState* > mStates;
+            unsigned int mNumPlayers;
+            float mMasterMaxVolume;
+            TimePoint mMasterTransportPosition;
       };
    }
 }

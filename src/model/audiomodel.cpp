@@ -99,78 +99,25 @@ class AudioModel::PlayerState {
       float mMaxSampleValue;
 };
 
-//TODO how to get it to run at the end of the frame?
-class AudioModel::QueryPlayState : public MasterCommand {
-   private:
-      AudioModel * mAudioModel;
-   public:
-      std::vector<AudioModel::PlayerState* > mStates;
-      unsigned int mNumPlayers;
-      float mMasterMaxVolume;
-      TimePoint mMasterTransportPosition;
-
-      QueryPlayState(AudioModel * model) : mAudioModel(model), mMasterMaxVolume(0.0) {
-         mNumPlayers = mAudioModel->player_count();
-         for(unsigned int i = 0; i < mNumPlayers; i++)
-            mStates.push_back(new AudioModel::PlayerState);
-         mStates.resize(mNumPlayers);
-      }
-      virtual ~QueryPlayState() {
-         for(unsigned int i = 0; i < mNumPlayers; i++)
-            delete mStates[i];
-      }
-      virtual bool delete_after_done() { return false; }
-      virtual void execute(){
-         mMasterTransportPosition = master()->transport()->position();
-         mMasterMaxVolume = master()->max_sample_value();
-         master()->max_sample_value_reset();
-         for(unsigned int i = 0; i < mNumPlayers; i++) {
-            Player * player = master()->players()[i];
-            mStates[i]->mCurrentFrame = player->frame();
-            mStates[i]->mMaxSampleValue = player->max_sample_value();
-            mStates[i]->mSpeed = player->play_speed();
-            player->max_sample_value_reset();
-         }
-      }
-      virtual void execute_done() {
-         for(unsigned int i = 0; i < mNumPlayers; i++)
-            mAudioModel->update_player_state(i, mStates[i]);
-
-         int master_level = static_cast<int>(100.0 * mMasterMaxVolume);
-         if (master_level > 0) {
-            QMetaObject::invokeMethod(mAudioModel, "relay_master_audio_level", 
-                  Qt::QueuedConnection,
-                  Q_ARG(int, master_level));
-         }
-
-         QMetaObject::invokeMethod(mAudioModel, "relay_master_position", 
-               Qt::QueuedConnection,
-               Q_ARG(TimePoint, mMasterTransportPosition));
-      }
-      //this command shouldn't be stored
-      virtual bool store(CommandIOData& /* data */) const { return false; }
-};
-
 class AudioModel::ConsumeThread : public QThread {
    private:
       Scheduler * mScheduler;
-      AudioModel * mModel;
+      QueryPlayState * mQueryCmd;
    public:
-      ConsumeThread(AudioModel * model, Scheduler * scheduler) : mScheduler(scheduler), mModel(model) { }
+      ConsumeThread(QueryPlayState * query_cmd, Scheduler * scheduler) : mScheduler(scheduler), mQueryCmd(query_cmd) { }
 
       void run() {
-         AudioModel::QueryPlayState * query_cmd = new AudioModel::QueryPlayState(mModel);
          while(true) {
-            if (query_cmd) {
-               mScheduler->execute(query_cmd);
-               query_cmd = NULL;
+            if (mQueryCmd) {
+               mScheduler->execute(mQueryCmd);
+               mQueryCmd = NULL;
                msleep(5); //should give the command several execute cycles to get through
             }
 
             mScheduler->execute_done_actions();
             dj::audio::Command * cmd = mScheduler->pop_complete_command();
             //if we got a command and the dynamic cast fails, delete the command
-            if (cmd && (query_cmd = dynamic_cast<AudioModel::QueryPlayState *>(cmd)) == NULL)
+            if (cmd && (mQueryCmd = dynamic_cast<QueryPlayState *>(cmd)) == NULL)
                delete cmd;
 
             //XXX if the UI becomes unresponsive, increase this value
@@ -268,7 +215,19 @@ AudioModel::AudioModel() :
    }
 
    //hook up and start the consume thread
-   mConsumeThread = new ConsumeThread(this, mMaster->scheduler());
+   //first setup the query command + connections
+   QueryPlayState * query_cmd = new QueryPlayState(mNumPlayers);
+   QObject::connect(query_cmd, SIGNAL(master_value_update(QString, int)),
+            SIGNAL(master_value_changed(QString, int)),
+            Qt::QueuedConnection);
+   QObject::connect(query_cmd, SIGNAL(master_value_update(QString, TimePoint)),
+            SIGNAL(master_value_changed(QString, TimePoint)),
+            Qt::QueuedConnection);
+   QObject::connect(query_cmd, SIGNAL(player_value_update(int, QString, int)),
+            SLOT(relay_player_value(int, QString, int)),
+            Qt::QueuedConnection);
+
+   mConsumeThread = new ConsumeThread(query_cmd, mMaster->scheduler());
    mConsumeThread->start();
 
    mAudibleTimer = new QTimer(this);
@@ -341,48 +300,6 @@ void AudioModel::set_player_position_beat_relative(int player_index, int beats) 
    set_player_position(player_index, point, false);
 }
 
-void AudioModel::update_player_state(int player_index, PlayerState * new_state){
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-   QMutexLocker lock(&mPlayerStatesMutex);
-   PlayerState * pstate = mPlayerStates[player_index];
-
-   int frame = new_state->mCurrentFrame;
-   if ((unsigned int)frame != pstate->mCurrentFrame) {
-      pstate->mCurrentFrame = frame;
-      //emit(relay_player_position_changed(player_index, frame));
-      QMetaObject::invokeMethod(this, "relay_player_value", 
-            Qt::QueuedConnection,
-            Q_ARG(int, player_index),
-            Q_ARG(QString, "update_frame"),
-            Q_ARG(int, frame));
-   }
-
-   //only return rate info while syncing
-   //TODO maybe send 2 values after starting to run free so that we are sure?
-   if (pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2) {
-      pstate->mPostFreeSpeedUpdates += 1;
-      int speed_percent = (new_state->mSpeed - 1.0) * one_scale;
-      if (pstate->mParamInt["speed"] != speed_percent) {
-         pstate->mParamInt["speed"] = speed_percent;
-         QMetaObject::invokeMethod(this, "relay_player_value", 
-               Qt::QueuedConnection,
-               Q_ARG(int, player_index),
-               Q_ARG(QString, "update_speed"),
-               Q_ARG(int, speed_percent));
-      }
-   }
-
-   int audio_level = static_cast<int>(new_state->mMaxSampleValue * 100.0);
-   if (audio_level > 0) {
-      QMetaObject::invokeMethod(this, "relay_player_value", 
-            Qt::QueuedConnection,
-            Q_ARG(int, player_index),
-            Q_ARG(QString, "update_audio_level"),
-            Q_ARG(int, audio_level));
-   }
-}
-
 void AudioModel::set_player_eq(int player_index, int band, int value) {
    if (band < 0 || band > 2)
       return;
@@ -444,15 +361,31 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
 }
 
 void AudioModel::relay_player_value(int player_index, QString name, int value){
-   emit(player_value_changed(player_index, name, value));
-}
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
 
-void AudioModel::relay_master_audio_level(int percent) {
-   emit(master_value_changed("update_audio_level", percent));
-}
+   QMutexLocker lock(&mPlayerStatesMutex);
+   PlayerState * pstate = mPlayerStates[player_index];
 
-void AudioModel::relay_master_position(TimePoint position) {
-   emit(master_value_changed("transport_position", position));
+   if (name == "update_frame") {
+      if ((unsigned int)value == pstate->mCurrentFrame)
+         return;
+      pstate->mCurrentFrame = value;
+      emit(player_value_changed(player_index, name, value));
+   } else if (name == "update_speed") {
+      //only return rate info while syncing
+      //TODO maybe send 2 values after starting to run free so that we are sure?
+      if (pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2) {
+         pstate->mPostFreeSpeedUpdates += 1;
+         if (pstate->mParamInt["speed"] == value)
+            return;
+         pstate->mParamInt["speed"] = value;
+         emit(player_value_changed(player_index, name, value));
+      }
+   } else if (name == "update_audio_level") {
+      if (value > 0)
+         emit(player_value_changed(player_index, name, value));
+   }
 }
 
 void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
@@ -803,4 +736,52 @@ void AudioModel::player_eval_audible(int player_index) {
       emit(player_value_changed(player_index, "audible", audible));
    } 
 }
+
+QueryPlayState::QueryPlayState(unsigned int num_players, QObject * parent) : QObject(parent), mMasterMaxVolume(0.0) {
+   mNumPlayers = num_players;
+   for(unsigned int i = 0; i < mNumPlayers; i++)
+      mStates.push_back(new AudioModel::PlayerState);
+   mStates.resize(mNumPlayers);
+}
+
+QueryPlayState::~QueryPlayState() {
+   for(unsigned int i = 0; i < mNumPlayers; i++)
+      delete mStates[i];
+}
+
+bool QueryPlayState::delete_after_done() { return false; }
+
+void QueryPlayState::execute(){
+   mMasterTransportPosition = master()->transport()->position();
+   mMasterMaxVolume = master()->max_sample_value();
+   master()->max_sample_value_reset();
+   for(unsigned int i = 0; i < mNumPlayers; i++) {
+      Player * player = master()->players()[i];
+      mStates[i]->mCurrentFrame = player->frame();
+      mStates[i]->mMaxSampleValue = player->max_sample_value();
+      mStates[i]->mSpeed = player->play_speed();
+      player->max_sample_value_reset();
+   }
+}
+
+void QueryPlayState::execute_done() {
+   int master_level = static_cast<int>(100.0 * mMasterMaxVolume);
+   if (master_level > 0)
+      emit(master_value_update("update_master_audio_level", master_level));
+   emit(master_value_update("update_master_position", mMasterTransportPosition));
+
+   for(int i = 0; i < (int)mNumPlayers; i++) {
+      AudioModel::PlayerState * pstate = mStates[i];
+      int speed_percent = (pstate->mSpeed - 1.0) * one_scale;
+      int audio_level = static_cast<int>(pstate->mMaxSampleValue * 100.0);
+
+      emit(player_value_update(i, "update_frame", pstate->mCurrentFrame));
+      emit(player_value_update(i, "update_speed", speed_percent));
+      if (audio_level > 0)
+         emit(player_value_update(i, "update_audio_level", audio_level));
+   }
+}
+
+//this command shouldn't be stored
+bool QueryPlayState::store(CommandIOData& /* data */) const { return false; }
 
