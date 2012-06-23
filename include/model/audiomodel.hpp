@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QMutex>
 #include <QDBusConnection>
 #include "master.hpp"
 #include "audioio.hpp"
@@ -110,9 +109,6 @@ namespace dj {
             QHash<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
 
 
-            //make sure that player states/audio buffer manager access is thread safe
-            QMutex mPlayerStatesMutex;
-
             //maintain master state info
             double mMasterBPM;
             bool mCrossFadeEnabled;
@@ -138,7 +134,6 @@ namespace dj {
             void set_player_audio_file(int player_index, QString location);
             void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
 
-            //not threadsafe, expects to have mutex already locked
             //eq the eq 0 is the lowest, 2 is high, one_scale is the top
             void set_player_eq(int player_index, int band, int value);
             void set_player_position(int player_index, const TimePoint &val, bool absolute = true);

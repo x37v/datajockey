@@ -3,7 +3,6 @@
 #include "transport.hpp"
 #include "defines.hpp"
 
-#include <QMutexLocker>
 #include <vector>
 #include <QMetaObject>
 #include <QTimer>
@@ -131,7 +130,6 @@ AudioModel * AudioModel::cInstance = NULL;
 AudioModel::AudioModel() :
    QObject(),
    mPlayerStates(),
-   mPlayerStatesMutex(QMutex::Recursive),
    mMasterBPM(0.0),
    mCrossFadeEnabled(false),
    mCrossFadePosition(0),
@@ -344,7 +342,6 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
       BeatBufferPtr beat_buffer) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-   QMutexLocker lock(&mPlayerStatesMutex);
    if (audio_buffer)
       mPlayerStates[player_index]->mNumFrames = audio_buffer->length();
    else
@@ -364,7 +361,6 @@ void AudioModel::relay_player_value(int player_index, QString name, int value){
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    if (name == "update_frame") {
@@ -445,7 +441,6 @@ void AudioModel::master_set(QString name, int value) {
       if (value < 0 || value >= (int)mNumPlayers)
          return;
 
-      QMutexLocker lock(&mPlayerStatesMutex);
       queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, value));
 
       if(!mPlayerStates[value]->mParamBool["sync"]) {
@@ -469,7 +464,6 @@ void AudioModel::master_set(QString name, double value) {
 void AudioModel::player_trigger(int player_index, QString name) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    if (name == "reset")
@@ -498,7 +492,6 @@ void AudioModel::player_trigger(int player_index, QString name) {
    } else if (name == "clear")
       queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
    else if (name != "load") {
-      QMutexLocker lock(&mPlayerStatesMutex);
       PlayerState * pstate = mPlayerStates[player_index];
       QHash<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
       if (state_itr == pstate->mParamBool.end()) {
@@ -515,7 +508,6 @@ void AudioModel::player_trigger(int player_index, QString name) {
 void AudioModel::player_set(int player_index, QString name, bool value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    //special case
@@ -565,7 +557,6 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
 void AudioModel::player_set(int player_index, QString name, int value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    if (name == "eq_low") {
@@ -639,7 +630,6 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
-   QMutexLocker lock(&mPlayerStatesMutex);
    PlayerState * pstate = mPlayerStates[player_index];
 
    //get the action
@@ -677,7 +667,6 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
 void AudioModel::player_load(int player_index, QString audio_file_path, QString annotation_file_path) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-   QMutexLocker lock(&mPlayerStatesMutex);
 
    player_trigger(player_index, "clear");
    mThreadPool[player_index]->load(player_index, audio_file_path, annotation_file_path);
@@ -712,8 +701,6 @@ void AudioModel::queue_command(dj::audio::Command * cmd){
 void AudioModel::player_eval_audible(int player_index) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
-
-   QMutexLocker lock(&mPlayerStatesMutex);
 
    PlayerState * state = mPlayerStates[player_index];
    bool audible = true;
