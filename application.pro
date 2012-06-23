@@ -8,6 +8,8 @@ LIBS += -lsndfile -lvorbisfile -lmad -ljack -lslv2 -lyaml-cpp -loscpack -lboost_
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 
+VERSION = 0.2.git
+
 CONFIG += DEBUG
 //CONFIG += RELEASE
 
@@ -46,7 +48,7 @@ INCLUDEPATH += . \
 
 QMAKE_CXXFLAGS_DEBUG += -DDEBUG
 
-QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions
+QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions -DDJ_VERSION=$$VERSION
 QMAKE_CFLAGS += $$DENORMAL_FLAGS -fexceptions
 RESOURCES = gui.qrc db.qrc
 

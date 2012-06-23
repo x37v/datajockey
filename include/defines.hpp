@@ -3,11 +3,17 @@
 
 #include <string>
 #include <sstream>
+#include <QString>
+
+#define DO_STRINGIFY(X) #X
+#define STRINGIFY(X) DO_STRINGIFY(X)
 
 namespace dj {
    //this is the value we use to scale from an int to a double, this
    //represents 'one' as a double in int terms.
    extern const unsigned int one_scale;
+   
+   const QString version_string = STRINGIFY(DJ_VERSION);
 
    template <typename T>
    std::string to_string(T v) {

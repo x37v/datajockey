@@ -40,6 +40,9 @@ Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
 {
+   setApplicationVersion(dj::version_string);
+   setApplicationName("Data Jockey " + applicationVersion());
+
    Configuration * config = Configuration::instance();
 
    model::db::setup(

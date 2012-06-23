@@ -1,4 +1,5 @@
 #include "appmainwindow.hpp"
+#include "defines.hpp"
 
 #include <QMainWindow>
 #include <QContextMenuEvent>
@@ -48,6 +49,7 @@ void MainWindow::about() {
    QFile text(":resources/text/about.html");
    text.open(QFile::ReadOnly);
 
-   QMessageBox::about(this, tr("About DataJockey"), text.readAll());
+   QMessageBox::about(this, tr("About DataJockey"), 
+         "<p>This is Data Jockey version " + dj::version_string + "</p>" + text.readAll());
 }
 
