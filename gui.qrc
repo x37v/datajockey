@@ -17,6 +17,9 @@
 	<file>resources/icons/seekfwd.png</file>
 	<file>resources/icons/sync_off.png</file>
 	<file>resources/icons/sync.png</file>
+
 	<file>resources/style.qss</file>
+	<file>resources/text/about.html</file>
+	<file alias="resources/text/COPYING">COPYING</file>
 </qresource>
 </RCC>

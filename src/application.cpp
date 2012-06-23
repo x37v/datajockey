@@ -264,9 +264,7 @@ Application::Application(int & argc, char ** argv) :
          SLOT(filter(bool)));
    */
 
-   //QFile file(":/resources/style.qss");
-   //XXX TMP
-   QFile file("./resources/style.qss");
+   QFile file(":/resources/style.qss");
    if(file.open(QFile::ReadOnly)){
       QString styleSheet = QLatin1String(file.readAll());
       this->setStyleSheet(styleSheet);

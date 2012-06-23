@@ -10,17 +10,23 @@ class MainWindow : public QMainWindow {
    public:
       MainWindow(QWidget * parent = NULL);
       virtual ~MainWindow();
+
    protected:
       void contextMenuEvent(QContextMenuEvent *event);
-      /*
+
    private slots:
-      void preferences();
+      void about();
+
    private:
      void createActions();
      void createMenus();
 
+     QAction *quitAct;
+     QAction *aboutAct;
+
+     QMenu *fileMenu;
      QMenu *preferencesMenu;
-     */
+     QMenu *helpMenu;
 };
 
 #endif
