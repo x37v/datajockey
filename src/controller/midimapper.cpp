@@ -44,19 +44,22 @@ namespace {
       param = key & 0xFF;
    }
 
-   void default_value_mappings(const QString& signal_name, double& offset, double& mult) {
-      mult = 1.0;
-      offset = 0.0;
+}
 
-      if (signal_name == "bpm") {
-         offset = 40.0;
-         mult = 160.0;
-      } else if (signal_name == "volume") {
-         mult = 1.5;
-      } else if (signal_name.contains("eq_") || signal_name.contains("speed")) {
-         mult = 2.0;
-         offset = -1.0;
-      }
+void MIDIMapper::default_value_mappings(const QString& signal_name, double& offset, double& mult) {
+   mult = 1.0;
+   offset = 0.0;
+
+   if (signal_name.contains("relative")) { //XXX what about beats or frames?
+      mult = 0.1;
+   } else if (signal_name == "bpm") {
+      offset = 40.0;
+      mult = 160.0;
+   } else if (signal_name == "volume") {
+      mult = 1.5;
+   } else if (signal_name.contains("eq_") || signal_name.contains("speed")) {
+      mult = 2.0;
+      offset = -1.0;
    }
 }
 
@@ -155,6 +158,7 @@ void MIDIMapper::map() {
 void MIDIMapper::clear() {
    mMappingState = IDLE;
    mMappings.clear();
+   emit(mappings_cleared());
 }
 
 void MIDIMapper::map_player(
@@ -190,6 +194,7 @@ void MIDIMapper::map_player(
 
    uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
    mMappings.insert(key, mapping);
+   emit(player_mapping_update(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
 }
 
 void MIDIMapper::map_master(
@@ -218,6 +223,7 @@ void MIDIMapper::map_master(
    mapping.value_mul = value_multiplier;
    uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
    mMappings.insert(key, mapping);
+   emit(master_mapping_update(signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
 }
 
 void MIDIMapper::load_file(QString file_path) {

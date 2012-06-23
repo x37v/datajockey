@@ -10,6 +10,7 @@
 namespace dj {
    namespace controller {
       enum midimapping_t {
+         NO_MAPPING,
          CONTROL_CHANGE, //crossing 0.5 in the positive triggers/toggles or turns on, crossing 0.5 in the negative turns off
          NOTE_ON, //note on triggers/toggles
          NOTE_TOGGLE //note on turns on, note off turns off
@@ -28,6 +29,8 @@ namespace dj {
                INT_VAL,
                DOUBLE_VAL,
             };
+
+            static void default_value_mappings(const QString& signal_name, double& offset, double& mult);
 
          public slots:
             void map();
@@ -69,6 +72,16 @@ namespace dj {
             void master_set(QString name, double value);
 
          signals:
+            void mappings_cleared();
+            void player_mapping_update(int player_index, QString signal_name, 
+                  midimapping_t midi_type, int midi_channel, int midi_param,
+                  double value_multiplier,
+                  double value_offset);
+            void master_mapping_update(QString signal_name, 
+                  midimapping_t midi_type, int midi_channel, int midi_param,
+                  double value_multiplier,
+                  double value_offset);
+
             void player_value_changed(int player_index, QString name, bool value);
             void player_value_changed(int player_index, QString name, int value);
             void player_value_changed(int player_index, QString name, double value);
