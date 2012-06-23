@@ -342,17 +342,27 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
       BeatBufferPtr beat_buffer) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+
+   PlayerState * pstate = mPlayerStates[player_index];
    if (audio_buffer)
-      mPlayerStates[player_index]->mNumFrames = audio_buffer->length();
+      pstate->mNumFrames = audio_buffer->length();
    else
-      mPlayerStates[player_index]->mNumFrames = 0;
+      pstate->mNumFrames = 0;
 
    //store the sample rate
-   mPlayerStates[player_index]->mParamInt["sample_rate"] = audio_buffer->sample_rate();
+   pstate->mParamInt["sample_rate"] = audio_buffer->sample_rate();
 
    mPlayingAudioFiles <<  audio_buffer;
    mPlayingAnnotationFiles << beat_buffer;
+
    queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
+
+   if (beat_buffer.data() == NULL) {
+      player_set(player_index, "sync", false);
+      emit(player_value_changed(player_index, "update_sync_disabled", true));
+   } else
+      emit(player_value_changed(player_index, "update_sync_disabled", false));
+
    player_trigger(player_index, "reset");
    emit(player_buffers_changed(player_index, audio_buffer, beat_buffer));
 }

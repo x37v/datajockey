@@ -150,7 +150,9 @@ MixerPanel::~MixerPanel() {
 void MixerPanel::player_set(int player_index, QString name, bool value) {
    if (player_index >= mPlayers.size())
       return;
-   if(QPushButton * button = mPlayers[player_index]->button(name))
+   if (name == "update_sync_disabled")
+      mPlayers[player_index]->button("sync")->setDisabled(value);
+   else if(QPushButton * button = mPlayers[player_index]->button(name))
       button->setChecked(value);
 }
 
