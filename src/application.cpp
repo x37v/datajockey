@@ -19,6 +19,7 @@
 #include "oscreceiver.hpp"
 #include "config.hpp"
 #include "annotation.hpp"
+#include "appmainwindow.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -48,7 +49,7 @@ Application::Application(int & argc, char ** argv) :
          config->db_password());
 
    mAudioModel = audio::AudioModel::instance();
-   mTop = new QWidget(0, Qt::Window);
+   mTop = new MainWindow;
    mMixerPanel = new view::MixerPanel(mTop);
 
    mMIDIMapper = new controller::MIDIMapper(mTop);
@@ -298,7 +299,10 @@ Application::Application(int & argc, char ** argv) :
 
    mMIDIMapper->start();
 
-   mTop->setLayout(top_layout);
+   QWidget * central = new QWidget(mTop);
+   central->setLayout(top_layout);
+
+   mTop->setCentralWidget(central);
    mTop->show();
 }
 

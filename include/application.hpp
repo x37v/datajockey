@@ -5,10 +5,12 @@
 #include "mixerpanel.hpp"
 
 class QWidget;
+class MainWindow;
 
 namespace dj {
    namespace audio { class AudioModel; }
    namespace controller { class MIDIMapper; }
+
    class Application : public QApplication {
       Q_OBJECT
       public:
@@ -21,7 +23,7 @@ namespace dj {
          audio::AudioModel * mAudioModel;
          view::MixerPanel * mMixerPanel;
          controller::MIDIMapper * mMIDIMapper;
-         QWidget * mTop;
+         MainWindow * mTop;
          int mCurrentwork;
    };
 }

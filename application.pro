@@ -78,6 +78,7 @@ HEADERS += include/application.hpp \
            include/util/audiofiletag.hpp \
            include/util/beatextractor.hpp \
            include/util/importer.hpp \
+           include/view/appmainwindow.hpp \
            include/view/audiolevel.hpp \
            include/view/mixerpanel.hpp \
            include/view/playerview.hpp \
@@ -127,6 +128,7 @@ SOURCES += src/application.cpp \
            src/util/audiofiletag.cpp \
            src/util/beatextractor.cpp \
            src/util/importer.cpp \ 
+           src/view/appmainwindow.cpp \
            src/view/audiolevel.cpp \
            src/view/mixerpanel.cpp \
            src/view/playerview.cpp \
