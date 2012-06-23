@@ -25,12 +25,12 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event) {
 }
 
 void MainWindow::createActions() {
-   quitAct = new QAction(tr("&quit"), this);
+   quitAct = new QAction(tr("quit"), this);
    quitAct->setShortcuts(QKeySequence::Quit);
    quitAct->setStatusTip(tr("Exit the application"));
    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-   aboutAct = new QAction(tr("&About"), this);
+   aboutAct = new QAction(tr("about"), this);
    aboutAct->setStatusTip(tr("Show the application's About box"));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
@@ -49,7 +49,8 @@ void MainWindow::about() {
    QFile text(":resources/text/about.html");
    text.open(QFile::ReadOnly);
 
-   QMessageBox::about(this, tr("About DataJockey"), 
+   QMessageBox::about(this,
+         tr("About DataJockey"), 
          "<p>This is Data Jockey version " + dj::version_string + "</p>" + text.readAll());
 }
 
