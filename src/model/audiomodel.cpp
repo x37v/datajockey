@@ -120,7 +120,7 @@ class AudioModel::ConsumeThread : public QThread {
                delete cmd;
 
             //XXX if the UI becomes unresponsive, increase this value
-            msleep(35);
+            msleep(15);
          }
       }
 };
