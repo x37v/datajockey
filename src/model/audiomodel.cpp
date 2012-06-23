@@ -754,8 +754,8 @@ void QueryPlayState::execute(){
 void QueryPlayState::execute_done() {
    int master_level = static_cast<int>(100.0 * mMasterMaxVolume);
    if (master_level > 0)
-      emit(master_value_update("update_master_audio_level", master_level));
-   emit(master_value_update("update_master_position", mMasterTransportPosition));
+      emit(master_value_update("update_audio_level", master_level));
+   emit(master_value_update("update_transport_position", mMasterTransportPosition));
 
    for(int i = 0; i < (int)mNumPlayers; i++) {
       AudioModel::PlayerState * pstate = mStates[i];

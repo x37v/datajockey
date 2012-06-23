@@ -207,7 +207,7 @@ void MixerPanel::master_set(QString name, double val) {
 }
 
 void MixerPanel::master_set(QString name, audio::TimePoint val) {
-   if (name == "transport_position") {
+   if (name == "update_transport_position") {
       //ignore position within beat
       val.pos_in_beat(0);
       if (val != mMasterPositionLast) {
