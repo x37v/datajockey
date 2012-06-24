@@ -83,7 +83,7 @@ void MIDIMapper::run() {
       //turn note offs into zero velocity note ons
       if (status == JackCpp::MIDIPort::NOTEOFF) {
          status = JackCpp::MIDIPort::NOTEON;
-         data.buff[2] = 0;
+         buff.data[2] = 0;
       }
 
       uint32_t key = make_key(status_to_mapping_t(status), buff.data[0] & 0x0F, buff.data[1]);
