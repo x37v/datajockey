@@ -16,6 +16,8 @@ namespace dj {
             MIDIMapper(QWidget * parent = NULL, Qt::WindowFlags f = 0);
             ~MIDIMapper();
             bool validate();
+         protected:
+            virtual void showEvent(QShowEvent * event);
          public slots:
             void okay();
             bool apply();
@@ -28,6 +30,7 @@ namespace dj {
                   double value_multiplier,
                   double value_offset);
          signals:
+            void requesting_mappings();
             void player_mapping_update(
                   int player_index,
                   QString signal_name,

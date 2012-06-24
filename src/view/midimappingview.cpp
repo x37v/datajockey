@@ -153,6 +153,11 @@ bool MIDIMapper::validate() {
    return false;
 }
 
+void MIDIMapper::showEvent(QShowEvent * event) {
+   QWidget::showEvent(event);
+   reset();
+}
+
 void MIDIMapper::okay() {
    if (apply())
       close();
@@ -179,6 +184,7 @@ void MIDIMapper::reset() {
    for (int row = 0; row < mPlayerTable->rowCount(); row++) {
       static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE))->setCurrentIndex(0);
    }
+   emit(requesting_mappings());
 }
 
 void MIDIMapper::map_player(

@@ -222,6 +222,10 @@ Application::Application(int & argc, char ** argv) :
                midimapping_t, int, int,
                double, double)),
          Qt::QueuedConnection);
+   QObject::connect(
+         mTop->midi_mapper(), SIGNAL(requesting_mappings()),
+         mMIDIMapper, SLOT(query()),
+         Qt::QueuedConnection);
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    //WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
