@@ -57,6 +57,10 @@ void MainWindow::createMenus() {
 void MainWindow::about() {
    QFile text(":resources/text/about.html");
    text.open(QFile::ReadOnly);
+
+   QMessageBox::about(this,
+         tr("About DataJockey"), 
+         "<p>This is Data Jockey version " + dj::version_string + "</p>" + text.readAll());
 }
 
 void MainWindow::midi_mapping() {
