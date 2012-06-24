@@ -11,6 +11,7 @@ class MainWindow : public QMainWindow {
    public:
       MainWindow(QWidget * parent = NULL);
       virtual ~MainWindow();
+      dj::view::MIDIMapper * midi_mapper();
 
    protected:
       void contextMenuEvent(QContextMenuEvent *event);

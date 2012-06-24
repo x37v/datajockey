@@ -16,8 +16,9 @@ MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
    createMenus();
 }
 
-MainWindow::~MainWindow() {
-}
+MainWindow::~MainWindow() { }
+
+dj::view::MIDIMapper * MainWindow::midi_mapper() { return mMIDIMapper; }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event) {
    QMenu menu(this);

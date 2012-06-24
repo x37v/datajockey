@@ -56,13 +56,6 @@ Application::Application(int & argc, char ** argv) :
    mMixerPanel = new view::MixerPanel(mTop);
 
    mMIDIMapper = new controller::MIDIMapper(mTop);
-   QString midi_mapping_file = config->midi_mapping_file();
-   if (QFile::exists(midi_mapping_file))
-      mMIDIMapper->load_file(midi_mapping_file);
-   if (config->midi_mapping_auto_save())
-      mMIDIMapper->auto_save(midi_mapping_file);
-   else
-      mMIDIMapper->auto_save(false);
 
    setStyle("plastique");
 
@@ -160,7 +153,7 @@ Application::Application(int & argc, char ** argv) :
          mAudioModel, SLOT(master_set(QString, double)),
          Qt::QueuedConnection);
 
-   //mapper in
+   //mapper view
    QObject::connect(
          mAudioModel, SIGNAL(player_triggered(int, QString)),
          mMIDIMapper, SLOT(player_trigger(int, QString)),
@@ -202,6 +195,32 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(
          mMixerPanel, SIGNAL(midi_map_triggered()),
          mMIDIMapper, SLOT(map()),
+         Qt::QueuedConnection);
+
+   //mapper + view
+   QObject::connect(
+         mTop->midi_mapper(),
+         SIGNAL(player_mapping_update(
+               int, QString,
+               midimapping_t, int, int,
+               double, double)),
+         mMIDIMapper,
+         SLOT(map_player(
+               int, QString,
+               midimapping_t, int, int,
+               double, double)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mMIDIMapper,
+         SIGNAL(player_mapping_update(
+               int, QString,
+               midimapping_t, int, int,
+               double, double)),
+         mTop->midi_mapper(),
+         SLOT(map_player(
+               int, QString,
+               midimapping_t, int, int,
+               double, double)),
          Qt::QueuedConnection);
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
@@ -267,12 +286,6 @@ Application::Application(int & argc, char ** argv) :
          SLOT(filter(bool)));
    */
 
-   QFile file(":/resources/style.qss");
-   if(file.open(QFile::ReadOnly)){
-      QString styleSheet = QLatin1String(file.readAll());
-      this->setStyleSheet(styleSheet);
-   }
-
    QTabWidget * left_tab_view = new QTabWidget(mTop);
    left_tab_view->addTab(mMixerPanel, "mixer");
    left_tab_view->addTab(tag_editor, "tags");
@@ -293,6 +306,23 @@ Application::Application(int & argc, char ** argv) :
    top_layout->addWidget(splitter);
 
 
+   //open files, load defaults
+   QFile file(":/resources/style.qss");
+   if(file.open(QFile::ReadOnly)){
+      QString styleSheet = QLatin1String(file.readAll());
+      this->setStyleSheet(styleSheet);
+   }
+
+   QString midi_mapping_file = config->midi_mapping_file();
+   if (QFile::exists(midi_mapping_file))
+      mMIDIMapper->load_file(midi_mapping_file);
+   if (config->midi_mapping_auto_save())
+      mMIDIMapper->auto_save(midi_mapping_file);
+   else
+      mMIDIMapper->auto_save(false);
+
+
+   //start up threads
    mAudioModel->start_audio();
 
    OscThread * osc_thread = new OscThread(config->osc_port());

@@ -65,6 +65,7 @@ void MIDIMapper::default_value_mappings(const QString& signal_name, double& offs
 
 MIDIMapper::MIDIMapper(QObject * parent): QThread(parent), mMappingState(IDLE), mAbort(false), mAutoSave(false) {
    mInputRingBuffer = audio::AudioIO::instance()->midi_input_ringbuffer();
+   qRegisterMetaType<midimapping_t>("midimapping_t");
 }
 
 MIDIMapper::~MIDIMapper() {
@@ -169,7 +170,7 @@ void MIDIMapper::map_player(
       int midi_param) {
    double value_multiplier, value_offset;
    default_value_mappings(signal_name, value_offset, value_multiplier);
-   MIDIMapper::map_player(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset);
+   map_player(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset);
 }
 
 void MIDIMapper::map_player(
@@ -180,19 +181,48 @@ void MIDIMapper::map_player(
       int midi_param,
       double value_multiplier,
       double value_offset) { 
+
+   //is it a master mapping?
    if (player_index < 0) {
       map_master(signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset);
       return;
    }
+
+   //remove the mapping
+   if (midi_type == NO_MAPPING) {
+      mapping_hash_t::iterator it = mMappings.begin();
+      while(it != mMappings.end()) {
+         if (it->signal_name == signal_name && it->player_index == -1)
+            it = mMappings.erase(it);
+         else
+            it++;
+      }
+      return;
+   }
+
+   uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
+
+   //see if this mapping already exists
+   mapping_hash_t::iterator it = mMappings.find(key);
+   signal_val_t value_type = player_value_type(signal_name);
+   if (it != mMappings.end()) {
+      if(it->midi_type == midi_type &&
+            it->signal_name == signal_name &&
+            it->player_index == player_index &&
+            it->value_type == value_type &&
+            it->value_offset == value_offset &&
+            it->value_mul == value_multiplier)
+         return;
+   }
+
    mapping_t mapping;
    mapping.midi_type = midi_type;
    mapping.signal_name = signal_name;
    mapping.player_index = player_index;
-   mapping.value_type = player_value_type(signal_name);
+   mapping.value_type = value_type;
    mapping.value_offset = value_offset;
    mapping.value_mul = value_multiplier;
 
-   uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
    mMappings.insert(key, mapping);
    emit(player_mapping_update(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
 }
@@ -214,6 +244,19 @@ void MIDIMapper::map_master(
       int midi_param,
       double value_multiplier,
       double value_offset) {
+
+   //remove the mapping
+   if (midi_type == NO_MAPPING) {
+      mapping_hash_t::iterator it = mMappings.begin();
+      while(it != mMappings.end()) {
+         if (it->signal_name == signal_name && it->player_index == -1)
+            it = mMappings.erase(it);
+         else
+            it++;
+      }
+      return;
+   }
+
    mapping_t mapping;
    mapping.midi_type = midi_type;
    mapping.signal_name = signal_name;
