@@ -33,8 +33,12 @@ namespace dj {
             static void default_value_mappings(const QString& signal_name, double& offset, double& mult);
 
          public slots:
+            //set up an auto mappin
             void map();
+            //clear all mappings
             void clear();
+            //sends all mappings via *_mapping_update
+            void query();
 
             void map_player(
                   int player_index,

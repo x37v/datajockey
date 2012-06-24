@@ -142,6 +142,7 @@ void MIDIMapper::run() {
          //set up value remapings
          default_value_mappings(mNextMapping.signal_name, mNextMapping.value_offset, mNextMapping.value_mul);
 
+         //XXX disable anything that might already be bound to this key
          mMappings.insert(key, mNextMapping);
          mMappingState = IDLE;
 
@@ -160,6 +161,30 @@ void MIDIMapper::clear() {
    mMappingState = IDLE;
    mMappings.clear();
    emit(mappings_cleared());
+}
+
+void MIDIMapper::query() {
+   for(mapping_hash_t::iterator it = mMappings.begin(); it != mMappings.end(); it++) {
+      uint32_t key = it.key();
+      const mapping_t mapping = it.value();
+
+      //grab the type, channel and param from the key
+      midimapping_t midi_type;
+      uint8_t midi_channel, midi_param;
+      key_info(key, midi_type, midi_channel, midi_param);
+
+      if (mapping.player_index < 0) {
+         emit(master_mapping_update(mapping.signal_name, 
+                  midi_type, (int)midi_channel, (int)midi_param,
+                  mapping.value_mul,
+                  mapping.value_offset));
+      } else {
+         emit(player_mapping_update(mapping.player_index, mapping.signal_name, 
+                  midi_type, (int)midi_channel, (int)midi_param,
+                  mapping.value_mul,
+                  mapping.value_offset));
+      }
+   }
 }
 
 void MIDIMapper::map_player(
@@ -228,6 +253,7 @@ void MIDIMapper::map_player(
    mapping.value_offset = value_offset;
    mapping.value_mul = value_multiplier;
 
+   //XXX disable anything that might already be bound to this key
    mMappings.insert(key, mapping);
    emit(player_mapping_update(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
 
@@ -277,6 +303,8 @@ void MIDIMapper::map_master(
    mapping.value_offset = value_offset;
    mapping.value_mul = value_multiplier;
    uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
+
+   //XXX disable anything that might already be bound to this key
    mMappings.insert(key, mapping);
    emit(master_mapping_update(signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
    if (mAutoSave && !mAutoSaveFileName.isEmpty())
