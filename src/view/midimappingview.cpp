@@ -4,6 +4,7 @@
 #include "defines.hpp"
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QString>
 #include <QObject>
@@ -13,6 +14,7 @@
 #include <QDoubleValidator>
 #include <QHeaderView>
 #include <QPushButton>
+#include <QMessageBox>
 #include <iostream>
 
 using namespace dj;
@@ -31,7 +33,8 @@ namespace {
       PLAYER_MUL = 5,
       PLAYER_OFFSET = 6,
       PLAYER_RESET = 7,
-      PLAYER_COLUMN_COUNT = 8
+      PLAYER_VALID = 8,
+      PLAYER_COLUMN_COUNT = 9
    };
 
    enum MASTER_ROWS {
@@ -42,7 +45,8 @@ namespace {
       MASTER_MUL = 4,
       MASTER_OFFSET = 5,
       MASTER_RESET = 6,
-      MASTER_COLUMN_COUNT = 7
+      MASTER_VALID = 7,
+      MASTER_COLUMN_COUNT = 8
    };
 
 }
@@ -51,7 +55,7 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
    mPlayerTable = new QTableWidget;
    mPlayerTable->setColumnCount(PLAYER_COLUMN_COUNT);
    QStringList header_labels;
-   header_labels << "signal" << "player" << "type" << "param number" <<  "channel" << "value multiplier" << "value offset" << "reset";
+   header_labels << "signal" << "player" << "type" << "param number" <<  "channel" << "value multiplier" << "value offset" << "reset" << "valid";
    mPlayerTable->setHorizontalHeaderLabels(header_labels);
    mPlayerTable->verticalHeader()->setVisible(false);
 
@@ -80,12 +84,101 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
       insert_player_rows(mPlayerTable, signal_type, signal);
    }
 
-   QHBoxLayout * top_layout = new QHBoxLayout;
+   QVBoxLayout * top_layout = new QVBoxLayout;
    top_layout->addWidget(mPlayerTable);
+
+   QHBoxLayout * button_layout = new QHBoxLayout;
+
+   QPushButton * apply_button = new QPushButton("apply", this);
+   apply_button->setCheckable(false);
+   QObject::connect(apply_button, SIGNAL(pressed()), SLOT(apply()));
+
+   QPushButton * okay_button = new QPushButton("okay", this);
+   okay_button->setCheckable(false);
+   QObject::connect(okay_button, SIGNAL(pressed()), SLOT(okay()));
+
+   QPushButton * cancel_button = new QPushButton("cancel", this);
+   cancel_button->setCheckable(false);
+   QObject::connect(cancel_button, SIGNAL(pressed()), SLOT(close()));
+
+   button_layout->addWidget(okay_button);
+   button_layout->addWidget(apply_button);
+   button_layout->addWidget(cancel_button);
+
+   top_layout->addLayout(button_layout);
+
    setLayout(top_layout);
 }
 
 MIDIMapper::~MIDIMapper() {
+}
+
+bool MIDIMapper::validate() {
+   QHash<uint32_t, int> key_to_row;
+   bool dups = false;
+
+   for (int row = 0; row < mPlayerTable->rowCount(); row++) {
+      QComboBox * combo_box = static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
+      if (combo_box->currentIndex() > 0) {
+         midimapping_t midi_type = static_cast<midimapping_t>(combo_box->itemData(combo_box->currentIndex()).toInt());
+         int channel = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_CHANNEL))->value() - 1;
+         int param = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_PARAM_NUM))->value();
+         uint32_t key = controller::MIDIMapper::make_key(midi_type, (uint8_t)channel, (uint8_t)param);
+
+         if (key_to_row.contains(key))
+            dups = true;
+         else //might go invalid later
+            mPlayerTable->item(row, PLAYER_VALID)->setText(QString());
+
+         key_to_row.insertMulti(key, row);
+      } else
+         mPlayerTable->item(row, PLAYER_VALID)->setText(QString());
+   }
+
+   if (!dups)
+      return true;
+
+   //invalidate all the invalid rows
+   uint32_t key;
+   foreach (key, key_to_row.keys()) {
+      QList<int> rows = key_to_row.values(key);
+      if (rows.length() > 1) {
+         int row;
+         foreach(row, rows) {
+            mPlayerTable->item(row, PLAYER_VALID)->setText("invalid");
+         }
+      }
+   }
+
+   return false;
+}
+
+void MIDIMapper::okay() {
+   if (apply())
+      close();
+}
+
+bool MIDIMapper::apply() {
+   if (!validate()) {
+      QMessageBox::information(this,
+            "invalid mappings",
+            "Your midi mappings contain duplicate/invalid mappings, please resolve those and try again.");
+      return false;
+   }
+
+   for (int row = 0; row < mPlayerTable->rowCount(); row++) {
+      QComboBox * combo_box = static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
+      if (combo_box->currentIndex() > 0)
+         send_player_row(row);
+   }
+   return true;
+}
+
+void MIDIMapper::reset() {
+   //set all of the rows to disabled
+   for (int row = 0; row < mPlayerTable->rowCount(); row++) {
+      static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE))->setCurrentIndex(0);
+   }
 }
 
 void MIDIMapper::map_player(
@@ -142,18 +235,21 @@ void MIDIMapper::default_button_pressed() {
 }
 
 void MIDIMapper::lineedit_changed(QString /* text */) {
-   QLineEdit * item = static_cast<QLineEdit *>(QObject::sender());
-   player_row_changed(item->property("row").toInt());
+   validate();
+   //QLineEdit * item = static_cast<QLineEdit *>(QObject::sender());
+   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::combobox_changed(int /* index */) {
-   QComboBox * item = static_cast<QComboBox *>(QObject::sender());
-   player_row_changed(item->property("row").toInt());
+   validate();
+   //QComboBox * item = static_cast<QComboBox *>(QObject::sender());
+   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::spinbox_changed(int /* value */) {
-   QSpinBox * item = static_cast<QSpinBox *>(QObject::sender());
-   player_row_changed(item->property("row").toInt());
+   validate();
+   //QSpinBox * item = static_cast<QSpinBox *>(QObject::sender());
+   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::insert_player_rows(QTableWidget * table, QString type, QString signal) {
@@ -235,10 +331,16 @@ void MIDIMapper::insert_player_rows(QTableWidget * table, QString type, QString 
       table->setCellWidget(row, PLAYER_RESET, default_button);
       QObject::connect(default_button, SIGNAL(pressed()),
             SLOT(default_button_pressed()));
+
+      //valid
+      item = new QTableWidgetItem(QString());
+      item->setFlags(Qt::NoItemFlags);
+      item->setData(Qt::UserRole, i);
+      table->setItem(row, PLAYER_VALID, item);
    }
 }
 
-void MIDIMapper::player_row_changed(int row) {
+void MIDIMapper::send_player_row(int row) {
    QString signal_name = mPlayerTable->item(row, PLAYER_SIGNAL)->text();
    int player_index = mPlayerTable->item(row, PLAYER_INDEX)->data(Qt::UserRole).toInt();
 

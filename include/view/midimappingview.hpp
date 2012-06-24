@@ -15,7 +15,12 @@ namespace dj {
          public:
             MIDIMapper(QWidget * parent = NULL, Qt::WindowFlags f = 0);
             ~MIDIMapper();
+            bool validate();
          public slots:
+            void okay();
+            bool apply();
+
+            void reset();
             void map_player(
                   int player_index,
                   QString signal_name,
@@ -43,7 +48,7 @@ namespace dj {
          private:
             QTableWidget * mPlayerTable;
             void insert_player_rows(QTableWidget * table, QString type, QString signal);
-            void player_row_changed(int row);
+            void send_player_row(int row);
       };
    }
 }

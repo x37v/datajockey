@@ -31,9 +31,10 @@ namespace dj {
             };
 
             static void default_value_mappings(const QString& signal_name, double& offset, double& mult);
+            static uint32_t make_key(midimapping_t midi_type, uint8_t channel, uint8_t param);
 
          public slots:
-            //set up an auto mappin
+            //set up an auto mapping
             void map();
             //clear all mappings
             void clear();

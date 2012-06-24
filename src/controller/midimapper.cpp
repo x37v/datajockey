@@ -21,21 +21,9 @@ namespace {
       switch (status & 0xF0) {
          case JackCpp::MIDIPort::NOTEON:
             return NOTE_ON;
-         case JackCpp::MIDIPort::NOTEOFF:
-            return NOTE_TOGGLE;
          default:
             return CONTROL_CHANGE;
       }
-   }
-
-   uint32_t make_key(midimapping_t midi_type, uint8_t channel, uint8_t param) {
-      uint8_t status = JackCpp::MIDIPort::CC;
-      if (midi_type == NOTE_ON)
-         status = JackCpp::MIDIPort::NOTEON;
-      else if (midi_type == NOTE_TOGGLE) //
-         status = JackCpp::MIDIPort::NOTEOFF;
-
-      return ((status | (channel & 0xF)) << 8) | param;
    }
 
    void key_info(uint32_t key, midimapping_t& midi_type, uint8_t& channel, uint8_t& param) {
@@ -44,6 +32,14 @@ namespace {
       param = key & 0xFF;
    }
 
+}
+
+uint32_t MIDIMapper::make_key(midimapping_t midi_type, uint8_t channel, uint8_t param) {
+   uint8_t status = JackCpp::MIDIPort::CC;
+   if (midi_type == NOTE_ON || midi_type == NOTE_TOGGLE)
+      status = JackCpp::MIDIPort::NOTEON;
+
+   return ((uint32_t)((status & 0xF0) | (channel & 0x0F)) << 8) | param;
 }
 
 void MIDIMapper::default_value_mappings(const QString& signal_name, double& offset, double& mult) {
@@ -83,7 +79,14 @@ void MIDIMapper::run() {
       mInputRingBuffer->read(buff);
 
       //look up this event
-      uint32_t key = make_key(status_to_mapping_t(buff.data[0] & 0xF0), buff.data[0] & 0x0F, buff.data[1]);
+      uint8_t status = buff.data[0] & 0xF0;
+      //turn note offs into zero velocity note ons
+      if (status == JackCpp::MIDIPort::NOTEOFF) {
+         status = JackCpp::MIDIPort::NOTEON;
+         data.buff[2] = 0;
+      }
+
+      uint32_t key = make_key(status_to_mapping_t(status), buff.data[0] & 0x0F, buff.data[1]);
 
       if (mMappingState == IDLE) {
          mapping_hash_t::iterator it = mMappings.find(key);
@@ -172,6 +175,7 @@ void MIDIMapper::query() {
       midimapping_t midi_type;
       uint8_t midi_channel, midi_param;
       key_info(key, midi_type, midi_channel, midi_param);
+      midi_type = mapping.midi_type;
 
       if (mapping.player_index < 0) {
          emit(master_mapping_update(mapping.signal_name, 
@@ -425,6 +429,7 @@ void MIDIMapper::save_file(QString file_path) {
       midimapping_t midi_type;
       uint8_t midi_channel, midi_param;
       key_info(it.key(), midi_type, midi_channel, midi_param);
+      midi_type = mapping.midi_type;
 
       yaml << YAML::Key << "midi_type";
       switch(midi_type) {
