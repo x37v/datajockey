@@ -261,88 +261,93 @@ void MIDIMapper::spinbox_changed(int /* value */) {
 void MIDIMapper::insert_player_rows(QTableWidget * table, QString type, QString signal) {
    QTableWidgetItem *item;
    int num_players = static_cast<int>(audio::AudioModel::instance()->player_count());
+   int num_copies = 1;
+   //if (signal.contains("relative"))
+      //num_copies = 2;
 
-   for (int i = 0; i < num_players; i++) {
-      int row = table->rowCount();
-      table->insertRow(row);
+   for (int p = 0; p < num_players; p++) {
+      for (int i = 0; i < num_copies; i++) {
+         int row = table->rowCount();
+         table->insertRow(row);
 
-      //signal name
-      item = new QTableWidgetItem(signal);
-      item->setFlags(Qt::ItemIsSelectable);
-      item->setData(Qt::UserRole, i);
-      table->setItem(row, PLAYER_SIGNAL, item);
+         //signal name
+         item = new QTableWidgetItem(signal);
+         item->setFlags(Qt::ItemIsSelectable);
+         item->setData(Qt::UserRole, row);
+         table->setItem(row, PLAYER_SIGNAL, item);
 
-      //player index
-      item = new QTableWidgetItem(QString::number(i));
-      item->setFlags(Qt::ItemIsSelectable);
-      item->setData(Qt::UserRole, i);
-      table->setItem(row, PLAYER_INDEX, item);
+         //player index
+         item = new QTableWidgetItem(QString::number(p));
+         item->setFlags(Qt::ItemIsSelectable);
+         item->setData(Qt::UserRole, row);
+         table->setItem(row, PLAYER_INDEX, item);
 
-      //midi type
-      QComboBox * midi_types = new QComboBox;
-      midi_types->addItem("disabled", dj::controller::NO_MAPPING);
-      if (type == "trigger") {
-         midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
-         midi_types->addItem("note on", dj::controller::NOTE_ON);
-      } else if (type == "bool") {
-         midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
-         midi_types->addItem("note on", dj::controller::NOTE_ON);
-         midi_types->addItem("note toggle", dj::controller::NOTE_TOGGLE);
-      } else if (type == "int" || type == "double") {
-         midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
+         //midi type
+         QComboBox * midi_types = new QComboBox;
+         midi_types->addItem("disabled", dj::controller::NO_MAPPING);
+         if (type == "trigger") {
+            midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
+            midi_types->addItem("note on", dj::controller::NOTE_ON);
+         } else if (type == "bool") {
+            midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
+            midi_types->addItem("note on", dj::controller::NOTE_ON);
+            midi_types->addItem("note toggle", dj::controller::NOTE_TOGGLE);
+         } else if (type == "int" || type == "double") {
+            midi_types->addItem("cc", dj::controller::CONTROL_CHANGE);
+         }
+         midi_types->setProperty("row", row);
+         QObject::connect(midi_types, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
+         table->setCellWidget(row, PLAYER_TYPE, midi_types);
+
+         //param num
+         QSpinBox * param_box = new QSpinBox;
+         param_box->setRange(0,127);
+         param_box->setProperty("row", row);
+         QObject::connect(param_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+         table->setCellWidget(row, PLAYER_PARAM_NUM, param_box);
+
+         //channel
+         QSpinBox * chan_box = new QSpinBox;
+         chan_box->setRange(1,16);
+         chan_box->setProperty("row", row);
+         QObject::connect(chan_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+         table->setCellWidget(row, PLAYER_CHANNEL, chan_box);
+
+         QDoubleValidator * double_validator = new QDoubleValidator;
+
+         double default_offset, default_mult;
+         controller::MIDIMapper::default_value_mappings(signal, default_offset, default_mult);
+
+         //multiplier
+         QLineEdit * number_edit = new QLineEdit;
+         number_edit->setValidator(double_validator);
+         number_edit->setText(QString::number(default_mult));
+         number_edit->setProperty("row", row);
+         QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+         table->setCellWidget(row, PLAYER_MUL, number_edit);
+
+         //offset
+         number_edit = new QLineEdit;
+         number_edit->setValidator(double_validator);
+         number_edit->setText(QString::number(default_offset));
+         number_edit->setProperty("row", row);
+         QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+         table->setCellWidget(row, PLAYER_OFFSET, number_edit);
+
+         //default
+         QPushButton * default_button = new QPushButton("defaults");
+         default_button->setCheckable(false);
+         default_button->setProperty("row", row);
+         table->setCellWidget(row, PLAYER_RESET, default_button);
+         QObject::connect(default_button, SIGNAL(pressed()),
+               SLOT(default_button_pressed()));
+
+         //valid
+         item = new QTableWidgetItem(QString());
+         item->setFlags(Qt::NoItemFlags);
+         item->setData(Qt::UserRole, row);
+         table->setItem(row, PLAYER_VALID, item);
       }
-      midi_types->setProperty("row", row);
-      QObject::connect(midi_types, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
-      table->setCellWidget(row, PLAYER_TYPE, midi_types);
-
-      //param num
-      QSpinBox * param_box = new QSpinBox;
-      param_box->setRange(0,127);
-      param_box->setProperty("row", row);
-      QObject::connect(param_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-      table->setCellWidget(row, PLAYER_PARAM_NUM, param_box);
-
-      //channel
-      QSpinBox * chan_box = new QSpinBox;
-      chan_box->setRange(1,16);
-      chan_box->setProperty("row", row);
-      QObject::connect(chan_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-      table->setCellWidget(row, PLAYER_CHANNEL, chan_box);
-
-      QDoubleValidator * double_validator = new QDoubleValidator;
-
-      double default_offset, default_mult;
-      controller::MIDIMapper::default_value_mappings(signal, default_offset, default_mult);
-
-      //multiplier
-      QLineEdit * number_edit = new QLineEdit;
-      number_edit->setValidator(double_validator);
-      number_edit->setText(QString::number(default_mult));
-      number_edit->setProperty("row", row);
-      QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-      table->setCellWidget(row, PLAYER_MUL, number_edit);
-
-      //offset
-      number_edit = new QLineEdit;
-      number_edit->setValidator(double_validator);
-      number_edit->setText(QString::number(default_offset));
-      number_edit->setProperty("row", row);
-      QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-      table->setCellWidget(row, PLAYER_OFFSET, number_edit);
-
-      //default
-      QPushButton * default_button = new QPushButton("defaults");
-      default_button->setCheckable(false);
-      default_button->setProperty("row", row);
-      table->setCellWidget(row, PLAYER_RESET, default_button);
-      QObject::connect(default_button, SIGNAL(pressed()),
-            SLOT(default_button_pressed()));
-
-      //valid
-      item = new QTableWidgetItem(QString());
-      item->setFlags(Qt::NoItemFlags);
-      item->setData(Qt::UserRole, i);
-      table->setItem(row, PLAYER_VALID, item);
    }
 }
 
