@@ -9,6 +9,9 @@
 #include <QFile>
 
 MainWindow::MainWindow(QWidget * parent) : QMainWindow(parent) {
+   mMIDIMapper = new dj::view::MIDIMapper(this, Qt::Dialog);
+   mMIDIMapper->setVisible(false);
+
    createActions();
    createMenus();
 }
@@ -33,6 +36,10 @@ void MainWindow::createActions() {
    aboutAct = new QAction(tr("about"), this);
    aboutAct->setStatusTip(tr("Show the application's About box"));
    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+   midiMappingAct = new QAction(tr("midi mapping"), this);
+   midiMappingAct->setStatusTip(tr("Set up midi mapping"));
+   connect(midiMappingAct, SIGNAL(triggered()), this, SLOT(midi_mapping()));
 }
 
 void MainWindow::createMenus() {
@@ -40,6 +47,7 @@ void MainWindow::createMenus() {
    fileMenu->addAction(quitAct);
 
    preferencesMenu = menuBar()->addMenu(tr("&preferences"));
+   preferencesMenu->addAction(midiMappingAct);
 
    helpMenu = menuBar()->addMenu(tr("&help"));
    helpMenu->addAction(aboutAct);
@@ -48,9 +56,8 @@ void MainWindow::createMenus() {
 void MainWindow::about() {
    QFile text(":resources/text/about.html");
    text.open(QFile::ReadOnly);
-
-   QMessageBox::about(this,
-         tr("About DataJockey"), 
-         "<p>This is Data Jockey version " + dj::version_string + "</p>" + text.readAll());
 }
 
+void MainWindow::midi_mapping() {
+   mMIDIMapper->setVisible(true);
+}

@@ -2,6 +2,7 @@
 #define DATAJOCKEY_APPMAIN_WINDOW_HPP
 
 #include <QMainWindow>
+#include "midimappingview.hpp"
 
 class QContextMenuEvent;
 
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow {
 
    private slots:
       void about();
+      void midi_mapping();
 
    private:
      void createActions();
@@ -23,10 +25,13 @@ class MainWindow : public QMainWindow {
 
      QAction *quitAct;
      QAction *aboutAct;
+     QAction *midiMappingAct;
 
      QMenu *fileMenu;
      QMenu *preferencesMenu;
      QMenu *helpMenu;
+
+     dj::view::MIDIMapper * mMIDIMapper;
 };
 
 #endif
