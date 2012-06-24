@@ -190,13 +190,18 @@ void MIDIMapper::map_player(
 
    //remove the mapping
    if (midi_type == NO_MAPPING) {
+      bool found = false;
       mapping_hash_t::iterator it = mMappings.begin();
       while(it != mMappings.end()) {
-         if (it->signal_name == signal_name && it->player_index == -1)
+         if (it->signal_name == signal_name && it->player_index == -1) {
+            found = true;
             it = mMappings.erase(it);
-         else
+         } else
             it++;
       }
+      //auto save if enabled
+      if (found && mAutoSave && !mAutoSaveFileName.isEmpty())
+         save_file(mAutoSaveFileName);
       return;
    }
 
@@ -225,6 +230,9 @@ void MIDIMapper::map_player(
 
    mMappings.insert(key, mapping);
    emit(player_mapping_update(player_index, signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
+
+   if (mAutoSave && !mAutoSaveFileName.isEmpty())
+      save_file(mAutoSaveFileName);
 }
 
 void MIDIMapper::map_master(
@@ -248,12 +256,16 @@ void MIDIMapper::map_master(
    //remove the mapping
    if (midi_type == NO_MAPPING) {
       mapping_hash_t::iterator it = mMappings.begin();
+      bool found = false;
       while(it != mMappings.end()) {
-         if (it->signal_name == signal_name && it->player_index == -1)
+         if (it->signal_name == signal_name && it->player_index == -1) {
+            found = true;
             it = mMappings.erase(it);
-         else
+         } else
             it++;
       }
+      if (found && mAutoSave && !mAutoSaveFileName.isEmpty())
+         save_file(mAutoSaveFileName);
       return;
    }
 
@@ -267,10 +279,16 @@ void MIDIMapper::map_master(
    uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
    mMappings.insert(key, mapping);
    emit(master_mapping_update(signal_name, midi_type, midi_channel, midi_param, value_multiplier, value_offset));
+   if (mAutoSave && !mAutoSaveFileName.isEmpty())
+      save_file(mAutoSaveFileName);
 }
 
 void MIDIMapper::load_file(QString file_path) {
+   //disable auto save during loading
+   bool auto_save = mAutoSave;
+   mAutoSave = false;
    clear();
+
    try {
       if (!QFile::exists(file_path))
          throw(std::runtime_error("file does not exist: " + file_path.toStdString()));
@@ -357,6 +375,8 @@ void MIDIMapper::load_file(QString file_path) {
    } catch (...) {
       cerr << "problem parsing file: " + file_path.toStdString() << endl;
    }
+
+   mAutoSave = auto_save;
 }
 
 void MIDIMapper::save_file(QString file_path) {
