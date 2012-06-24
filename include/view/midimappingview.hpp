@@ -2,10 +2,12 @@
 #define DJ_MIDIMAPPING_VIEW_HPP
 
 #include <QWidget>
+#include <QMap>
+#include <QString>
 #include "midimapper.hpp"
 
 class QTableWidget;
-
+class QComboBox;
 
 namespace dj {
    namespace view {
@@ -45,13 +47,17 @@ namespace dj {
 
          private slots:
             void default_button_pressed();
+            void mapping_signal_changed(int index);
             void lineedit_changed(QString text);
             void combobox_changed(int index);
             void spinbox_changed(int index);
          private:
             QTableWidget * mPlayerTable;
-            void insert_player_rows(QTableWidget * table, QString type, QString signal);
+            QMap<QString, QString> mPlayerSignals; //name, type
+            void insert_player_row(QTableWidget * table);
             void send_player_row(int row);
+            void fillin_type_box(const QString& signal_type, QComboBox * type_box);
+            void set_defaults(const QString& signal, int row);
       };
    }
 }
