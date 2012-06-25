@@ -188,7 +188,17 @@ void MIDIMapper::map_player(
 
 void MIDIMapper::default_button_pressed() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
-   int row = button->property("row").toInt();
+
+   //find the row
+   int row = -1;
+   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
+      if (static_cast<QPushButton *>(mPlayerTable->cellWidget(i, PLAYER_RESET)) == button) {
+         row = i;
+         break;
+      }
+   }
+   if (row < 0)
+      return;
 
    QComboBox * signal_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_SIGNAL));
    QString signal = signal_box->itemText(signal_box->currentIndex());
@@ -200,8 +210,16 @@ void MIDIMapper::mapping_signal_changed(int index) {
    const QString signal = signal_box->itemText(index);
    const QString signal_type = mPlayerSignals[signal];
 
-   //XXX can we do this the whole time?
-   int row = signal_box->property("row").toInt();
+   int row = -1;
+   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
+      if (static_cast<QComboBox *>(mPlayerTable->cellWidget(i, PLAYER_SIGNAL)) == signal_box) {
+         row = i;
+         break;
+      }
+   }
+   if (row < 0)
+      return;
+
    QComboBox * type_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
 
    //update the type box
@@ -215,24 +233,30 @@ void MIDIMapper::mapping_signal_changed(int index) {
 void MIDIMapper::lineedit_changed(QString /* text */) {
    validate();
    //QLineEdit * item = static_cast<QLineEdit *>(QObject::sender());
-   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::combobox_changed(int /* index */) {
    validate();
    //QComboBox * item = static_cast<QComboBox *>(QObject::sender());
-   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::spinbox_changed(int /* value */) {
    validate();
    //QSpinBox * item = static_cast<QSpinBox *>(QObject::sender());
-   //send_player_row(item->property("row").toInt());
 }
 
 void MIDIMapper::delete_row() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
-   int row = button->property("row").toInt();
+   //find the row
+   int row = -1;
+   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
+      if (static_cast<QPushButton *>(mPlayerTable->cellWidget(i, PLAYER_DELETE)) == button) {
+         row = i;
+         break;
+      }
+   }
+   if (row < 0)
+      return;
 
    int player_index, midi_channel, midi_param;
    QString signal_name;
@@ -252,12 +276,7 @@ void MIDIMapper::delete_row() {
             signal_name,
             dj::controller::NO_MAPPING, midi_channel, midi_param,
             mult, offset));
-
-   //we remove all and request..
-   //TODO is there a better way?
-   while(mPlayerTable->rowCount() > 0)
-      mPlayerTable->removeRow(0);
-   emit(requesting_mappings());
+   mPlayerTable->removeRow(row);
 }
 
 int MIDIMapper::add_player_row() {
@@ -270,7 +289,6 @@ int MIDIMapper::add_player_row() {
 
    //signal name
    combo_box = new QComboBox;
-   combo_box->setProperty("row", row);
    QString signal;
    foreach(signal, mPlayerSignals.keys()) {
       combo_box->addItem(signal);
@@ -289,7 +307,6 @@ int MIDIMapper::add_player_row() {
    //midi type
    combo_box = new QComboBox;
    fillin_type_box(signal, combo_box);
-   combo_box->setProperty("row", row);
    QObject::connect(combo_box, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
    mPlayerTable->setCellWidget(row, PLAYER_TYPE, combo_box);
 
@@ -326,7 +343,6 @@ int MIDIMapper::add_player_row() {
 
    //default
    QPushButton * default_button = new QPushButton("defaults");
-   default_button->setProperty("row", row);
    default_button->setCheckable(false);
    mPlayerTable->setCellWidget(row, PLAYER_RESET, default_button);
    QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
@@ -339,7 +355,6 @@ int MIDIMapper::add_player_row() {
 
    //delete
    QPushButton * delete_button = new QPushButton("delete");
-   default_button->setProperty("row", row);
    default_button->setCheckable(false);
    mPlayerTable->setCellWidget(row, PLAYER_DELETE, delete_button);
    QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_row()));
