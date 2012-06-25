@@ -24,7 +24,6 @@ namespace dj {
             void okay();
             bool apply();
 
-            void reset();
             void map_player(
                   int player_index,
                   QString signal_name,
@@ -51,13 +50,27 @@ namespace dj {
             void lineedit_changed(QString text);
             void combobox_changed(int index);
             void spinbox_changed(int index);
+            void delete_row();
+            int add_player_row();
+
          private:
             QTableWidget * mPlayerTable;
             QMap<QString, QString> mPlayerSignals; //name, type
-            void insert_player_row(QTableWidget * table);
             void send_player_row(int row);
             void fillin_type_box(const QString& signal_type, QComboBox * type_box);
             void set_defaults(const QString& signal, int row);
+            int find_player_row(uint32_t key);
+            void row_midi_data(int row, midimapping_t &midi_type, int &midi_channel, int &midi_param);
+            void row_mapping_data(int row,
+                     int& player_index,
+                     QString& signal_name,
+                     midimapping_t& midi_type, int& midi_channel, int& midi_param,
+                     double& mult, double& offset);
+            void update_row(int row,
+                     int player_index,
+                     QString signal_name,
+                     midimapping_t midi_type, int midi_channel, int midi_param,
+                     double mult, double offset);
       };
    }
 }

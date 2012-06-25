@@ -144,6 +144,7 @@ void MIDIMapper::run() {
 
          //set up value remapings
          default_value_mappings(mNextMapping.signal_name, mNextMapping.value_offset, mNextMapping.value_mul);
+         mNextMapping.midi_type = status_to_mapping_t(status);
 
          //XXX disable anything that might already be bound to this key
          mMappings.insert(key, mNextMapping);
@@ -219,18 +220,8 @@ void MIDIMapper::map_player(
 
    //remove the mapping
    if (midi_type == NO_MAPPING) {
-      bool found = false;
-      mapping_hash_t::iterator it = mMappings.begin();
-      while(it != mMappings.end()) {
-         if (it->signal_name == signal_name && it->player_index == -1) {
-            found = true;
-            it = mMappings.erase(it);
-         } else
-            it++;
-      }
-      //auto save if enabled
-      if (found && mAutoSave && !mAutoSaveFileName.isEmpty())
-         save_file(mAutoSaveFileName);
+      uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
+      mMappings.remove(key);
       return;
    }
 
@@ -285,17 +276,8 @@ void MIDIMapper::map_master(
 
    //remove the mapping
    if (midi_type == NO_MAPPING) {
-      mapping_hash_t::iterator it = mMappings.begin();
-      bool found = false;
-      while(it != mMappings.end()) {
-         if (it->signal_name == signal_name && it->player_index == -1) {
-            found = true;
-            it = mMappings.erase(it);
-         } else
-            it++;
-      }
-      if (found && mAutoSave && !mAutoSaveFileName.isEmpty())
-         save_file(mAutoSaveFileName);
+      uint32_t key = make_key(midi_type, midi_channel, 0xFF & midi_param);
+      mMappings.remove(key);
       return;
    }
 
