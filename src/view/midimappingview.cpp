@@ -277,6 +277,7 @@ void MIDIMapper::delete_row() {
             dj::controller::NO_MAPPING, midi_channel, midi_param,
             mult, offset));
    mPlayerTable->removeRow(row);
+   validate();
 }
 
 int MIDIMapper::add_player_row() {
