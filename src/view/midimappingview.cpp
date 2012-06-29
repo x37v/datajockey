@@ -51,9 +51,12 @@ namespace {
       MASTER_COLUMN_COUNT
    };
 
+   void set_defaults(QTableWidget * table, int mult_row, int offset_row, const QString& signal, int row);
 }
 
 MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f) {
+   mDoubleValidator = new QDoubleValidator;
+
    QStringList signal_types;
    signal_types << "trigger" << "bool" << "int" << "double";
 
@@ -238,7 +241,7 @@ void MIDIMapper::default_button_pressed() {
 
    QComboBox * signal_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_SIGNAL));
    QString signal = signal_box->itemText(signal_box->currentIndex());
-   set_defaults(signal, row);
+   set_defaults(mPlayerTable, PLAYER_MUL, PLAYER_OFFSET, signal, row);
 }
 
 void MIDIMapper::mapping_signal_changed(int index) {
@@ -261,7 +264,7 @@ void MIDIMapper::mapping_signal_changed(int index) {
    //update the type box
    fillin_type_box(signal_type, type_box);
    //set the defaults
-   set_defaults(signal, row);
+   set_defaults(mPlayerTable, PLAYER_MUL, PLAYER_OFFSET, signal, row);
 
    validate();
 }
@@ -317,93 +320,152 @@ void MIDIMapper::delete_row() {
 }
 
 int MIDIMapper::add_player_row() {
-   QTableWidgetItem *item;
-   QComboBox * combo_box;
-   QSpinBox * spin_box;
+   return add_row(PLAYER);
+}
 
-   int row = mPlayerTable->rowCount();
-   mPlayerTable->insertRow(row);
+int MIDIMapper::add_master_row() {
+   return add_row(MASTER);
+}
+
+int MIDIMapper::add_row(table_t type) {
+   QTableWidget * table;
+   QMap<QString, QString> signal_map; //name, type
+
+   QComboBox * signal_name = NULL;
+   QComboBox * midi_type = NULL;
+   QSpinBox * player_index = NULL;
+   QSpinBox * param_num = NULL;
+   QSpinBox * channel = NULL;
+   QLineEdit * multiplier = NULL;
+   QLineEdit * offset = NULL;
+   QPushButton * default_button = NULL;
+   QPushButton * delete_button = NULL;
+   QTableWidgetItem * valid_item = NULL;
+
+   int signal_column;
+   int index_column = 0;
+   int type_column;
+   int param_num_column;
+   int channel_column;
+   int mul_column;
+   int offset_column;
+   int reset_column;
+   int valid_column;
+   int delete_column;
+   
+   if (type == PLAYER) {
+      table = mPlayerTable;
+      signal_map = mPlayerSignals;
+
+      signal_column = PLAYER_SIGNAL;
+      index_column = PLAYER_INDEX;
+      type_column = PLAYER_TYPE;
+      param_num_column = PLAYER_PARAM_NUM;
+      channel_column = PLAYER_CHANNEL;
+      mul_column = PLAYER_MUL;
+      offset_column = PLAYER_OFFSET;
+      reset_column = PLAYER_RESET;
+      valid_column = PLAYER_VALID;
+      delete_column = PLAYER_DELETE;
+   } else {
+      table = mMasterTable;
+      signal_map = mMasterSignals;
+
+      signal_column = MASTER_SIGNAL;
+      type_column = MASTER_TYPE;
+      param_num_column = MASTER_PARAM_NUM;
+      channel_column = MASTER_CHANNEL;
+      mul_column = MASTER_MUL;
+      offset_column = MASTER_OFFSET;
+      reset_column = MASTER_RESET;
+      valid_column = MASTER_VALID;
+      delete_column = MASTER_DELETE;
+   }
+
+   int row = table->rowCount();
+   table->insertRow(row);
 
    //signal name
-   combo_box = new QComboBox;
+   signal_name = new QComboBox;
    QString signal;
-   foreach(signal, mPlayerSignals.keys()) {
-      combo_box->addItem(signal);
+   foreach(signal, signal_map.keys()) {
+      signal_name->addItem(signal);
    }
+
    //set the signal to the first signal in the list
-   signal = mPlayerSignals.values().first();
-   QObject::connect(combo_box, SIGNAL(currentIndexChanged(int)), SLOT(mapping_signal_changed(int)));
-   mPlayerTable->setCellWidget(row, PLAYER_SIGNAL, combo_box);
+   signal = signal_map.values().first();
+   table->setCellWidget(row, signal_column, signal_name);
 
    //player index
-   spin_box = new QSpinBox;
-   spin_box->setRange(1, audio::AudioModel::instance()->player_count());
-   QObject::connect(spin_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-   mPlayerTable->setCellWidget(row, PLAYER_INDEX, spin_box);
+   if (type == PLAYER) {
+      player_index = new QSpinBox;
+      player_index->setRange(1, audio::AudioModel::instance()->player_count());
+      table->setCellWidget(row, index_column, player_index);
+   }
 
    //midi type
-   combo_box = new QComboBox;
-   fillin_type_box(signal, combo_box);
-   QObject::connect(combo_box, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
-   mPlayerTable->setCellWidget(row, PLAYER_TYPE, combo_box);
+   midi_type = new QComboBox;
+   fillin_type_box(signal, midi_type);
+   table->setCellWidget(row, type_column, midi_type);
 
    //param num
-   spin_box = new QSpinBox;
-   spin_box->setRange(0,127);
-   QObject::connect(spin_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-   mPlayerTable->setCellWidget(row, PLAYER_PARAM_NUM, spin_box);
+   param_num = new QSpinBox;
+   param_num->setRange(0,127);
+   table->setCellWidget(row, param_num_column, param_num);
 
    //channel
-   spin_box = new QSpinBox;
-   spin_box->setRange(1,16);
-   QObject::connect(spin_box, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-   mPlayerTable->setCellWidget(row, PLAYER_CHANNEL, spin_box);
-
-   QDoubleValidator * double_validator = new QDoubleValidator;
+   channel = new QSpinBox;
+   channel->setRange(1,16);
+   table->setCellWidget(row, channel_column, channel);
 
    double default_offset, default_mult;
    controller::MIDIMapper::default_value_mappings(signal, default_offset, default_mult);
 
    //multiplier
-   QLineEdit * number_edit = new QLineEdit;
-   number_edit->setValidator(double_validator);
-   number_edit->setText(QString::number(default_mult));
-   QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-   mPlayerTable->setCellWidget(row, PLAYER_MUL, number_edit);
+   multiplier = new QLineEdit;
+   multiplier->setValidator(mDoubleValidator);
+   multiplier->setText(QString::number(default_mult));
+   table->setCellWidget(row, mul_column, multiplier);
 
    //offset
-   number_edit = new QLineEdit;
-   number_edit->setValidator(double_validator);
-   number_edit->setText(QString::number(default_offset));
-   QObject::connect(number_edit, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-   mPlayerTable->setCellWidget(row, PLAYER_OFFSET, number_edit);
+   offset = new QLineEdit;
+   offset->setValidator(mDoubleValidator);
+   offset->setText(QString::number(default_offset));
+   table->setCellWidget(row, offset_column, offset);
 
    //default
-   QPushButton * default_button = new QPushButton("defaults");
+   default_button = new QPushButton("defaults");
    default_button->setCheckable(false);
-   mPlayerTable->setCellWidget(row, PLAYER_RESET, default_button);
-   QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
+   table->setCellWidget(row, reset_column, default_button);
 
    //valid
-   item = new QTableWidgetItem(QString());
-   item->setFlags(Qt::NoItemFlags);
-   item->setData(Qt::UserRole, row);
-   mPlayerTable->setItem(row, PLAYER_VALID, item);
+   valid_item = new QTableWidgetItem(QString());
+   valid_item->setFlags(Qt::NoItemFlags);
+   valid_item->setData(Qt::UserRole, row);
+   table->setItem(row, valid_column, valid_item);
 
    //delete
-   QPushButton * delete_button = new QPushButton("delete");
-   default_button->setCheckable(false);
-   mPlayerTable->setCellWidget(row, PLAYER_DELETE, delete_button);
-   QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_row()));
+   delete_button = new QPushButton("delete");
+   delete_button->setCheckable(false);
+   table->setCellWidget(row, delete_column, delete_button);
 
-   set_defaults(signal, row);
+   set_defaults(table, mul_column, offset_column, signal, row);
+
+   if (type == PLAYER) {
+      QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_row()));
+      QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
+      QObject::connect(multiplier, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+      QObject::connect(offset, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+      QObject::connect(channel, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+      QObject::connect(param_num, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+      QObject::connect(midi_type, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
+      QObject::connect(player_index, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+      QObject::connect(signal_name, SIGNAL(currentIndexChanged(int)), SLOT(mapping_signal_changed(int)));
+   }
 
    return row;
 }
 
-int MIDIMapper::add_master_row() {
-   return 0;
-}
 
 void MIDIMapper::send_player_row(int row) {
    int player_index, midi_channel, midi_param;
@@ -446,13 +508,6 @@ void MIDIMapper::fillin_type_box(const QString& signal_type, QComboBox * type_bo
       //store our type
       type_box->property("signal_type").toString() = signal_type;
    }
-}
-
-void MIDIMapper::set_defaults(const QString& signal, int row) {
-   double default_offset, default_mult;
-   controller::MIDIMapper::default_value_mappings(signal, default_offset, default_mult);
-   static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_OFFSET))->setText(QString::number(default_offset));
-   static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_MUL))->setText(QString::number(default_mult));
 }
 
 int MIDIMapper::find_player_row(uint32_t key) {
@@ -545,3 +600,13 @@ void MIDIMapper::update_row(int row,
    static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_OFFSET))->setText(QString::number(offset));
    static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_MUL))->setText(QString::number(mult));
 }
+
+namespace {
+   void set_defaults(QTableWidget * table, int mult_row, int offset_row, const QString& signal, int row) {
+      double default_offset, default_mult;
+      controller::MIDIMapper::default_value_mappings(signal, default_offset, default_mult);
+      static_cast<QLineEdit*>(table->cellWidget(row, mult_row))->setText(QString::number(default_mult));
+      static_cast<QLineEdit*>(table->cellWidget(row, offset_row))->setText(QString::number(default_offset));
+   }
+}
+

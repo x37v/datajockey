@@ -8,6 +8,7 @@
 
 class QTableWidget;
 class QComboBox;
+class QDoubleValidator;
 
 namespace dj {
    namespace view {
@@ -20,6 +21,10 @@ namespace dj {
             bool validate();
          protected:
             virtual void showEvent(QShowEvent * event);
+            enum table_t {
+               PLAYER,
+               MASTER
+            };
          public slots:
             void okay();
             bool apply();
@@ -60,16 +65,17 @@ namespace dj {
             void delete_row();
             int add_player_row();
             int add_master_row();
+            int add_row(table_t type);
 
          private:
             QTableWidget * mPlayerTable;
             QTableWidget * mMasterTable;
             QMap<QString, QString> mPlayerSignals; //name, type
             QMap<QString, QString> mMasterSignals; //name, type
+            QDoubleValidator * mDoubleValidator;
 
             void send_player_row(int row);
             void fillin_type_box(const QString& signal_type, QComboBox * type_box);
-            void set_defaults(const QString& signal, int row);
             int find_player_row(uint32_t key);
             void row_midi_data(int row, midimapping_t &midi_type, int &midi_channel, int &midi_param);
             void row_mapping_data(int row,
