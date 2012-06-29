@@ -30,14 +30,21 @@ namespace dj {
                   midimapping_t midi_type, int midi_channel, int midi_param,
                   double value_multiplier,
                   double value_offset);
+            void map_master(
+                  QString signal_name,
+                  midimapping_t midi_type, int midi_channel, int midi_param,
+                  double value_multiplier,
+                  double value_offset);
          signals:
             void requesting_mappings();
+
             void player_mapping_update(
                   int player_index,
                   QString signal_name,
                   midimapping_t midi_type, int midi_channel, int midi_param,
                   double value_multiplier,
                   double value_offset);
+
             void master_mapping_update(
                   QString signal_name,
                   midimapping_t midi_type, int midi_channel, int midi_param,
@@ -52,10 +59,14 @@ namespace dj {
             void spinbox_changed(int index);
             void delete_row();
             int add_player_row();
+            int add_master_row();
 
          private:
             QTableWidget * mPlayerTable;
+            QTableWidget * mMasterTable;
             QMap<QString, QString> mPlayerSignals; //name, type
+            QMap<QString, QString> mMasterSignals; //name, type
+
             void send_player_row(int row);
             void fillin_type_box(const QString& signal_type, QComboBox * type_box);
             void set_defaults(const QString& signal, int row);

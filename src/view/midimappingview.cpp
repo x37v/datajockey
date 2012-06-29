@@ -47,6 +47,7 @@ namespace {
       MASTER_OFFSET,
       MASTER_RESET,
       MASTER_VALID,
+      MASTER_DELETE,
       MASTER_COLUMN_COUNT
    };
 
@@ -66,24 +67,53 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
             mPlayerSignals[signal + "_relative"] = "trigger";
       }
    }
+   foreach(signal_type, signal_types) {
+      QString signal;
+      foreach(signal, audio::AudioModel::master_signals[signal_type]) {
+         mMasterSignals[signal] = signal_type;
+         if (signal_type == "int" || signal_type == "double")
+            mMasterSignals[signal + "_relative"] = "trigger";
+      }
+   }
 
    mPlayerTable = new QTableWidget;
+   mMasterTable = new QTableWidget;
    mPlayerTable->setColumnCount(PLAYER_COLUMN_COUNT);
+   mMasterTable->setColumnCount(MASTER_COLUMN_COUNT);
 
    QStringList header_labels;
    header_labels << "signal" << "player" << "type" << "param number" <<  "channel" << "value multiplier" << "value offset" << "reset" << "valid" << "delete";
    mPlayerTable->setHorizontalHeaderLabels(header_labels);
    mPlayerTable->verticalHeader()->setVisible(false);
 
-   QVBoxLayout * top_layout = new QVBoxLayout;
-   top_layout->addWidget(mPlayerTable);
+   header_labels.clear();
+   header_labels << "signal" << "type" << "param number" <<  "channel" << "value multiplier" << "value offset" << "reset" << "valid" << "delete";
+   mMasterTable->setHorizontalHeaderLabels(header_labels);
+   mMasterTable->verticalHeader()->setVisible(false);
 
-   QHBoxLayout * button_layout = new QHBoxLayout;
+   QVBoxLayout * player_layout = new QVBoxLayout;
+   QVBoxLayout * master_layout = new QVBoxLayout;
+   player_layout->addWidget(mPlayerTable);
+   master_layout->addWidget(mMasterTable);
 
    QPushButton * addplayer_button = new QPushButton("add mapping", this);
    addplayer_button->setCheckable(false);
    QObject::connect(addplayer_button, SIGNAL(pressed()), SLOT(add_player_row()));
-   button_layout->addWidget(addplayer_button);
+   player_layout->addWidget(addplayer_button);
+
+   QPushButton * addmaster_button = new QPushButton("add mapping", this);
+   addmaster_button->setCheckable(false);
+   QObject::connect(addmaster_button, SIGNAL(pressed()), SLOT(add_master_row()));
+   master_layout->addWidget(addmaster_button);
+
+   QHBoxLayout * table_layout = new QHBoxLayout;
+   table_layout->addLayout(player_layout);
+   table_layout->addLayout(master_layout);
+
+   QVBoxLayout * top_layout = new QVBoxLayout;
+   top_layout->addLayout(table_layout);
+
+   QHBoxLayout * button_layout = new QHBoxLayout;
 
    QPushButton * apply_button = new QPushButton("apply", this);
    apply_button->setCheckable(false);
@@ -99,7 +129,6 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
    cancel_button->setCheckable(false);
    QObject::connect(cancel_button, SIGNAL(pressed()), SLOT(close()));
    button_layout->addWidget(cancel_button);
-
 
    top_layout->addLayout(button_layout);
 
@@ -184,6 +213,13 @@ void MIDIMapper::map_player(
          signal_name,
          midi_type, midi_channel, midi_param,
          value_multiplier, value_offset);
+}
+
+void MIDIMapper::map_master(
+      QString signal_name,
+      midimapping_t midi_type, int midi_channel, int midi_param,
+      double value_multiplier,
+      double value_offset) {
 }
 
 void MIDIMapper::default_button_pressed() {
@@ -363,6 +399,10 @@ int MIDIMapper::add_player_row() {
    set_defaults(signal, row);
 
    return row;
+}
+
+int MIDIMapper::add_master_row() {
+   return 0;
 }
 
 void MIDIMapper::send_player_row(int row) {
