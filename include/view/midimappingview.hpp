@@ -4,14 +4,24 @@
 #include <QWidget>
 #include <QMap>
 #include <QString>
+#include <QTableWidget>
 #include "midimapper.hpp"
 
-class QTableWidget;
 class QComboBox;
 class QDoubleValidator;
 
 namespace dj {
    namespace view {
+
+      template <typename T>
+         int find_item_table_row(T item, int item_column, QTableWidget * table) {
+            for (int i = 0; i < table->rowCount(); i++) {
+               if (static_cast<T>(table->cellWidget(i, item_column)) == item)
+                  return i;
+            }
+            return -1;
+         }
+
       using dj::controller::midimapping_t;
       class MIDIMapper : public QWidget {
          Q_OBJECT
@@ -62,12 +72,14 @@ namespace dj {
             void lineedit_changed(QString text);
             void combobox_changed(int index);
             void spinbox_changed(int index);
-            void delete_row();
+            void delete_player_row();
+            void delete_master_row();
             int add_player_row();
             int add_master_row();
+         private:
+            void delete_row(table_t type, int row);
             int add_row(table_t type);
 
-         private:
             QTableWidget * mPlayerTable;
             QTableWidget * mMasterTable;
             QMap<QString, QString> mPlayerSignals; //name, type

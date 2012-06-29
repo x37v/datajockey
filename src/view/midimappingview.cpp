@@ -229,13 +229,7 @@ void MIDIMapper::default_button_pressed() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
 
    //find the row
-   int row = -1;
-   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
-      if (static_cast<QPushButton *>(mPlayerTable->cellWidget(i, PLAYER_RESET)) == button) {
-         row = i;
-         break;
-      }
-   }
+   int row = find_item_table_row(button, PLAYER_RESET, mPlayerTable);
    if (row < 0)
       return;
 
@@ -249,13 +243,7 @@ void MIDIMapper::mapping_signal_changed(int index) {
    const QString signal = signal_box->itemText(index);
    const QString signal_type = mPlayerSignals[signal];
 
-   int row = -1;
-   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
-      if (static_cast<QComboBox *>(mPlayerTable->cellWidget(i, PLAYER_SIGNAL)) == signal_box) {
-         row = i;
-         break;
-      }
-   }
+   int row = find_item_table_row(signal_box, PLAYER_SIGNAL, mPlayerTable);
    if (row < 0)
       return;
 
@@ -284,38 +272,47 @@ void MIDIMapper::spinbox_changed(int /* value */) {
    //QSpinBox * item = static_cast<QSpinBox *>(QObject::sender());
 }
 
-void MIDIMapper::delete_row() {
+void MIDIMapper::delete_player_row() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
    //find the row
-   int row = -1;
-   for (int i = 0; i < mPlayerTable->rowCount(); i++) {
-      if (static_cast<QPushButton *>(mPlayerTable->cellWidget(i, PLAYER_DELETE)) == button) {
-         row = i;
-         break;
-      }
-   }
-   if (row < 0)
-      return;
+   int row = find_item_table_row(button, PLAYER_DELETE, mPlayerTable);
+   if (row >= 0)
+      delete_row(PLAYER, row);
+}
 
+void MIDIMapper::delete_master_row() {
+   QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   //find the row
+   int row = find_item_table_row(button, MASTER_DELETE, mMasterTable);
+   if (row >= 0)
+      delete_row(MASTER, row);
+}
+
+void MIDIMapper::delete_row(table_t type, int row) {
    int player_index, midi_channel, midi_param;
    QString signal_name;
    midimapping_t midi_type ;
    double mult, offset;
 
-   //get the data
-   row_mapping_data(row,
-         player_index,
-         signal_name,
-         midi_type, midi_channel, midi_param,
-         mult, offset);
-
-   //send a removal
-   emit(player_mapping_update(
+   if (type == PLAYER) {
+      //get the data
+      row_mapping_data(row,
             player_index,
             signal_name,
-            dj::controller::NO_MAPPING, midi_channel, midi_param,
-            mult, offset));
-   mPlayerTable->removeRow(row);
+            midi_type, midi_channel, midi_param,
+            mult, offset);
+
+      //send a removal
+      emit(player_mapping_update(
+               player_index,
+               signal_name,
+               dj::controller::NO_MAPPING, midi_channel, midi_param,
+               mult, offset));
+      mPlayerTable->removeRow(row);
+   } else {
+      //XXX implement
+      mMasterTable->removeRow(row);
+   }
    validate();
 }
 
@@ -452,7 +449,7 @@ int MIDIMapper::add_row(table_t type) {
    set_defaults(table, mul_column, offset_column, signal, row);
 
    if (type == PLAYER) {
-      QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_row()));
+      QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_player_row()));
       QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
       QObject::connect(multiplier, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
       QObject::connect(offset, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
@@ -461,6 +458,8 @@ int MIDIMapper::add_row(table_t type) {
       QObject::connect(midi_type, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
       QObject::connect(player_index, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
       QObject::connect(signal_name, SIGNAL(currentIndexChanged(int)), SLOT(mapping_signal_changed(int)));
+   } else {
+      //XXX implement
    }
 
    return row;
