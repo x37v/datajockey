@@ -51,12 +51,44 @@ namespace {
       AudioModel::master_signals["bool"] = list;
 
       list.clear();
-      list << "volume" << "crossfade_position" << "crossfade_player_left" << "crossfade_player_right";
+      list << "volume" << "crossfade_position" << "crossfade_player_left" << "crossfade_player_right" << "track";
       AudioModel::master_signals["int"] = list;
 
       list.clear();
       list << "bpm";
       AudioModel::master_signals["double"] = list;
+
+
+      //set up relative
+      QStringList list_with_rel;
+      QString signal;
+
+      list_with_rel.clear();
+      list = AudioModel::player_signals["int"];
+      foreach(signal, list) {
+         list_with_rel << signal << (signal + "_relative");
+      }
+      AudioModel::player_signals["int"] = list_with_rel;
+
+      list_with_rel.clear();
+      list = AudioModel::player_signals["double"];
+      foreach(signal, list) {
+         list_with_rel << signal << (signal + "_relative");
+      }
+      AudioModel::player_signals["double"] = list_with_rel;
+
+      list = AudioModel::master_signals["int"];
+      foreach(signal, list) {
+         list_with_rel << signal << (signal + "_relative");
+      }
+      AudioModel::master_signals["int"] = list_with_rel;
+
+      list_with_rel.clear();
+      list = AudioModel::master_signals["double"];
+      foreach(signal, list) {
+         list_with_rel << signal << (signal + "_relative");
+      }
+      AudioModel::master_signals["double"] = list_with_rel;
    }
 }
 
@@ -467,9 +499,7 @@ void AudioModel::master_set(QString name, bool value) {
 
 void AudioModel::master_set(QString name, int value) {
 #ifdef TEST_SIGNALS_HASH
-   QString norel_name(name);
-   norel_name.remove("_relative");
-   if (!master_signals["int"].contains(name) && !master_signals["int"].contains(norel_name))
+   if (!master_signals["int"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"int\"] hash" << endl;
 #endif
    //TODO compare against last set value?
@@ -515,15 +545,15 @@ void AudioModel::master_set(QString name, int value) {
          mPlayerStates[value]->mParamBool["sync"] = true;
          emit(player_value_changed(value, "sync", true));
       }
+   } else if (name == "track") {
+      //do nothing
    } else
       cerr << name.toStdString() << " is not a master_set (int) arg" << endl;
 }
 
 void AudioModel::master_set(QString name, double value) {
 #ifdef TEST_SIGNALS_HASH
-   QString norel_name(name);
-   norel_name.remove("_relative");
-   if (!master_signals["double"].contains(name) && !master_signals["double"].contains(norel_name))
+   if (!master_signals["double"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"double\"] hash" << endl;
 #endif
    if (name == "bpm") {
@@ -640,9 +670,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
 
 void AudioModel::player_set(int player_index, QString name, int value) {
 #ifdef TEST_SIGNALS_HASH
-   QString norel_name(name);
-   norel_name.remove("_relative");
-   if (!player_signals["int"].contains(name) && !player_signals["int"].contains(norel_name))
+   if (!player_signals["int"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"int\"] hash" << endl;
 #endif
 
@@ -703,9 +731,7 @@ void AudioModel::player_set(int player_index, QString name, int value) {
 
 void AudioModel::player_set(int player_index, QString name, double value) {
 #ifdef TEST_SIGNALS_HASH
-   QString norel_name(name);
-   norel_name.remove("_relative");
-   if (!player_signals["double"].contains(name) && !player_signals["double"].contains(norel_name))
+   if (!player_signals["double"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"double\"] hash" << endl;
 #endif
    if (player_index < 0 || player_index >= (int)mNumPlayers)

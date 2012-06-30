@@ -46,8 +46,13 @@ void MIDIMapper::default_value_mappings(const QString& signal_name, double& offs
    mult = 1.0;
    offset = 0.0;
 
-   if (signal_name.contains("relative")) { //XXX what about beats or frames?
-      mult = 0.1;
+   if (signal_name.contains("relative")) { //XXX what about frames?
+      if (signal_name.contains("track") || signal_name.contains("beat"))
+         mult = 1;
+      else if (signal_name.contains("bpm"))
+         mult = 2;
+      else
+         mult = 0.1;
    } else if (signal_name == "bpm") {
       offset = 40.0;
       mult = 160.0;
@@ -95,7 +100,7 @@ void MIDIMapper::run() {
             double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
 
             //multiply by one_scale when we should
-            if (it->signal_name.contains("eq") ||
+            if (it->signal_name.contains("eq_") ||
                   it->signal_name.contains("speed") ||
                   it->signal_name.contains("volume") ||
                   it->signal_name.contains("crossfade_position"))
@@ -520,7 +525,7 @@ void MIDIMapper::mapping_from_slot(int player_index, QString name, signal_val_t 
 }
 
 MIDIMapper::signal_val_t MIDIMapper::player_value_type(QString signal_name) {
-   if (signal_name.contains("relative") || AudioModel::player_signals["trigger"].contains(signal_name) || AudioModel::player_signals["bool"].contains(signal_name))
+   if (AudioModel::player_signals["trigger"].contains(signal_name) || AudioModel::player_signals["bool"].contains(signal_name))
       return TRIGGER_VAL;
    if (AudioModel::player_signals["int"].contains(signal_name))
       return INT_VAL;
@@ -531,7 +536,7 @@ MIDIMapper::signal_val_t MIDIMapper::player_value_type(QString signal_name) {
 
 
 MIDIMapper::signal_val_t MIDIMapper::master_value_type(QString signal_name) {
-   if (signal_name.contains("relative") || AudioModel::master_signals["trigger"].contains(signal_name) || AudioModel::master_signals["bool"].contains(signal_name))
+   if (AudioModel::master_signals["trigger"].contains(signal_name) || AudioModel::master_signals["bool"].contains(signal_name))
       return TRIGGER_VAL;
    if (AudioModel::master_signals["int"].contains(signal_name))
       return INT_VAL;

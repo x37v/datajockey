@@ -66,16 +66,12 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
       QString signal;
       foreach(signal, audio::AudioModel::player_signals[signal_type]) {
          mPlayerSignals[signal] = signal_type;
-         if (signal_type == "int" || signal_type == "double")
-            mPlayerSignals[signal + "_relative"] = "trigger";
       }
    }
    foreach(signal_type, signal_types) {
       QString signal;
       foreach(signal, audio::AudioModel::master_signals[signal_type]) {
          mMasterSignals[signal] = signal_type;
-         if (signal_type == "int" || signal_type == "double")
-            mMasterSignals[signal + "_relative"] = "trigger";
       }
    }
 
