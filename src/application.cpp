@@ -211,6 +211,18 @@ Application::Application(int & argc, char ** argv) :
                double, double)),
          Qt::QueuedConnection);
    QObject::connect(
+         mTop->midi_mapper(),
+         SIGNAL(master_mapping_update(
+               QString,
+               midimapping_t, int, int,
+               double, double)),
+         mMIDIMapper,
+         SLOT(map_master(
+               QString,
+               midimapping_t, int, int,
+               double, double)),
+         Qt::QueuedConnection);
+   QObject::connect(
          mMIDIMapper,
          SIGNAL(player_mapping_update(
                int, QString,
@@ -219,6 +231,18 @@ Application::Application(int & argc, char ** argv) :
          mTop->midi_mapper(),
          SLOT(map_player(
                int, QString,
+               midimapping_t, int, int,
+               double, double)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mMIDIMapper,
+         SIGNAL(master_mapping_update(
+               QString,
+               midimapping_t, int, int,
+               double, double)),
+         mTop->midi_mapper(),
+         SLOT(map_master(
+               QString,
                midimapping_t, int, int,
                double, double)),
          Qt::QueuedConnection);

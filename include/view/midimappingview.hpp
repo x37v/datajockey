@@ -13,15 +13,6 @@ class QDoubleValidator;
 namespace dj {
    namespace view {
 
-      template <typename T>
-         int find_item_table_row(T item, int item_column, QTableWidget * table) {
-            for (int i = 0; i < table->rowCount(); i++) {
-               if (static_cast<T>(table->cellWidget(i, item_column)) == item)
-                  return i;
-            }
-            return -1;
-         }
-
       using dj::controller::midimapping_t;
       class MIDIMapper : public QWidget {
          Q_OBJECT
@@ -87,19 +78,39 @@ namespace dj {
             QDoubleValidator * mDoubleValidator;
 
             void send_player_row(int row);
+            void send_master_row(int row);
+
             void fillin_type_box(const QString& signal_type, QComboBox * type_box);
-            int find_player_row(uint32_t key);
-            void row_midi_data(int row, midimapping_t &midi_type, int &midi_channel, int &midi_param);
-            void row_mapping_data(int row,
+            int find_row_by_key(table_t type, uint32_t key);
+
+            void row_midi_data(table_t type, int row, midimapping_t &midi_type, int &midi_channel, int &midi_param);
+
+            void player_row_mapping_data(int row,
                      int& player_index,
                      QString& signal_name,
                      midimapping_t& midi_type, int& midi_channel, int& midi_param,
                      double& mult, double& offset);
+            void master_row_mapping_data(int row,
+                     QString& signal_name,
+                     midimapping_t& midi_type, int& midi_channel, int& midi_param,
+                     double& mult, double& offset);
+
+            //if you send a negative value as player_index this will address the master table
             void update_row(int row,
                      int player_index,
                      QString signal_name,
                      midimapping_t midi_type, int midi_channel, int midi_param,
                      double mult, double offset);
+
+            template <typename T>
+               static int find_item_table_row(T item, int item_column, QTableWidget * table) {
+                  for (int i = 0; i < table->rowCount(); i++) {
+                     if (static_cast<T>(table->cellWidget(i, item_column)) == item)
+                        return i;
+                  }
+                  return -1;
+               }
+
       };
    }
 }

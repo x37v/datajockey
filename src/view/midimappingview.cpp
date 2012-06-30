@@ -142,13 +142,13 @@ MIDIMapper::~MIDIMapper() {
 }
 
 bool MIDIMapper::validate() {
-   QHash<uint32_t, int> key_to_row;
+   QHash<uint32_t, QPair<table_t, int> > key_to_row;
    bool dups = false;
 
    for (int row = 0; row < mPlayerTable->rowCount(); row++) {
       midimapping_t midi_type;
       int channel, param;
-      row_midi_data(row, midi_type, channel, param);
+      row_midi_data(PLAYER, row, midi_type, channel, param);
 
       uint32_t key = controller::MIDIMapper::make_key(midi_type, (uint8_t)channel, (uint8_t)param);
       if (key_to_row.contains(key))
@@ -156,7 +156,21 @@ bool MIDIMapper::validate() {
       else //might go invalid later
          mPlayerTable->item(row, PLAYER_VALID)->setText(QString());
 
-      key_to_row.insertMulti(key, row);
+      key_to_row.insertMulti(key, QPair<table_t, int>(PLAYER, row));
+   }
+
+   for (int row = 0; row < mMasterTable->rowCount(); row++) {
+      midimapping_t midi_type;
+      int channel, param;
+      row_midi_data(MASTER, row, midi_type, channel, param);
+
+      uint32_t key = controller::MIDIMapper::make_key(midi_type, (uint8_t)channel, (uint8_t)param);
+      if (key_to_row.contains(key))
+         dups = true;
+      else //might go invalid later
+         mMasterTable->item(row, MASTER_VALID)->setText(QString());
+
+      key_to_row.insertMulti(key, QPair<table_t, int>(MASTER, row));
    }
 
    if (!dups)
@@ -165,11 +179,14 @@ bool MIDIMapper::validate() {
    //invalidate all the invalid rows
    uint32_t key;
    foreach (key, key_to_row.keys()) {
-      QList<int> rows = key_to_row.values(key);
+      QList<QPair<table_t, int> > rows = key_to_row.values(key);
       if (rows.length() > 1) {
-         int row;
+         QPair<table_t, int> row;
          foreach(row, rows) {
-            mPlayerTable->item(row, PLAYER_VALID)->setText("invalid");
+            if (row.first == PLAYER)
+               mPlayerTable->item(row.second, PLAYER_VALID)->setText("invalid");
+            else
+               mMasterTable->item(row.second, MASTER_VALID)->setText("invalid");
          }
       }
    }
@@ -199,6 +216,8 @@ bool MIDIMapper::apply() {
 
    for (int row = 0; row < mPlayerTable->rowCount(); row++)
       send_player_row(row);
+   for (int row = 0; row < mMasterTable->rowCount(); row++)
+      send_master_row(row);
    return true;
 }
 
@@ -208,7 +227,7 @@ void MIDIMapper::map_player(
       midimapping_t midi_type, int midi_channel, int midi_param,
       double value_multiplier, double value_offset) {
    uint32_t key = controller::MIDIMapper::make_key(midi_type, (uint8_t)midi_channel, (uint8_t)midi_param);
-   int row = find_player_row(key);
+   int row = find_row_by_key(PLAYER, key);
    if (row < 0)
       row = add_player_row();
    update_row(row,
@@ -223,36 +242,85 @@ void MIDIMapper::map_master(
       midimapping_t midi_type, int midi_channel, int midi_param,
       double value_multiplier,
       double value_offset) {
+   uint32_t key = controller::MIDIMapper::make_key(midi_type, (uint8_t)midi_channel, (uint8_t)midi_param);
+   int row = find_row_by_key(MASTER, key);
+   if (row < 0)
+      row = add_master_row();
+   update_row(row,
+         -1,
+         signal_name,
+         midi_type, midi_channel, midi_param,
+         value_multiplier, value_offset);
 }
 
 void MIDIMapper::default_button_pressed() {
    QPushButton * button = static_cast<QPushButton *>(QObject::sender());
+   const QString table_name = button->property("table").toString();
+   QTableWidget * table;
+
+   int reset_column, signal_column, offset_column, mul_column;
+
+   if (table_name == "player") {
+      table = mPlayerTable;
+      reset_column = PLAYER_RESET;
+      signal_column = PLAYER_SIGNAL;
+      offset_column = PLAYER_OFFSET;
+      mul_column = PLAYER_MUL;
+   } else {
+      table = mMasterTable;
+      reset_column = MASTER_RESET;
+      signal_column = MASTER_SIGNAL;
+      offset_column = MASTER_OFFSET;
+      mul_column = MASTER_MUL;
+   }
 
    //find the row
-   int row = find_item_table_row(button, PLAYER_RESET, mPlayerTable);
+   int row = find_item_table_row(button, reset_column, table);
    if (row < 0)
       return;
 
-   QComboBox * signal_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_SIGNAL));
+   QComboBox * signal_box = static_cast<QComboBox *>(table->cellWidget(row, signal_column));
    QString signal = signal_box->itemText(signal_box->currentIndex());
-   set_defaults(mPlayerTable, PLAYER_MUL, PLAYER_OFFSET, signal, row);
+   set_defaults(table, mul_column, offset_column, signal, row);
 }
 
 void MIDIMapper::mapping_signal_changed(int index) {
    QComboBox * signal_box = static_cast<QComboBox *>(QObject::sender());
    const QString signal = signal_box->itemText(index);
-   const QString signal_type = mPlayerSignals[signal];
+   const QString table_name = signal_box->property("table").toString();
+   QTableWidget * table;
+   QMap<QString, QString> signal_map; //name, type
 
-   int row = find_item_table_row(signal_box, PLAYER_SIGNAL, mPlayerTable);
+   int signal_column, type_column, mul_column, offset_column;
+   if (table_name == "player") {
+      table = mPlayerTable;
+      signal_map = mPlayerSignals;
+      signal_column = PLAYER_SIGNAL;
+      type_column = PLAYER_TYPE;
+      offset_column = PLAYER_OFFSET;
+      mul_column = PLAYER_MUL;
+   } else {
+      table = mMasterTable;
+      signal_map = mMasterSignals;
+      signal_column = MASTER_SIGNAL;
+      type_column = MASTER_TYPE;;
+      offset_column = MASTER_OFFSET;
+      mul_column = MASTER_MUL;
+   }
+
+   const QString signal_type = signal_map[signal];
+
+   int row = find_item_table_row(signal_box, signal_column, table);
    if (row < 0)
       return;
 
-   QComboBox * type_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
+   QComboBox * type_box = static_cast<QComboBox *>(table->cellWidget(row, type_column));
 
    //update the type box
    fillin_type_box(signal_type, type_box);
+
    //set the defaults
-   set_defaults(mPlayerTable, PLAYER_MUL, PLAYER_OFFSET, signal, row);
+   set_defaults(table, mul_column, offset_column, signal, row);
 
    validate();
 }
@@ -296,7 +364,7 @@ void MIDIMapper::delete_row(table_t type, int row) {
 
    if (type == PLAYER) {
       //get the data
-      row_mapping_data(row,
+      player_row_mapping_data(row,
             player_index,
             signal_name,
             midi_type, midi_channel, midi_param,
@@ -310,7 +378,17 @@ void MIDIMapper::delete_row(table_t type, int row) {
                mult, offset));
       mPlayerTable->removeRow(row);
    } else {
-      //XXX implement
+      //get the data
+      master_row_mapping_data(row,
+            signal_name,
+            midi_type, midi_channel, midi_param,
+            mult, offset);
+
+      //send a removal
+      emit(master_mapping_update(
+               signal_name,
+               dj::controller::NO_MAPPING, midi_channel, midi_param,
+               mult, offset));
       mMasterTable->removeRow(row);
    }
    validate();
@@ -384,6 +462,7 @@ int MIDIMapper::add_row(table_t type) {
 
    //signal name
    signal_name = new QComboBox;
+   signal_name->setProperty("table", type == PLAYER ? "player" : "master");
    QString signal;
    foreach(signal, signal_map.keys()) {
       signal_name->addItem(signal);
@@ -433,6 +512,7 @@ int MIDIMapper::add_row(table_t type) {
    //default
    default_button = new QPushButton("defaults");
    default_button->setCheckable(false);
+   default_button->setProperty("table", type == PLAYER ? "player" : "master");
    table->setCellWidget(row, reset_column, default_button);
 
    //valid
@@ -444,27 +524,29 @@ int MIDIMapper::add_row(table_t type) {
    //delete
    delete_button = new QPushButton("delete");
    delete_button->setCheckable(false);
+   delete_button->setProperty("table", type == PLAYER ? "player" : "master");
    table->setCellWidget(row, delete_column, delete_button);
 
    set_defaults(table, mul_column, offset_column, signal, row);
 
    if (type == PLAYER) {
       QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_player_row()));
-      QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
-      QObject::connect(multiplier, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-      QObject::connect(offset, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
-      QObject::connect(channel, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-      QObject::connect(param_num, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-      QObject::connect(midi_type, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
       QObject::connect(player_index, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
-      QObject::connect(signal_name, SIGNAL(currentIndexChanged(int)), SLOT(mapping_signal_changed(int)));
    } else {
-      //XXX implement
+      QObject::connect(delete_button, SIGNAL(pressed()), SLOT(delete_master_row()));
    }
+
+   //generic
+   QObject::connect(default_button, SIGNAL(pressed()), SLOT(default_button_pressed()));
+   QObject::connect(signal_name, SIGNAL(currentIndexChanged(int)), SLOT(mapping_signal_changed(int)));
+   QObject::connect(multiplier, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+   QObject::connect(offset, SIGNAL(textChanged(QString)), SLOT(lineedit_changed(QString)));
+   QObject::connect(channel, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+   QObject::connect(param_num, SIGNAL(valueChanged(int)), SLOT(spinbox_changed(int)));
+   QObject::connect(midi_type, SIGNAL(currentIndexChanged(int)), SLOT(combobox_changed(int)));
 
    return row;
 }
-
 
 void MIDIMapper::send_player_row(int row) {
    int player_index, midi_channel, midi_param;
@@ -473,7 +555,7 @@ void MIDIMapper::send_player_row(int row) {
    double mult, offset;
 
    //get the data
-   row_mapping_data(row,
+   player_row_mapping_data(row,
          player_index,
          signal_name,
          midi_type, midi_channel, midi_param,
@@ -482,6 +564,25 @@ void MIDIMapper::send_player_row(int row) {
    //send it
    emit(player_mapping_update(
             player_index,
+            signal_name,
+            midi_type, midi_channel, midi_param,
+            mult, offset));
+}
+
+void MIDIMapper::send_master_row(int row) {
+   int midi_channel, midi_param;
+   QString signal_name;
+   midimapping_t midi_type ;
+   double mult, offset;
+
+   //get the data
+   master_row_mapping_data(row,
+         signal_name,
+         midi_type, midi_channel, midi_param,
+         mult, offset);
+
+   //send it
+   emit(master_mapping_update(
             signal_name,
             midi_type, midi_channel, midi_param,
             mult, offset));
@@ -509,11 +610,12 @@ void MIDIMapper::fillin_type_box(const QString& signal_type, QComboBox * type_bo
    }
 }
 
-int MIDIMapper::find_player_row(uint32_t key) {
-   for (int row = 0; row < mPlayerTable->rowCount(); row++) {
+int MIDIMapper::find_row_by_key(table_t type, uint32_t key) {
+   QTableWidget * table = (type == PLAYER ? mPlayerTable : mMasterTable);
+   for (int row = 0; row < table->rowCount(); row++) {
       midimapping_t midi_type;
       int channel, param;
-      row_midi_data(row, midi_type, channel, param);
+      row_midi_data(type, row, midi_type, channel, param);
       uint32_t row_key = controller::MIDIMapper::make_key(midi_type, (uint8_t)channel, (uint8_t)param);
       if (key == row_key)
          return row;
@@ -521,14 +623,21 @@ int MIDIMapper::find_player_row(uint32_t key) {
    return -1;
 }
 
-void MIDIMapper::row_midi_data(int row, midimapping_t &midi_type, int &midi_channel, int &midi_param) {
-   QComboBox * combo_box = static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
-   midi_type = static_cast<midimapping_t>(combo_box->itemData(combo_box->currentIndex()).toInt());
-   midi_channel = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_CHANNEL))->value() - 1;
-   midi_param = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_PARAM_NUM))->value();
+void MIDIMapper::row_midi_data(table_t type, int row, midimapping_t &midi_type, int &midi_channel, int &midi_param) {
+   if (type == PLAYER) {
+      QComboBox * combo_box = static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
+      midi_type = static_cast<midimapping_t>(combo_box->itemData(combo_box->currentIndex()).toInt());
+      midi_channel = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_CHANNEL))->value() - 1;
+      midi_param = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_PARAM_NUM))->value();
+   } else {
+      QComboBox * combo_box = static_cast<QComboBox*>(mMasterTable->cellWidget(row, MASTER_TYPE));
+      midi_type = static_cast<midimapping_t>(combo_box->itemData(combo_box->currentIndex()).toInt());
+      midi_channel = static_cast<QSpinBox*>(mMasterTable->cellWidget(row, MASTER_CHANNEL))->value() - 1;
+      midi_param = static_cast<QSpinBox*>(mMasterTable->cellWidget(row, MASTER_PARAM_NUM))->value();
+   }
 }
 
-void MIDIMapper::row_mapping_data(int row,
+void MIDIMapper::player_row_mapping_data(int row,
       int& player_index,
       QString& signal_name,
       midimapping_t& midi_type, int& midi_channel, int& midi_param,
@@ -558,13 +667,73 @@ void MIDIMapper::row_mapping_data(int row,
    mult = static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_MUL))->text().toDouble();
 }
 
+void MIDIMapper::master_row_mapping_data(int row,
+      QString& signal_name,
+      midimapping_t& midi_type, int& midi_channel, int& midi_param,
+      double& mult, double& offset) {
+   //signal
+   QComboBox * combo_box = static_cast<QComboBox*>(mMasterTable->cellWidget(row, MASTER_SIGNAL));
+   signal_name = combo_box->itemText(combo_box->currentIndex());
+
+   //type
+   combo_box = static_cast<QComboBox*>(mMasterTable->cellWidget(row, MASTER_TYPE));
+   midi_type = static_cast<midimapping_t>(combo_box->itemData(combo_box->currentIndex()).toInt());
+
+   //channel
+   QSpinBox *spin_box = static_cast<QSpinBox*>(mMasterTable->cellWidget(row, MASTER_CHANNEL));
+   midi_channel = spin_box->value() - 1;
+
+   //param
+   spin_box = static_cast<QSpinBox*>(mMasterTable->cellWidget(row, MASTER_PARAM_NUM));
+   midi_param = spin_box->value();
+
+   //offset/mul
+   offset = static_cast<QLineEdit*>(mMasterTable->cellWidget(row, MASTER_OFFSET))->text().toDouble();
+   mult = static_cast<QLineEdit*>(mMasterTable->cellWidget(row, MASTER_MUL))->text().toDouble();
+}
+
 void MIDIMapper::update_row(int row,
       int player_index,
       QString signal_name,
       midimapping_t midi_type, int midi_channel, int midi_param,
       double mult, double offset) {
+
+   QTableWidget * table;
+   QMap<QString, QString> signal_map; //name, type
+
+   int signal_column;
+   int index_column = 0;
+   int type_column;
+   int param_num_column;
+   int channel_column;
+   int mul_column;
+   int offset_column;
+   
+   if (player_index >= 0) {
+      table = mPlayerTable;
+      signal_map = mPlayerSignals;
+
+      signal_column = PLAYER_SIGNAL;
+      index_column = PLAYER_INDEX;
+      type_column = PLAYER_TYPE;
+      param_num_column = PLAYER_PARAM_NUM;
+      channel_column = PLAYER_CHANNEL;
+      mul_column = PLAYER_MUL;
+      offset_column = PLAYER_OFFSET;
+   } else {
+      table = mMasterTable;
+      signal_map = mMasterSignals;
+
+      signal_column = MASTER_SIGNAL;
+      type_column = MASTER_TYPE;
+      param_num_column = MASTER_PARAM_NUM;
+      channel_column = MASTER_CHANNEL;
+      mul_column = MASTER_MUL;
+      offset_column = MASTER_OFFSET;
+   }
+
    //signal
-   QComboBox * combo_box = static_cast<QComboBox*>(mPlayerTable->cellWidget(row, PLAYER_SIGNAL));
+   QComboBox * combo_box = static_cast<QComboBox*>(table->cellWidget(row, signal_column));
    int index = combo_box->findText(signal_name);
    if (index < 0) {
       cerr << DJ_FILEANDLINE << signal_name.toStdString() << " not found in signal list" << endl;
@@ -572,13 +741,16 @@ void MIDIMapper::update_row(int row,
    }
    combo_box->setCurrentIndex(index);
 
-   //index
-   QSpinBox * spin_box = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_INDEX));
-   spin_box->setValue(player_index + 1);
+   QSpinBox * spin_box = NULL;
+   if (player_index >= 0) {
+      //index
+      spin_box = static_cast<QSpinBox*>(table->cellWidget(row, index_column));
+      spin_box->setValue(player_index + 1);
+   }
 
    //update the type box
-   const QString signal_type = mPlayerSignals[signal_name];
-   QComboBox * type_box = static_cast<QComboBox *>(mPlayerTable->cellWidget(row, PLAYER_TYPE));
+   const QString signal_type = signal_map[signal_name];
+   QComboBox * type_box = static_cast<QComboBox *>(table->cellWidget(row, type_column));
    fillin_type_box(signal_type, type_box);
    index = type_box->findData(midi_type);
    if (index < 0) {
@@ -588,16 +760,16 @@ void MIDIMapper::update_row(int row,
    type_box->setCurrentIndex(index);
 
    //channel
-   spin_box = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_CHANNEL));
+   spin_box = static_cast<QSpinBox*>(table->cellWidget(row, channel_column));
    spin_box->setValue(midi_channel + 1);
 
    //param
-   spin_box = static_cast<QSpinBox*>(mPlayerTable->cellWidget(row, PLAYER_PARAM_NUM));
+   spin_box = static_cast<QSpinBox*>(table->cellWidget(row, param_num_column));
    spin_box->setValue(midi_param);
 
    //offset/mul
-   static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_OFFSET))->setText(QString::number(offset));
-   static_cast<QLineEdit*>(mPlayerTable->cellWidget(row, PLAYER_MUL))->setText(QString::number(mult));
+   static_cast<QLineEdit*>(table->cellWidget(row, offset_column))->setText(QString::number(offset));
+   static_cast<QLineEdit*>(table->cellWidget(row, mul_column))->setText(QString::number(mult));
 }
 
 namespace {
