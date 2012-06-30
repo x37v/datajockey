@@ -313,7 +313,7 @@ void MIDIMapper::mapping_signal_changed(int index) {
    QComboBox * type_box = static_cast<QComboBox *>(table->cellWidget(row, type_column));
 
    //update the type box
-   fillin_type_box(signal_type, type_box);
+   fillin_type_box(signal, signal_type, type_box);
 
    //set the defaults
    set_defaults(table, mul_column, offset_column, signal, row);
@@ -465,7 +465,7 @@ int MIDIMapper::add_row(table_t type) {
    }
 
    //set the signal to the first signal in the list
-   signal = signal_map.values().first();
+   signal = signal_map.keys().first();
    table->setCellWidget(row, signal_column, signal_name);
 
    //player index
@@ -477,7 +477,7 @@ int MIDIMapper::add_row(table_t type) {
 
    //midi type
    midi_type = new QComboBox;
-   fillin_type_box(signal, midi_type);
+   fillin_type_box(signal, signal_map.values().first(), midi_type);
    table->setCellWidget(row, type_column, midi_type);
 
    //param num
@@ -584,14 +584,14 @@ void MIDIMapper::send_master_row(int row) {
             mult, offset));
 }
 
-void MIDIMapper::fillin_type_box(const QString& signal_type, QComboBox * type_box) {
+void MIDIMapper::fillin_type_box(const QString& signal_name, const QString& signal_type, QComboBox * type_box) {
    if (type_box->property("signal_type").toString() != signal_type) {
       //remove all
       while(type_box->count() > 0)
          type_box->removeItem(0);
 
       //build up a new one
-      if (signal_type == "trigger") {
+      if (signal_type == "trigger" || signal_name.contains("relative")) {
          type_box->addItem("cc", dj::controller::CONTROL_CHANGE);
          type_box->addItem("note on", dj::controller::NOTE_ON);
       } else if (signal_type == "bool") {
@@ -747,7 +747,7 @@ void MIDIMapper::update_row(int row,
    //update the type box
    const QString signal_type = signal_map[signal_name];
    QComboBox * type_box = static_cast<QComboBox *>(table->cellWidget(row, type_column));
-   fillin_type_box(signal_type, type_box);
+   fillin_type_box(signal_name, signal_type, type_box);
    index = type_box->findData(midi_type);
    if (index < 0) {
       cerr << DJ_FILEANDLINE << " problem finding type in type box " << signal_type.toStdString() << endl;

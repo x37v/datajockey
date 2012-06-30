@@ -80,7 +80,7 @@ namespace dj {
             void send_player_row(int row);
             void send_master_row(int row);
 
-            void fillin_type_box(const QString& signal_type, QComboBox * type_box);
+            void fillin_type_box(const QString& signal_name, const QString& signal_type, QComboBox * type_box);
             int find_row_by_key(table_t type, uint32_t key);
 
             void row_midi_data(table_t type, int row, midimapping_t &midi_type, int &midi_channel, int &midi_param);

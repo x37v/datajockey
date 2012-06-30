@@ -96,9 +96,12 @@ void MIDIMapper::run() {
       if (mMappingState == IDLE) {
          mapping_hash_t::iterator it = mMappings.find(key);
          if (it != mMappings.end()) {
-            uint8_t input_value = buff.data[2];
-            double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
+            const uint8_t input_value = buff.data[2];
+            //relative signals don't send zeros
+            if (it->signal_name.contains("relative") && input_value == 0)
+               continue;
 
+            double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
             //multiply by one_scale when we should
             if (it->signal_name.contains("eq_") ||
                   it->signal_name.contains("speed") ||

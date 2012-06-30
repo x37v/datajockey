@@ -559,9 +559,15 @@ void AudioModel::master_set(QString name, double value) {
    if (name == "bpm") {
       if (value != mMasterBPM) {
          mMasterBPM = value;
-         queue_command(new TransportBPMCommand(mMaster->transport(), value));
-         emit(master_value_changed(name, value));
+         queue_command(new TransportBPMCommand(mMaster->transport(), mMasterBPM));
+         emit(master_value_changed(name, mMasterBPM));
       }
+   } else if (name == "bpm_relative") {
+      mMasterBPM += value;
+      queue_command(new TransportBPMCommand(mMaster->transport(), mMasterBPM));
+      emit(master_value_changed("bpm", mMasterBPM));
+   } else {
+      cerr << DJ_FILEANDLINE << "oops, " << name.toStdString() << " not executed in audio model" << endl;
    }
 }
 
