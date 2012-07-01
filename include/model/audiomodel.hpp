@@ -117,10 +117,9 @@ namespace dj {
 
 
             //maintain master state info
-            double mMasterBPM;
-            bool mCrossFadeEnabled;
-            int mCrossFadePosition;
-            int mCrossFadePlayers[2];
+            QHash<QString, bool> mMasterParamBool;
+            QHash<QString, int> mMasterParamInt;
+            QHash<QString, double> mMasterParamDouble;
 
             int mPlayerAudibleThresholdVolume;
             int mCrossfadeAudibleThresholdPosition;

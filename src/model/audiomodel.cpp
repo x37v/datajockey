@@ -208,9 +208,6 @@ AudioModel * AudioModel::cInstance = NULL;
 AudioModel::AudioModel() :
    QObject(),
    mPlayerStates(),
-   mMasterBPM(0.0),
-   mCrossFadeEnabled(false),
-   mCrossFadePosition(0),
    mPlayerAudibleThresholdVolume(0.05 * one_scale), //XXX make this configurable?
    mCrossfadeAudibleThresholdPosition(0.05 * one_scale),
    mBumpSeconds(0.25)
@@ -225,9 +222,13 @@ AudioModel::AudioModel() :
    qRegisterMetaType<BeatBufferPtr>("BeatBufferPtr");
 
    //set them to be out of range at first, this will be updated later via a slot
-   mCrossFadePlayers[0] = num_players;
-   mCrossFadePlayers[1] = num_players;
-
+   mMasterParamDouble["bpm"] = 10.0;
+   mMasterParamBool["crossfade_enabled"] = false;
+   mMasterParamInt["volume"] = 0;
+   mMasterParamInt["cue_volume"] = 0;
+   mMasterParamInt["crossfade_position"] = 0;
+   mMasterParamInt["crossfade_player_left"] = num_players;
+   mMasterParamInt["crossfade_player_right"] = num_players;
    mAudioIO = dj::audio::AudioIO::instance();
    mMaster = dj::audio::Master::instance();
 
@@ -489,8 +490,8 @@ void AudioModel::master_set(QString name, bool value) {
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"bool\"] hash" << endl;
 #endif
    if (name == "crossfade_enabled") {
-      if (value != mCrossFadeEnabled) {
-         mCrossFadeEnabled = value;
+      if (value != mMasterParamBool["crossfade_enabled"]) {
+         mMasterParamBool["crossfade_enabled"] = value;
          queue_command(new MasterBoolCommand(value ? MasterBoolCommand::XFADE : MasterBoolCommand::NO_XFADE));
       }
    } else
@@ -502,14 +503,29 @@ void AudioModel::master_set(QString name, int value) {
    if (!master_signals["int"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"int\"] hash" << endl;
 #endif
-   //TODO compare against last set value?
+
+   //if we have a relative value, make it absolute with the addition of the parameter in question
+   if (name.contains("_relative")) {
+      QString nonrel = name;
+      nonrel.remove("_relative");
+      if (mMasterParamInt.contains(nonrel)) {
+         name = nonrel;
+         value += mMasterParamInt[name];
+      }
+   }
    
    if (name == "volume") {
       value = clamp(value, 0, (int)(1.5 * one_scale));
+      if (value == mMasterParamInt[name])
+         return;
+      mMasterParamInt[name] = value;
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::MAIN_VOLUME, (double)value / (double)one_scale));
       emit(master_value_changed("volume", value));
    } else if (name == "cue_volume") {
       value = clamp(value, 0, (int)(1.5 * one_scale));
+      if (value == mMasterParamInt[name])
+         return;
+      mMasterParamInt[name] = value;
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::CUE_VOLUME, (double)value / (double)one_scale));
       emit(master_value_changed("cue_volume", value));
    } else if (name == "crossfade_player_left" || name == "crossfade_player_right") {
@@ -518,23 +534,23 @@ void AudioModel::master_set(QString name, int value) {
          return;
       }
       if (name.contains("left")) {
-         if (mCrossFadePlayers[0] == value)
+         if (mMasterParamInt["crossfade_player_left"] == value)
             return;
-         mCrossFadePlayers[0] = value;
+         mMasterParamInt["crossfade_player_left"] = value;
       } else {
-         if (mCrossFadePlayers[1] == value)
+         if (mMasterParamInt["crossfade_player_right"] == value)
             return;
-         mCrossFadePlayers[1] = value;
+         mMasterParamInt["crossfade_player_right"] = value;
       }
-      queue_command(new MasterXFadeSelectCommand((unsigned int)mCrossFadePlayers[0], (unsigned int)mCrossFadePlayers[1]));
+      queue_command(new MasterXFadeSelectCommand((unsigned int)mMasterParamInt["crossfade_player_left"], (unsigned int)mMasterParamInt["crossfade_player_right"]));
       emit(master_value_changed(name, value));
    } else if (name == "crossfade_position") {
       value = clamp(value, 0, (int)one_scale);
-      if (value != mCrossFadePosition) {
-         mCrossFadePosition = value;
-         queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
-         emit(master_value_changed("crossfade_position", value));
-      }
+      if (value == mMasterParamInt[name])
+         return;
+      mMasterParamInt["crossfade_position"] = value;
+      queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
+      emit(master_value_changed("crossfade_position", value));
    } else if (name == "sync_to_player") {
       if (value < 0 || value >= (int)mNumPlayers)
          return;
@@ -556,16 +572,22 @@ void AudioModel::master_set(QString name, double value) {
    if (!master_signals["double"].contains(name))
       cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"double\"] hash" << endl;
 #endif
-   if (name == "bpm") {
-      if (value != mMasterBPM) {
-         mMasterBPM = value;
-         queue_command(new TransportBPMCommand(mMaster->transport(), mMasterBPM));
-         emit(master_value_changed(name, mMasterBPM));
+   //if we have a relative value, make it absolute with the addition of the parameter in question
+   if (name.contains("_relative")) {
+      QString nonrel = name;
+      nonrel.remove("_relative");
+      if (mMasterParamDouble.contains(nonrel)) {
+         name = nonrel;
+         value += mMasterParamDouble[name];
       }
-   } else if (name == "bpm_relative") {
-      mMasterBPM += value;
-      queue_command(new TransportBPMCommand(mMaster->transport(), mMasterBPM));
-      emit(master_value_changed("bpm", mMasterBPM));
+   }
+
+   if (name == "bpm") {
+      if (value != mMasterParamDouble["bpm"]) {
+         mMasterParamDouble["bpm"] = value;
+         queue_command(new TransportBPMCommand(mMaster->transport(), mMasterParamDouble["bpm"]));
+         emit(master_value_changed(name, mMasterParamDouble["bpm"]));
+      }
    } else {
       cerr << DJ_FILEANDLINE << "oops, " << name.toStdString() << " not executed in audio model" << endl;
    }
@@ -840,9 +862,9 @@ void AudioModel::player_eval_audible(int player_index) {
          state->mParamBool["pause"] ||
          //XXX detect player cue style: player->mParamBool["cue"]
          state->mParamInt["volume"] < mPlayerAudibleThresholdVolume ||
-         (mCrossFadeEnabled && 
-          ((mCrossFadePlayers[1] == player_index && mCrossFadePosition < mCrossfadeAudibleThresholdPosition) ||
-          (mCrossFadePlayers[0] == player_index && mCrossFadePosition > (one_scale - mCrossfadeAudibleThresholdPosition))))
+         (mMasterParamBool["crossfade_enabled"] && 
+          ((mMasterParamInt["crossfade_player_right"] == player_index && mMasterParamInt["crossfade_position"] < mCrossfadeAudibleThresholdPosition) ||
+          (mMasterParamInt["crossfade_player_left"] == player_index && mMasterParamInt["crossfade_position"] > (one_scale - mCrossfadeAudibleThresholdPosition))))
          ) {
       audible = false;
    }
