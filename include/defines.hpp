@@ -30,6 +30,8 @@ namespace dj {
             return top;
          return val;
       }
+
+   const int volume_slider_height = 200;
 }
 
 

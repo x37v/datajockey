@@ -116,6 +116,8 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    mMasterVolume = new QSlider(Qt::Vertical, this);
    mMasterVolume->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
    mMasterVolume->setValue(one_scale);
+   mMasterVolume->setMinimumHeight(dj::volume_slider_height);
+   mMasterVolume->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
    mAudioLevel = new AudioLevel(this);
 
@@ -300,16 +302,5 @@ void MixerPanel::relay_volume_changed(int value) {
 
 void MixerPanel::relay_tempo_changed(double value) {
    emit(master_value_changed("bpm", value));
-}
-
-void MixerPanel::resizeEvent(QResizeEvent * event) {
-   QWidget::resizeEvent(event);
-
-   QRect rect = mPlayers[0]->slider_level_geometry();
-   QRect mrect_orig = mSliderLevelLayout->geometry();
-   QRect mrect = mrect_orig;
-   mrect.setHeight(rect.height());
-   mrect.translate(0, mrect_orig.height() - mrect.height());
-   mSliderLevelLayout->setGeometry(mrect);
 }
 

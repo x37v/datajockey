@@ -119,6 +119,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mVolumeSlider = new QSlider(Qt::Vertical, this);
    mVolumeSlider->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
    mVolumeSlider->setValue(one_scale);
+   mVolumeSlider->setMinimumHeight(dj::volume_slider_height);
+   mVolumeSlider->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
    mAudioLevelView = new AudioLevel(this);
 
@@ -129,6 +131,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mSliderLevelLayout->addStretch(10);
    mSliderLevelLayout->setContentsMargins(0,0,0,0);
 
+   mControlLayout->addStretch(10);
    mControlLayout->addLayout(mSliderLevelLayout);
    mControlLayout->setContentsMargins(0,0,0,0);
 

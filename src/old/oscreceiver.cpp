@@ -229,9 +229,9 @@ void OscReceiver::processDJControlMessage(const std::string addr, int mixer, con
 
       //absolute
       if(strcmp(matches[1].str().c_str(), "") == 0)
-         emit(player_value_changed(mixer, "seek_beat", beats));
+         emit(player_value_changed(mixer, "play_beat", beats));
       else
-         emit(player_value_changed(mixer, "seek_beat_relative", beats));
+         emit(player_value_changed(mixer, "play_beat_relative", beats));
    } 
 #if 0
    else if(boost::regex_match(addr.c_str(), matches, beatoffset_re)){

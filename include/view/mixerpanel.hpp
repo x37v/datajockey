@@ -50,9 +50,6 @@ namespace dj {
             void relay_volume_changed(int value);
             void relay_tempo_changed(double value);
 
-         protected:
-            virtual void resizeEvent(QResizeEvent * event);
-
          signals:
             void midi_map_triggered();
 
