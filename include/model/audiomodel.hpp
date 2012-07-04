@@ -150,7 +150,7 @@ namespace dj {
 
             template <typename T>
                void make_slotarg_absolute(const QHash<QString, T>& param_hash, QString& param_name, T& param_value) {
-                  if (param_name.contains("play_")) //_beat, _position, _frame, ..
+                  if (param_name.contains("play_") || param_name.contains("seek") || param_name.contains("bump")) //_beat, _position, _frame, ..
                      return;
 
                   //if we have a relative value, make it absolute with the addition of the parameter in question
@@ -163,6 +163,10 @@ namespace dj {
                      }
                   }
                }
+
+            //call these after converting relative to absolute
+            void slotval_clamp(const QString& param_name, int& param_value);
+            void slotval_clamp(const QString& param_name, double& param_value);
       };
 
       //TODO how to get it to run at the end of the frame?

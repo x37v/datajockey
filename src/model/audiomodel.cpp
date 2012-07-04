@@ -16,6 +16,8 @@ using std::endl;
 
 namespace {
    const int audible_timeout_ms = 200;
+   const int one_point_five = static_cast<int>((double)one_scale * 1.5);
+   const int ione_scale = one_scale;
 
    void init_signal_hashes() {
       QStringList list;
@@ -86,15 +88,6 @@ namespace {
       }
       AudioModel::master_signals["double"] = list_with_rel;
    }
-}
-
-template <typename T>
-T clamp(T val, T bottom, T top) {
-   if (val < bottom)
-      return bottom;
-   if (val > top)
-      return top;
-   return val;
 }
 
 
@@ -380,8 +373,6 @@ void AudioModel::set_player_eq(int player_index, int band, int value) {
    if (band < 0 || band > 2)
       return;
 
-   int ione_scale = one_scale;
-
    if (value < -ione_scale)
       value = -ione_scale;
    else if (value > ione_scale)
@@ -494,18 +485,16 @@ void AudioModel::master_set(QString name, bool value) {
 void AudioModel::master_set(QString name, int value) {
    //if we have a relative value, make it absolute with the addition of the parameter in question
    make_slotarg_absolute(mMasterParamInt, name, value);
+   slotval_clamp(name, value);
+   
+   if (mMasterParamInt.contains(name) && value == mMasterParamInt[name])
+      return;
    
    if (name == "volume") {
-      value = clamp(value, 0, (int)(1.5 * one_scale));
-      if (value == mMasterParamInt[name])
-         return;
       mMasterParamInt[name] = value;
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::MAIN_VOLUME, (double)value / (double)one_scale));
       emit(master_value_changed("volume", value));
    } else if (name == "cue_volume") {
-      value = clamp(value, 0, (int)(1.5 * one_scale));
-      if (value == mMasterParamInt[name])
-         return;
       mMasterParamInt[name] = value;
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::CUE_VOLUME, (double)value / (double)one_scale));
       emit(master_value_changed("cue_volume", value));
@@ -526,9 +515,6 @@ void AudioModel::master_set(QString name, int value) {
       queue_command(new MasterXFadeSelectCommand((unsigned int)mMasterParamInt["crossfade_player_left"], (unsigned int)mMasterParamInt["crossfade_player_right"]));
       emit(master_value_changed(name, value));
    } else if (name == "crossfade_position") {
-      value = clamp(value, 0, (int)one_scale);
-      if (value == mMasterParamInt[name])
-         return;
       mMasterParamInt["crossfade_position"] = value;
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
       emit(master_value_changed("crossfade_position", value));
@@ -543,21 +529,25 @@ void AudioModel::master_set(QString name, int value) {
          emit(player_value_changed(value, "sync", true));
       }
    } else if (name == "track") {
-      //do nothing
-   } else
+      return ;//do nothing
+   } else {
       cerr << name.toStdString() << " is not a master_set (int) arg" << endl;
+      return;
+   }
 }
 
 void AudioModel::master_set(QString name, double value) {
    //if we have a relative value, make it absolute with the addition of the parameter in question
    make_slotarg_absolute(mMasterParamDouble, name, value);
+   slotval_clamp(name, value);
+
+   if (mMasterParamDouble.contains(name) && value == mMasterParamDouble[name])
+      return;
 
    if (name == "bpm") {
-      if (value != mMasterParamDouble["bpm"]) {
-         mMasterParamDouble["bpm"] = value;
-         queue_command(new TransportBPMCommand(mMaster->transport(), mMasterParamDouble["bpm"]));
-         emit(master_value_changed(name, mMasterParamDouble["bpm"]));
-      }
+      mMasterParamDouble["bpm"] = value;
+      queue_command(new TransportBPMCommand(mMaster->transport(), mMasterParamDouble["bpm"]));
+      emit(master_value_changed(name, mMasterParamDouble["bpm"]));
    } else {
       cerr << DJ_FILEANDLINE << "oops, " << name.toStdString() << " not executed in audio model" << endl;
    }
@@ -661,8 +651,9 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       return;
    PlayerState * pstate = mPlayerStates[player_index];
 
-   //make it absolute
+   //make it absolute and clamp it
    make_slotarg_absolute(pstate->mParamInt, name, value);
+   slotval_clamp(name, value);
 
    if (name == "eq_low") {
       set_player_eq(player_index, 0, value);
@@ -720,8 +711,9 @@ void AudioModel::player_set(int player_index, QString name, double value) {
       return;
    PlayerState * pstate = mPlayerStates[player_index];
 
-   //make it absolute
+   //make it absolute and clamp it
    make_slotarg_absolute(pstate->mParamDouble, name, value);
+   slotval_clamp(name, value);
 
    if (name == "play_position") {
       if (value < 0.0)
@@ -831,6 +823,22 @@ void AudioModel::player_eval_audible(int player_index) {
       state->mParamBool["audible"] = audible;
       emit(player_value_changed(player_index, "audible", audible));
    } 
+}
+
+void AudioModel::slotval_clamp(const QString& param_name, int& param_value) {
+   if (param_name == "volume")
+      param_value = clamp(param_value, 0, one_point_five);
+   else if (param_name == "speed" || param_name.contains("eq_"))
+      param_value = clamp(param_value, -ione_scale, ione_scale);
+   else if (param_name == "crossfade_position")
+      param_value = clamp(param_value, 0, ione_scale);
+   else if (param_name.contains("crossfade_player_"))
+      param_value = clamp(param_value, 0, static_cast<int>(mNumPlayers));
+}
+
+void AudioModel::slotval_clamp(const QString& param_name, double& param_value) {
+   if (param_name == "bpm")
+      param_value = clamp(param_value, 10.0, 300.0);
 }
 
 QueryPlayState::QueryPlayState(unsigned int num_players, QObject * parent) : QObject(parent), mMasterMaxVolume(0.0) {

@@ -21,6 +21,15 @@ namespace dj {
       result << v;
       return result.str();
    }
+
+   template <typename T>
+      T clamp(T val, T bottom, T top) {
+         if (val < bottom)
+            return bottom;
+         if (val > top)
+            return top;
+         return val;
+      }
 }
 
 
