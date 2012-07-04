@@ -7,10 +7,6 @@
 #include <QMetaObject>
 #include <QTimer>
 
-#ifdef DEBUG
-#define TEST_SIGNALS_HASH
-#endif
-
 using namespace dj;
 using namespace dj::audio;
 
@@ -485,10 +481,6 @@ void AudioModel::players_eval_audible() {
 }
 
 void AudioModel::master_set(QString name, bool value) {
-#ifdef TEST_SIGNALS_HASH
-   if (!master_signals["bool"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"bool\"] hash" << endl;
-#endif
    if (name == "crossfade_enabled") {
       if (value != mMasterParamBool["crossfade_enabled"]) {
          mMasterParamBool["crossfade_enabled"] = value;
@@ -499,11 +491,6 @@ void AudioModel::master_set(QString name, bool value) {
 }
 
 void AudioModel::master_set(QString name, int value) {
-#ifdef TEST_SIGNALS_HASH
-   if (!master_signals["int"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"int\"] hash" << endl;
-#endif
-
    //if we have a relative value, make it absolute with the addition of the parameter in question
    if (name.contains("_relative")) {
       QString nonrel = name;
@@ -568,10 +555,6 @@ void AudioModel::master_set(QString name, int value) {
 }
 
 void AudioModel::master_set(QString name, double value) {
-#ifdef TEST_SIGNALS_HASH
-   if (!master_signals["double"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the master_signals[\"double\"] hash" << endl;
-#endif
    //if we have a relative value, make it absolute with the addition of the parameter in question
    if (name.contains("_relative")) {
       QString nonrel = name;
@@ -594,11 +577,6 @@ void AudioModel::master_set(QString name, double value) {
 }
 
 void AudioModel::player_trigger(int player_index, QString name) {
-#ifdef TEST_SIGNALS_HASH
-   if (name != "clear" && !player_signals["trigger"].contains(name) && !player_signals["bool"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"trigger\"] or player_signals[\"bool\"] hashes" << endl;
-#endif
-
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    PlayerState * pstate = mPlayerStates[player_index];
@@ -643,11 +621,6 @@ void AudioModel::player_trigger(int player_index, QString name) {
 }
 
 void AudioModel::player_set(int player_index, QString name, bool value) {
-#ifdef TEST_SIGNALS_HASH
-   if (name != "seeking" && !player_signals["bool"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"bool\"] hash" << endl;
-#endif
-
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    PlayerState * pstate = mPlayerStates[player_index];
@@ -697,11 +670,6 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
 }
 
 void AudioModel::player_set(int player_index, QString name, int value) {
-#ifdef TEST_SIGNALS_HASH
-   if (!player_signals["int"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"int\"] hash" << endl;
-#endif
-
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
    PlayerState * pstate = mPlayerStates[player_index];
@@ -758,10 +726,6 @@ void AudioModel::player_set(int player_index, QString name, int value) {
 }
 
 void AudioModel::player_set(int player_index, QString name, double value) {
-#ifdef TEST_SIGNALS_HASH
-   if (!player_signals["double"].contains(name))
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not contained in the player_signals[\"double\"] hash" << endl;
-#endif
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
 
