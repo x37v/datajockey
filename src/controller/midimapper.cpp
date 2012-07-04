@@ -49,6 +49,8 @@ void MIDIMapper::default_value_mappings(const QString& signal_name, double& offs
    if (signal_name.contains("relative")) { //XXX what about frames?
       if (signal_name.contains("track") || signal_name.contains("beat"))
          mult = 1;
+      else if (signal_name.contains("speed"))
+         mult = 0.01; //1 percent
       else if (signal_name.contains("bpm"))
          mult = 2;
       else
@@ -101,7 +103,7 @@ void MIDIMapper::run() {
             if (it->signal_name.contains("relative") && input_value == 0)
                continue;
 
-            double value = static_cast<int>(it->value_offset + it->value_mul * (double)input_value / 127.0);
+            double value = it->value_offset + it->value_mul * (double)input_value / 127.0;
             //multiply by one_scale when we should
             if (it->signal_name.contains("eq_") ||
                   it->signal_name.contains("speed") ||

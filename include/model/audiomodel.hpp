@@ -147,6 +147,22 @@ namespace dj {
             void set_player_position_beat_relative(int player_index, int beats);
 
             void player_eval_audible(int player_index);
+
+            template <typename T>
+               void make_slotarg_absolute(const QHash<QString, T>& param_hash, QString& param_name, T& param_value) {
+                  if (param_name.contains("play_")) //_beat, _position, _frame, ..
+                     return;
+
+                  //if we have a relative value, make it absolute with the addition of the parameter in question
+                  if (param_name.contains("_relative")) {
+                     QString nonrel = param_name;
+                     nonrel.remove("_relative");
+                     if (param_hash.contains(nonrel)) {
+                        param_name = nonrel;
+                        param_value += param_hash[param_name];
+                     }
+                  }
+               }
       };
 
       //TODO how to get it to run at the end of the frame?

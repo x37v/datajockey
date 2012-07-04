@@ -159,8 +159,9 @@ class AudioModel::PlayerState {
          mPostFreeSpeedUpdates(0),
          mMaxSampleValue(0.0) { }
 
-      QHash<QString, int> mParamInt;
       QHash<QString, bool> mParamBool;
+      QHash<QString, int> mParamInt;
+      QHash<QString, double> mParamDouble;
       QHash<QString, TimePoint> mParamPosition;
 
       //okay to update in audio thread
@@ -492,14 +493,7 @@ void AudioModel::master_set(QString name, bool value) {
 
 void AudioModel::master_set(QString name, int value) {
    //if we have a relative value, make it absolute with the addition of the parameter in question
-   if (name.contains("_relative")) {
-      QString nonrel = name;
-      nonrel.remove("_relative");
-      if (mMasterParamInt.contains(nonrel)) {
-         name = nonrel;
-         value += mMasterParamInt[name];
-      }
-   }
+   make_slotarg_absolute(mMasterParamInt, name, value);
    
    if (name == "volume") {
       value = clamp(value, 0, (int)(1.5 * one_scale));
@@ -556,14 +550,7 @@ void AudioModel::master_set(QString name, int value) {
 
 void AudioModel::master_set(QString name, double value) {
    //if we have a relative value, make it absolute with the addition of the parameter in question
-   if (name.contains("_relative")) {
-      QString nonrel = name;
-      nonrel.remove("_relative");
-      if (mMasterParamDouble.contains(nonrel)) {
-         name = nonrel;
-         value += mMasterParamDouble[name];
-      }
-   }
+   make_slotarg_absolute(mMasterParamDouble, name, value);
 
    if (name == "bpm") {
       if (value != mMasterParamDouble["bpm"]) {
@@ -674,6 +661,9 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       return;
    PlayerState * pstate = mPlayerStates[player_index];
 
+   //make it absolute
+   make_slotarg_absolute(pstate->mParamInt, name, value);
+
    if (name == "eq_low") {
       set_player_eq(player_index, 0, value);
    } else if (name == "eq_mid") {
@@ -728,6 +718,10 @@ void AudioModel::player_set(int player_index, QString name, int value) {
 void AudioModel::player_set(int player_index, QString name, double value) {
    if (player_index < 0 || player_index >= (int)mNumPlayers)
       return;
+   PlayerState * pstate = mPlayerStates[player_index];
+
+   //make it absolute
+   make_slotarg_absolute(pstate->mParamDouble, name, value);
 
    if (name == "play_position") {
       if (value < 0.0)
