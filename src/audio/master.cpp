@@ -30,11 +30,11 @@ Master::Master(){
    mMaxSampleValue = 0.0f;
 
    //set up lv2
-   mLV2World = slv2_world_new();
+   mLV2World = lilv_world_new();
    mLV2Plugins = NULL;
    if (mLV2World) {
-      slv2_world_load_all(mLV2World);
-      mLV2Plugins = slv2_world_get_all_plugins(mLV2World);
+      lilv_world_load_all(mLV2World);
+      mLV2Plugins = lilv_world_get_all_plugins(mLV2World);
    }
 }
 
@@ -222,29 +222,14 @@ void Master::sync_to_player(unsigned int player_index) {
 }
 */
 
-const std::vector<Player *>& Master::players() const {
-   return mPlayers;
-}
+const std::vector<Player *>& Master::players() const { return mPlayers; }
+Scheduler * Master::scheduler(){ return &mScheduler; }
+Transport * Master::transport(){ return &mTransport; }
 
-Scheduler * Master::scheduler(){
-   return &mScheduler;
-}
+LilvWorld * Master::lv2_world() const { return mLV2World; }
+const LilvPlugins * Master::lv2_plugins() const { return mLV2Plugins; }
 
-Transport * Master::transport(){
-   return &mTransport;
-}
-
-SLV2World Master::lv2_world() const {
-   return mLV2World;
-}
-
-SLV2Plugins Master::lv2_plugins() const {
-   return mLV2Plugins;
-}
-
-float Master::max_sample_value() const {
-   return mMaxSampleValue;
-}
+float Master::max_sample_value() const { return mMaxSampleValue; }
 
 //setters
 void Master::master_volume(float val){

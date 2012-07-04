@@ -8,9 +8,7 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "stretcher.hpp"
-#include <slv2/collections.h>
-#include <slv2/plugin.h>
-#include <slv2/plugininstance.h>
+#include <lilv/lilv.h>
 
 namespace dj {
    namespace audio {
@@ -131,7 +129,7 @@ namespace dj {
             float mMaxSampleValue;
 
             //the eq instance
-            SLV2Instance   mEqInstance;
+            LilvInstance * mEqInstance;
             EqControl mEqControl;
 
             //helpers

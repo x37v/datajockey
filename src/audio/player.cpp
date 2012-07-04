@@ -50,7 +50,7 @@ Player::~Player(){
    if(mVolumeBuffer)
       delete [] mVolumeBuffer;
 	if(mEqInstance)
-		slv2_instance_free(mEqInstance);
+		lilv_instance_free(mEqInstance);
 }
 
 //#error "GO OVER ALL OF THIS!!!!!!!!!!!!!!, stretcher not fully integrated"
@@ -68,23 +68,23 @@ void Player::setup_audio(
 
    //do lv2
    Master * master = Master::instance();
-	SLV2Value plugin_uri = slv2_value_new_uri(master->lv2_world(), DJ_EQ_URI);
-	SLV2Plugin eq_plugin = slv2_plugins_get_by_uri(master->lv2_plugins(), plugin_uri);
+	LilvNode * plugin_uri = lilv_new_uri(master->lv2_world(), DJ_EQ_URI);
+	const LilvPlugin * eq_plugin = lilv_plugins_get_by_uri(master->lv2_plugins(), plugin_uri);
    if (!eq_plugin) {
 		cerr << "could not load eq lv2 plugin, do you have dj eq installed?:" << endl;
 		cerr << "\t\t" << DJ_EQ_URI << endl;
    } else {
       //load the plugin
-      mEqInstance = slv2_plugin_instantiate(eq_plugin, mSampleRate, NULL);
+      mEqInstance = lilv_plugin_instantiate(eq_plugin, mSampleRate, NULL);
       if (!mEqInstance) {
          cerr << "could not instantiate eq lv2 plugin, do you have dj eq installed?:" << endl;
          cerr << "\t\t" << DJ_EQ_URI << endl;
       } else {
-         slv2_instance_connect_port(mEqInstance, 0, &mEqControl.low);
-         slv2_instance_connect_port(mEqInstance, 1, &mEqControl.mid);
-         slv2_instance_connect_port(mEqInstance, 2, &mEqControl.high);
-         slv2_instance_connect_port(mEqInstance, 7, &mEqControl.latency);
-         slv2_instance_activate(mEqInstance);
+         lilv_instance_connect_port(mEqInstance, 0, &mEqControl.low);
+         lilv_instance_connect_port(mEqInstance, 1, &mEqControl.mid);
+         lilv_instance_connect_port(mEqInstance, 2, &mEqControl.high);
+         lilv_instance_connect_port(mEqInstance, 7, &mEqControl.latency);
+         lilv_instance_activate(mEqInstance);
       }
    }
 
@@ -182,11 +182,11 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
    if(!mStretcher->audio_buffer())
       return;
    if(mEqInstance) {
-      slv2_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
-      slv2_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
-      slv2_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
-      slv2_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
-      slv2_instance_run(mEqInstance, numFrames);
+      lilv_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
+      lilv_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
+      lilv_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
+      lilv_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
+      lilv_instance_run(mEqInstance, numFrames);
    }
 }
 

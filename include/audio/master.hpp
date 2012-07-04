@@ -5,7 +5,7 @@
 #include "transport.hpp"
 #include "scheduler.hpp"
 #include "types.hpp"
-#include "slv2/slv2.h"
+#include <lilv/lilv.h>
 #include <vector>
 
 namespace dj {
@@ -41,8 +41,8 @@ namespace dj {
             const std::vector<Player *>& players() const;
             Scheduler * scheduler();
             Transport * transport();
-            SLV2World lv2_world() const;
-            SLV2Plugins lv2_plugins() const;
+            LilvWorld * lv2_world() const;
+            const LilvPlugins * lv2_plugins() const;
             float max_sample_value() const;
 
             //setters
@@ -70,8 +70,8 @@ namespace dj {
             float mCrossFadePosition;
             float mMaxSampleValue;
 
-            SLV2World mLV2World;
-            SLV2Plugins mLV2Plugins;
+            LilvWorld * mLV2World;
+            const LilvPlugins * mLV2Plugins;
       };
       class MasterCommand : public Command {
          public:

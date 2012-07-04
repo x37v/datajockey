@@ -11,7 +11,7 @@ Importer:
    Provide any sort of UI?  At least list the tracks before importing? Display progress.
    GUI importer, integrate into main app
 Audio:
-   lilv replace slv2
+   lilvmm?
 Recently Played Filter:
    Each time you start the app increment a 'session number'.  Each time a song
    becomes audible [what do we do if they're using direct track outs?] note the
