@@ -139,6 +139,8 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
 
    setLayout(top_layout);
 
+   top_layout->setSizeConstraint(QLayout::SetMinimumSize);
+
    QObject::connect(mMasterTempo, SIGNAL(valueChanged(double)), this, SLOT(relay_tempo_changed(double)));
    QObject::connect(mCrossFadeSlider, SIGNAL(valueChanged(int)), this, SLOT(relay_crossfade_changed(int)));
    QObject::connect(mMasterVolume, SIGNAL(valueChanged(int)), this, SLOT(relay_volume_changed(int)));

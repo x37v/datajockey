@@ -325,6 +325,7 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(work_detail);
    left_layout->addWidget(splitter);
 
+
    QBoxLayout * top_layout = new QBoxLayout(QBoxLayout::LeftToRight);
    splitter = new QSplitter(Qt::Horizontal);
    QWidget * left = new QWidget;
@@ -332,6 +333,12 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(left);
    splitter->addWidget(work_db_view);
    top_layout->addWidget(splitter);
+
+   //set the default sizes
+   QList<int> sizes;
+   sizes << mMixerPanel->minimumWidth();
+   sizes << work_db_view->maximumWidth() - mMixerPanel->minimumWidth();
+   splitter->setSizes(sizes);
 
 
    //open files, load defaults
