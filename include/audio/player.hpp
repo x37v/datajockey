@@ -61,14 +61,14 @@ namespace dj {
             bool looping() const;
             double volume() const;
             double play_speed() const;
-            const TimePoint& position() const;
+            const TimePoint& position();
             const TimePoint& start_position() const;
             const TimePoint& end_position() const;
             const TimePoint& loop_start_position() const;
             const TimePoint& loop_end_position() const;
             unsigned int frame() const;
             float max_sample_value() const;
-            double bpm() const;
+            double bpm();
 
             AudioBuffer * audio_buffer() const;
             BeatBuffer * beat_buffer() const;

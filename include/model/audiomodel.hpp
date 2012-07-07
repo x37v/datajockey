@@ -183,11 +183,13 @@ namespace dj {
          signals:
             void player_value_update(int player_index, QString name, int val);
             void master_value_update(QString name, int value);
+            void master_value_update(QString name, double value);
             void master_value_update(QString name, TimePoint timepoint);
          private:
             std::vector<AudioModel::PlayerState* > mStates;
             unsigned int mNumPlayers;
             float mMasterMaxVolume;
+            double mMasterBPM;
             TimePoint mMasterTransportPosition;
       };
    }

@@ -16,8 +16,9 @@ namespace dj {
             void reset();
 
             //set the frame
-            void frame(unsigned int frame, double frame_subsample = 0.0);
+            void frame(unsigned int frame, double frame_subsamp = 0.0);
             unsigned int frame() const;
+            double frame_subsample() const;
 
             //set the playback speed
             void speed(double play_speed);

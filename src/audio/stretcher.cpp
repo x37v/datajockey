@@ -28,12 +28,12 @@ namespace dj {
       }
 
       //set the frame
-      void Stretcher::frame(unsigned int frame, double frame_subsample) {
+      void Stretcher::frame(unsigned int frame, double frame_subsamp) {
          if (!mAudioBuffer)
             return;
 
          mFrame = frame;
-         mFrameSubsample = frame_subsample;
+         mFrameSubsample = frame_subsamp;
 
          if (mFrame >= mAudioBuffer->length()) {
             mFrame = mAudioBuffer->length() - 1;
@@ -47,6 +47,7 @@ namespace dj {
       }
 
       unsigned int Stretcher::frame() const { return mFrame; }
+      double Stretcher::frame_subsample() const { return mFrameSubsample; }
 
       //set the playback speed
       void Stretcher::speed(double play_speed) {

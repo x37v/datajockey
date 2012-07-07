@@ -21,7 +21,6 @@ namespace {
 }
 
 BeatBuffer::BeatBuffer() {
-   mStartBeat = 0;
 }
 
 BeatBuffer::~BeatBuffer() {
@@ -61,7 +60,6 @@ double BeatBuffer::time_at_position(const TimePoint& position) const {
       if(position.valid()){
          int beat = position.beat() + position.bar() * 4;
          unsigned int size = mBeatData.size();
-         beat += mStartBeat;
          //make sure we're in range!
          if (size == 0)
             return 0.0;
@@ -89,21 +87,20 @@ TimePoint BeatBuffer::position_at_time(double seconds) const {
 TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos) const {
    TimePoint pos;
    unsigned int size = mBeatData.size();
-   unsigned int start = mStartBeat;
-
-   if (start >= size)
-      start = 0;
-
    if(size > 0 && seconds >= 0){
-      //make sure we aren't trying to advance before the start
-      if (seconds <= mBeatData[start]) {
-         pos.at_bar(start / 4, start % 4);
+      //make sure that our time is within our range
+      if (seconds <= mBeatData[0]) {
+         pos.at_bar(0);
          return pos;
       } else if (seconds >= mBeatData.back()) {
          pos.at_bar(size / 4, size % 4);
          return pos;
       }
 
+      /*
+       * temporarily ditch this
+       * XXX
+       *
       //advance to the last position if it is before the time we are looking for
       //XXX what about TimePoint::SECONDS types?
       if(lastPos.type() == TimePoint::BEAT_BAR) {
@@ -111,21 +108,19 @@ TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos)
          if (beat < static_cast<int>(size) && mBeatData[beat] <= seconds)
             start = beat;
       }
+      */
 
-      for(unsigned int i = start; i < size; i++){
+      for(unsigned int i = 1; i < size; i++){
          //XXX assuming 4/4
-         if(mBeatData[i] == seconds)
-            pos.at_bar((i - start) / 4, (i - start) % 4);
-         else if(mBeatData[i] > seconds){
-            if(i == start){
-               pos.at_bar(0);
-            } else {
-               unsigned int beat = i - 1 - start;
-               double diff = mBeatData[i - start] - mBeatData[beat];
-               if (diff != 0)
-                  diff = (seconds - mBeatData[beat]) / diff;
-               pos.at_bar(beat / 4, beat % 4, diff);
-            }
+         if(mBeatData[i] == seconds) {
+            pos.at_bar(i / 4, i % 4);
+            return pos;
+         } else if (mBeatData[i] > seconds){
+            unsigned int beat = i - 1;
+            double diff = mBeatData[i] - mBeatData[beat];
+            if (diff != 0)
+               diff = (seconds - mBeatData[beat]) / diff;
+            pos.at_bar(beat / 4, beat % 4, diff);
             return pos;
          }
       }
@@ -141,19 +136,10 @@ TimePoint BeatBuffer::end_position() const {
    if(mBeatData.size() == 0)
       return pos;
    //XXX assuming 4/4
-   beats = mBeatData.size() - mStartBeat;
+   beats = mBeatData.size();
    pos.type(TimePoint::BEAT_BAR);
    pos.at_bar(beats / 4, beats % 4);
    return pos;
-}
-
-unsigned int BeatBuffer::start_offset() const {
-   return mStartBeat;
-}
-
-void BeatBuffer::start_offset(unsigned int val){
-   if(val < mBeatData.size())
-      mStartBeat = val;
 }
 
 BeatBuffer::const_iterator BeatBuffer::begin() const { return mBeatData.begin(); }

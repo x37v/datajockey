@@ -217,10 +217,33 @@ unsigned int Master::cross_fade_mixer(unsigned int index) const {
       return mCrossFadeMixers[index];
 }
 
-/*
 void Master::sync_to_player(unsigned int player_index) {
+   if (player_index >= mPlayers.size())
+      return;
+   Player * player = mPlayers[player_index];
+   const double bpm = player->bpm();
+
+   //XXX indicate error?
+   if (bpm < 20.0 || bpm > 250.0)
+      return;
+
+   const TimePoint player_pos = player->position();
+
+   //always move the transport forward, so if our pos in beat is 
+   TimePoint new_pos = mTransport.position();
+   if (new_pos.beat() > player_pos.beat() || 
+         (new_pos.beat() == player_pos.beat() && new_pos.pos_in_beat() > player_pos.pos_in_beat())) {
+      new_pos += TimePoint(1,0);
+   }
+   new_pos.pos_in_beat(player_pos.pos_in_beat());
+
+   //update position and bpm of transpor
+   mTransport.position(new_pos);
+   mTransport.bpm(bpm);
+
+   //update the player
+   player->sync(true);
 }
-*/
 
 const std::vector<Player *>& Master::players() const { return mPlayers; }
 Scheduler * Master::scheduler(){ return &mScheduler; }
@@ -293,13 +316,11 @@ MasterIntCommand::MasterIntCommand(action_t action, int value) :
 }
 
 void MasterIntCommand::execute() {
-   /*
    switch(mAction) {
       case SYNC_TO_PLAYER:
          master()->sync_to_player(mValue);
          break;
    }
-   */
 }
 
 bool MasterIntCommand::store(CommandIOData& /* data */) const {

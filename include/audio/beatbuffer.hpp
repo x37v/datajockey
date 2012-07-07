@@ -57,9 +57,6 @@ namespace dj {
             void median_and_mean(double& median, double& mean);
 
          private:
-            //the start beat lets us offset the data
-            //indicating where bar 0, beat 0 should in the data
-            unsigned int mStartBeat;
             beat_list_t mBeatData;
       };
       typedef QExplicitlySharedDataPointer<BeatBuffer> BeatBufferPtr;

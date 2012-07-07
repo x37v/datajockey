@@ -289,6 +289,9 @@ AudioModel::AudioModel() :
    QObject::connect(query_cmd, SIGNAL(master_value_update(QString, int)),
             SIGNAL(master_value_changed(QString, int)),
             Qt::QueuedConnection);
+   QObject::connect(query_cmd, SIGNAL(master_value_update(QString, double)),
+            SIGNAL(master_value_changed(QString, double)),
+            Qt::QueuedConnection);
    QObject::connect(query_cmd, SIGNAL(master_value_update(QString, TimePoint)),
             SIGNAL(master_value_changed(QString, TimePoint)),
             Qt::QueuedConnection);
@@ -519,7 +522,8 @@ void AudioModel::master_set(QString name, int value) {
       queue_command(new MasterDoubleCommand(MasterDoubleCommand::XFADE_POSITION, (double)value / (double)one_scale));
       emit(master_value_changed("crossfade_position", value));
    } else if (name == "sync_to_player") {
-      if (value < 0 || value >= (int)mNumPlayers)
+      //return if the index is out of range or the player is already syncing
+      if (value < 0 || value >= (int)mNumPlayers || mPlayerStates[value]->mParamBool["sync"])
          return;
 
       queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, value));
@@ -858,6 +862,7 @@ bool QueryPlayState::delete_after_done() { return false; }
 void QueryPlayState::execute(){
    mMasterTransportPosition = master()->transport()->position();
    mMasterMaxVolume = master()->max_sample_value();
+   mMasterBPM = master()->transport()->bpm();
    master()->max_sample_value_reset();
    for(unsigned int i = 0; i < mNumPlayers; i++) {
       Player * player = master()->players()[i];
@@ -873,6 +878,7 @@ void QueryPlayState::execute_done() {
    if (master_level > 0)
       emit(master_value_update("update_audio_level", master_level));
    emit(master_value_update("update_transport_position", mMasterTransportPosition));
+   emit(master_value_update("bpm", mMasterBPM));
 
    for(int i = 0; i < (int)mNumPlayers; i++) {
       AudioModel::PlayerState * pstate = mStates[i];

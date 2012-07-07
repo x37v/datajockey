@@ -49,6 +49,7 @@ namespace dj {
             void relay_crossfade_changed(int value);
             void relay_volume_changed(int value);
             void relay_tempo_changed(double value);
+            void relay_master_sync(int player);
 
          signals:
             void midi_map_triggered();

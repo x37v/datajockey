@@ -230,13 +230,37 @@ bool Player::syncing() const { return mSync; }
 bool Player::looping() const { return mLoop; }
 double Player::volume() const { return mVolume; }
 double Player::play_speed() const { return mStretcher->speed(); }
-const TimePoint& Player::position() const { return mPosition; }
+
+#include <iostream>
+using std::cerr;
+using std::endl;
+
+const TimePoint& Player::position() { 
+   //if we aren't syncing, update our position from our beat buffer if we can
+   if (mBeatBuffer && !mSync) {
+      mPosition = mBeatBuffer->position_at_time(((double)mStretcher->frame() + mStretcher->frame_subsample())/ (double)mSampleRate, mPosition);
+   }
+   return mPosition; 
+}
 const TimePoint& Player::start_position() const { return mStartPosition; }
 const TimePoint& Player::end_position() const { return mEndPosition; }
 const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
 const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
 float Player::max_sample_value() const { return mMaxSampleValue; }
+
+double Player::bpm() {
+   if (!mBeatBuffer)
+      return 0.0;
+
+   //what if we are on the last beat?
+   TimePoint cur = position();
+   TimePoint next = cur;
+   next.advance_beat();
+
+   double s_per_beat = (mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(cur)) / play_speed();
+   return 60.0 / s_per_beat; //becomes beats per min
+}
 
 AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); }
 BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
@@ -259,6 +283,8 @@ void Player::mute(bool val){
 
 void Player::sync(bool val){
    if (val != mSync) {
+      if (!mSync)
+         mPosition = position();
       mSync = val;
       mUpdateTransportOffset = true;
    }
@@ -325,7 +351,7 @@ void Player::position_at_frame(unsigned long frame) {
    mStretcher->frame(frame);
 
    if (mBeatBuffer) {
-      double time = mStretcher->frame();
+      double time = mStretcher->frame() + mStretcher->frame_subsample();
       time /= mSampleRate;
       mPosition = mBeatBuffer->position_at_time(time, mPosition);
    }
@@ -390,7 +416,7 @@ void Player::position_relative(TimePoint amt){
    if (!mBeatBuffer)
       return;
    mPosition = mBeatBuffer->position_at_time(
-         ((double)mStretcher->frame()) / (double)mSampleRate, mPosition);
+         ((double)mStretcher->frame() + mStretcher->frame_subsample()) / (double)mSampleRate, mPosition);
    position(mPosition + amt);
 }
 

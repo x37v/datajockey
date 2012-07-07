@@ -11,6 +11,7 @@
 #include <QDial>
 #include <QProgressBar>
 #include <QLineEdit>
+#include <QSignalMapper>
 
 #include <iostream>
 using std::cout;
@@ -113,6 +114,21 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
 
    master_layout->addWidget(midi_map, 0, Qt::AlignHCenter);
 
+   //set up sync buttons
+   QSignalMapper * sync_mapper = new QSignalMapper(this);
+   for (int i = 0; i < (int)num_players; i++) {
+      QPushButton * sync_button = new QPushButton("sync to " + QString::number(i + 1), this);
+      sync_button->setCheckable(false);
+      master_layout->addWidget(sync_button);
+      QObject::connect(
+            sync_button, SIGNAL(clicked()),
+            sync_mapper, SLOT(map()));
+      sync_mapper->setMapping(sync_button, i);
+   }
+   QObject::connect(
+         sync_mapper, SIGNAL(mapped(int)),
+         SLOT(relay_master_sync(int)));
+
    mMasterVolume = new QSlider(Qt::Vertical, this);
    mMasterVolume->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
    mMasterVolume->setValue(one_scale);
@@ -208,8 +224,11 @@ void MixerPanel::master_set(QString name, int val) {
 }
 
 void MixerPanel::master_set(QString name, double val) {
-   if (name == "bpm")
+   if (name == "bpm") {
+      mSettingTempo = true;
       mMasterTempo->setValue(val);
+      mSettingTempo = false;
+   }
 }
 
 void MixerPanel::master_set(QString name, audio::TimePoint val) {
@@ -301,6 +320,11 @@ void MixerPanel::relay_volume_changed(int value) {
 }
 
 void MixerPanel::relay_tempo_changed(double value) {
-   emit(master_value_changed("bpm", value));
+   if (!mSettingTempo)
+      emit(master_value_changed("bpm", value));
+}
+
+void MixerPanel::relay_master_sync(int player) {
+   emit(master_value_changed("sync_to_player", player));
 }
 
