@@ -233,9 +233,8 @@ double Player::play_speed() const { return mStretcher->speed(); }
 
 const TimePoint& Player::position() { 
    //if we aren't syncing, update our position from our beat buffer if we can
-   if (mBeatBuffer && !mSync) {
+   if (mBeatBuffer && !mSync)
       mPosition = strecher_position();
-   }
    return mPosition; 
 }
 
@@ -286,6 +285,15 @@ void Player::sync(bool val){
       mUpdateTransportOffset = true;
    }
    //TODO change position type?
+}
+
+void Player::sync(bool val, const Transport& transport) {
+   if (val != mSync) {
+      if (!mSync)
+         mPosition = strecher_position();
+      mSync = val;
+      update_transport_offset(transport);
+   }
 }
 
 void Player::loop(bool val){
