@@ -118,7 +118,11 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    QSignalMapper * sync_mapper = new QSignalMapper(this);
    for (int i = 0; i < (int)num_players; i++) {
       QPushButton * sync_button = new QPushButton("sync to " + QString::number(i + 1), this);
+      mPlayerCanSync <<  true;
+      mSyncToPlayer << sync_button;
       sync_button->setCheckable(false);
+      sync_button->setDisabled(true);
+
       master_layout->addWidget(sync_button);
       QObject::connect(
             sync_button, SIGNAL(clicked()),
@@ -170,10 +174,21 @@ MixerPanel::~MixerPanel() {
 void MixerPanel::player_set(int player_index, QString name, bool value) {
    if (player_index >= mPlayers.size())
       return;
-   if (name == "update_sync_disabled")
+   if (name == "update_sync_disabled") {
+      mPlayerCanSync[player_index] = !value;
       mPlayers[player_index]->button("sync")->setDisabled(value);
-   else if(QPushButton * button = mPlayers[player_index]->button(name))
+      //disable sync to player if syncing isn't available or player is in sync running mode
+      mSyncToPlayer[player_index]->setDisabled(value || mPlayers[player_index]->button("sync")->isChecked());
+   } else if(QPushButton * button = mPlayers[player_index]->button(name)) {
       button->setChecked(value);
+      //only enable sync to player when the player is running in free mode and it can sync
+      if (name == "sync") {
+         if (!value && mPlayerCanSync[player_index])
+            mSyncToPlayer[player_index]->setDisabled(false);
+         else
+            mSyncToPlayer[player_index]->setDisabled(true);
+      }
+   }
 }
 
 void MixerPanel::player_set(int player_index, QString name, int value) {

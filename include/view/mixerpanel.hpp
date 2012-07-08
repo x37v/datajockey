@@ -12,6 +12,7 @@ class QSlider;
 class QDoubleSpinBox;
 class QBoxLayout;
 class QLineEdit;
+class QPushButton;
 
 namespace dj {
    namespace view {
@@ -72,6 +73,8 @@ namespace dj {
             QBoxLayout * mSliderLevelLayout;
             QLineEdit * mMasterPosition;
             TimePoint mMasterPositionLast;
+            QList<QPushButton *> mSyncToPlayer;
+            QList<bool> mPlayerCanSync;
             
             //map senders to indices for relaying
             QHash<QObject *, int> mSenderToIndex;
