@@ -22,6 +22,7 @@ namespace dj {
    namespace audio {
 
       class QueryPlayState;
+      class MasterSyncToPlayerCommand;
 
       class AudioModel : public QObject {
          Q_OBJECT
@@ -192,6 +193,19 @@ namespace dj {
             double mMasterBPM;
             TimePoint mMasterTransportPosition;
       };
+
+      class MasterSyncToPlayerCommand : public QObject, public MasterIntCommand {
+         Q_OBJECT
+         public:
+            MasterSyncToPlayerCommand(int value);
+            virtual void execute();
+            virtual void execute_done();
+         signals:
+            void master_value_update(QString name, double value);
+         private:
+            double mBPM;
+      };
+
    }
 }
 

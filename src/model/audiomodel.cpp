@@ -526,7 +526,13 @@ void AudioModel::master_set(QString name, int value) {
       if (value < 0 || value >= (int)mNumPlayers || mPlayerStates[value]->mParamBool["sync"])
          return;
 
-      queue_command(new MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, value));
+      //create the command and connect it to our signal so we get a bpm update
+      MasterSyncToPlayerCommand * cmd = new MasterSyncToPlayerCommand(value);
+      QObject::connect(
+            cmd, SIGNAL(master_value_update(QString, double)),
+            SIGNAL(master_value_changed(QString, double)),
+            Qt::QueuedConnection);
+      queue_command(cmd);
 
       if(!mPlayerStates[value]->mParamBool["sync"]) {
          mPlayerStates[value]->mParamBool["sync"] = true;
@@ -878,7 +884,7 @@ void QueryPlayState::execute_done() {
    if (master_level > 0)
       emit(master_value_update("update_audio_level", master_level));
    emit(master_value_update("update_transport_position", mMasterTransportPosition));
-   emit(master_value_update("bpm", mMasterBPM));
+   //emit(master_value_update("bpm", mMasterBPM));
 
    for(int i = 0; i < (int)mNumPlayers; i++) {
       AudioModel::PlayerState * pstate = mStates[i];
@@ -894,4 +900,20 @@ void QueryPlayState::execute_done() {
 
 //this command shouldn't be stored
 bool QueryPlayState::store(CommandIOData& /* data */) const { return false; }
+
+
+MasterSyncToPlayerCommand::MasterSyncToPlayerCommand(int value) :
+   QObject(NULL),
+   MasterIntCommand(MasterIntCommand::SYNC_TO_PLAYER, value), mBPM(0.0) {
+}
+
+void MasterSyncToPlayerCommand::execute() {
+   //execute the normal command then grab the bpm
+   MasterIntCommand::execute();
+   mBPM = master()->transport()->bpm();
+}
+
+void MasterSyncToPlayerCommand::execute_done() {
+   emit(master_value_update("bpm", mBPM));
+}
 
