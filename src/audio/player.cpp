@@ -231,17 +231,14 @@ bool Player::looping() const { return mLoop; }
 double Player::volume() const { return mVolume; }
 double Player::play_speed() const { return mStretcher->speed(); }
 
-#include <iostream>
-using std::cerr;
-using std::endl;
-
 const TimePoint& Player::position() { 
    //if we aren't syncing, update our position from our beat buffer if we can
    if (mBeatBuffer && !mSync) {
-      mPosition = mBeatBuffer->position_at_time(((double)mStretcher->frame() + mStretcher->frame_subsample())/ (double)mSampleRate, mPosition);
+      mPosition = strecher_position();
    }
    return mPosition; 
 }
+
 const TimePoint& Player::start_position() const { return mStartPosition; }
 const TimePoint& Player::end_position() const { return mEndPosition; }
 const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
@@ -350,11 +347,8 @@ void Player::position_at_frame(unsigned long frame) {
    mUpdateTransportOffset = true;
    mStretcher->frame(frame);
 
-   if (mBeatBuffer) {
-      double time = mStretcher->frame() + mStretcher->frame_subsample();
-      time /= mSampleRate;
-      mPosition = mBeatBuffer->position_at_time(time, mPosition);
-   }
+   if (mBeatBuffer)
+      mPosition = strecher_position();
 
    mPositionDirty = false;
 }
@@ -415,8 +409,7 @@ void Player::max_sample_value_reset() { mMaxSampleValue = 0.0; };
 void Player::position_relative(TimePoint amt){
    if (!mBeatBuffer)
       return;
-   mPosition = mBeatBuffer->position_at_time(
-         ((double)mStretcher->frame() + mStretcher->frame_subsample()) / (double)mSampleRate, mPosition);
+   mPosition = strecher_position();
    position(mPosition + amt);
 }
 
@@ -480,6 +473,12 @@ void Player::update_transport_offset(const Transport& transport) {
    mTransportOffset.pos_in_beat(0.0);
 
    mUpdateTransportOffset = false;
+}
+
+TimePoint Player::strecher_position() {
+   return mBeatBuffer->position_at_time(
+         (static_cast<double>(mStretcher->frame()) + mStretcher->frame_subsample()) / static_cast<double>(mSampleRate),
+         mPosition);
 }
 
 //command stuff

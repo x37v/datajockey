@@ -137,6 +137,9 @@ namespace dj {
             //for updating the play speed while syncing
             void update_play_speed(const Transport& transport);
             void update_transport_offset(const Transport& transport);
+
+            //gives the current position based on the stretcher frame + beat buffer
+            TimePoint strecher_position();
       };
 
       class PlayerCommand : public Command {
