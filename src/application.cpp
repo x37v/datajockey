@@ -29,6 +29,7 @@
 #include <QSqlRelationalTableModel>
 #include <QSqlRelation>
 #include <QDebug>
+#include <QSettings>
 #include <stdexcept>
 #include <boost/program_options.hpp>
 
@@ -42,6 +43,11 @@ Application::Application(int & argc, char ** argv) :
 {
    setApplicationVersion(dj::version_string);
    setApplicationName("Data Jockey " + applicationVersion());
+
+   //for global qsettings
+   QCoreApplication::setOrganizationName("xnor");
+   QCoreApplication::setOrganizationDomain("x37v.info");
+   QCoreApplication::setApplicationName("DataJockey");
 
    Configuration * config = Configuration::instance();
 
@@ -267,6 +273,10 @@ Application::Application(int & argc, char ** argv) :
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
    //XXX removing filter buttons for now
    work_db_view->showFilterButtons(false);
+
+   //hide some columns
+   QStringList hidden_column_names;
+   hidden_column_names << "audio_file_milliseconds" << "audio_file_channels";
 
    //WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);

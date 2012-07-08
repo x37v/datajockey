@@ -15,6 +15,7 @@
 #include <QHeaderView>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QSettings>
 #include <iostream>
 
 using namespace dj;
@@ -132,6 +133,8 @@ MIDIMapper::MIDIMapper(QWidget * parent, Qt::WindowFlags f) : QWidget(parent, f)
    top_layout->addLayout(button_layout);
 
    setLayout(top_layout);
+
+   read_settings();
 }
 
 MIDIMapper::~MIDIMapper() {
@@ -195,6 +198,26 @@ void MIDIMapper::showEvent(QShowEvent * event) {
    while(mPlayerTable->rowCount() > 0)
       mPlayerTable->removeRow(0);
    emit(requesting_mappings());
+}
+
+void MIDIMapper::closeEvent(QCloseEvent * event) {
+   write_settings();
+}
+
+void MIDIMapper::write_settings() {
+   QSettings settings;
+   settings.beginGroup("MIDIMapperView");
+   settings.setValue("size", size());
+   settings.setValue("pos", pos());
+   settings.endGroup();
+}
+
+void MIDIMapper::read_settings() {
+   QSettings settings;
+   settings.beginGroup("MIDIMapperView");
+   resize(settings.value("size", QSize(400, 400)).toSize());
+   move(settings.value("pos", QPoint(200, 200)).toPoint());
+   settings.endGroup();
 }
 
 void MIDIMapper::okay() {

@@ -22,10 +22,15 @@ namespace dj {
             bool validate();
          protected:
             virtual void showEvent(QShowEvent * event);
+            virtual void closeEvent(QCloseEvent * event);
             enum table_t {
                PLAYER,
                MASTER
             };
+
+            void write_settings();
+            void read_settings();
+
          public slots:
             void okay();
             bool apply();
