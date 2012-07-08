@@ -540,7 +540,7 @@ void PlayerStateCommand::execute(){
             p->out_state(Player::CUE);
             break;
          case SYNC:
-            p->sync(true);
+            p->sync(true, *Master::instance()->transport());
             break;
          case NO_SYNC:
             p->sync(false);
