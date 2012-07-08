@@ -28,6 +28,8 @@
 #include <QSqlRecord>
 #include <QSqlTableModel>
 #include <QAbstractItemModel>
+#include <QSettings>
+#include <QTimer>
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
 		QWidget *parent) :
@@ -79,6 +81,8 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 	QObject::connect(mRemoveFilterButton, SIGNAL(clicked(bool)),
 			this, SLOT(setUnFiltered()));
 
+   //schedule the settings reading to happen after view construction
+   QTimer::singleShot(0, this, SLOT(read_settings()));
 }
 
 QTableView * WorkDBView::tableView(){
@@ -155,5 +159,20 @@ void WorkDBView::setFiltered(){
 void WorkDBView::setUnFiltered(){
 	//mModel->setUnFiltered();
    emit(filter_state_changed(false));
+}
+
+void WorkDBView::write_settings() {
+   QSettings settings;
+   settings.beginGroup("WorkDBView");
+   settings.setValue("header_state", mTableView->horizontalHeader()->saveState());
+   settings.endGroup();
+}
+
+void WorkDBView::read_settings() {
+   QSettings settings;
+   settings.beginGroup("WorkDBView");
+   if (settings.contains("header_state"))
+      mTableView->horizontalHeader()->restoreState(settings.value("header_state").toByteArray()); 
+   settings.endGroup();
 }
 

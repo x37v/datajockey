@@ -271,6 +271,10 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->select();
 
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
+   //XXX hack to write settings before quitting, is there a better way?
+   QObject::connect(
+         this, SIGNAL(aboutToQuit()),
+         work_db_view, SLOT(write_settings()));
    //XXX removing filter buttons for now
    work_db_view->showFilterButtons(false);
 

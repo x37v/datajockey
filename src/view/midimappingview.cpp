@@ -16,6 +16,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QSettings>
+#include <QCloseEvent>
 #include <iostream>
 
 using namespace dj;
@@ -202,6 +203,7 @@ void MIDIMapper::showEvent(QShowEvent * event) {
 
 void MIDIMapper::closeEvent(QCloseEvent * event) {
    write_settings();
+   event->accept();
 }
 
 void MIDIMapper::write_settings() {

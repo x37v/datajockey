@@ -39,7 +39,9 @@ class WorkDBView : public QWidget {
 	public slots:
 		void selectWork(int work_id);
 		void showFilterButtons(bool show = true);
+      void write_settings();
 	protected slots:
+      void read_settings();
 		//void selectWork(const QModelIndex & index);
 		void setSelection( const QItemSelection & selected);
 		void setFiltered();
@@ -49,7 +51,8 @@ class WorkDBView : public QWidget {
 		void applyFilterPushed();
 		void removeFilterPushed();
       void filter_state_changed(bool);
-	private:
+
+   private:
 		QTableView * mTableView;
 		QPushButton * mApplyFilterButton;
 		QPushButton * mRemoveFilterButton;
