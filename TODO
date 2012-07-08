@@ -3,8 +3,6 @@ Waveform View:
    we know the play rate, we know the sample rate, we just update the frame position when we get an update and guess in between updates
 Beat Extraction:
    config based smoothing amount
-UI:
-   sync to playing track: sync master to track and then put track in sync mode?
 Loading:
    display error message dialog when we cannot load an audio file or buffer.
 Importer:
