@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QDateTime>
 
 namespace {
    QSqlDatabase cDB;
@@ -34,9 +35,9 @@ namespace {
 
    const QString cWorkInsert(
          "INSERT INTO audio_works\n"
-         "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, artist_id)\n"
+         "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, artist_id, created_at, updated_at)\n"
          "VALUES\n"
-         "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :artist_id)\n"
+         "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :artist_id, :created_at, :updated_at)\n"
          );
 
    const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
@@ -257,6 +258,10 @@ int db::work::create(
       query.prepare(cWorkInsert);
 
       query.bindValue(":audio_file_location", audio_file_location);
+
+      QDateTime now = QDateTime::currentDateTime();
+      query.bindValue(":created_at", now);
+      query.bindValue(":updated_at", now);
 
       i = attributes.find("name");
       if (i != attributes.end())
