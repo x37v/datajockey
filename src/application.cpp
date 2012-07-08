@@ -265,6 +265,8 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->select();
 
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
+   //XXX removing filter buttons for now
+   work_db_view->showFilterButtons(false);
 
    //WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
