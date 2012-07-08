@@ -140,6 +140,7 @@ namespace dj {
             void update_transport_offset(const Transport& transport);
 
             //gives the current position based on the stretcher frame + beat buffer
+            //requires beat buffer and stretcher be valid
             TimePoint strecher_position();
       };
 

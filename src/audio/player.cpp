@@ -289,7 +289,7 @@ void Player::sync(bool val){
 
 void Player::sync(bool val, const Transport& transport) {
    if (val != mSync) {
-      if (!mSync)
+      if (mBeatBuffer && !mSync)
          mPosition = strecher_position();
       mSync = val;
       update_transport_offset(transport);
@@ -484,6 +484,9 @@ void Player::update_transport_offset(const Transport& transport) {
 }
 
 TimePoint Player::strecher_position() {
+   if (!mBeatBuffer)
+      return mPosition;
+
    return mBeatBuffer->position_at_time(
          (static_cast<double>(mStretcher->frame()) + mStretcher->frame_subsample()) / static_cast<double>(mSampleRate),
          mPosition);
