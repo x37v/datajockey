@@ -82,7 +82,7 @@ namespace {
          }
          bool prepare(const QString & query){
             if (!QSqlQuery::prepare(query))
-               throw("failed to query: " + lastError().text().toStdString());
+               throw(std::runtime_error("failed to query: " + lastError().text().toStdString()));
             return true;
          }
          bool exec() {
@@ -92,7 +92,7 @@ namespace {
          }
    };
 
-   void build_work_table() throw(std::runtime_error) {
+   void create_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
       QMutexLocker lock(&mMutex);
       //build up query
       MySqlQuery query(cDB);
@@ -117,11 +117,21 @@ namespace {
          selects << "`" + name + "`.value as `" + name + "`";
       }
 
-      QString query_string = "CREATE TEMPORARY TABLE works AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ") + " ORDER BY album_id, track";
+      QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ");
+
+      if (!where_clause.isEmpty())
+         query_string += (" where " + where_clause);
+
+      query_string += " ORDER BY album_id, track";
       
       //actually create the table
       query.prepare(query_string);
       query.exec();
+   }
+
+   void build_work_table() throw(std::runtime_error) {
+      //create_temp_work_table("works", "audio_works.id IN (select audio_work_id from audio_work_tags where audio_work_tags.tag_id in (2,3,4))");
+      create_temp_work_table("works");
 
       QSqlTableModel tab;
       tab.setTable("works");
@@ -169,7 +179,11 @@ void db::setup(
    if(cDB.driver()->hasFeature(QSqlDriver::Transactions))
       has_transactions = true;
 
-   build_work_table();
+   try {
+      build_work_table();
+   } catch (std::runtime_error e) {
+      qFatal("couldn't build temporary work table, exception thrown with following message: %s", e.what());
+   }
 }
 
 QSqlDatabase db::get() { return cDB; }
