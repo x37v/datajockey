@@ -71,6 +71,9 @@ namespace {
    const QString cWorkTagFind("SELECT id FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
    const QString cWorkTagCreate("INSERT INTO audio_work_tags (tag_id, audio_work_id) VALUES (:tag_id, :audio_work_id)");
 
+   QStringList work_table_selects;
+   QStringList work_table_joins;
+
    int cWorkArtistIdColumn = 0;
    int cWorkAlbumIdColumn = 0;
    int cWorkAudioFileTypeIdColumn = 0;
@@ -92,39 +95,41 @@ namespace {
          }
    };
 
-   void create_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
+   void create_worktable_selects_and_joins() throw (std::runtime_error) {
       QMutexLocker lock(&mMutex);
-      //build up query
-      MySqlQuery query(cDB);
 
-      QStringList selects;
-      QStringList joins;
+      work_table_selects << "audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
+         " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_milliseconds, audio_works.audio_file_channels,"
+         " audio_works.annotation_file_location, audio_works.created_at, audio_works.updated_at";
+      work_table_joins << "audio_works";
 
-      selects << "audio_works.*";
-      joins << "audio_works";
-
-      selects << "albums.id AS album_id";
-      selects << "album_audio_works.track AS track";
-      joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
+      work_table_selects << "albums.id AS album_id";
+      work_table_selects << "album_audio_works.track AS track";
+      work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
 
       //build up descriptor joins
+      MySqlQuery query(cDB);
       query.prepare(cDescriptorTypesAll);
       query.exec();
       while(query.next()) {
          QString name = query.value(1).toString();
          QString id = query.value(0).toString();
-         joins << "LEFT JOIN descriptors as `" + name + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
-         selects << "`" + name + "`.value as `" + name + "`";
+         work_table_joins << "LEFT JOIN descriptors as `" + name + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
+         work_table_selects << "`" + name + "`.value as `" + name + "`";
       }
+   }
 
-      QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT " + selects.join(", ") + " FROM " + joins.join(" ");
+   void create_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
+      QMutexLocker lock(&mMutex);
+      QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT " + work_table_selects.join(", ") + " FROM " + work_table_joins.join(" ");
 
       if (!where_clause.isEmpty())
          query_string += (" where " + where_clause);
 
       query_string += " ORDER BY album_id, track";
-      
+
       //actually create the table
+      MySqlQuery query(cDB);
       query.prepare(query_string);
       query.exec();
    }
@@ -178,6 +183,12 @@ void db::setup(
 
    if(cDB.driver()->hasFeature(QSqlDriver::Transactions))
       has_transactions = true;
+
+   try {
+      create_worktable_selects_and_joins();
+   } catch (std::runtime_error e) {
+      qFatal("couldn't create worktable selects and joins, exception thrown with following message: %s", e.what());
+   }
 
    try {
       build_work_table();
