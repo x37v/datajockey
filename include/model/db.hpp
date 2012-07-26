@@ -31,7 +31,11 @@ namespace dj {
 					QString& work_title) throw(std::runtime_error);
 
 			namespace work {
+            QString filtered_table(const QString where_clause = QString()) throw(std::runtime_error);
+            void filtered_update(const QString& table_name, const QString where_clause = QString()) throw(std::runtime_error);
+
             int temp_table_id_column(QString id_name);
+
 				int create(
 						const QHash<QString, QVariant>& attributes,
 						const QString& audio_file_location

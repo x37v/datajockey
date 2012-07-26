@@ -78,6 +78,8 @@ namespace {
    int cWorkAlbumIdColumn = 0;
    int cWorkAudioFileTypeIdColumn = 0;
 
+   int cFilteredWorkTableCount = 0;
+
    //this class simply wraps the prepare and exec methods of QSqlQuery so it throws exceptions on failures
    class MySqlQuery : public QSqlQuery {
       public:
@@ -130,6 +132,27 @@ namespace {
 
       //actually create the table
       MySqlQuery query(cDB);
+      query.prepare(query_string);
+      query.exec();
+   }
+
+   void update_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
+      QMutexLocker lock(&mMutex);
+      MySqlQuery query(cDB);
+
+      //delete everything from the table
+      QString query_string = "DELETE FROM " + table_name;
+      query.prepare(query_string);
+      query.exec();
+
+      //prepare the insert
+      query_string = "INSERT INTO " + table_name + " SELECT " + work_table_selects.join(", ") + " FROM " + work_table_joins.join(" ");
+      if (!where_clause.isEmpty())
+         query_string += (" where " + where_clause);
+
+      query_string += " ORDER BY album_id, track";
+
+      //actually create the table
       query.prepare(query_string);
       query.exec();
    }
@@ -251,6 +274,17 @@ bool db::find_artist_and_title_by_id(
 	work_title = query.value(titleCol).toString();
 
 	return true;
+}
+
+QString db::work::filtered_table(const QString where_clause) throw(std::runtime_error) {
+   QMutexLocker lock(&mMutex);
+   QString table_name("filtered_works_" + QString::number(cFilteredWorkTableCount++));
+   create_temp_work_table(table_name, where_clause);
+   return table_name;
+}
+
+void db::work::filtered_update(const QString& table_name, const QString where_clause) throw(std::runtime_error) {
+   update_temp_work_table(table_name, where_clause);
 }
 
 int db::work::temp_table_id_column(QString id_name) {
