@@ -5,12 +5,13 @@
 #include <vector>
 #include <string>
 #include "importer.hpp"
+#include <QString>
 
 class ImporterApplication : public QCoreApplication {
    Q_OBJECT
    public:
       ImporterApplication(int & argc, char ** argv);
-      void import_paths(std::vector<std::string>& paths);
+      void import_paths(std::vector<std::string>& paths, QRegExp ignore_pattern = QRegExp());
    public slots:
       void cleanup();
    private:

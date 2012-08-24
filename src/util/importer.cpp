@@ -21,7 +21,7 @@ using std::endl;
 namespace {
    const QStringList valid_file_types = (QStringList() << "flac" << "mp3" << "ogg");
 
-   QStringList recurse_dirs(const QStringList& file_list) {
+   QStringList recurse_dirs(const QStringList& file_list, const QRegExp& ignore_pattern) {
       QStringList files;
 
       foreach(const QString &item, file_list) {
@@ -35,9 +35,11 @@ namespace {
             QStringList entries = dir.entryList(QDir::AllEntries | QDir::Readable | QDir::NoDotAndDotDot);
             for(QStringList::iterator it = entries.begin(); it != entries.end(); it++)
                *it = dir.filePath(*it);
-            files << recurse_dirs(entries);
-         } else
-            files << item;
+            files << recurse_dirs(entries, ignore_pattern);
+         } else {
+           if (!ignore_pattern.isEmpty() && !item.contains(ignore_pattern))
+             files << item;
+         }
       }
       return files;
    }
@@ -141,8 +143,8 @@ Importer::Importer(QObject * parent) : QObject(parent) {
          SIGNAL(finished()));
 }
 
-void Importer::import(const QStringList& file_list, bool recurse_directories) {
-   QStringList files = (recurse_directories ? recurse_dirs(file_list) : file_list);
+void Importer::import(const QStringList& file_list, bool recurse_directories, QRegExp ignore_pattern) {
+   QStringList files = (recurse_directories ? recurse_dirs(file_list, ignore_pattern) : file_list);
 
    if (mFutureWatcher->isRunning()) {
       //XXX should we cancel?

@@ -37,11 +37,11 @@ ImporterApplication::ImporterApplication(int& argc, char ** argv) : QCoreApplica
    }
 }
 
-void ImporterApplication::import_paths(std::vector<std::string>& paths) {
+void ImporterApplication::import_paths(std::vector<std::string>& paths, QRegExp ignore_pattern) {
    QStringList qpaths;
    for(std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); it++)
       qpaths << QString::fromStdString(*it);
-   mImporter->import(qpaths);
+   mImporter->import(qpaths, true, ignore_pattern);
 }
 
 void ImporterApplication::cleanup() {
@@ -51,12 +51,14 @@ void ImporterApplication::cleanup() {
 int main(int argc, char * argv[]) {
    try {
       dj::Configuration * config = dj::Configuration::instance();
+      QString ignore_pattern;
 
       po::options_description generic_options("Allowed options");
       generic_options.add_options()
          ("help,h", "print this help message")
          ("force,f", "non interactive, just import without any prompting")
          ("config,c", po::value<std::string>(), "specify a config file")
+         ("ignore,d", po::value<std::string>(), "specify a pattern to ignore for import")
          ;
 
       // Hidden options, will be allowed both on command line and
@@ -95,6 +97,9 @@ int main(int argc, char * argv[]) {
       else
          config->load_default();
 
+      if (vm.count("ignore"))
+         ignore_pattern = QString::fromStdString(vm["ignore"].as<std::string>());
+
       std::vector<std::string> import_paths = vm["input-file"].as< std::vector<std::string> >();
       if (!vm.count("force")) {
          cout << "Initiating a recursive import of the following paths: " << endl;
@@ -105,6 +110,8 @@ int main(int argc, char * argv[]) {
          QString db_adapter = config->db_adapter();
          db_adapter = db_adapter.right(db_adapter.size() - 1).toLower();
          cout << endl << "Using " << config->db_name().toStdString() << " " << db_adapter.toStdString() << " database " << endl;
+         if (!ignore_pattern.isEmpty())
+           cout << "Ignoring files that match " << ignore_pattern.toStdString() << endl;
 
          cout << "Note, files that are already in the database will be ignored." << endl;
          cout << "Type 'yes' to continue or anything else to exit" << endl;
@@ -121,7 +128,7 @@ int main(int argc, char * argv[]) {
 
       int fake_argc = 1; //only passing the program name because we use the rest with boost
       ImporterApplication app(fake_argc, argv);
-      app.import_paths(import_paths);
+      app.import_paths(import_paths, QRegExp(ignore_pattern));
       app.exec();
 
    } catch(std::exception& e) {
