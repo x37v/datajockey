@@ -37,7 +37,7 @@ namespace {
                *it = dir.filePath(*it);
             files << recurse_dirs(entries, ignore_pattern);
          } else {
-           if (!ignore_pattern.isEmpty() && !item.contains(ignore_pattern))
+           if (ignore_pattern.isEmpty() || !item.contains(ignore_pattern))
              files << item;
          }
       }
