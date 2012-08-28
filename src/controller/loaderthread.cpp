@@ -51,7 +51,7 @@ void LoaderThread::run() {
       mAudioBuffer = AudioBufferPtr(new AudioBuffer(mAudioFileName.toStdString()));
 
       if (!mAnnotationFileName.isEmpty()) {
-         if (!mBeatBuffer->load(mAnnotationFileName.toStdString())) {
+         if (!mBeatBuffer->load(mAnnotationFileName)) {
             emit(load_error(mPlayerIndex, "problem loading annotation file: " + mAnnotationFileName));
             mBeatBuffer.reset();
          }

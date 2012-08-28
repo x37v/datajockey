@@ -2,7 +2,15 @@
 #include <yaml-cpp/yaml.h>
 #include <vector>
 #include <algorithm>
-#include <fstream>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <iostream>
+
+namespace fs = boost::filesystem;
+
+using std::cerr;
+using std::endl;
 
 using namespace dj::audio;
 
@@ -26,10 +34,10 @@ BeatBuffer::BeatBuffer() {
 BeatBuffer::~BeatBuffer() {
 }
 
-bool BeatBuffer::load(std::string file_location) {
+bool BeatBuffer::load(const QString& file_location) {
    clear();
    try {
-      std::ifstream fin(file_location.c_str());
+      fs::ifstream fin(file_location.toStdWString());
       YAML::Parser parser(fin);
       YAML::Node doc;
       parser.GetNextDocument(doc);
@@ -47,6 +55,7 @@ bool BeatBuffer::load(std::string file_location) {
          }
       }
    } catch(...) {
+      cerr << "problem loading " << file_location.toStdString() << endl;
       return false;
    }
    return true;

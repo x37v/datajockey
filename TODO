@@ -1,3 +1,6 @@
+Files:
+   make sure that non ascii string named files can be read in [audio files]
+   this should be fixed for beat buffers
 Filtering:
    Create a temporary work table with a where clause for filtering.
    updates to filter will just clear the table and select -> insert with a new where clause

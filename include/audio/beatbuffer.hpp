@@ -7,6 +7,7 @@
 #include <deque>
 #include <QSharedData>
 #include <QExplicitlySharedDataPointer>
+#include <QString>
 
 namespace dj {
    namespace audio {
@@ -19,7 +20,7 @@ namespace dj {
 
             BeatBuffer();
             virtual ~BeatBuffer();
-            bool load(std::string file_location);
+            bool load(const QString& file_location);
 
             double time_at_position(const TimePoint& position) const;
             TimePoint position_at_time(double seconds) const;
