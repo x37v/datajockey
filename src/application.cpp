@@ -272,7 +272,7 @@ Application::Application(int & argc, char ** argv) :
 
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
 
-   QString filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"baby_rave\"))");
+   QString filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"aug282012\"))");
    rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
    rtable_model->setTable(filtered_name);
    rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
