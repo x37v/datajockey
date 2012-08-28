@@ -38,7 +38,7 @@ namespace {
             files << recurse_dirs(entries, ignore_pattern);
          } else {
            if (ignore_pattern.isEmpty() || !item.contains(ignore_pattern))
-             files << item;
+             files << info.canonicalFilePath();
          }
       }
       return files;
