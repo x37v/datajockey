@@ -281,6 +281,15 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->select();
    WorkDBView * work_db_view_filtered = new WorkDBView(rtable_model, mTop);
 
+   filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"jams\"))");
+   rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
+   rtable_model->setTable(filtered_name);
+   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+   rtable_model->select();
+   WorkDBView * work_db_view_filtered2 = new WorkDBView(rtable_model, mTop);
+
    //XXX hack to write settings before quitting, is there a better way?
    QObject::connect(
          this, SIGNAL(aboutToQuit()),
@@ -337,6 +346,17 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(workSelected(int)),
          SLOT(select_work(int)));
 
+   QObject::connect(
+         work_db_view_filtered2,
+         SIGNAL(workSelected(int)),
+         work_detail,
+         SLOT(setWork(int)));
+
+   QObject::connect(
+         work_db_view_filtered2,
+         SIGNAL(workSelected(int)),
+         SLOT(select_work(int)));
+
    /*
    //filter application
    QObject::connect(
@@ -371,7 +391,8 @@ Application::Application(int & argc, char ** argv) :
 
    QTabWidget * right_tab_view = new QTabWidget(mTop);
    right_tab_view->addTab(work_db_view, "all works");
-   right_tab_view->addTab(work_db_view_filtered, "filtered");
+   right_tab_view->addTab(work_db_view_filtered, "chill");
+   right_tab_view->addTab(work_db_view_filtered2, "jams");
    splitter->addWidget(right_tab_view);
 
    top_layout->addWidget(splitter);
