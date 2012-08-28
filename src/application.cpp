@@ -271,6 +271,16 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->select();
 
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
+
+   QString filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"baby_rave\"))");
+   rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
+   rtable_model->setTable(filtered_name);
+   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
+   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+   rtable_model->select();
+   WorkDBView * work_db_view_filtered = new WorkDBView(rtable_model, mTop);
+
    //XXX hack to write settings before quitting, is there a better way?
    QObject::connect(
          this, SIGNAL(aboutToQuit()),
@@ -316,6 +326,17 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(workSelected(int)),
          SLOT(select_work(int)));
 
+   QObject::connect(
+         work_db_view_filtered,
+         SIGNAL(workSelected(int)),
+         work_detail,
+         SLOT(setWork(int)));
+
+   QObject::connect(
+         work_db_view_filtered,
+         SIGNAL(workSelected(int)),
+         SLOT(select_work(int)));
+
    /*
    //filter application
    QObject::connect(
@@ -347,13 +368,18 @@ Application::Application(int & argc, char ** argv) :
    QWidget * left = new QWidget;
    left->setLayout(left_layout);
    splitter->addWidget(left);
-   splitter->addWidget(work_db_view);
+
+   QTabWidget * right_tab_view = new QTabWidget(mTop);
+   right_tab_view->addTab(work_db_view, "all works");
+   right_tab_view->addTab(work_db_view_filtered, "filtered");
+   splitter->addWidget(right_tab_view);
+
    top_layout->addWidget(splitter);
 
    //set the default sizes
    QList<int> sizes;
    sizes << mMixerPanel->minimumWidth();
-   sizes << work_db_view->maximumWidth() - mMixerPanel->minimumWidth();
+   sizes << right_tab_view->maximumWidth() - mMixerPanel->minimumWidth();
    splitter->setSizes(sizes);
 
 
