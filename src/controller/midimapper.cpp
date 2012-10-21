@@ -98,12 +98,20 @@ void MIDIMapper::run() {
       if (mMappingState == IDLE) {
          mapping_hash_t::iterator it = mMappings.find(key);
          if (it != mMappings.end()) {
-            const uint8_t input_value = buff.data[2];
-            //relative signals don't send zeros
-            if (it->signal_name.contains("relative") && input_value == 0)
-               continue;
+            int input_value = buff.data[2];
+
+            if (it->signal_name.contains("relative")) {
+              //relative signals don't send zeros
+              if (input_value == 0)
+                continue;
+              //hack to do 2 types of relative.. centered at 0 or centered at 64
+              //centered at zero detected by < 32 or > 96 [and only the negative matters]
+              if (input_value > 96)
+                input_value -= 128;
+            }
 
             double value = it->value_offset + it->value_mul * (double)input_value / 127.0;
+
             //multiply by one_scale when we should
             if (it->signal_name.contains("eq_") ||
                   it->signal_name.contains("speed") ||
