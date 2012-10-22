@@ -132,6 +132,16 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
          root["midi_map"]["autosave"] >> mMIDIMapAutoSave;
       } catch (...) { /* do nothing */ }
 
+      //check out the import settings
+      try {
+        for (YAML::Iterator it = root["import"]["ignore"].begin(); it != root["import"]["ignore"].end(); it++) {
+          std::string v;
+          *it >> v;
+          mImportIgnores << QString::fromStdString(v);
+        }
+      } catch (...) { /* do nothing */ }
+
+
    } catch (...){
       mValidFile = false;
       std::string str("error reading config file: ");
@@ -174,6 +184,10 @@ QString Configuration::annotation_dir() { return mAnnotationDir; }
 
 QString Configuration::midi_mapping_file() { return mMIDIMapFile; }
 bool Configuration::midi_mapping_auto_save() { return mMIDIMapAutoSave; }
+
+const QStringList& Configuration::import_ignores() const {
+  return mImportIgnores;
+}
 
 void Configuration::restore_defaults() {
    mDBUserName = "user";

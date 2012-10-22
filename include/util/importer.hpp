@@ -16,7 +16,7 @@ namespace dj {
          public:
             Importer(QObject * parent = NULL);
          public slots:
-            void import(const QStringList& file_list, bool recurse_directories = true, QRegExp ignore_pattern = QRegExp());
+            void import(const QStringList& file_list, bool recurse_directories = true, QList<QRegExp> ignore_patterns = QList<QRegExp>());
             void import_blocking(const QString& audio_file);
          signals:
             void finished();

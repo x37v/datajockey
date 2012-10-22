@@ -31,6 +31,7 @@
 
 #include <stdexcept>
 #include <QString>
+#include <QStringList>
 #include <yaml-cpp/yaml.h>
 
 namespace dj {
@@ -57,6 +58,8 @@ namespace dj {
          QString annotation_dir();
          QString midi_mapping_file();
          bool midi_mapping_auto_save();
+
+         const QStringList& import_ignores() const;
       private:
          bool db_get(YAML::Node& doc, QString entry, QString &result);
          QString mFile;
@@ -72,6 +75,8 @@ namespace dj {
 
          QString mMIDIMapFile;
          bool mMIDIMapAutoSave;
+
+         QStringList mImportIgnores;
 
       protected:
          Configuration();
