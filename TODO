@@ -1,3 +1,5 @@
+Syncing:
+  Something isn't right with sync to track, sometimes it just doesn't work. or it seems like maybe it is syncing to the wrong track?
 Files:
    make sure that non ascii string named files can be read in [audio files]
    this should be fixed for beat buffers
