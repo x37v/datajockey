@@ -1,4 +1,5 @@
 #include "master.hpp"
+#include "defines.hpp"
 #include <math.h>
 
 using namespace dj::audio;
@@ -253,6 +254,16 @@ LilvWorld * Master::lv2_world() const { return mLV2World; }
 const LilvPlugins * Master::lv2_plugins() const { return mLV2Plugins; }
 
 float Master::max_sample_value() const { return mMaxSampleValue; }
+
+bool Master::player_audible(unsigned int player_index) const {
+  if (player_index >= mPlayers.size() ||
+      !mPlayers[player_index]->audible() ||
+      master_volume() < INAUDIBLE_VOLUME ||
+      (static_cast<int>(player_index) == mCrossFadeMixers[1] && mCrossFadePosition <= INAUDIBLE_VOLUME) ||
+      (static_cast<int>(player_index) == mCrossFadeMixers[0] && (1.0 - mCrossFadePosition) <= INAUDIBLE_VOLUME))
+    return false;
+  return true;
+}
 
 //setters
 void Master::master_volume(float val){

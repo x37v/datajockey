@@ -7,6 +7,7 @@
 
 #define DO_STRINGIFY(X) #X
 #define STRINGIFY(X) DO_STRINGIFY(X)
+#define INAUDIBLE_VOLUME 0.001f
 
 namespace dj {
    //this is the value we use to scale from an int to a double, this

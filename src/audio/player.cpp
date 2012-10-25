@@ -3,6 +3,7 @@
 #include "master.hpp"
 #include "stretcher.hpp"
 #include "stretcherrate.hpp"
+#include "defines.hpp"
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 #define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
 
@@ -256,6 +257,12 @@ double Player::bpm() {
 
    double s_per_beat = (mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(cur)) / play_speed();
    return 60.0 / s_per_beat; //becomes beats per min
+}
+
+bool Player::audible() const {
+  if (!mStretcher->audio_buffer() || muted() || play_state() == PAUSE || volume() < INAUDIBLE_VOLUME || frame() >= mStretcher->audio_buffer()->length())
+    return false;
+  return true;
 }
 
 AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); }

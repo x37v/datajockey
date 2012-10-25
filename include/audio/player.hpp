@@ -69,6 +69,7 @@ namespace dj {
             unsigned int frame() const;
             float max_sample_value() const;
             double bpm();
+            bool audible() const;
 
             AudioBuffer * audio_buffer() const;
             BeatBuffer * beat_buffer() const;

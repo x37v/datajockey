@@ -44,6 +44,7 @@ namespace dj {
             LilvWorld * lv2_world() const;
             const LilvPlugins * lv2_plugins() const;
             float max_sample_value() const;
+            bool player_audible(unsigned int player_index) const;
 
             //setters
             void master_volume(float val);

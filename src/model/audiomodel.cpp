@@ -11,11 +11,11 @@ using namespace dj;
 using namespace dj::audio;
 
 #include <iostream>
+using std::cout;
 using std::cerr;
 using std::endl;
 
 namespace {
-   const int audible_timeout_ms = 200;
    const int one_point_five = static_cast<int>((double)one_scale * 1.5);
    const int ione_scale = one_scale;
 
@@ -150,7 +150,8 @@ class AudioModel::PlayerState {
          mNumFrames(0),
          mSpeed(0.0),
          mPostFreeSpeedUpdates(0),
-         mMaxSampleValue(0.0) { }
+         mMaxSampleValue(0.0),
+         mAudible(false) { }
 
       QHash<QString, bool> mParamBool;
       QHash<QString, int> mParamInt;
@@ -164,6 +165,7 @@ class AudioModel::PlayerState {
       //we count the number of speed updates so that after going 'free' we get at least two updates to the gui
       unsigned int mPostFreeSpeedUpdates;
       float mMaxSampleValue;
+      bool mAudible;
 };
 
 class AudioModel::ConsumeThread : public QThread {
@@ -298,14 +300,13 @@ AudioModel::AudioModel() :
    QObject::connect(query_cmd, SIGNAL(player_value_update(int, QString, int)),
             SLOT(relay_player_value(int, QString, int)),
             Qt::QueuedConnection);
+   QObject::connect(query_cmd, SIGNAL(player_bool_update(int, QString, bool)),
+            SLOT(relay_player_bool(int, QString, bool)),
+            Qt::QueuedConnection);
 
    mConsumeThread = new ConsumeThread(query_cmd, mMaster->scheduler());
    mConsumeThread->start();
 
-   mAudibleTimer = new QTimer(this);
-   mAudibleTimer->setInterval(audible_timeout_ms);
-   QObject::connect(mAudibleTimer, SIGNAL(timeout()), SLOT(players_eval_audible()));
-   mAudibleTimer->start();
 }
 
 AudioModel::~AudioModel() {
@@ -466,13 +467,22 @@ void AudioModel::relay_player_value(int player_index, QString name, int value){
    }
 }
 
-void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
-   emit(player_value_changed(player_index, "update_progress", percent));
+void AudioModel::relay_player_bool(int player_index, QString name, bool value) {
+   if (player_index < 0 || player_index >= (int)mNumPlayers)
+      return;
+
+   PlayerState * pstate = mPlayerStates[player_index];
+   if (name == "update_audible") {
+     if (pstate->mParamBool["audible"] != value) {
+       pstate->mParamBool["audible"] = value;
+       emit(player_value_changed(player_index, "audible", value));
+       //cout << "player " << player_index << " audible: " << value << endl;
+     }
+   }
 }
 
-void AudioModel::players_eval_audible() {
-   for(unsigned int player_index = 0; player_index < mPlayerStates.size(); player_index++)
-      player_eval_audible(player_index);
+void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
+   emit(player_value_changed(player_index, "update_progress", percent));
 }
 
 void AudioModel::master_set(QString name, bool value) {
@@ -809,32 +819,6 @@ void AudioModel::queue_command(dj::audio::Command * cmd){
    mMaster->scheduler()->execute(cmd);
 }
 
-void AudioModel::player_eval_audible(int player_index) {
-   if (player_index < 0 || player_index >= (int)mNumPlayers)
-      return;
-
-   PlayerState * state = mPlayerStates[player_index];
-   bool audible = true;
-
-   if(state->mNumFrames == 0 ||
-         state->mCurrentFrame >= state->mNumFrames ||
-         state->mParamBool["mute"] ||
-         state->mParamBool["pause"] ||
-         //XXX detect player cue style: player->mParamBool["cue"]
-         state->mParamInt["volume"] < mPlayerAudibleThresholdVolume ||
-         (mMasterParamBool["crossfade_enabled"] && 
-          ((mMasterParamInt["crossfade_player_right"] == player_index && mMasterParamInt["crossfade_position"] < mCrossfadeAudibleThresholdPosition) ||
-          (mMasterParamInt["crossfade_player_left"] == player_index && mMasterParamInt["crossfade_position"] > (one_scale - mCrossfadeAudibleThresholdPosition))))
-         ) {
-      audible = false;
-   }
-
-   if (state->mParamBool["audible"] != audible) {
-      state->mParamBool["audible"] = audible;
-      emit(player_value_changed(player_index, "audible", audible));
-   } 
-}
-
 void AudioModel::slotval_clamp(const QString& param_name, int& param_value) {
    if (param_name == "volume")
       param_value = clamp(param_value, 0, one_point_five);
@@ -875,6 +859,7 @@ void QueryPlayState::execute(){
       mStates[i]->mCurrentFrame = player->frame();
       mStates[i]->mMaxSampleValue = player->max_sample_value();
       mStates[i]->mSpeed = player->play_speed();
+      mStates[i]->mAudible = master()->player_audible(i);
       player->max_sample_value_reset();
    }
 }
@@ -895,6 +880,7 @@ void QueryPlayState::execute_done() {
       emit(player_value_update(i, "update_speed", speed_percent));
       if (audio_level > 0)
          emit(player_value_update(i, "update_audio_level", audio_level));
+      emit(player_bool_update(i, "update_audible", pstate->mAudible));
    }
 }
 

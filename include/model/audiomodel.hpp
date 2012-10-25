@@ -85,11 +85,11 @@ namespace dj {
                   AudioBufferPtr audio_buffer,
                   BeatBufferPtr beat_buffer);
             void relay_player_value(int player_index, QString name, int value);
+            void relay_player_bool(int player_index, QString name, bool value);
 
             //relay methods are called with queued connections across threads so that
             //they relay signals into the main thread, they simply emit signals
             void relay_audio_file_load_progress(int player_index, int percent);
-            void players_eval_audible();
 
          private:
             friend class PlayerSetBuffersCommand;
@@ -127,8 +127,6 @@ namespace dj {
 
             double mBumpSeconds;
 
-            QTimer * mAudibleTimer;
-
             //**** private methods
 
             //returns true if the buffer is actually loaded anywhere
@@ -146,8 +144,6 @@ namespace dj {
             void set_player_position(int player_index, const TimePoint &val, bool absolute = true);
             void set_player_position_frame(int player_index, int frame, bool absolute = true);
             void set_player_position_beat_relative(int player_index, int beats);
-
-            void player_eval_audible(int player_index);
 
             template <typename T>
                void make_slotarg_absolute(const QHash<QString, T>& param_hash, QString& param_name, T& param_value) {
@@ -183,6 +179,7 @@ namespace dj {
             virtual bool store(CommandIOData& /* data */) const;
          signals:
             void player_value_update(int player_index, QString name, int val);
+            void player_bool_update(int player_index, QString name, bool val);
             void master_value_update(QString name, int value);
             void master_value_update(QString name, double value);
             void master_value_update(QString name, TimePoint timepoint);
