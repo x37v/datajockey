@@ -49,6 +49,8 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 	mTableView->verticalHeader()->setVisible(false);
 	mTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	mTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+  //XXX actually do something with editing at some point
+  mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
 	//create the buttons
 	mApplyFilterButton = new QPushButton("apply filter", this);
