@@ -55,13 +55,15 @@ namespace {
   void import_file(const QString& audio_file_path) {
     unsigned int beat_smooth_iterations = 20; //XXX grab from config
     try {
+
+      if (model::db::work::find_by_audio_file_location(audio_file_path) != 0) {
+        //qWarning() << audio_file_path << " already in database, skipping";
+        return;
+      }
+
       //XXX not thread safe, might not print all at once, use signals?
       cout << "processing: " << audio_file_path.toStdString() << endl;
 
-      if (model::db::work::find_by_audio_file_location(audio_file_path) != 0) {
-        qWarning() << audio_file_path << " already in database, skipping";
-        return;
-      }
       //grab tag data
       QHash<QString, QVariant> tag_data;
       audiofile_tag::extract(audio_file_path, tag_data);
