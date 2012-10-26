@@ -37,11 +37,11 @@ ImporterApplication::ImporterApplication(int& argc, char ** argv) : QCoreApplica
    }
 }
 
-void ImporterApplication::import_paths(std::vector<std::string>& paths, QList<QRegExp> ignore_patterns) {
+void ImporterApplication::import_paths(std::vector<std::string>& paths, QList<QRegExp> ignore_patterns, bool multithreaded) {
   QStringList qpaths;
    for(std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); it++)
       qpaths << QString::fromStdString(*it);
-   mImporter->import(qpaths, true, ignore_patterns);
+   mImporter->import(qpaths, true, ignore_patterns, multithreaded);
 }
 
 void ImporterApplication::cleanup() {
@@ -52,11 +52,13 @@ int main(int argc, char * argv[]) {
    try {
       dj::Configuration * config = dj::Configuration::instance();
       QList<QRegExp> ignore_patterns;
+      bool multithreaded = true;
 
       po::options_description generic_options("Allowed options");
       generic_options.add_options()
          ("help,h", "print this help message")
          ("force,f", "non interactive, just import without any prompting")
+         ("single-thread,1", "run single threaded, workaround for mp3 stack smashing bug")
          ("config,c", po::value<std::string>(), "specify a config file")
          ("ignore,d", po::value<std::vector<std::string> >(), "specify a pattern to ignore for import")
          ;
@@ -96,6 +98,11 @@ int main(int argc, char * argv[]) {
          config->load_file(QString::fromStdString(vm["config"].as<std::string>()));
       else
          config->load_default();
+
+      if (vm.count("single-thread")) {
+        cout << "Running in single threaded mode" << endl;
+        multithreaded = false;
+      }
 
       //grab the ignore patterns from our config file
       QString ignore;
@@ -142,7 +149,7 @@ int main(int argc, char * argv[]) {
 
       int fake_argc = 1; //only passing the program name because we use the rest with boost
       ImporterApplication app(fake_argc, argv);
-      app.import_paths(import_paths, ignore_patterns);
+      app.import_paths(import_paths, ignore_patterns, false);
       app.exec();
 
    } catch(std::exception& e) {

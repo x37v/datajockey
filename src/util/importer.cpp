@@ -141,6 +141,12 @@ namespace {
       qWarning() << "failed to import file " << audio_file_path;
     }
   }
+
+  void import_files(const QStringList& file_list) {
+    foreach(const QString &file, file_list) {
+      import_file(file);
+    }
+  }
 }
 
 Importer::Importer(QObject * parent) : QObject(parent) {
@@ -151,7 +157,7 @@ Importer::Importer(QObject * parent) : QObject(parent) {
       SIGNAL(finished()));
 }
 
-void Importer::import(const QStringList& file_list, bool recurse_directories, QList<QRegExp> ignore_patterns) {
+void Importer::import(const QStringList& file_list, bool recurse_directories, QList<QRegExp> ignore_patterns, bool multithreaded) {
   QStringList files = (recurse_directories ? recurse_dirs(file_list, ignore_patterns) : file_list);
 
   if (mFutureWatcher->isRunning()) {
@@ -167,7 +173,11 @@ void Importer::import(const QStringList& file_list, bool recurse_directories, QL
       continue;
     mFileList << item;
   }
-  mFutureWatcher->setFuture(QtConcurrent::map(mFileList, import_file));
+
+  if (multithreaded)
+    mFutureWatcher->setFuture(QtConcurrent::map(mFileList, import_file));
+  else
+    mFutureWatcher->setFuture(QtConcurrent::run(import_files, mFileList));
 }
 
 void Importer::import_blocking(const QString& audio_file) {

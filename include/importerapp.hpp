@@ -12,7 +12,7 @@ class ImporterApplication : public QCoreApplication {
    Q_OBJECT
    public:
       ImporterApplication(int & argc, char ** argv);
-      void import_paths(std::vector<std::string>& paths, QList<QRegExp> ignore_patterns = QList<QRegExp>());
+      void import_paths(std::vector<std::string>& paths, QList<QRegExp> ignore_patterns = QList<QRegExp>(), bool multithreaded = true);
    public slots:
       void cleanup();
    private:
