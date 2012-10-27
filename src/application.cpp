@@ -270,7 +270,11 @@ Application::Application(int & argc, char ** argv) :
    //XXX quite slow rtable_model->setFilter("works.id IN (select audio_work_id from audio_work_tags where audio_work_tags.tag_id in (2,3,4))");
    rtable_model->select();
 
+   QList<WorkDBView *> db_views;
+   QStringList db_view_names;
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
+   db_views << work_db_view;
+   db_view_names << "all";
 
    QString filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"aug282012\"))");
    rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
@@ -279,16 +283,25 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
    rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
    rtable_model->select();
-   WorkDBView * work_db_view_filtered = new WorkDBView(rtable_model, mTop);
 
-   filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"jams\"))");
-   rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
-   rtable_model->setTable(filtered_name);
-   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
-   rtable_model->select();
-   WorkDBView * work_db_view_filtered2 = new WorkDBView(rtable_model, mTop);
+   db_views << new WorkDBView(rtable_model, mTop);
+   db_view_names << "chill";
+
+   QStringList tag_names;
+   tag_names << "jams" << "halloween" << "minimal_synth";
+
+   foreach(const QString tag, tag_names) {
+     QString sel = "audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"" + tag + "\"))";
+     filtered_name = model::db::work::filtered_table(sel);
+     rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
+     rtable_model->setTable(filtered_name);
+     rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
+     rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
+     rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+     rtable_model->select();
+     db_views << new WorkDBView(rtable_model, mTop);
+     db_view_names << tag;
+   }
 
    //XXX hack to write settings before quitting, is there a better way?
    QObject::connect(
@@ -323,39 +336,19 @@ Application::Application(int & argc, char ** argv) :
          SLOT(setTags(QList<int>)));
          */
 
-   //work selection
-   QObject::connect(
-         work_db_view,
+   foreach (WorkDBView * view, db_views) {
+     //work selection
+     QObject::connect(
+         view,
          SIGNAL(workSelected(int)),
          work_detail,
          SLOT(setWork(int)));
 
-   QObject::connect(
-         work_db_view,
+     QObject::connect(
+         view,
          SIGNAL(workSelected(int)),
          SLOT(select_work(int)));
-
-   QObject::connect(
-         work_db_view_filtered,
-         SIGNAL(workSelected(int)),
-         work_detail,
-         SLOT(setWork(int)));
-
-   QObject::connect(
-         work_db_view_filtered,
-         SIGNAL(workSelected(int)),
-         SLOT(select_work(int)));
-
-   QObject::connect(
-         work_db_view_filtered2,
-         SIGNAL(workSelected(int)),
-         work_detail,
-         SLOT(setWork(int)));
-
-   QObject::connect(
-         work_db_view_filtered2,
-         SIGNAL(workSelected(int)),
-         SLOT(select_work(int)));
+   }
 
    /*
    //filter application
@@ -390,9 +383,9 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(left);
 
    QTabWidget * right_tab_view = new QTabWidget(mTop);
-   right_tab_view->addTab(work_db_view, "all works");
-   right_tab_view->addTab(work_db_view_filtered, "chill");
-   right_tab_view->addTab(work_db_view_filtered2, "jams");
+   for (int i = 0; i < db_views.size(); i++) {
+     right_tab_view->addTab(db_views[i], db_view_names[i]);
+   }
    splitter->addWidget(right_tab_view);
 
    top_layout->addWidget(splitter);
