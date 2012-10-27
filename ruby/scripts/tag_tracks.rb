@@ -28,13 +28,24 @@ Datajockey::connect
 
 include Datajockey
 
-t = Tag.where(:name => 'jams').first
-t2 = Tag.where(:name => 'aug282012').first
+tag_name = 'halloween'
+
+t = Tag.where(:name => tag_name)
+unless t
+  c = TagClass.where(:name => 'mix').first
+  t = Tag.create(:name => tag_name, :tag_class => c)
+  t.save
+end
+
+#t2 = Tag.where(:name => 'aug282012').first
 
 ARGV.each do |f|
+  next if f =~ /\#/
+  f = f.sub("media_drive", "x")
   w = AudioWork.where(:audio_file_location => f).first
   if w
-    unless w.tags.include?(t2) or w.tags.include?(t)
+    #unless w.tags.include?(t2) or w.tags.include?(t)
+    unless w.tags.include?(t)
       w.tags << t
       w.save
     end
