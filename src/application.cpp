@@ -291,7 +291,11 @@ Application::Application(int & argc, char ** argv) :
    tag_names << "jams" << "halloween" << "minimal_synth";
 
    foreach(const QString tag, tag_names) {
-     QString sel = "audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"" + tag + "\"))";
+     int tag_id = model::db::tag::find(tag);
+     QString tag_id_s;
+     tag_id_s.setNum(tag_id);
+     QString sel = "audio_work_tags.tag_id = " + tag_id_s;
+     //"SELECT \"audio_works\".* FROM \"audio_works\" INNER JOIN \"audio_work_tags\" ON \"audio_works\".\"id\" = \"audio_work_tags\".\"audio_work_id\" WHERE \"audio_work_tags\".\"tag_id\" = 134"
      filtered_name = model::db::work::filtered_table(sel);
      rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
      rtable_model->setTable(filtered_name);
