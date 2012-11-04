@@ -108,7 +108,8 @@ namespace {
 
     work_table_selects << "albums.id AS album_id";
     work_table_selects << "album_audio_works.track AS track";
-    work_table_joins << "INNER JOIN audio_work_tags ON audio_works.id = audio_work_tags.audio_work_id";
+    //XXX need to figure out how to resolve duplicates
+    work_table_joins << "LEFT OUTER JOIN audio_work_tags ON audio_works.id = audio_work_tags.audio_work_id";
     work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
 
     //build up descriptor joins
