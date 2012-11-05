@@ -15,6 +15,11 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QDateTime>
+#include <iostream>
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 namespace {
   QSqlDatabase cDB;
@@ -102,6 +107,7 @@ namespace {
     QMutexLocker lock(&mMutex);
 
     work_table_selects << "audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
+    //work_table_selects << "DISTINCT audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
       " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_milliseconds, audio_works.audio_file_channels,"
       " audio_works.annotation_file_location, audio_works.created_at, audio_works.updated_at";
     work_table_joins << "audio_works";
@@ -129,9 +135,12 @@ namespace {
     QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT " + work_table_selects.join(", ") + " FROM " + work_table_joins.join(" ");
 
     if (!where_clause.isEmpty())
-      query_string += (" where " + where_clause);
+      query_string += (" WHERE " + where_clause);
 
     query_string += " ORDER BY album_id, track";
+
+    //cout << "temp table creation:" << endl;
+    //cout << query_string.toStdString() << endl;
 
     //actually create the table
     MySqlQuery query(cDB);
