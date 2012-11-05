@@ -802,8 +802,12 @@ void AudioModel::start_audio() {
    //mAudioIO->connectToPhysical(3,3);
 
    //XXX make this configurable
-   mAudioIO->connectToPhysical(0,0);
-   mAudioIO->connectToPhysical(1,1);
+   try {
+     mAudioIO->connectToPhysical(0,0);
+     mAudioIO->connectToPhysical(1,1);
+   } catch (...) {
+     cerr << "couldn't connect to physical jack audio ports" << endl;
+   }
 }
 
 void AudioModel::stop_audio() {
