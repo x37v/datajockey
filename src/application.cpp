@@ -285,6 +285,7 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->select();
 
    db_views << new WorkDBView(rtable_model, mTop);
+   db_views.last()->showFilterButtons(false);
    db_view_names << "chill";
 
    QStringList tag_names;
@@ -304,6 +305,7 @@ Application::Application(int & argc, char ** argv) :
      rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
      rtable_model->select();
      db_views << new WorkDBView(rtable_model, mTop);
+     db_views.last()->showFilterButtons(false);
      db_view_names << tag;
    }
 
