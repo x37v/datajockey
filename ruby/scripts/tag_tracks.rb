@@ -21,7 +21,6 @@ $: << ".."
 
 require 'datajockey/base'
 require 'datajockey/db'
-require 'irb'
 
 #connect to the database
 Datajockey::connect
