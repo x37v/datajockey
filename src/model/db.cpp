@@ -107,15 +107,12 @@ namespace {
     QMutexLocker lock(&mMutex);
 
     work_table_selects << "audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
-    //work_table_selects << "DISTINCT audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
       " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_milliseconds, audio_works.audio_file_channels,"
       " audio_works.annotation_file_location, audio_works.created_at, audio_works.updated_at";
     work_table_joins << "audio_works";
 
     work_table_selects << "albums.id AS album_id";
     work_table_selects << "album_audio_works.track AS track";
-    //XXX need to figure out how to resolve duplicates
-    work_table_joins << "LEFT OUTER JOIN audio_work_tags ON audio_works.id = audio_work_tags.audio_work_id";
     work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
 
     //build up descriptor joins
@@ -291,13 +288,22 @@ bool db::find_artist_and_title_by_id(
 QString db::work::filtered_table(const QString where_clause) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   QString table_name("filtered_works_" + QString::number(cFilteredWorkTableCount++));
-  create_temp_work_table(table_name, where_clause);
+
+  QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT DISTINCT works.* " +
+    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id WHERE " + 
+    where_clause;
+
+  MySqlQuery query(get());
+  query.prepare(query_string);
+  query.exec();
   return table_name;
 }
 
+/*
 void db::work::filtered_update(const QString& table_name, const QString where_clause) throw(std::runtime_error) {
   update_temp_work_table(table_name, where_clause);
 }
+*/
 
 int db::work::temp_table_id_column(QString id_name) {
   if (id_name == "artist")

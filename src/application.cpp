@@ -276,28 +276,15 @@ Application::Application(int & argc, char ** argv) :
    db_views << work_db_view;
    db_view_names << "all";
 
-   QString filtered_name = model::db::work::filtered_table("audio_works.id IN (select audio_work_id from audio_work_tags where tag_id in (select id from tags where name = \"aug282012\"))");
-   rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
-   rtable_model->setTable(filtered_name);
-   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
-   rtable_model->select();
-
-   db_views << new WorkDBView(rtable_model, mTop);
-   db_views.last()->showFilterButtons(false);
-   db_view_names << "chill";
-
    QStringList tag_names;
-   tag_names << "jams" << "halloween" << "minimal_synth";
+   tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
 
    foreach(const QString tag, tag_names) {
      int tag_id = model::db::tag::find(tag);
      QString tag_id_s;
      tag_id_s.setNum(tag_id);
      QString sel = "audio_work_tags.tag_id = " + tag_id_s;
-     //"SELECT \"audio_works\".* FROM \"audio_works\" INNER JOIN \"audio_work_tags\" ON \"audio_works\".\"id\" = \"audio_work_tags\".\"audio_work_id\" WHERE \"audio_work_tags\".\"tag_id\" = 134"
-     filtered_name = model::db::work::filtered_table(sel);
+     QString filtered_name = model::db::work::filtered_table(sel);
      rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
      rtable_model->setTable(filtered_name);
      rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
