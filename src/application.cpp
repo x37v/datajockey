@@ -280,7 +280,6 @@ Application::Application(int & argc, char ** argv) :
      rtable_model = new WorkRelationModel(filtered_name, mTop, model::db::get());
      rtable_model->select();
      db_views << new WorkDBView(rtable_model, mTop);
-     db_views.last()->showFilterButtons(false);
      db_view_names << tag;
    }
 
@@ -288,8 +287,6 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(
          this, SIGNAL(aboutToQuit()),
          work_db_view, SLOT(write_settings()));
-   //XXX removing filter buttons for now
-   work_db_view->showFilterButtons(false);
 
    //hide some columns
    QStringList hidden_column_names;

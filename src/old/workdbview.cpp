@@ -37,7 +37,6 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 {
   //create the layouts
   QVBoxLayout * layout = new QVBoxLayout(this);
-  QHBoxLayout * buttonLayout = new QHBoxLayout;
 
   //create and set up the tableview
   mTableView = new QTableView(this);
@@ -52,21 +51,10 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   //XXX actually do something with editing at some point
   mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
-  //create the buttons
-  mApplyFilterButton = new QPushButton("apply filter", this);
-  mRemoveFilterButton = new QPushButton("remove filter", this);
-  mApplyFilterButton->setToolTip(tr("apply the filter selected in filter list"));
-  mRemoveFilterButton->setToolTip(tr("disable any filtering"));
-
-  //add items to the buttonLayout
-  buttonLayout->addWidget(mApplyFilterButton, 0);
-  buttonLayout->addWidget(mRemoveFilterButton, 0);
-
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
 
   layout->addWidget(mTableView, 10);
-  layout->addLayout(buttonLayout, 0);
   setLayout(layout);
 
   //connect up our internal signals
@@ -74,14 +62,6 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
       SIGNAL(selectionChanged(const QItemSelection, const QItemSelection)),
       this,
       SLOT(setSelection(const QItemSelection)));
-  QObject::connect(mApplyFilterButton, SIGNAL(clicked(bool)),
-      this, SIGNAL(applyFilterPushed()));
-  QObject::connect(mRemoveFilterButton, SIGNAL(clicked(bool)),
-      this, SIGNAL(removeFilterPushed()));
-  QObject::connect(mApplyFilterButton, SIGNAL(clicked(bool)),
-      this, SLOT(setFiltered()));
-  QObject::connect(mRemoveFilterButton, SIGNAL(clicked(bool)),
-      this, SLOT(setUnFiltered()));
 
   //schedule the settings reading to happen after view construction
   QTimer::singleShot(0, this, SLOT(read_settings()));
@@ -89,14 +69,6 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 
 QTableView * WorkDBView::tableView(){
   return mTableView;
-}
-
-QPushButton * WorkDBView::applyFilterButton(){
-  return mApplyFilterButton;
-}
-
-QPushButton * WorkDBView::removeFilterButton(){
-  return mRemoveFilterButton;
 }
 
 void WorkDBView::selectWork(int work_id){
@@ -126,11 +98,6 @@ emit(workSelected(work));
 }
 */
 
-void WorkDBView::showFilterButtons(bool show){
-  mApplyFilterButton->setVisible(show);
-  mRemoveFilterButton->setVisible(show);
-}
-
 void WorkDBView::setSelection( const QItemSelection & selected){
   Q_UNUSED(selected);
   QModelIndex index = mTableView->selectionModel()->currentIndex(); 
@@ -139,28 +106,6 @@ void WorkDBView::setSelection( const QItemSelection & selected){
   if(index.isValid())
     work_id = mTableView->model()->data(index).toInt();
   emit(workSelected(work_id));
-}
-
-void WorkDBView::setFiltered(){
-  emit(filter_state_changed(true));
-  //bool selected = false;
-  //int work_index = 0;
-  //QModelIndexList indexes = mTableView->selectionModel()->selectedIndexes();
-  //if(indexes.size() > 0){
-  //QSqlRecord record = ((QSqlTableModel *)mTableView->model())->record(indexes[0].row());
-  //QVariant itemData = record.value(WORK_ID_COL);
-  //work_index = itemData.toInt();
-  //selected = true;
-  //}
-  //mModel->setFiltered();
-  //if(selected){
-  //XXX what to do now?
-  //}
-}
-
-void WorkDBView::setUnFiltered(){
-  //mModel->setUnFiltered();
-  emit(filter_state_changed(false));
 }
 
 void WorkDBView::write_settings() {
