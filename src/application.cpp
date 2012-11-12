@@ -20,6 +20,7 @@
 #include "config.hpp"
 #include "annotation.hpp"
 #include "appmainwindow.hpp"
+#include "workrelationmodel.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -262,11 +263,7 @@ Application::Application(int & argc, char ** argv) :
 	//WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
-   QSqlRelationalTableModel * rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
-   rtable_model->setTable("works");
-   rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
-   rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+   WorkRelationModel * rtable_model = new WorkRelationModel("works", mTop, model::db::get());
    rtable_model->select();
 
    QList<WorkDBView *> db_views;
@@ -280,11 +277,7 @@ Application::Application(int & argc, char ** argv) :
 
    foreach(const QString tag, tag_names) {
      QString filtered_name = model::db::work::filtered_table_by_tag(tag);
-     rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
-     rtable_model->setTable(filtered_name);
-     rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
-     rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
-     rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
+     rtable_model = new WorkRelationModel(filtered_name, mTop, model::db::get());
      rtable_model->select();
      db_views << new WorkDBView(rtable_model, mTop);
      db_views.last()->showFilterButtons(false);
