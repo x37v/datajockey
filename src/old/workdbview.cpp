@@ -18,6 +18,7 @@
  *		with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "db.hpp"
 #include "workdbview.hpp"
 #include "worktablemodel.hpp"
 #include <QTableView>
@@ -30,6 +31,23 @@
 #include <QAbstractItemModel>
 #include <QSettings>
 #include <QTimer>
+#include <QTime>
+#include <QStyledItemDelegate>
+
+class TimeDisplayDelegate : public QStyledItemDelegate {
+  public:
+    TimeDisplayDelegate(QObject *parent) : QStyledItemDelegate(parent) { }
+    virtual ~TimeDisplayDelegate() { }
+
+    virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
+      int ms = value.toInt();
+      int sec = ms / 1000;
+      int min = sec / 60;
+      sec = sec % 60;
+      return QString("%1:%2 %3").arg(min).arg(sec, 2, 10, QChar('0')).arg(value.toInt());
+    }
+};
+
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
     QWidget *parent) :
@@ -50,6 +68,9 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   mTableView->setSelectionMode(QAbstractItemView::SingleSelection);
   //XXX actually do something with editing at some point
   mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
+
+  TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
+  mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_id_column("audio_file_milliseconds"), time_delegate);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
