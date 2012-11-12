@@ -8,13 +8,8 @@
 #include "db.hpp"
 #include "workdetailview.hpp"
 #include "workdbview.hpp"
-#include "workfiltermodel.hpp"
 #include "worktablemodel.hpp"
 #include "tagmodel.hpp"
-#include "workfilterlist.hpp"
-#include "workfilterlistview.hpp"
-#include "workfiltermodel.hpp"
-#include "defaultworkfilters.hpp"
 #include "tageditor.hpp"
 #include "oscreceiver.hpp"
 #include "config.hpp"
@@ -288,31 +283,8 @@ Application::Application(int & argc, char ** argv) :
          this, SIGNAL(aboutToQuit()),
          work_db_view, SLOT(write_settings()));
 
-   //hide some columns
-   QStringList hidden_column_names;
-   hidden_column_names << "audio_file_milliseconds" << "audio_file_channels";
-
    //WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
-
-   /*
-   WorkFilterList * filter_list = new WorkFilterList(work_table_model);
-	TagSelectionFilter * tag_filter = new TagSelectionFilter(work_table_model);
-	TempoRangeFilter * tempo_filter = new TempoRangeFilter(work_table_model);
-   filter_list->addFilter(tag_filter);
-   filter_list->addFilter(tempo_filter);
-   WorkFilterListView * filter_list_view = new WorkFilterListView(filter_list, mTop);
-
-   //set the filter
-   filtered_work_model->setFilter(tag_filter);
-
-   //tag selection
-   QObject::connect(
-         tag_editor,
-         SIGNAL(tagSelectionChanged(QList<int>)),
-         tag_filter,
-         SLOT(setTags(QList<int>)));
-         */
 
    foreach (WorkDBView * view, db_views) {
      //work selection
@@ -327,20 +299,6 @@ Application::Application(int & argc, char ** argv) :
          SIGNAL(workSelected(int)),
          SLOT(select_work(int)));
    }
-
-   /*
-   //filter application
-   QObject::connect(
-         filter_list,
-         SIGNAL(selectionChanged(WorkFilterModel *)),
-         filtered_work_model,
-         SLOT(setFilter(WorkFilterModel *)));
-   QObject::connect(
-         work_db_view,
-         SIGNAL(filter_state_changed(bool)),
-         filtered_work_model,
-         SLOT(filter(bool)));
-   */
 
    QTabWidget * left_tab_view = new QTabWidget(mTop);
    left_tab_view->addTab(mMixerPanel, "mixer");
