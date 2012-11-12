@@ -254,8 +254,6 @@ Application::Application(int & argc, char ** argv) :
          Qt::QueuedConnection);
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
-   //WorkTableModel * work_table_model = new WorkTableModel(model::db::get(), mTop);
-	//WorkFilterModelProxy * filtered_work_model = new WorkFilterModelProxy(work_table_model);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
    WorkRelationModel * rtable_model = new WorkRelationModel("works", mTop, model::db::get());
@@ -283,7 +281,6 @@ Application::Application(int & argc, char ** argv) :
          this, SIGNAL(aboutToQuit()),
          work_db_view, SLOT(write_settings()));
 
-   //WorkDBView * work_db_view = new WorkDBView(filtered_work_model, mTop);
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
    foreach (WorkDBView * view, db_views) {
