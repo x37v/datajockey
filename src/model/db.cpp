@@ -305,6 +305,31 @@ void db::work::filtered_update(const QString& table_name, const QString where_cl
 }
 */
 
+QString db::work::filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error) {
+  QStringList tag_ids_s;
+  foreach(int id, tag_ids) {
+    QString s;
+    s.setNum(id);
+    tag_ids_s << s;
+  }
+  return filtered_table("audio_work_tags.tag_id IN (" + tag_ids_s.join(", ") + ")");
+}
+
+QString db::work::filtered_table_by_tag(int tag_id) throw(std::runtime_error) {
+  QList<int> tag_ids;
+  tag_ids << tag_id;
+  return filtered_table_by_tags(tag_ids);
+}
+
+QString db::work::filtered_table_by_tag(QString tag, QString tag_class) throw(std::runtime_error) {
+  int tag_id;
+  if (tag_class.isEmpty())
+    tag_id = tag::find(tag);
+  else
+    tag_id = tag::find(tag, tag::find_class(tag_class));
+  return filtered_table_by_tag(tag_id);
+}
+
 int db::work::temp_table_id_column(QString id_name) {
   if (id_name == "artist")
     return cWorkArtistIdColumn;

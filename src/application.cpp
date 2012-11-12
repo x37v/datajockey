@@ -267,7 +267,6 @@ Application::Application(int & argc, char ** argv) :
    rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
    rtable_model->setRelation(model::db::work::temp_table_id_column("artist"), QSqlRelation("artists", "id", "name"));
    rtable_model->setRelation(model::db::work::temp_table_id_column("album"), QSqlRelation("albums", "id", "name"));
-   //XXX quite slow rtable_model->setFilter("works.id IN (select audio_work_id from audio_work_tags where audio_work_tags.tag_id in (2,3,4))");
    rtable_model->select();
 
    QList<WorkDBView *> db_views;
@@ -280,11 +279,7 @@ Application::Application(int & argc, char ** argv) :
    tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
 
    foreach(const QString tag, tag_names) {
-     int tag_id = model::db::tag::find(tag);
-     QString tag_id_s;
-     tag_id_s.setNum(tag_id);
-     QString sel = "audio_work_tags.tag_id = " + tag_id_s;
-     QString filtered_name = model::db::work::filtered_table(sel);
+     QString filtered_name = model::db::work::filtered_table_by_tag(tag);
      rtable_model = new QSqlRelationalTableModel(mTop, model::db::get());
      rtable_model->setTable(filtered_name);
      rtable_model->setRelation(model::db::work::temp_table_id_column("audio_file_type"), QSqlRelation("audio_file_types", "id", "name"));
