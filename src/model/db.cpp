@@ -40,9 +40,9 @@ namespace {
 
   const QString cWorkInsert(
       "INSERT INTO audio_works\n"
-      "(name, year, audio_file_type_id, audio_file_location, audio_file_milliseconds, audio_file_channels, artist_id, created_at, updated_at)\n"
+      "(name, year, audio_file_type_id, audio_file_location, audio_file_seconds, audio_file_channels, artist_id, created_at, updated_at)\n"
       "VALUES\n"
-      "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_milliseconds, :audio_file_channels, :artist_id, :created_at, :updated_at)\n"
+      "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_seconds, :audio_file_channels, :artist_id, :created_at, :updated_at)\n"
       );
 
   const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
@@ -108,7 +108,7 @@ namespace {
     QMutexLocker lock(&mMutex);
 
     work_table_selects << "audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
-      " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_milliseconds, audio_works.audio_file_channels,"
+      " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_seconds, audio_works.audio_file_channels,"
       " audio_works.annotation_file_location, audio_works.created_at, audio_works.updated_at";
     work_table_joins << "audio_works";
 
@@ -176,7 +176,7 @@ namespace {
     cWorkArtistIdColumn = tab.fieldIndex("artist_id");
     cWorkAlbumIdColumn = tab.fieldIndex("album_id");
     cWorkAudioFileTypeIdColumn = tab.fieldIndex("audio_file_type_id");
-    cWorkSongLengthColumn = tab.fieldIndex("audio_file_milliseconds");
+    cWorkSongLengthColumn = tab.fieldIndex("audio_file_seconds");
   };
 }
 
@@ -339,7 +339,7 @@ int db::work::temp_table_id_column(QString id_name) {
     return cWorkAlbumIdColumn;
   else if (id_name == "audio_file_type")
     return cWorkAudioFileTypeIdColumn;
-  else if (id_name == "audio_file_milliseconds")
+  else if (id_name == "audio_file_seconds")
     return cWorkSongLengthColumn;
   return 0;
 }
@@ -387,11 +387,11 @@ int db::work::create(
     else
       query.bindValue(":audio_file_channels", 2);
 
-    i = attributes.find("milliseconds");
+    i = attributes.find("seconds");
     if (i != attributes.end())
-      query.bindValue(":audio_file_milliseconds", i.value());
+      query.bindValue(":audio_file_seconds", i.value());
     else
-      query.bindValue(":audio_file_milliseconds", QVariant::Int);
+      query.bindValue(":audio_file_seconds", QVariant::Int);
 
     i = attributes.find("file_type");
     QString file_type_name;

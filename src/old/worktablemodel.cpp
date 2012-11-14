@@ -69,7 +69,7 @@ void WorkTableModel::init(const QSqlDatabase & db){
 		"\taudio_works.name as title,\n"
 		"\talbums.name as album, \n"
 		"\talbum_audio_works.track as track, \n"
-		"\taudio_file_milliseconds as duration, \n"
+		"\taudio_file_seconds as duration, \n"
 #if 1
 		"\taudio_file_types.name as \"file type\" ");
 #else
@@ -115,7 +115,7 @@ WorkTableModel::WorkTableModel(
 	setQuery(cQuery, db);
 }
 
-//reformat the time display role so that it is in MM:SS not milliseconds
+//reformat the time display role so that it is in MM:SS not seconds
 QVariant WorkTableModel::data( const QModelIndex & index, int role) const {
 	QVariant ret = QSqlQueryModel::data(index,role);
 	if(index.isValid() && (index.column() == TIME_COLUMN) && (role == Qt::DisplayRole)){

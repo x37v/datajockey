@@ -72,7 +72,7 @@ namespace {
       audio::AudioBufferPtr audio_buffer(new audio::AudioBuffer(audio_file_path.toStdString()));
       if(!audio_buffer->load())
         throw(std::runtime_error(DJ_FILEANDLINE + " failed to load audio buffer " + audio_file_path.toStdString()));
-      tag_data["milliseconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer->length() * 1000) / static_cast<double>(audio_buffer->sample_rate()));
+      tag_data["seconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer->length()) / static_cast<double>(audio_buffer->sample_rate()));
 
       //extract beats
       audio::BeatBufferPtr beat_buffer(new audio::BeatBuffer);

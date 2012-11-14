@@ -40,11 +40,10 @@ class TimeDisplayDelegate : public QStyledItemDelegate {
     virtual ~TimeDisplayDelegate() { }
 
     virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
-      int ms = value.toInt();
-      int sec = ms / 1000;
+      int sec = value.toInt();
       int min = sec / 60;
       sec = sec % 60;
-      return QString("%1:%2 %3").arg(min).arg(sec, 2, 10, QChar('0')).arg(value.toInt());
+      return QString("%1:%2").arg(min).arg(sec, 2, 10, QChar('0'));
     }
 };
 
@@ -70,7 +69,7 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
   TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
-  mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_id_column("audio_file_milliseconds"), time_delegate);
+  mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_id_column("audio_file_seconds"), time_delegate);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
