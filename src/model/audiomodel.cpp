@@ -42,6 +42,8 @@ namespace {
       //*** MASTER
 
       list.clear();
+      list << "sync_to_player0";
+      list << "sync_to_player1";
       AudioModel::master_signals["trigger"] = list;
 
       list.clear();
@@ -483,6 +485,20 @@ void AudioModel::relay_player_bool(int player_index, QString name, bool value) {
 
 void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
    emit(player_value_changed(player_index, "update_progress", percent));
+}
+
+void AudioModel::master_trigger(QString name) {
+  if (name.contains("sync_to_player")) {
+    for (int i = 0; i < static_cast<int>(mNumPlayers); i++) {
+      QString idx;
+      idx.setNum(i);
+      if (name == (QString("sync_to_player") + idx)) {
+        master_set("sync_to_player", i);
+        break;
+      }
+    }
+  } else
+    cerr << DJ_FILEANDLINE << name.toStdString() << " is not a master_trigger arg" << endl;
 }
 
 void AudioModel::master_set(QString name, bool value) {

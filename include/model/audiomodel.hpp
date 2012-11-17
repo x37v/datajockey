@@ -60,6 +60,7 @@ namespace dj {
             void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
 
             //***** MASTER COMMANDS
+            void master_trigger(QString name);
             void master_set(QString name, bool value);
             void master_set(QString name, int value);
             void master_set(QString name, double value);

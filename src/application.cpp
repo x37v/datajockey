@@ -143,6 +143,10 @@ Application::Application(int & argc, char ** argv) :
          mAudioModel, SLOT(player_trigger(int, QString)),
          Qt::QueuedConnection);
    QObject::connect(
+         mMIDIMapper, SIGNAL(master_triggered(QString)),
+         mAudioModel, SLOT(master_trigger(QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
          mMIDIMapper, SIGNAL(master_value_changed(QString, bool)),
          mAudioModel, SLOT(master_set(QString, bool)),
          Qt::QueuedConnection);
