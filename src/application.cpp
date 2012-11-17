@@ -64,6 +64,10 @@ Application::Application(int & argc, char ** argv) :
    QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(pre_quit_actions()));
 
    QObject::connect(mMixerPanel,
+         SIGNAL(master_triggered(QString)),
+         mAudioModel,
+         SLOT(master_trigger(QString)));
+   QObject::connect(mMixerPanel,
          SIGNAL(master_value_changed(QString, int)),
          mAudioModel,
          SLOT(master_set(QString, int)));
@@ -179,11 +183,11 @@ Application::Application(int & argc, char ** argv) :
          Qt::QueuedConnection);
          */
 
-   /*
    QObject::connect(
-         mMixerPanel, SIGNAL(master_trigged(QString)),
-         mMIDIMapper, SLOT(player_trigger(QString)),
+         mAudioModel, SIGNAL(master_triggered(QString)),
+         mMIDIMapper, SLOT(master_trigger(QString)),
          Qt::QueuedConnection);
+   /*
    QObject::connect(
          mAudioModel, SIGNAL(master_value_changed(QString, bool)),
          mMIDIMapper, SLOT(master_set(QString, bool)),

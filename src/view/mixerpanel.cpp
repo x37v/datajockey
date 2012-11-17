@@ -118,6 +118,8 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
    QSignalMapper * sync_mapper = new QSignalMapper(this);
    for (int i = 0; i < (int)num_players; i++) {
       QPushButton * sync_button = new QPushButton("sync to " + QString::number(i + 1), this);
+      QString idx;
+      idx.setNum(i);
       mPlayerCanSync <<  true;
       mSyncToPlayer << sync_button;
       sync_button->setCheckable(false);
@@ -127,11 +129,11 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
       QObject::connect(
             sync_button, SIGNAL(clicked()),
             sync_mapper, SLOT(map()));
-      sync_mapper->setMapping(sync_button, i);
+      sync_mapper->setMapping(sync_button, QString("sync_to_player") + idx);
    }
    QObject::connect(
-         sync_mapper, SIGNAL(mapped(int)),
-         SLOT(relay_master_sync(int)));
+         sync_mapper, SIGNAL(mapped(QString)),
+         SIGNAL(master_triggered(QString)));
 
    mMasterVolume = new QSlider(Qt::Vertical, this);
    mMasterVolume->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
@@ -339,7 +341,4 @@ void MixerPanel::relay_tempo_changed(double value) {
       emit(master_value_changed("bpm", value));
 }
 
-void MixerPanel::relay_master_sync(int player) {
-   emit(master_value_changed("sync_to_player", player));
-}
 

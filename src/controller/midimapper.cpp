@@ -13,6 +13,7 @@
 using namespace dj::controller;
 using dj::audio::AudioModel;
 
+using std::cout;
 using std::cerr;
 using std::endl;
 

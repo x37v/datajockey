@@ -79,6 +79,7 @@ namespace dj {
             void master_value_changed(QString name, int value);
             void master_value_changed(QString name, double value);
             void master_value_changed(QString name, TimePoint timepoint);
+            void master_triggered(QString name);
 
          protected slots:
             //only for internal use

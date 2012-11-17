@@ -493,6 +493,8 @@ void AudioModel::master_trigger(QString name) {
       QString idx;
       idx.setNum(i);
       if (name == (QString("sync_to_player") + idx)) {
+        //emit signal before actually doing it so that the midi mapper the trigger first
+        emit(master_triggered(name));
         master_set("sync_to_player", i);
         break;
       }

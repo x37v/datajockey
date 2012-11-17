@@ -50,7 +50,6 @@ namespace dj {
             void relay_crossfade_changed(int value);
             void relay_volume_changed(int value);
             void relay_tempo_changed(double value);
-            void relay_master_sync(int player);
 
          signals:
             void midi_map_triggered();
@@ -60,6 +59,7 @@ namespace dj {
             void player_value_changed(int player_index, QString name, int val);
 
             void tempo_changed(double);
+            void master_triggered(QString name);
             void master_value_changed(QString name, int value);
             void master_value_changed(QString name, double value);
 
