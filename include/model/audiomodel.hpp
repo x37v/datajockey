@@ -19,196 +19,196 @@
 class QTimer;
 
 namespace dj {
-   namespace audio {
+  namespace audio {
 
-      class QueryPlayState;
-      class MasterSyncToPlayerCommand;
+    class QueryPlayState;
+    class MasterSyncToPlayerCommand;
 
-      class AudioModel : public QObject {
-         Q_OBJECT
-         Q_CLASSINFO("D-Bus Interface", "org.x37v.datajockey.audio")
+    class AudioModel : public QObject {
+      Q_OBJECT
+      Q_CLASSINFO("D-Bus Interface", "org.x37v.datajockey.audio")
 
-         private:
-            //forward declarations
-            class PlayerSetBuffersCommand;
-            class ConsumeThread;
+      private:
+        //forward declarations
+        class PlayerSetBuffersCommand;
+        class ConsumeThread;
 
-            //singleton
-            AudioModel();
-            AudioModel(const AudioModel&);
-            AudioModel& operator=(const AudioModel&);
-            ~AudioModel();
-            static AudioModel * cInstance;
-         public:
+        //singleton
+        AudioModel();
+        AudioModel(const AudioModel&);
+        AudioModel& operator=(const AudioModel&);
+        ~AudioModel();
+        static AudioModel * cInstance;
+      public:
 
-            static QHash<QString, QStringList> player_signals; //type, name list
-            static QHash<QString, QStringList> master_signals; //type, name list
+        static QHash<QString, QStringList> player_signals; //type, name list
+        static QHash<QString, QStringList> master_signals; //type, name list
 
-            class PlayerState;
-            static AudioModel * instance();
+        class PlayerState;
+        static AudioModel * instance();
 
-         public slots:
-            unsigned int sample_rate() const;
-            unsigned int player_count() const;
+      public slots:
+        unsigned int sample_rate() const;
+        unsigned int player_count() const;
 
-            //trigger also takes any player_set(..bool) params and toggles them
-            void player_trigger(int player_index, QString name);
-            void player_set(int player_index, QString name, bool value);
-            void player_set(int player_index, QString name, int value);
-            void player_set(int player_index, QString name, double value);
-            void player_set(int player_index, QString name, TimePoint value);
-            void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
+        //trigger also takes any player_set(..bool) params and toggles them
+        void player_trigger(int player_index, QString name);
+        void player_set(int player_index, QString name, bool value);
+        void player_set(int player_index, QString name, int value);
+        void player_set(int player_index, QString name, double value);
+        void player_set(int player_index, QString name, TimePoint value);
+        void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
 
-            //***** MASTER COMMANDS
-            void master_trigger(QString name);
-            void master_set(QString name, bool value);
-            void master_set(QString name, int value);
-            void master_set(QString name, double value);
+        //***** MASTER COMMANDS
+        void master_trigger(QString name);
+        void master_set(QString name, bool value);
+        void master_set(QString name, int value);
+        void master_set(QString name, double value);
 
-            //start and stop the audio processing
-            void start_audio();
-            void stop_audio();
+        //start and stop the audio processing
+        void start_audio();
+        void stop_audio();
 
-         signals:
-            void player_value_changed(int player_index, QString name, int value);
-            void player_value_changed(int player_index, QString name, QString value);
-            void player_value_changed(int player_index, QString name, bool value);
-            void player_triggered(int player_index, QString name);
-            void player_buffers_changed(int player_index, AudioBufferPtr audio_buffer, BeatBufferPtr beatbuffer);
+      signals:
+        void player_value_changed(int player_index, QString name, int value);
+        void player_value_changed(int player_index, QString name, QString value);
+        void player_value_changed(int player_index, QString name, bool value);
+        void player_triggered(int player_index, QString name);
+        void player_buffers_changed(int player_index, AudioBufferPtr audio_buffer, BeatBufferPtr beatbuffer);
 
-            void master_value_changed(QString name, int value);
-            void master_value_changed(QString name, double value);
-            void master_value_changed(QString name, TimePoint timepoint);
-            void master_triggered(QString name);
+        void master_value_changed(QString name, int value);
+        void master_value_changed(QString name, double value);
+        void master_value_changed(QString name, TimePoint timepoint);
+        void master_triggered(QString name);
 
-         protected slots:
-            //only for internal use
-            void relay_player_buffers_loaded(int player_index,
-                  AudioBufferPtr audio_buffer,
-                  BeatBufferPtr beat_buffer);
-            void relay_player_value(int player_index, QString name, int value);
-            void relay_player_bool(int player_index, QString name, bool value);
+      protected slots:
+        //only for internal use
+        void relay_player_buffers_loaded(int player_index,
+            AudioBufferPtr audio_buffer,
+            BeatBufferPtr beat_buffer);
+        void relay_player_value(int player_index, QString name, int value);
+        void relay_player_bool(int player_index, QString name, bool value);
 
-            //relay methods are called with queued connections across threads so that
-            //they relay signals into the main thread, they simply emit signals
-            void relay_audio_file_load_progress(int player_index, int percent);
+        //relay methods are called with queued connections across threads so that
+        //they relay signals into the main thread, they simply emit signals
+        void relay_audio_file_load_progress(int player_index, int percent);
 
-            void relay_master_value_changed(QString name, int value);
-            void relay_master_value_changed(QString name, double value);
+        void relay_master_value_changed(QString name, int value);
+        void relay_master_value_changed(QString name, double value);
 
-         private:
-            friend class PlayerSetBuffersCommand;
-            //pointers to other internal singletons
-            dj::audio::AudioIO * mAudioIO;
-            dj::audio::Master * mMaster;
+      private:
+        friend class PlayerSetBuffersCommand;
+        //pointers to other internal singletons
+        dj::audio::AudioIO * mAudioIO;
+        dj::audio::Master * mMaster;
 
-            unsigned int mNumPlayers;
-            std::vector<LoaderThread *> mThreadPool;
-            //we keep a copy of the pointers for each time we push them into
-            //the audio thread we remove a copy each time they come out of the
-            //audio thread this is how we manage the reference counting and
-            //avoid having deallocation happen in the audio thread
-            QList<AudioBufferPtr> mPlayingAudioFiles;
-            QList<BeatBufferPtr> mPlayingAnnotationFiles;
+        unsigned int mNumPlayers;
+        std::vector<LoaderThread *> mThreadPool;
+        //we keep a copy of the pointers for each time we push them into
+        //the audio thread we remove a copy each time they come out of the
+        //audio thread this is how we manage the reference counting and
+        //avoid having deallocation happen in the audio thread
+        QList<AudioBufferPtr> mPlayingAudioFiles;
+        QList<BeatBufferPtr> mPlayingAnnotationFiles;
 
-            //execute/consume the scheduler's done actions
-            ConsumeThread * mConsumeThread;
+        //execute/consume the scheduler's done actions
+        ConsumeThread * mConsumeThread;
 
-            //maintain player state information
-            std::vector<PlayerState *> mPlayerStates;
-            typedef QPair<PlayerStateCommand::action_t, PlayerStateCommand::action_t> player_onoff_action_pair_t;
-            QHash<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
-            QHash<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
-            QHash<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
+        //maintain player state information
+        std::vector<PlayerState *> mPlayerStates;
+        typedef QPair<PlayerStateCommand::action_t, PlayerStateCommand::action_t> player_onoff_action_pair_t;
+        QHash<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
+        QHash<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;
+        QHash<QString, PlayerPositionCommand::position_t> mPlayerPositionActionMapping;
 
 
-            //maintain master state info
-            QHash<QString, bool> mMasterParamBool;
-            QHash<QString, int> mMasterParamInt;
-            QHash<QString, double> mMasterParamDouble;
+        //maintain master state info
+        QHash<QString, bool> mMasterParamBool;
+        QHash<QString, int> mMasterParamInt;
+        QHash<QString, double> mMasterParamDouble;
 
-            int mPlayerAudibleThresholdVolume;
-            int mCrossfadeAudibleThresholdPosition;
+        int mPlayerAudibleThresholdVolume;
+        int mCrossfadeAudibleThresholdPosition;
 
-            double mBumpSeconds;
+        double mBumpSeconds;
 
-            //**** private methods
+        //**** private methods
 
-            //returns true if the buffer is actually loaded anywhere
-            //this is called from one of many audio loader threads
-            bool audio_file_load_complete(QString fileName, dj::audio::AudioBuffer * buffer);
+        //returns true if the buffer is actually loaded anywhere
+        //this is called from one of many audio loader threads
+        bool audio_file_load_complete(QString fileName, dj::audio::AudioBuffer * buffer);
 
-            //convenience method for executing commands in the master's scheduler
-            void queue_command(dj::audio::Command * cmd);
+        //convenience method for executing commands in the master's scheduler
+        void queue_command(dj::audio::Command * cmd);
 
-            void set_player_audio_file(int player_index, QString location);
-            void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
+        void set_player_audio_file(int player_index, QString location);
+        void set_player_audio_buffer(int player_index, dj::audio::AudioBuffer * buf);
 
-            //eq the eq 0 is the lowest, 2 is high, one_scale is the top
-            void set_player_eq(int player_index, int band, int value);
-            void set_player_position(int player_index, const TimePoint &val, bool absolute = true);
-            void set_player_position_frame(int player_index, int frame, bool absolute = true);
-            void set_player_position_beat_relative(int player_index, int beats);
+        //eq the eq 0 is the lowest, 2 is high, one_scale is the top
+        void set_player_eq(int player_index, int band, int value);
+        void set_player_position(int player_index, const TimePoint &val, bool absolute = true);
+        void set_player_position_frame(int player_index, int frame, bool absolute = true);
+        void set_player_position_beat_relative(int player_index, int beats);
 
-            template <typename T>
-               void make_slotarg_absolute(const QHash<QString, T>& param_hash, QString& param_name, T& param_value) {
-                  if (param_name.contains("play_") || param_name.contains("seek") || param_name.contains("bump")) //_beat, _position, _frame, ..
-                     return;
+        template <typename T>
+          void make_slotarg_absolute(const QHash<QString, T>& param_hash, QString& param_name, T& param_value) {
+            if (param_name.contains("play_") || param_name.contains("seek") || param_name.contains("bump")) //_beat, _position, _frame, ..
+              return;
 
-                  //if we have a relative value, make it absolute with the addition of the parameter in question
-                  if (param_name.contains("_relative")) {
-                     QString nonrel = param_name;
-                     nonrel.remove("_relative");
-                     if (param_hash.contains(nonrel)) {
-                        param_name = nonrel;
-                        param_value += param_hash[param_name];
-                     }
-                  }
-               }
+            //if we have a relative value, make it absolute with the addition of the parameter in question
+            if (param_name.contains("_relative")) {
+              QString nonrel = param_name;
+              nonrel.remove("_relative");
+              if (param_hash.contains(nonrel)) {
+                param_name = nonrel;
+                param_value += param_hash[param_name];
+              }
+            }
+          }
 
-            //call these after converting relative to absolute
-            void slotval_clamp(const QString& param_name, int& param_value);
-            void slotval_clamp(const QString& param_name, double& param_value);
-      };
+        //call these after converting relative to absolute
+        void slotval_clamp(const QString& param_name, int& param_value);
+        void slotval_clamp(const QString& param_name, double& param_value);
+    };
 
-      //TODO how to get it to run at the end of the frame?
-      class QueryPlayState : public QObject, public MasterCommand {
-         Q_OBJECT
-         public:
-            QueryPlayState(unsigned int num_players, QObject * parent = NULL);
-            virtual ~QueryPlayState();
-            virtual bool delete_after_done();
-            virtual void execute();
-            virtual void execute_done();
-            //this command shouldn't be stored
-            virtual bool store(CommandIOData& /* data */) const;
-         signals:
-            void player_value_update(int player_index, QString name, int val);
-            void player_bool_update(int player_index, QString name, bool val);
-            void master_value_update(QString name, int value);
-            void master_value_update(QString name, double value);
-            void master_value_update(QString name, TimePoint timepoint);
-         private:
-            std::vector<AudioModel::PlayerState* > mStates;
-            unsigned int mNumPlayers;
-            float mMasterMaxVolume;
-            double mMasterBPM;
-            TimePoint mMasterTransportPosition;
-      };
+    //TODO how to get it to run at the end of the frame?
+    class QueryPlayState : public QObject, public MasterCommand {
+      Q_OBJECT
+      public:
+        QueryPlayState(unsigned int num_players, QObject * parent = NULL);
+        virtual ~QueryPlayState();
+        virtual bool delete_after_done();
+        virtual void execute();
+        virtual void execute_done();
+        //this command shouldn't be stored
+        virtual bool store(CommandIOData& /* data */) const;
+      signals:
+        void player_value_update(int player_index, QString name, int val);
+        void player_bool_update(int player_index, QString name, bool val);
+        void master_value_update(QString name, int value);
+        void master_value_update(QString name, double value);
+        void master_value_update(QString name, TimePoint timepoint);
+      private:
+        std::vector<AudioModel::PlayerState* > mStates;
+        unsigned int mNumPlayers;
+        float mMasterMaxVolume;
+        double mMasterBPM;
+        TimePoint mMasterTransportPosition;
+    };
 
-      class MasterSyncToPlayerCommand : public QObject, public MasterIntCommand {
-         Q_OBJECT
-         public:
-            MasterSyncToPlayerCommand(int value);
-            virtual void execute();
-            virtual void execute_done();
-         signals:
-            void master_value_update(QString name, double value);
-         private:
-            double mBPM;
-      };
+    class MasterSyncToPlayerCommand : public QObject, public MasterIntCommand {
+      Q_OBJECT
+      public:
+        MasterSyncToPlayerCommand(int value);
+        virtual void execute();
+        virtual void execute_done();
+      signals:
+        void master_value_update(QString name, double value);
+      private:
+        double mBPM;
+    };
 
-   }
+  }
 }
 
 #endif
