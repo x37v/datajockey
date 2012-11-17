@@ -93,6 +93,9 @@ namespace dj {
             //they relay signals into the main thread, they simply emit signals
             void relay_audio_file_load_progress(int player_index, int percent);
 
+            void relay_master_value_changed(QString name, int value);
+            void relay_master_value_changed(QString name, double value);
+
          private:
             friend class PlayerSetBuffersCommand;
             //pointers to other internal singletons

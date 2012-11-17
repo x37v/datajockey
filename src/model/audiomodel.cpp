@@ -291,10 +291,10 @@ AudioModel::AudioModel() :
    //first setup the query command + connections
    QueryPlayState * query_cmd = new QueryPlayState(mNumPlayers);
    QObject::connect(query_cmd, SIGNAL(master_value_update(QString, int)),
-            SIGNAL(master_value_changed(QString, int)),
+            SLOT(relay_master_value_changed(QString, int)),
             Qt::QueuedConnection);
    QObject::connect(query_cmd, SIGNAL(master_value_update(QString, double)),
-            SIGNAL(master_value_changed(QString, double)),
+            SLOT(relay_master_value_changed(QString, double)),
             Qt::QueuedConnection);
    QObject::connect(query_cmd, SIGNAL(master_value_update(QString, TimePoint)),
             SIGNAL(master_value_changed(QString, TimePoint)),
@@ -487,6 +487,16 @@ void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
    emit(player_value_changed(player_index, "update_progress", percent));
 }
 
+void AudioModel::relay_master_value_changed(QString name, int value) {
+  emit(master_value_changed(name, value));
+}
+
+void AudioModel::relay_master_value_changed(QString name, double value) {
+  if (name == "bpm")
+    mMasterParamDouble["bpm"] = value;
+  emit(master_value_changed(name, value));
+}
+
 void AudioModel::master_trigger(QString name) {
   if (name.contains("sync_to_player")) {
     for (int i = 0; i < static_cast<int>(mNumPlayers); i++) {
@@ -554,11 +564,11 @@ void AudioModel::master_set(QString name, int value) {
       if (value < 0 || value >= (int)mNumPlayers || mPlayerStates[value]->mParamBool["sync"])
          return;
 
-      //create the command and connect it to our signal so we get a bpm update
+      //create the command and connect it to our relay slot so we get a bpm update
       MasterSyncToPlayerCommand * cmd = new MasterSyncToPlayerCommand(value);
       QObject::connect(
             cmd, SIGNAL(master_value_update(QString, double)),
-            SIGNAL(master_value_changed(QString, double)),
+            SLOT(relay_master_value_changed(QString, double)),
             Qt::QueuedConnection);
       queue_command(cmd);
 
