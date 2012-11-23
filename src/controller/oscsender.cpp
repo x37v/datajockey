@@ -5,6 +5,7 @@
 #include <ip/UdpSocket.h>
 #include "defines.hpp"
 #include <iostream>
+#include <QDateTime>
 
 #define OSC_OUTPUT_BUFFER_SIZE 2048
 
@@ -69,6 +70,7 @@ void OSCSender::player_trigger(int player_index, QString name){
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
   p << player_start(player_index, name) << osc::EndMessage;
+  //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
   send(mDestinations, p);
 }
@@ -108,6 +110,7 @@ void OSCSender::master_trigger(QString name){
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
   p << master_start(name) << osc::EndMessage;
+  //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
   send(mDestinations, p);
 }
@@ -133,6 +136,7 @@ void OSCSender::player_send(int player_index, QString name, QVariant value){
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
 
   p << player_start(player_index, name);
+  //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
   //remap the value if we need
   value = value_transform(name, value);
@@ -166,6 +170,7 @@ void OSCSender::master_send(QString name, QVariant value){
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
 
   p << master_start(name);
+  //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
   //remap the value if we need
   value = value_transform(name, value);
