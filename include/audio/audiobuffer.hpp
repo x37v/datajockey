@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include "soundfile.hpp"
+#include <QString>
 #include <QSharedData>
 #include <QExplicitlySharedDataPointer>
 
@@ -28,6 +29,7 @@ namespace dj {
             //grab a sample
             float sample(unsigned int channel, unsigned int index) const;
             float sample(unsigned int channel, unsigned int index, double subsample) const;
+            QString file_location() const;
 
             //fill a buffer, mixing to mono, starting at index start_index
             //expects the buffer to be resized to its desired fill size

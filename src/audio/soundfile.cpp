@@ -46,7 +46,8 @@ SoundFile::SoundFile(std::string location) :
    mSndFile(location.c_str()), 
    mType(UNSUPPORTED),
    mSampleRate(0),
-   mChannels(0)
+   mChannels(0),
+   mLocation(location)
 {
    std::string oggEnd0("ogg");
    std::string oggEnd1("OGG");
@@ -267,6 +268,8 @@ unsigned int SoundFile::readf(short *ptr, unsigned int frames){
          return 0;
    };
 }
+
+std::string SoundFile::location() const { return mLocation; }
 
 SoundFile::operator bool () const {
    return valid();

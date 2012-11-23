@@ -64,6 +64,10 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
    return linear_interp(sample0, sample1, subsample);
 }
 
+QString AudioBuffer::file_location() const {
+  return QString::fromStdString(mSoundFile.location());
+}
+
 void AudioBuffer::fill_mono(data_buffer_t& buffer, unsigned int start_index) const {
 	const unsigned int num_channels = channels();
 	const unsigned int frames = buffer.size();

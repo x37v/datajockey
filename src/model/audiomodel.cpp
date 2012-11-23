@@ -440,6 +440,8 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
 
   player_trigger(player_index, "reset");
   emit(player_buffers_changed(player_index, audio_buffer, beat_buffer));
+  emit(player_value_changed(player_index, "audio_file", audio_buffer->file_location()));
+  //XXX do beat buffer too
 }
 
 void AudioModel::relay_player_value(int player_index, QString name, int value){

@@ -281,6 +281,10 @@ Application::Application(int & argc, char ** argv) :
          mAudioModel, SIGNAL(player_value_changed(int, QString, double)),
          mOSCSender, SLOT(player_set(int, QString, double)),
          Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, QString)),
+         mOSCSender, SLOT(player_set(int, QString, QString)),
+         Qt::QueuedConnection);
 
    QObject::connect(
          mAudioModel, SIGNAL(master_triggered(QString)),

@@ -58,6 +58,7 @@ class SoundFile {
     void synthMadFrame();
     int mSampleRate;
     unsigned int mChannels;
+    std::string mLocation;
 
     //private member functions for reading ogg/mp3 shorts
     unsigned int oggReadShortFrame (short *ptr, unsigned int frames);
@@ -71,6 +72,7 @@ class SoundFile {
     unsigned int channels();
     unsigned int readf (float *ptr, unsigned int frames) ;
     unsigned int readf (short *ptr, unsigned int frames) ;
+    std::string location() const;
     operator bool () const ;
       bool valid() const;
       unsigned int frames();
