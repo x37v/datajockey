@@ -1,21 +1,21 @@
 /*
- *		Copyright (c) 2008 Alex Norman.  All rights reserved.
- *		http://www.x37v.info/datajockey
+ *    Copyright (c) 2008 Alex Norman.  All rights reserved.
+ *    http://www.x37v.info/datajockey
  *
- *		This file is part of Data Jockey.
- *		
- *		Data Jockey is free software: you can redistribute it and/or modify it
- *		under the terms of the GNU General Public License as published by the
- *		Free Software Foundation, either version 3 of the License, or (at your
- *		option) any later version.
- *		
- *		Data Jockey is distributed in the hope that it will be useful, but
- *		WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
- *		Public License for more details.
- *		
- *		You should have received a copy of the GNU General Public License along
- *		with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
+ *    This file is part of Data Jockey.
+ *    
+ *    Data Jockey is free software: you can redistribute it and/or modify it
+ *    under the terms of the GNU General Public License as published by the
+ *    Free Software Foundation, either version 3 of the License, or (at your
+ *    option) any later version.
+ *    
+ *    Data Jockey is distributed in the hope that it will be useful, but
+ *    WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General Public License along
+ *    with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /* 
@@ -389,27 +389,27 @@ using std::cout;
 using std::endl;
 
 int main(){
-	short frame[1024 * 2];
-	for(unsigned int i = 0; i < 2048; i++)
-		frame[i] = 0;
-	//SoundFile f("/mp3/adolescents/adolescents/01-i_hate_children.mp3");
-	SoundFile f("/home/alex/music/new/chrome/anthology_1979-1983_2004/01-chrome-anthology_1979-1983-chromosome_damage.mp3");
-	//SoundFile f("/mp3/woody_guthrie/dust_bowl_ballads/01-the_great_dust_storm_dust_storm_disaster.ogg");
-	//SoundFile f("/tmp/asdf12345");
-	if(f){
-		cout << "sample rate: " << f.samplerate() << endl;
-		SndfileHandle sndFile("/tmp/test.wav",
-				SFM_WRITE, 
-				SF_FORMAT_WAV | SF_FORMAT_PCM_16, 
-				2, 44100);
-		unsigned int samples;
-		while(0 < (samples = f.readf(frame,1024))){
-			sndFile.writef(frame,samples);
-		}
-		return 0;
-	} else {
-		cout << "NOPE" << endl;
-		return -1;
-	}
+  short frame[1024 * 2];
+  for(unsigned int i = 0; i < 2048; i++)
+    frame[i] = 0;
+  //SoundFile f("/mp3/adolescents/adolescents/01-i_hate_children.mp3");
+  SoundFile f("/home/alex/music/new/chrome/anthology_1979-1983_2004/01-chrome-anthology_1979-1983-chromosome_damage.mp3");
+  //SoundFile f("/mp3/woody_guthrie/dust_bowl_ballads/01-the_great_dust_storm_dust_storm_disaster.ogg");
+  //SoundFile f("/tmp/asdf12345");
+  if(f){
+    cout << "sample rate: " << f.samplerate() << endl;
+    SndfileHandle sndFile("/tmp/test.wav",
+        SFM_WRITE, 
+        SF_FORMAT_WAV | SF_FORMAT_PCM_16, 
+        2, 44100);
+    unsigned int samples;
+    while(0 < (samples = f.readf(frame,1024))){
+      sndFile.writef(frame,samples);
+    }
+    return 0;
+  } else {
+    cout << "NOPE" << endl;
+    return -1;
+  }
 }
 */
