@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <QString>
+#include <QPair>
 
 #define DO_STRINGIFY(X) #X
 #define STRINGIFY(X) DO_STRINGIFY(X)
@@ -15,6 +16,8 @@ namespace dj {
    extern const unsigned int one_scale;
    
    const QString version_string = STRINGIFY(DJ_VERSION);
+
+   typedef QPair<QString, int> OscNetAddr;
 
    template <typename T>
    std::string to_string(T v) {

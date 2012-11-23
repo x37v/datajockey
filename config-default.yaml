@@ -7,7 +7,11 @@ database:
   database: /home/alex/.datajockey/database.sqlite3
   pool: 5
   timeout: 5000
-osc_port: 10001
+osc:
+  in_port: 10001
+  out:
+    address: localhost
+    port: 10010
 annotation:
   files: ~/.datajockey/annotation/
   beat_locations:

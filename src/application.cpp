@@ -12,6 +12,7 @@
 #include "tagmodel.hpp"
 #include "tageditor.hpp"
 #include "oscreceiver.hpp"
+#include "oscsender.hpp"
 #include "config.hpp"
 #include "annotation.hpp"
 #include "appmainwindow.hpp"
@@ -58,6 +59,7 @@ Application::Application(int & argc, char ** argv) :
    mMixerPanel = new view::MixerPanel(mTop);
 
    mMIDIMapper = new controller::MIDIMapper(mTop);
+   mOSCSender = new controller::OSCSender(mTop);
 
    setStyle("plastique");
 
@@ -261,6 +263,43 @@ Application::Application(int & argc, char ** argv) :
          mMIDIMapper, SLOT(query()),
          Qt::QueuedConnection);
 
+
+   //osc sender
+   QObject::connect(
+         mAudioModel, SIGNAL(player_triggered(int, QString)),
+         mOSCSender, SLOT(player_trigger(int, QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, bool)),
+         mOSCSender, SLOT(player_set(int, QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, int)),
+         mOSCSender, SLOT(player_set(int, QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(player_value_changed(int, QString, double)),
+         mOSCSender, SLOT(player_set(int, QString, double)),
+         Qt::QueuedConnection);
+
+   QObject::connect(
+         mAudioModel, SIGNAL(master_triggered(QString)),
+         mOSCSender, SLOT(master_trigger(QString)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, bool)),
+         mOSCSender, SLOT(master_set(QString, bool)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, int)),
+         mOSCSender, SLOT(master_set(QString, int)),
+         Qt::QueuedConnection);
+   QObject::connect(
+         mAudioModel, SIGNAL(master_value_changed(QString, double)),
+         mOSCSender, SLOT(master_set(QString, double)),
+         Qt::QueuedConnection);
+
+
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
@@ -357,10 +396,11 @@ Application::Application(int & argc, char ** argv) :
    //start up threads
    mAudioModel->start_audio();
 
-   OscThread * osc_thread = new OscThread(config->osc_port());
+   OscThread * osc_thread = new OscThread(config->osc_in_port());
    osc_thread->start();
 
    mMIDIMapper->start();
+   mOSCSender->start();
 
    QWidget * central = new QWidget(mTop);
    central->setLayout(top_layout);

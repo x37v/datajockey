@@ -110,7 +110,32 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
 
       //fill in the rest
       try {
-         root["osc_port"] >> mOscPort;
+        const YAML::Node& osc = root["osc"];
+        try {
+          osc["in_port"] >> mOscInPort;
+        } catch (...) { /* do nothing */ }
+
+        const YAML::Node& osc_out = osc["out"];
+        //the destinations could be a list or a map
+        try {
+          //first try map
+          std::string address;
+          int port;
+          osc_out["address"] >> address;
+          osc_out["port"] >> port;
+          mOscDestinations << OscNetAddr(QString::fromStdString(address), port);
+        } catch(...) {
+          try {
+            for (unsigned int i = 0; i < osc_out.size(); i++) {
+              std::string address;
+              int port;
+              osc_out[i]["address"] >> address;
+              osc_out[i]["port"] >> port;
+              mOscDestinations << OscNetAddr(QString::fromStdString(address), port);
+            }
+          } catch (...) { /* do nothing */ }
+        }
+
       } catch (...) { /* do nothing */ }
 
       try {
@@ -179,7 +204,8 @@ QString Configuration::db_name() { return mDBName; }
 QString Configuration::db_password() { return mDBPassword; }
 QString Configuration::db_username() { return mDBUserName; }
 
-unsigned int Configuration::osc_port(){ return mOscPort; }
+unsigned int Configuration::osc_in_port(){ return mOscInPort; }
+const QList<OscNetAddr> Configuration::osc_destinations() const { return mOscDestinations; }
 QString Configuration::annotation_dir() { return mAnnotationDir; }
 
 QString Configuration::midi_mapping_file() { return mMIDIMapFile; }
@@ -197,7 +223,7 @@ void Configuration::restore_defaults() {
 
    mAnnotationDir = DEFAULT_ANNOTATION_DIR;
 
-   mOscPort = DEFAULT_OSC_PORT;
+   mOscInPort = DEFAULT_OSC_PORT;
 
    mMIDIMapFile = DEFAULT_MIDI_MAPPING_FILE;
    mMIDIMapAutoSave = DEFAULT_MIDI_AUTO_SAVE;

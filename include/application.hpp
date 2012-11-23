@@ -10,6 +10,7 @@ class MainWindow;
 namespace dj {
    namespace audio { class AudioModel; }
    namespace controller { class MIDIMapper; }
+   namespace controller { class OSCSender; }
 
    class Application : public QApplication {
       Q_OBJECT
@@ -23,6 +24,7 @@ namespace dj {
          audio::AudioModel * mAudioModel;
          view::MixerPanel * mMixerPanel;
          controller::MIDIMapper * mMIDIMapper;
+         controller::OSCSender * mOSCSender;
          MainWindow * mTop;
          int mCurrentwork;
    };

@@ -32,7 +32,9 @@
 #include <stdexcept>
 #include <QString>
 #include <QStringList>
+#include <QPair>
 #include <yaml-cpp/yaml.h>
+#include "defines.hpp"
 
 namespace dj {
    class Configuration {
@@ -53,7 +55,8 @@ namespace dj {
          QString db_username();
          QString db_password();
 
-         unsigned int osc_port();
+         unsigned int osc_in_port();
+         const QList<OscNetAddr> osc_destinations() const;
 
          QString annotation_dir();
          QString midi_mapping_file();
@@ -69,7 +72,8 @@ namespace dj {
          QString mDBUserName;
          QString mDBPassword;
 
-         unsigned int mOscPort;
+         unsigned int mOscInPort;
+         QList<OscNetAddr> mOscDestinations;
 
          QString mAnnotationDir;
 
