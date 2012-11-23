@@ -93,7 +93,7 @@ Application::Application(int & argc, char ** argv) :
    //hook the trigger to us for loading only
    QObject::connect(mMixerPanel,
          SIGNAL(player_triggered(int, QString)),
-         SLOT(set_player_trigger(int, QString)));
+         SLOT(player_trigger(int, QString)));
 
    //hook view into model
    QObject::connect(mMixerPanel,
@@ -422,7 +422,7 @@ void Application::select_work(int work_id) {
    mCurrentwork = work_id;
 }
 
-void Application::set_player_trigger(int player_index, QString name) {
+void Application::player_trigger(int player_index, QString name) {
 	if (name != "load")
 		return;
 

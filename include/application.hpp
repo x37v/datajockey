@@ -19,7 +19,7 @@ namespace dj {
       public slots:
          void pre_quit_actions();
          void select_work(int work_id);
-         void set_player_trigger(int player_index, QString name);
+         void player_trigger(int player_index, QString name);
       private:
          audio::AudioModel * mAudioModel;
          view::MixerPanel * mMixerPanel;
