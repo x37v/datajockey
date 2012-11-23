@@ -33,6 +33,7 @@ namespace {
     addr.append(name);
     return osc::BeginMessage(addr.toStdString().c_str());
   }
+
 }
 
 OSCSender::OSCSender(QObject * parent) : QThread(parent) {
@@ -63,34 +64,19 @@ void OSCSender::player_trigger(int player_index, QString name){
 }
 
 void OSCSender::player_set(int player_index, QString name, bool value){
-  if (name.contains("update"))
-    return;
-  char b[OSC_OUTPUT_BUFFER_SIZE];
-  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << player_start(player_index, name) << value << msg_end();
-
-
-  send(mDestinations, p);
+  player_send(player_index, name, value);
 }
 
 void OSCSender::player_set(int player_index, QString name, int value){
-  if (name.contains("update"))
-    return;
-  char b[OSC_OUTPUT_BUFFER_SIZE];
-  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << player_start(player_index, name) << value << msg_end();
-
-  send(mDestinations, p);
+  player_send(player_index, name, value);
 }
 
 void OSCSender::player_set(int player_index, QString name, double value){
-  if (name.contains("update"))
-    return;
-  char b[OSC_OUTPUT_BUFFER_SIZE];
-  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << player_start(player_index, name) << value << msg_end();
+  player_send(player_index, name, value);
+}
 
-  send(mDestinations, p);
+void OSCSender::player_set(int player_index, QString name, QString value) {
+  player_send(player_index, name, value);
 }
 
 void OSCSender::player_set(int /*player_index*/, QString /*name*/, TimePoint /*value*/){
@@ -117,32 +103,70 @@ void OSCSender::master_trigger(QString name){
 }
 
 void OSCSender::master_set(QString name, bool value){
-  if (name.contains("update"))
-    return;
-  char b[OSC_OUTPUT_BUFFER_SIZE];
-  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << master_start(name) << value << msg_end();
-
-  send(mDestinations, p);
+  master_send(name, value);
 }
 
 void OSCSender::master_set(QString name, int value){
-  if (name.contains("update"))
-    return;
-  char b[OSC_OUTPUT_BUFFER_SIZE];
-  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << master_start(name) << value << msg_end();
-
-  send(mDestinations, p);
+  master_send(name, value);
 }
 
 void OSCSender::master_set(QString name, double value){
+  master_send(name, value);
+}
+
+
+void OSCSender::player_send(int player_index, QString name, QVariant value){
   if (name.contains("update"))
     return;
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << master_start(name) << value << msg_end();
+  p << player_start(player_index, name);
+  switch(value.type()) {
+    case QMetaType::Bool:
+      p << value.toBool();
+      break;
+    case QMetaType::Int:
+      p << value.toInt();
+      break;
+    case QMetaType::Double:
+      p << value.toDouble();
+      break;
+    case QMetaType::QString:
+      p << value.toString().toStdString().c_str();
+      break;
+    default:
+      //XXX error
+      return;
+  }
 
+  p << msg_end();
   send(mDestinations, p);
 }
 
+void OSCSender::master_send(QString name, QVariant value){
+  if (name.contains("update"))
+    return;
+  char b[OSC_OUTPUT_BUFFER_SIZE];
+  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
+  p << master_start(name);
+  switch(value.type()) {
+    case QMetaType::Bool:
+      p << value.toBool();
+      break;
+    case QMetaType::Int:
+      p << value.toInt();
+      break;
+    case QMetaType::Double:
+      p << value.toDouble();
+      break;
+    case QMetaType::QString:
+      p << value.toString().toStdString().c_str();
+      break;
+    default:
+      //XXX error
+      return;
+  }
+
+  p << msg_end();
+  send(mDestinations, p);
+}

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QList>
+#include <QVariant>
 #include "timepoint.hpp"
 
 class UdpTransmitSocket;
@@ -24,6 +25,7 @@ namespace dj {
         void player_set(int player_index, QString name, bool value);
         void player_set(int player_index, QString name, int value);
         void player_set(int player_index, QString name, double value);
+        void player_set(int player_index, QString name, QString value);
         void player_set(int player_index, QString name, TimePoint value);
 
         void master_trigger(QString name);
@@ -32,6 +34,8 @@ namespace dj {
         void master_set(QString name, double value);
       private:
         QList<UdpTransmitSocket *> mDestinations;
+        void player_send(int player_index, QString name, QVariant value);
+        void master_send(QString name, QVariant value);
     };
   }
 }
