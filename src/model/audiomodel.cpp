@@ -717,6 +717,8 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     set_player_position_frame(player_index, value, false);
   } else if (name == "play_beat_relative") {
     set_player_position_beat_relative(player_index, value);
+  } else if (name == "load") {
+    emit(player_value_changed(player_index, "load", value));
   } else {
     //get the state for this name
     QHash<QString, int>::iterator state_itr = pstate->mParamInt.find(name);

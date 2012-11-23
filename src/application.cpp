@@ -435,6 +435,8 @@ void Application::player_trigger(int player_index, QString name) {
          player_index,
          audio_file,
          annotation_file);
+   //doesn't actually do anything other than cause the model to emit
+   mAudioModel->player_set(player_index, "load", mCurrentwork);
 
 	//find the work info
 	QString artist_name;
