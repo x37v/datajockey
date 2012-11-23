@@ -148,7 +148,7 @@ void OSCSender::player_send(int player_index, QString name, QVariant value){
       p << value.toInt();
       break;
     case QMetaType::Double:
-      p << value.toDouble();
+      p << static_cast<float>(value.toDouble());
       break;
     case QMetaType::QString:
       p << value.toString().toStdString().c_str();
@@ -182,7 +182,7 @@ void OSCSender::master_send(QString name, QVariant value){
       p << value.toInt();
       break;
     case QMetaType::Double:
-      p << value.toDouble();
+      p << static_cast<float>(value.toDouble());
       break;
     case QMetaType::QString:
       p << value.toString().toStdString().c_str();
