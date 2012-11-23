@@ -4,18 +4,28 @@
 #include <osc/OscOutboundPacketStream.h>
 #include <ip/UdpSocket.h>
 #include "defines.hpp"
+#include <iostream>
 
-#define OSC_OUTPUT_BUFFER_SIZE 1024
+#define OSC_OUTPUT_BUFFER_SIZE 2048
 
 using namespace dj::controller;
+using std::cerr;
+using std::endl;
 
 namespace {
   typedef osc::OutboundPacketStream packet_stream;
-  typedef osc::MessageTerminator msg_end;
 
   void send(QList<UdpTransmitSocket *>& sockets, const packet_stream& stream) {
     foreach(UdpTransmitSocket * socket, sockets)
       socket->Send(stream.Data(), stream.Size());
+  }
+
+  QVariant value_transform(QString& name, QVariant value) {
+    if (name.contains("volume") || name.contains("eq_") || name.contains("crossfade_position"))
+        return QVariant(static_cast<double>(value.toInt()) / static_cast<double>(dj::one_scale));
+    else if (name.contains("speed"))
+        return QVariant(static_cast<double>(value.toInt()) / 10.0);
+    return value;
   }
   
   osc::BeginMessage player_start(int player_index, QString& name) {
@@ -58,7 +68,7 @@ void OSCSender::player_trigger(int player_index, QString name){
     return;
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << player_start(player_index, name) << msg_end();
+  p << player_start(player_index, name) << osc::EndMessage;
 
   send(mDestinations, p);
 }
@@ -97,7 +107,7 @@ void OSCSender::master_trigger(QString name){
     return;
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
-  p << master_start(name) << msg_end();
+  p << master_start(name) << osc::EndMessage;
 
   send(mDestinations, p);
 }
@@ -118,9 +128,14 @@ void OSCSender::master_set(QString name, double value){
 void OSCSender::player_send(int player_index, QString name, QVariant value){
   if (name.contains("update"))
     return;
+
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
+
   p << player_start(player_index, name);
+
+  //remap the value if we need
+  value = value_transform(name, value);
   switch(value.type()) {
     case QMetaType::Bool:
       p << value.toBool();
@@ -135,20 +150,25 @@ void OSCSender::player_send(int player_index, QString name, QVariant value){
       p << value.toString().toStdString().c_str();
       break;
     default:
-      //XXX error
+      cerr << "unsupported osc send type " << value.typeName() << " for player_send " << player_index << " " << name.toStdString() << endl;
       return;
   }
 
-  p << msg_end();
+  p << osc::EndMessage;
   send(mDestinations, p);
 }
 
 void OSCSender::master_send(QString name, QVariant value){
   if (name.contains("update"))
     return;
+
   char b[OSC_OUTPUT_BUFFER_SIZE];
   packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
+
   p << master_start(name);
+
+  //remap the value if we need
+  value = value_transform(name, value);
   switch(value.type()) {
     case QMetaType::Bool:
       p << value.toBool();
@@ -163,10 +183,11 @@ void OSCSender::master_send(QString name, QVariant value){
       p << value.toString().toStdString().c_str();
       break;
     default:
-      //XXX error
+      cerr << "unsupported osc send type " << value.typeName() << " for master_send " << name.toStdString() << endl;
       return;
   }
 
-  p << msg_end();
+  p << osc::EndMessage;
   send(mDestinations, p);
 }
+
