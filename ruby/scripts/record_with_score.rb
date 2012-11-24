@@ -8,10 +8,13 @@ SERVER_PORT = 10010
 
 jack_ports = ['datajockey:output0', 'datajockey:output1']
 audio_file_out = "datajockey_capture-#{@@start_time.to_s.gsub(" ", "_")}.wav"
+score_file_out = "datajockey_capture-#{@@start_time.to_s.gsub(" ", "_")}.txt"
 
 @@rec_process = fork do
   exec('jack_capture', '-dc', '-c', jack_ports.size.to_s, '-fn', audio_file_out, *jack_ports.collect { |p| ['--port', p] }.flatten)
 end
+
+@@score_file = File.open(score_file_out, "w")
 
 def evt_time
   Time.now - @@start_time
@@ -20,7 +23,13 @@ end
 def quit_app
   Process.kill("TERM", @@rec_process)
   Process.wait
+  @@score_file.close
   exit
+end
+
+def add_score_item(item)
+  @@score_file.puts item
+  puts item
 end
 
 trap("SIGINT") do
@@ -39,11 +48,11 @@ OSC.run do
     case cmd
     when 'audible'
       audible = (args[1] == 1)
-      puts "#{evt_time} #{player} audible #{audible}"
+      add_score_item "#{evt_time} #{player} audible #{audible}"
     when 'audio_file'
-      puts "#{evt_time} #{player} audio_file #{args[1]}"
+      add_score_item "#{evt_time} #{player} audio_file #{args[1]}"
     when 'load'
-      puts "#{evt_time} #{player} load #{args[1]}" if args.size == 2
+      add_score_item "#{evt_time} #{player} load #{args[1]}" if args.size == 2
     end
   end
 
