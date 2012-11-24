@@ -3,10 +3,11 @@
 require 'rubygems'
 require 'ruby-osc'
 
-include OSC
+SERVER_PORT = 10010
+@@start_time = Time.now
 
 jack_ports = ['datajockey:output0', 'datajockey:output1']
-audio_file_out = "datajockey_capture-#{Time.now.to_s.gsub(" ", "_")}.wav"
+audio_file_out = "datajockey_capture-#{@@start_time.to_s.gsub(" ", "_")}.wav"
 
 rec_process = fork do
   system('jack_capture', '-dc', '-c', jack_ports.size.to_s, '-fn', audio_file_out, *jack_ports.collect { |p| ['--port', p] }.flatten)
@@ -20,14 +21,14 @@ trap("SIGINT") {
   exit
 }
 
-@@start_time = Time.now
-
 def evt_time
   Time.now - @@start_time
 end
 
+puts "##{@@start_time} #{audio_file_out}"
+
 OSC.run do
-  server = Server.new 10010
+  server = OSC::Server.new SERVER_PORT
   server.add_pattern %r{/dj/player/.*} do |*args| # this will match any /foo node
     player = args[0].split('/')[3].to_i
     cmd = args[0].sub(%r{/dj/player/\d/}, "").gsub("/", "_")
