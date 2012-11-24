@@ -6,8 +6,14 @@
 #include "defines.hpp"
 #include <iostream>
 #include <QDateTime>
+#include <stdexcept>
 
 #define OSC_OUTPUT_BUFFER_SIZE 2048
+
+//do we cast booleans integers
+#define OSC_BOOL_TO_INT
+//do we cast doubles to floats
+#define OSC_DOUBLE_TO_FLOAT
 
 using namespace dj::controller;
 using std::cerr;
@@ -43,6 +49,39 @@ namespace {
     QString addr("/dj/master/");
     addr.append(name);
     return osc::BeginMessage(addr.toStdString().c_str());
+  }
+
+  void osc_add_value(packet_stream& stream, QString value_name, QVariant value) throw(std::runtime_error) {
+    //remap the value if we need
+    value = value_transform(value_name, value);
+
+    switch(static_cast<QMetaType::Type>(value.type())) {
+      case QMetaType::Bool:
+#ifdef OSC_BOOL_TO_INT
+        stream << static_cast<int>(value.toBool());
+#else
+        stream << value.toBool();
+#endif
+        break;
+      case QMetaType::Int:
+        stream << value.toInt();
+        break;
+      case QMetaType::Float:
+        stream << value.toFloat();
+        break;
+      case QMetaType::Double:
+#ifdef OSC_DOUBLE_TO_FLOAT
+        stream << static_cast<float>(value.toDouble());
+#else
+        stream << value.toDouble();
+#endif
+        break;
+      case QMetaType::QString:
+        stream << value.toString().toStdString().c_str();
+        break;
+      default:
+        throw(std::runtime_error("unsupported osc send type " + std::string(value.typeName())));
+    }
   }
 
 }
@@ -138,24 +177,11 @@ void OSCSender::player_send(int player_index, QString name, QVariant value){
   p << player_start(player_index, name);
   //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
-  //remap the value if we need
-  value = value_transform(name, value);
-  switch(value.type()) {
-    case QMetaType::Bool:
-      p << value.toBool();
-      break;
-    case QMetaType::Int:
-      p << value.toInt();
-      break;
-    case QMetaType::Double:
-      p << static_cast<float>(value.toDouble());
-      break;
-    case QMetaType::QString:
-      p << value.toString().toStdString().c_str();
-      break;
-    default:
-      cerr << "unsupported osc send type " << value.typeName() << " for player_send " << player_index << " " << name.toStdString() << endl;
-      return;
+  try {
+    osc_add_value(p, name, value);
+  } catch (std::exception& e) {
+    cerr << e.what() << endl;
+    return;
   }
 
   p << osc::EndMessage;
@@ -172,24 +198,11 @@ void OSCSender::master_send(QString name, QVariant value){
   p << master_start(name);
   //p << osc::TimeTag(QDateTime::currentMSecsSinceEpoch());
 
-  //remap the value if we need
-  value = value_transform(name, value);
-  switch(value.type()) {
-    case QMetaType::Bool:
-      p << value.toBool();
-      break;
-    case QMetaType::Int:
-      p << value.toInt();
-      break;
-    case QMetaType::Double:
-      p << static_cast<float>(value.toDouble());
-      break;
-    case QMetaType::QString:
-      p << value.toString().toStdString().c_str();
-      break;
-    default:
-      cerr << "unsupported osc send type " << value.typeName() << " for master_send " << name.toStdString() << endl;
-      return;
+  try {
+    osc_add_value(p, name, value);
+  } catch (std::exception& e) {
+    cerr << e.what() << endl;
+    return;
   }
 
   p << osc::EndMessage;
