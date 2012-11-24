@@ -34,6 +34,48 @@ using namespace dj;
 using std::endl;
 using std::cout;
 
+namespace {
+  void connect_common_interfaces(QObject * src, QObject * dst, Qt::ConnectionType connection_type = Qt::AutoConnection) {
+    QObject::connect(
+        src, SIGNAL(player_triggered(int, QString)),
+        dst, SLOT(player_trigger(int, QString)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(player_value_changed(int, QString, bool)),
+        dst, SLOT(player_set(int, QString, bool)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(player_value_changed(int, QString, int)),
+        dst, SLOT(player_set(int, QString, int)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(player_value_changed(int, QString, double)),
+        dst, SLOT(player_set(int, QString, double)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(player_value_changed(int, QString, QString)),
+        dst, SLOT(player_set(int, QString, QString)),
+        connection_type);
+
+    QObject::connect(
+        src, SIGNAL(master_triggered(QString)),
+        dst, SLOT(master_trigger(QString)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(master_value_changed(QString, bool)),
+        dst, SLOT(master_set(QString, bool)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(master_value_changed(QString, int)),
+        dst, SLOT(master_set(QString, int)),
+        connection_type);
+    QObject::connect(
+        src, SIGNAL(master_value_changed(QString, double)),
+        dst, SLOT(master_set(QString, double)),
+        connection_type);
+  }
+}
+
 Application::Application(int & argc, char ** argv) :
    QApplication(argc, argv),
    mCurrentwork(0)
@@ -134,34 +176,7 @@ Application::Application(int & argc, char ** argv) :
 
    //hook up mapper
    //mapper out
-   QObject::connect(
-         mMIDIMapper, SIGNAL(player_value_changed(int, QString, int)),
-         mAudioModel, SLOT(player_set(int, QString, int)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(player_value_changed(int, QString, bool)),
-         mAudioModel, SLOT(player_set(int, QString, bool)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(player_triggered(int, QString)),
-         mAudioModel, SLOT(player_trigger(int, QString)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(master_triggered(QString)),
-         mAudioModel, SLOT(master_trigger(QString)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(master_value_changed(QString, bool)),
-         mAudioModel, SLOT(master_set(QString, bool)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(master_value_changed(QString, int)),
-         mAudioModel, SLOT(master_set(QString, int)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mMIDIMapper, SIGNAL(master_value_changed(QString, double)),
-         mAudioModel, SLOT(master_set(QString, double)),
-         Qt::QueuedConnection);
+   connect_common_interfaces(mMIDIMapper, mAudioModel);
 
    //mapper view
    QObject::connect(
@@ -261,45 +276,8 @@ Application::Application(int & argc, char ** argv) :
          mMIDIMapper, SLOT(query()),
          Qt::QueuedConnection);
 
-
    //osc sender
-   QObject::connect(
-         mAudioModel, SIGNAL(player_triggered(int, QString)),
-         mOSCSender, SLOT(player_trigger(int, QString)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(player_value_changed(int, QString, bool)),
-         mOSCSender, SLOT(player_set(int, QString, bool)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(player_value_changed(int, QString, int)),
-         mOSCSender, SLOT(player_set(int, QString, int)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(player_value_changed(int, QString, double)),
-         mOSCSender, SLOT(player_set(int, QString, double)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(player_value_changed(int, QString, QString)),
-         mOSCSender, SLOT(player_set(int, QString, QString)),
-         Qt::QueuedConnection);
-
-   QObject::connect(
-         mAudioModel, SIGNAL(master_triggered(QString)),
-         mOSCSender, SLOT(master_trigger(QString)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(master_value_changed(QString, bool)),
-         mOSCSender, SLOT(master_set(QString, bool)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(master_value_changed(QString, int)),
-         mOSCSender, SLOT(master_set(QString, int)),
-         Qt::QueuedConnection);
-   QObject::connect(
-         mAudioModel, SIGNAL(master_value_changed(QString, double)),
-         mOSCSender, SLOT(master_set(QString, double)),
-         Qt::QueuedConnection);
+   connect_common_interfaces(mAudioModel, mOSCSender, Qt::QueuedConnection);
 
    QObject::connect(this, SIGNAL(aboutToQuit()), mOSCSender, SLOT(send_quit()));
 
@@ -401,6 +379,7 @@ Application::Application(int & argc, char ** argv) :
 
    OscThread * osc_thread = new OscThread(config->osc_in_port());
    osc_thread->start();
+   connect_common_interfaces(osc_thread->receiver(), mAudioModel, Qt::QueuedConnection);
 
    mMIDIMapper->start();
    mOSCSender->start();

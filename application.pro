@@ -43,7 +43,7 @@ INCLUDEPATH += . \
    include/old \
    include/util \
    ext/jackcpp/include/ \
-	/usr/include/rasqal/ \
+   /usr/include/rasqal/ \
    /usr/local/include/oscpack/ \
    /usr/local/include/lilv-0/
 
@@ -76,6 +76,7 @@ HEADERS += include/application.hpp \
            include/audio/types.hpp \
            include/controller/loaderthread.hpp \
            include/controller/midimapper.hpp \
+           include/controller/oscreceiver.hpp \
            include/controller/oscsender.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
@@ -90,7 +91,6 @@ HEADERS += include/application.hpp \
            include/view/playerview.hpp \
            include/view/waveformviewgl.hpp \
            include/old/defaultworkfilters.hpp \
-           include/old/oscreceiver.hpp \
            include/old/tageditor.hpp \
            include/old/tagmodel.hpp \
            include/old/tagview.hpp \
@@ -128,6 +128,7 @@ SOURCES += src/application.cpp \
            src/audio/transport.cpp \
            src/controller/loaderthread.cpp \
            src/controller/midimapper.cpp \
+           src/controller/oscreceiver.cpp \
            src/controller/oscsender.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
@@ -142,7 +143,6 @@ SOURCES += src/application.cpp \
            src/view/playerview.cpp \
            src/view/waveformviewgl.cpp \
            src/old/defaultworkfilters.cpp \
-           src/old/oscreceiver.cpp \
            src/old/tageditor.cpp \
            src/old/tagmodel.cpp \
            src/old/tagview.cpp \
