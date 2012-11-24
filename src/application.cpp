@@ -63,8 +63,6 @@ Application::Application(int & argc, char ** argv) :
 
    setStyle("plastique");
 
-   QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(pre_quit_actions()));
-
    QObject::connect(mMixerPanel,
          SIGNAL(master_triggered(QString)),
          mAudioModel,
@@ -303,6 +301,7 @@ Application::Application(int & argc, char ** argv) :
          mOSCSender, SLOT(master_set(QString, double)),
          Qt::QueuedConnection);
 
+   QObject::connect(this, SIGNAL(aboutToQuit()), mOSCSender, SLOT(send_quit()));
 
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
@@ -409,11 +408,14 @@ Application::Application(int & argc, char ** argv) :
    QWidget * central = new QWidget(mTop);
    central->setLayout(top_layout);
 
+   QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(pre_quit_actions()));
+
    mTop->setCentralWidget(central);
    mTop->show();
 }
 
 void Application::pre_quit_actions() {
+   sleep(1);
    mAudioModel->stop_audio();
    model::db::close();
 }

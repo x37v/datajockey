@@ -32,6 +32,8 @@ namespace dj {
         void master_set(QString name, bool value);
         void master_set(QString name, int value);
         void master_set(QString name, double value);
+
+        void send_quit();
       private:
         QList<UdpTransmitSocket *> mDestinations;
         void player_send(int player_index, QString name, QVariant value);

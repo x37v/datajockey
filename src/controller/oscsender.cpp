@@ -166,6 +166,12 @@ void OSCSender::master_set(QString name, double value){
   master_send(name, value);
 }
 
+void OSCSender::send_quit() {
+  char b[OSC_OUTPUT_BUFFER_SIZE];
+  packet_stream p(b, OSC_OUTPUT_BUFFER_SIZE);
+  p << osc::BeginMessage("/dj/quit") << osc::EndMessage;
+  send(mDestinations, p);
+}
 
 void OSCSender::player_send(int player_index, QString name, QVariant value){
   if (name.contains("update"))
