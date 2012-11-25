@@ -80,6 +80,7 @@ HEADERS += include/application.hpp \
            include/controller/oscsender.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
+           include/model/workfiltermodel.hpp \
            include/model/workrelationmodel.hpp \
            include/util/audiofiletag.hpp \
            include/util/beatextractor.hpp \
@@ -90,7 +91,6 @@ HEADERS += include/application.hpp \
            include/view/mixerpanel.hpp \
            include/view/playerview.hpp \
            include/view/waveformviewgl.hpp \
-           include/old/defaultworkfilters.hpp \
            include/old/tageditor.hpp \
            include/old/tagmodel.hpp \
            include/old/tagview.hpp \
@@ -98,9 +98,6 @@ HEADERS += include/application.hpp \
            include/old/treemodel.h \
            include/old/workdbview.hpp \
            include/old/workdetailview.hpp \
-           include/old/workfilterlist.hpp \
-           include/old/workfilterlistview.hpp \
-           include/old/workfiltermodel.hpp \
            #include/old/workpreviewer.hpp \
            include/old/worktablemodel.hpp \
            include/old/worktagmodelfilter.hpp \
@@ -132,6 +129,7 @@ SOURCES += src/application.cpp \
            src/controller/oscsender.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
+           src/model/workfiltermodel.cpp \
            src/model/workrelationmodel.cpp \
            src/util/audiofiletag.cpp \
            src/util/beatextractor.cpp \
@@ -142,7 +140,6 @@ SOURCES += src/application.cpp \
            src/view/mixerpanel.cpp \
            src/view/playerview.cpp \
            src/view/waveformviewgl.cpp \
-           src/old/defaultworkfilters.cpp \
            src/old/tageditor.cpp \
            src/old/tagmodel.cpp \
            src/old/tagview.cpp \
@@ -150,9 +147,6 @@ SOURCES += src/application.cpp \
            src/old/treemodel.cpp \
            src/old/workdbview.cpp \
            src/old/workdetailview.cpp \
-           src/old/workfilterlist.cpp \
-           src/old/workfilterlistview.cpp \
-           src/old/workfiltermodel.cpp \
            #src/old/workpreviewer.cpp \
            src/old/worktablemodel.cpp \
            src/old/worktagmodelfilter.cpp \

@@ -156,10 +156,10 @@ namespace {
     query.exec();
 
     //prepare the insert
-    query_string = "INSERT INTO " + table_name + " SELECT " + work_table_selects.join(", ") + " FROM " + work_table_joins.join(" ");
+    query_string = "INSERT INTO " + table_name + " SELECT DISTINCT works.* " +
+      "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
     if (!where_clause.isEmpty())
-      query_string += (" where " + where_clause);
-
+      query_string += (" WHERE " + where_clause);
     query_string += " ORDER BY album_id, track";
 
     //actually create the table
@@ -292,8 +292,9 @@ QString db::work::filtered_table(const QString where_clause) throw(std::runtime_
   QString table_name("filtered_works_" + QString::number(cFilteredWorkTableCount++));
 
   QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT DISTINCT works.* " +
-    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id WHERE " + 
-    where_clause;
+    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
+  if (!where_clause.isEmpty())
+    query_string += "WHERE " + where_clause;
 
   MySqlQuery query(get());
   query.prepare(query_string);
@@ -301,11 +302,9 @@ QString db::work::filtered_table(const QString where_clause) throw(std::runtime_
   return table_name;
 }
 
-/*
 void db::work::filtered_update(const QString& table_name, const QString where_clause) throw(std::runtime_error) {
   update_temp_work_table(table_name, where_clause);
 }
-*/
 
 QString db::work::filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error) {
   QStringList tag_ids_s;

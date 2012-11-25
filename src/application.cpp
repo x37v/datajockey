@@ -17,6 +17,7 @@
 #include "annotation.hpp"
 #include "appmainwindow.hpp"
 #include "workrelationmodel.hpp"
+#include "workfiltermodel.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -297,10 +298,15 @@ Application::Application(int & argc, char ** argv) :
    tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
 
    foreach(const QString tag, tag_names) {
-     QString filtered_name = model::db::work::filtered_table_by_tag(tag);
-     rtable_model = new WorkRelationModel(filtered_name, mTop, model::db::get());
-     rtable_model->select();
-     db_views << new WorkDBView(rtable_model, mTop);
+     //QString filtered_name = model::db::work::filtered_table_by_tag(tag);
+     //rtable_model = new WorkRelationModel(filtered_name, mTop, model::db::get());
+
+     WorkFilterModel * ftable_model = new WorkFilterModel(mTop, model::db::get());
+     QString tag_id;
+     tag_id.setNum(model::db::tag::find(tag));
+     ftable_model->set_filter_expression("audio_work_tags.tag_id = " + tag_id);
+     ftable_model->select();
+     db_views << new WorkDBView(ftable_model, mTop);
      db_view_names << tag;
    }
 
