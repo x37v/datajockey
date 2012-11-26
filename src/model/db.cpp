@@ -295,6 +295,7 @@ QString db::work::filtered_table(const QString where_clause) throw(std::runtime_
     "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
   if (!where_clause.isEmpty())
     query_string += "WHERE " + where_clause;
+  query_string += " ORDER BY album_id, track";
 
   MySqlQuery query(get());
   query.prepare(query_string);
@@ -577,7 +578,7 @@ int db::tag::find_class(const QString& name) throw(std::runtime_error) {
 
   if (query.first())
     return query.value(0).toInt();
-  return -1;
+  throw std::runtime_error("cannot find tag class with name " + name.toStdString());
 }
 
 int db::tag::find(const QString& name, int tag_class_id) throw(std::runtime_error) {
