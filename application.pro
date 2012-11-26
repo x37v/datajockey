@@ -87,6 +87,7 @@ HEADERS += include/application.hpp \
            include/util/importer.hpp \
            include/view/appmainwindow.hpp \
            include/view/audiolevel.hpp \
+           include/view/filtereddbview.hpp \
            include/view/midimappingview.hpp \
            include/view/mixerpanel.hpp \
            include/view/playerview.hpp \
@@ -136,6 +137,7 @@ SOURCES += src/application.cpp \
            src/util/importer.cpp \ 
            src/view/appmainwindow.cpp \
            src/view/audiolevel.cpp \
+           src/view/filtereddbview.cpp \
            src/view/midimappingview.cpp \
            src/view/mixerpanel.cpp \
            src/view/playerview.cpp \

@@ -50,7 +50,8 @@ class TimeDisplayDelegate : public QStyledItemDelegate {
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
     QWidget *parent) :
-  QWidget(parent)
+  QWidget(parent),
+  mWriteSettings(true)
 {
   //create the layouts
   QVBoxLayout * layout = new QVBoxLayout(this);
@@ -81,7 +82,7 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   QObject::connect(mTableView->selectionModel(), 
       SIGNAL(selectionChanged(const QItemSelection, const QItemSelection)),
       this,
-      SLOT(setSelection(const QItemSelection)));
+      SLOT(set_selection(const QItemSelection)));
 
   //schedule the settings reading to happen after view construction
   QTimer::singleShot(0, this, SLOT(read_settings()));
@@ -91,7 +92,7 @@ QTableView * WorkDBView::tableView(){
   return mTableView;
 }
 
-void WorkDBView::selectWork(int work_id){
+void WorkDBView::select_work(int work_id) {
   //get the first index
   int rows = mTableView->model()->rowCount();
   //iterate to find our work
@@ -100,7 +101,7 @@ void WorkDBView::selectWork(int work_id){
     QVariant data = index.data();
     if(data.isValid() && data.canConvert(QVariant::Int) && data.toInt() == work_id){
       mTableView->selectRow(index.row());
-      emit(workSelected(work_id));
+      emit(work_selected(work_id));
       return;
     }
   }
@@ -113,26 +114,28 @@ void WorkDBView::selectWork(int work_id){
 //find the id of the work and emit that
 if(itemData.isValid() && itemData.canConvert(QVariant::Int)){
 int work = itemData.toInt();
-emit(workSelected(work));
+emit(work_selected(work));
 }
 }
 */
 
-void WorkDBView::setSelection(const QItemSelection & selected){
+void WorkDBView::set_selection(const QItemSelection & selected) {
   Q_UNUSED(selected);
   QModelIndex index = mTableView->selectionModel()->currentIndex(); 
   index = index.sibling(index.row(), WorkTableModel::idColumn);
   int work_id = -1;
   if(index.isValid())
     work_id = mTableView->model()->data(index).toInt();
-  emit(workSelected(work_id));
+  emit(work_selected(work_id));
 }
 
 void WorkDBView::write_settings() {
-  QSettings settings;
-  settings.beginGroup("WorkDBView");
-  settings.setValue("header_state", mTableView->horizontalHeader()->saveState());
-  settings.endGroup();
+  if (mWriteSettings) {
+    QSettings settings;
+    settings.beginGroup("WorkDBView");
+    settings.setValue("header_state", mTableView->horizontalHeader()->saveState());
+    settings.endGroup();
+  }
 }
 
 void WorkDBView::read_settings() {
@@ -142,4 +145,6 @@ void WorkDBView::read_settings() {
     mTableView->horizontalHeader()->restoreState(settings.value("header_state").toByteArray()); 
   settings.endGroup();
 }
+
+void WorkDBView::shouldWriteSettings(bool write) { mWriteSettings = write; }
 

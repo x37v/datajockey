@@ -18,36 +18,26 @@
  *		with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WORK_DB_VIEW_HPP
-#define WORK_DB_VIEW_HPP
+#ifndef FILTERED_DB_VIEW_HPP
+#define FILTERED_DB_VIEW_HPP
 
 #include <QWidget>
-#include <QModelIndex>
-#include <QItemSelection>
 
-class QTableView;
-class QPushButton;
+class WorkDBView;
 class QAbstractItemModel;
+class QTextEdit;
 
-class WorkDBView : public QWidget {
+class FilteredDBView : public QWidget {
   Q_OBJECT
   public:
-    WorkDBView(QAbstractItemModel * model, QWidget *parent = NULL);
-    QTableView * tableView();
-    void shouldWriteSettings(bool write);
+    FilteredDBView(QAbstractItemModel * model, QWidget *parent = NULL);
   public slots:
     void select_work(int work_id);
-    void write_settings();
-  protected slots:
-    void read_settings();
-    //void selectWork(const QModelIndex & index);
-    void set_selection(const QItemSelection & selected);
   signals:
     void work_selected(int work);
   private:
-    QTableView * mTableView;
-    bool mWriteSettings;
+    WorkDBView * mDBView;
+    QTextEdit * mFilterEditor;
 };
 
 #endif
-

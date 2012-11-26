@@ -18,6 +18,8 @@
 #include "appmainwindow.hpp"
 #include "workrelationmodel.hpp"
 #include "workfiltermodel.hpp"
+#include "filtereddbview.hpp"
+
 
 #include <QSlider>
 #include <QFile>
@@ -288,11 +290,22 @@ Application::Application(int & argc, char ** argv) :
    WorkRelationModel * rtable_model = new WorkRelationModel("works", mTop, model::db::get());
    rtable_model->select();
 
-   QList<WorkDBView *> db_views;
+   QList<QWidget *> db_views;
    QStringList db_view_names;
    WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
    db_views << work_db_view;
    db_view_names << "all";
+
+   //work selection
+   QObject::connect(
+       work_db_view,
+       SIGNAL(work_selected(int)),
+       work_detail,
+       SLOT(setWork(int)));
+   QObject::connect(
+       work_db_view,
+       SIGNAL(work_selected(int)),
+       SLOT(select_work(int)));
 
    QStringList tag_names;
    tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
@@ -306,8 +319,21 @@ Application::Application(int & argc, char ** argv) :
      tag_id.setNum(model::db::tag::find(tag));
      ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
      ftable_model->select();
-     db_views << new WorkDBView(ftable_model, mTop);
+     FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);
+     db_views << filtered_view;
      db_view_names << tag;
+
+     //work selection
+     QObject::connect(
+         filtered_view,
+         SIGNAL(work_selected(int)),
+         work_detail,
+         SLOT(setWork(int)));
+
+     QObject::connect(
+         filtered_view,
+         SIGNAL(work_selected(int)),
+         SLOT(select_work(int)));
    }
 
    //XXX hack to write settings before quitting, is there a better way?
@@ -316,20 +342,6 @@ Application::Application(int & argc, char ** argv) :
          work_db_view, SLOT(write_settings()));
 
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
-
-   foreach (WorkDBView * view, db_views) {
-     //work selection
-     QObject::connect(
-         view,
-         SIGNAL(workSelected(int)),
-         work_detail,
-         SLOT(setWork(int)));
-
-     QObject::connect(
-         view,
-         SIGNAL(workSelected(int)),
-         SLOT(select_work(int)));
-   }
 
    QTabWidget * left_tab_view = new QTabWidget(mTop);
    left_tab_view->addTab(mMixerPanel, "mixer");
