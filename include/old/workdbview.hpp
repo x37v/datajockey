@@ -40,7 +40,7 @@ class WorkDBView : public QWidget {
   protected slots:
     void read_settings();
     //void selectWork(const QModelIndex & index);
-    void setSelection( const QItemSelection & selected);
+    void setSelection(const QItemSelection & selected);
   signals:
     void workSelected(int work);
   private:

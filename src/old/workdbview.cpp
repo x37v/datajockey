@@ -118,7 +118,7 @@ emit(workSelected(work));
 }
 */
 
-void WorkDBView::setSelection( const QItemSelection & selected){
+void WorkDBView::setSelection(const QItemSelection & selected){
   Q_UNUSED(selected);
   QModelIndex index = mTableView->selectionModel()->currentIndex(); 
   index = index.sibling(index.row(), WorkTableModel::idColumn);
