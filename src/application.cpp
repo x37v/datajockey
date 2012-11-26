@@ -304,7 +304,7 @@ Application::Application(int & argc, char ** argv) :
      WorkFilterModel * ftable_model = new WorkFilterModel(mTop, model::db::get());
      QString tag_id;
      tag_id.setNum(model::db::tag::find(tag));
-     ftable_model->set_filter_expression("audio_work_tags.tag_id = " + tag_id);
+     ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
      ftable_model->select();
      db_views << new WorkDBView(ftable_model, mTop);
      db_view_names << tag;
