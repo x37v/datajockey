@@ -35,7 +35,7 @@ namespace {
 
       //grab name and class id
       tag_name = remove_quotes(captures[1]);
-      if (capture_count == 2) {
+      if (capture_count == 2 && !captures[2].isEmpty()) {
         QString tag_class = remove_quotes(captures[2]);
         tag_class_id = db::tag::find_class(tag_class);
       }
@@ -61,6 +61,7 @@ void WorkFilterModel::set_filter_expression(QString expression) {
   QString sql_expr;
   try {
     sql_expr = filter_to_sql(expression);
+    //cout << "sql_expr " << sql_expr.toStdString() << endl;
     db::work::filtered_update(tableName(), sql_expr);
   } catch (std::runtime_error& e) {
     cerr << e.what() << endl;
