@@ -69,6 +69,8 @@ void WorkFilterModel::set_filter_expression(QString expression) {
     emit(filter_expression_changed(expression));
     emit(sql_changed(sql_expr));
   } catch (std::runtime_error& e) {
+    emit(filter_expression_changed(expression));
+    emit(sql_changed(QString()));
     emit(filter_expression_error(QString::fromStdString(e.what())));
     //cerr << e.what() << endl;
   }

@@ -311,12 +311,7 @@ Application::Application(int & argc, char ** argv) :
    tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
 
    foreach(const QString tag, tag_names) {
-     //QString filtered_name = model::db::work::filtered_table_by_tag(tag);
-     //rtable_model = new WorkRelationModel(filtered_name, mTop, model::db::get());
-
      WorkFilterModel * ftable_model = new WorkFilterModel(mTop, model::db::get());
-     QString tag_id;
-     tag_id.setNum(model::db::tag::find(tag));
      FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);
      db_views << filtered_view;
      db_view_names << tag;
@@ -351,6 +346,7 @@ Application::Application(int & argc, char ** argv) :
          filtered_view,
          SLOT(filter_expression_error(QString)));
 
+     //actually set the expression
      ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
    }
 
