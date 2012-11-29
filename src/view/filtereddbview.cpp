@@ -37,7 +37,7 @@ void FilteredDBView::set_filter_expression(QString expression) {
 void FilteredDBView::filter_expression_error(QString expression) {
   QMessageBox::warning(this,
       "invalid filter",
-      "invalid filter expression " + expression);
+      "invalid filter expression: " + expression);
 }
 
 void FilteredDBView::submit_pressed() {
