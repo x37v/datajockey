@@ -11,6 +11,8 @@ FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QW
   QVBoxLayout * layout = new QVBoxLayout(this);
 
   mFilterEditor = new QTextEdit(this);
+  mFilterEditor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
   QPushButton * submit_button = new QPushButton("apply filter", this);
 
   mDBView = new WorkDBView(model, this);
