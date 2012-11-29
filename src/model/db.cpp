@@ -597,7 +597,7 @@ int db::tag::find(const QString& name, int tag_class_id) throw(std::runtime_erro
   query.exec();
   if (query.first())
     return query.value(0).toInt();
-  return -1;
+  throw std::runtime_error("cannot find tag with name " + name.toStdString());
 }
 
 int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
