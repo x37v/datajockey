@@ -48,8 +48,25 @@ namespace {
     return expression;
   }
 
+  const QRegExp bpm_reg(
+      "\\((?:bpm|tempo_median|tempo)\\s*((?:>=|<=|=|>|<)\\s*[\\d\\.]+)\\s*\\)",
+      Qt::CaseInsensitive);
+
+  QString replace_tempo_median(QString expression) throw(std::runtime_error) {
+    QRegExp rx(bpm_reg);
+    rx.setMinimal(true);
+    int pos = 0;
+    while((pos = rx.indexIn(expression, 0)) != -1) {
+      const int len = rx.matchedLength();
+      expression.replace(pos, len, "works.tempo_median " + rx.capturedTexts()[1]);
+    }
+    return expression;
+  }
+
   QString filter_to_sql(QString expression) throw(std::runtime_error) {
-    return replace_tag_expressions(expression);
+    expression = replace_tag_expressions(expression);
+    expression = replace_tempo_median(expression);
+    return expression;
   }
 }
 
@@ -63,6 +80,7 @@ void WorkFilterModel::set_filter_expression(QString expression) {
   mFilterExpression = expression;
   try {
     QString sql_expr = filter_to_sql(expression);
+    //cout << sql_expr.toStdString() << endl;
     db::work::filtered_update(tableName(), sql_expr);
     select();
 
@@ -76,7 +94,7 @@ void WorkFilterModel::set_filter_expression(QString expression) {
   }
 }
 
-bool WorkFilterModel::valid_filter_expression(QString expression) {
+bool WorkFilterModel::valid_filter_expression(QString /* expression */) {
   //XXX implement!!
   return true;
 }
