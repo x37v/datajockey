@@ -15,6 +15,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QDateTime>
+#include <QRegExp>
 #include <iostream>
 
 using std::cout;
@@ -123,7 +124,7 @@ namespace {
     while(query.next()) {
       QString name = query.value(1).toString();
       QString id = query.value(0).toString();
-      work_table_joins << "LEFT JOIN descriptors as `" + name + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
+      work_table_joins << "LEFT JOIN descriptors as `" + name.replace(QRegExp("\\s+"), "_") + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
       work_table_selects << "`" + name + "`.value as `" + name + "`";
     }
   }
