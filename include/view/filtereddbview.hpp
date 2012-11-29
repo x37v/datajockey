@@ -33,8 +33,13 @@ class FilteredDBView : public QWidget {
     FilteredDBView(QAbstractItemModel * model, QWidget *parent = NULL);
   public slots:
     void select_work(int work_id);
+    void set_filter_expression(QString expression);
+    void filter_expression_error(QString expression);
+  protected slots:
+    void submit_pressed();
   signals:
     void work_selected(int work);
+    void filter_expression_changed(QString expression);
   private:
     WorkDBView * mDBView;
     QTextEdit * mFilterEditor;

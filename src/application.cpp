@@ -317,8 +317,6 @@ Application::Application(int & argc, char ** argv) :
      WorkFilterModel * ftable_model = new WorkFilterModel(mTop, model::db::get());
      QString tag_id;
      tag_id.setNum(model::db::tag::find(tag));
-     ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
-     ftable_model->select();
      FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);
      db_views << filtered_view;
      db_view_names << tag;
@@ -334,6 +332,26 @@ Application::Application(int & argc, char ** argv) :
          filtered_view,
          SIGNAL(work_selected(int)),
          SLOT(select_work(int)));
+
+     QObject::connect(
+         filtered_view,
+         SIGNAL(filter_expression_changed(QString)),
+         ftable_model,
+         SLOT(set_filter_expression(QString)));
+
+     QObject::connect(
+         ftable_model,
+         SIGNAL(filter_expression_changed(QString)),
+         filtered_view,
+         SLOT(set_filter_expression(QString)));
+
+     QObject::connect(
+         ftable_model,
+         SIGNAL(filter_expression_error(QString)),
+         filtered_view,
+         SLOT(filter_expression_error(QString)));
+
+     ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
    }
 
    //XXX hack to write settings before quitting, is there a better way?

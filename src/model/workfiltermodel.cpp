@@ -57,14 +57,20 @@ WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) : WorkRelati
 }
 
 void WorkFilterModel::set_filter_expression(QString expression) {
+  if (mFilterExpression == expression)
+    return;
+
   mFilterExpression = expression;
-  QString sql_expr;
   try {
-    sql_expr = filter_to_sql(expression);
-    //cout << "sql_expr " << sql_expr.toStdString() << endl;
+    QString sql_expr = filter_to_sql(expression);
     db::work::filtered_update(tableName(), sql_expr);
+    select();
+
+    emit(filter_expression_changed(expression));
+    emit(sql_changed(sql_expr));
   } catch (std::runtime_error& e) {
-    cerr << e.what() << endl;
+    emit(filter_expression_error(expression));
+    //cerr << e.what() << endl;
   }
 }
 
