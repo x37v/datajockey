@@ -18,6 +18,7 @@
 #include "appmainwindow.hpp"
 #include "workrelationmodel.hpp"
 #include "workfiltermodel.hpp"
+#include "workfiltermodelcollection.hpp"
 #include "filtereddbview.hpp"
 
 
@@ -310,8 +311,11 @@ Application::Application(int & argc, char ** argv) :
    QStringList tag_names;
    tag_names << "aug282012" << "jams" << "halloween" << "minimal_synth";
 
+   WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
+   connect_common_interfaces(mAudioModel, filter_collection);
+
    foreach(const QString tag, tag_names) {
-     WorkFilterModel * ftable_model = new WorkFilterModel(mTop, model::db::get());
+     WorkFilterModel * ftable_model = filter_collection->new_filter_model();
      FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);
      db_views << filtered_view;
      db_view_names << tag;

@@ -11,6 +11,7 @@ class WorkFilterModel : public WorkRelationModel {
 
   public slots:
     void set_filter_expression(QString expression);
+    void set_current_bpm(double bpm);
 
     //validate a filter expression string
     static bool valid_filter_expression(QString expression);
@@ -23,6 +24,7 @@ class WorkFilterModel : public WorkRelationModel {
   private:
     QString mFilterExpression;
     QString mTable;
+    double mCurrentBPM;
 };
 
 #endif

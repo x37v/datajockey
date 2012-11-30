@@ -81,6 +81,7 @@ HEADERS += include/application.hpp \
            include/model/audiomodel.hpp \
            include/model/db.hpp \
            include/model/workfiltermodel.hpp \
+           include/model/workfiltermodelcollection.hpp \
            include/model/workrelationmodel.hpp \
            include/util/audiofiletag.hpp \
            include/util/beatextractor.hpp \
@@ -131,6 +132,7 @@ SOURCES += src/application.cpp \
            src/model/audiomodel.cpp \
            src/model/db.cpp \
            src/model/workfiltermodel.cpp \
+           src/model/workfiltermodelcollection.cpp \
            src/model/workrelationmodel.cpp \
            src/util/audiofiletag.cpp \
            src/util/beatextractor.cpp \

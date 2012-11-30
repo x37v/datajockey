@@ -132,17 +132,21 @@ namespace {
   }
 }
 
-WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) : WorkRelationModel(db::work::filtered_table(), parent, db) {
+WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) :
+  WorkRelationModel(db::work::filtered_table(), parent, db),
+  mCurrentBPM(120.0)
+{
 }
 
 void WorkFilterModel::set_filter_expression(QString expression) {
-  if (mFilterExpression == expression)
-    return;
+  //XXX just for now, should probably have some sort of 'dirty' flag if we care about
+  //current_bpm and other dynamic elements
+  //if (mFilterExpression == expression)
+    //return;
 
   mFilterExpression = expression;
   try {
-    double current_tempo = 100.0; //XXX hardcoded tmp
-    QString sql_expr = filter_to_sql(expression, current_tempo);
+    QString sql_expr = filter_to_sql(expression, mCurrentBPM);
     //cout << sql_expr.toStdString() << endl;
     db::work::filtered_update(tableName(), sql_expr);
     select();
@@ -156,6 +160,8 @@ void WorkFilterModel::set_filter_expression(QString expression) {
     //cerr << e.what() << endl;
   }
 }
+
+void WorkFilterModel::set_current_bpm(double bpm) { mCurrentBPM = bpm; }
 
 bool WorkFilterModel::valid_filter_expression(QString /* expression */) {
   //XXX implement!!
