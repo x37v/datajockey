@@ -1,3 +1,5 @@
+clicks:
+  changing of tempo causes clicks in synched audio.
 DB:
   Case insensitive sort
   Load up the whole table for the work lists, so that we have a good scrollbar and can type to search for anything
