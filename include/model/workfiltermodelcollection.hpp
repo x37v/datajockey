@@ -7,6 +7,7 @@
 #include <QList>
 
 class WorkFilterModel;
+class QTimer;
 
 class WorkFilterModelCollection : public QObject {
   Q_OBJECT
@@ -33,8 +34,14 @@ class WorkFilterModelCollection : public QObject {
     void work_selected(int work);
     void current_bpm_changed(double bpm);
 
+  protected slots:
+    void bpm_send_timeout();
+
   private:
     double mCurrentBPM;
+    double mLastBPM;
+    QTimer * mBPMTimeout;
+
     QList<WorkFilterModel *> mFilterModels;
 };
 

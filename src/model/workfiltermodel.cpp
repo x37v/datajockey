@@ -48,6 +48,8 @@ namespace {
     return expression;
   }
 
+  const QRegExp current_bpm_presense("(?:cbpm|current_tempo|current_bpm)", Qt::CaseInsensitive);
+
   const QRegExp current_bpm_with_mul(
     "\\((?:cbpm|current_tempo|current_bpm)\\s*(\\d+\\.?\\d*%?)\\s*\\)",
       Qt::CaseInsensitive);
@@ -146,25 +148,39 @@ void WorkFilterModel::set_filter_expression(QString expression) {
 
   mFilterExpression = expression;
   try {
-    QString sql_expr = filter_to_sql(expression, mCurrentBPM);
-    //cout << sql_expr.toStdString() << endl;
-    db::work::filtered_update(tableName(), sql_expr);
-    select();
-
+    apply_filter_expression(expression);
     emit(filter_expression_changed(expression));
-    emit(sql_changed(sql_expr));
+    emit(sql_changed(mSQLExpression));
   } catch (std::runtime_error& e) {
     emit(filter_expression_changed(expression));
-    emit(sql_changed(QString()));
+    mSQLExpression = QString();
+    emit(sql_changed(mSQLExpression));
     emit(filter_expression_error(QString::fromStdString(e.what())));
     //cerr << e.what() << endl;
   }
 }
 
-void WorkFilterModel::set_current_bpm(double bpm) { mCurrentBPM = bpm; }
+void WorkFilterModel::set_current_bpm(double bpm) {
+  mCurrentBPM = bpm;
+  if (mFilterExpression.isEmpty() || !mFilterExpression.contains(current_bpm_presense))
+    return;
+
+  //XXX check to see if we actually have current_bpm in our expression
+  try {
+    apply_filter_expression(mFilterExpression);
+  } catch (std::runtime_error& e) {
+    //XXX
+  }
+}
 
 bool WorkFilterModel::valid_filter_expression(QString /* expression */) {
   //XXX implement!!
   return true;
 }
 
+void WorkFilterModel::apply_filter_expression(QString expression) throw(std::runtime_error) {
+  QString sql_expr = filter_to_sql(expression, mCurrentBPM);
+  db::work::filtered_update(tableName(), sql_expr);
+  mSQLExpression = sql_expr;
+  select();
+}

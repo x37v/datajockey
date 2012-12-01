@@ -2,6 +2,7 @@
 #define WORK_FILTER_MODEL_HPP
 
 #include "workrelationmodel.hpp"
+#include <stdexcept>
 
 class WorkFilterModel : public WorkRelationModel {
   Q_OBJECT
@@ -22,7 +23,9 @@ class WorkFilterModel : public WorkRelationModel {
     void sql_changed(QString sql_expression);
 
   private:
+    void apply_filter_expression(QString expression) throw(std::runtime_error);
     QString mFilterExpression;
+    QString mSQLExpression;
     QString mTable;
     double mCurrentBPM;
 };

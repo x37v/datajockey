@@ -1,13 +1,23 @@
 #include "workfiltermodelcollection.hpp"
 #include "workfiltermodel.hpp"
 #include "db.hpp"
+#include <QTimer>
 
 using namespace dj;
 
+namespace {
+  const int bpm_timer_timeout_ms = 200;
+}
+
 WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatabase db) :
   QObject(parent),
-  mCurrentBPM(120.0)
+  mCurrentBPM(120.0),
+  mLastBPM(0.0)
 {
+  //timeout timer
+  mBPMTimeout = new QTimer(this);
+  mBPMTimeout->setSingleShot(true);
+  QObject::connect(mBPMTimeout, SIGNAL(timeout()), SLOT(bpm_send_timeout()));
 }
 
 WorkFilterModel * WorkFilterModelCollection::new_filter_model() {
@@ -49,9 +59,16 @@ void WorkFilterModelCollection::master_set(QString name, double value){
     if (mCurrentBPM == value)
       return;
     mCurrentBPM = value;
-    emit(current_bpm_changed(mCurrentBPM));
+    mBPMTimeout->start(bpm_timer_timeout_ms);
   }
 }
 
 void WorkFilterModelCollection::select_work(int work_id) { emit(work_selected(work_id)); }
+
+void WorkFilterModelCollection::bpm_send_timeout() {
+  if (mCurrentBPM != mLastBPM) {
+    mLastBPM = mCurrentBPM;
+    emit(current_bpm_changed(mCurrentBPM));
+  }
+}
 
