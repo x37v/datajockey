@@ -60,7 +60,13 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   mTableView = new QTableView(this);
   mTableView->setSortingEnabled(true);
   mTableView->setModel(model);
-  mTableView->setColumnHidden(0, true);
+
+  //hide the id columns
+  QList<int> id_columns;
+  dj::model::db::work::temp_table_id_columns(id_columns);
+  foreach (int id_col, id_columns)
+    mTableView->setColumnHidden(id_col, true);
+
   mTableView->horizontalHeader()->setMovable(true);
   //mTableView->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   mTableView->verticalHeader()->setVisible(false);

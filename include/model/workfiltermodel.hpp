@@ -1,7 +1,6 @@
 #ifndef WORK_FILTER_MODEL_HPP
 #define WORK_FILTER_MODEL_HPP
 
-#include "workrelationmodel.hpp"
 #include <stdexcept>
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>

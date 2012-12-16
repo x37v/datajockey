@@ -39,6 +39,7 @@ namespace dj {
         QString filtered_table_by_tag(QString tag, QString tag_class = QString()) throw(std::runtime_error);
 
         int temp_table_id_column(QString id_name);
+        void temp_table_id_columns(QList<int>& ids);
 
         int create(
             const QHash<QString, QVariant>& attributes,

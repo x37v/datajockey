@@ -244,6 +244,5 @@ void WorkFilterModel::apply_filter_expression(QString expression) throw(std::run
 
   if (mQueryModel->lastError().isValid())
     qDebug() << mQueryModel->lastError();
-  //select();
 }
 

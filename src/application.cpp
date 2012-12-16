@@ -16,7 +16,6 @@
 #include "config.hpp"
 #include "annotation.hpp"
 #include "appmainwindow.hpp"
-#include "workrelationmodel.hpp"
 #include "workfiltermodel.hpp"
 #include "workfiltermodelcollection.hpp"
 #include "filtereddbview.hpp"
@@ -27,8 +26,7 @@
 #include <QWidget>
 #include <QSplitter>
 #include <QTabWidget>
-#include <QSqlRelationalTableModel>
-#include <QSqlRelation>
+#include <QSqlTableModel>
 #include <QDebug>
 #include <QSettings>
 #include <stdexcept>
@@ -288,7 +286,8 @@ Application::Application(int & argc, char ** argv) :
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
-   WorkRelationModel * rtable_model = new WorkRelationModel("works", mTop, model::db::get());
+   QSqlTableModel * rtable_model = new QSqlTableModel(mTop, model::db::get());
+   rtable_model->setTable("works");
    rtable_model->select();
 
    QList<QWidget *> db_views;

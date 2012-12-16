@@ -81,6 +81,7 @@ namespace {
   QStringList work_table_selects;
   QStringList work_table_joins;
 
+  int cWorkIdColumn = 0;
   int cWorkArtistIdColumn = 0;
   int cWorkAlbumIdColumn = 0;
   int cWorkAudioFileTypeIdColumn = 0;
@@ -114,8 +115,15 @@ namespace {
     work_table_joins << "audio_works";
 
     work_table_selects << "albums.id AS album_id";
+    work_table_selects << "albums.name AS album";
     work_table_selects << "album_audio_works.track AS track";
     work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
+
+    work_table_selects << "artists.name AS artist";
+    work_table_joins << "INNER JOIN artists ON artists.id = audio_works.artist_id";
+
+    work_table_selects << "audio_file_types.name AS file_type";
+    work_table_joins << "INNER JOIN audio_file_types ON audio_file_types.id = audio_works.audio_file_type_id";
 
     //build up descriptor joins
     MySqlQuery query(cDB);
@@ -174,6 +182,7 @@ namespace {
 
     QSqlTableModel tab;
     tab.setTable("works");
+    cWorkIdColumn = tab.fieldIndex("id");
     cWorkArtistIdColumn = tab.fieldIndex("artist_id");
     cWorkAlbumIdColumn = tab.fieldIndex("album_id");
     cWorkAudioFileTypeIdColumn = tab.fieldIndex("audio_file_type_id");
@@ -340,7 +349,9 @@ QString db::work::filtered_table_by_tag(QString tag, QString tag_class) throw(st
 }
 
 int db::work::temp_table_id_column(QString id_name) {
-  if (id_name == "artist")
+  if (id_name == "id")
+    return cWorkIdColumn;
+  else if (id_name == "artist")
     return cWorkArtistIdColumn;
   else if (id_name == "album")
     return cWorkAlbumIdColumn;
@@ -349,6 +360,13 @@ int db::work::temp_table_id_column(QString id_name) {
   else if (id_name == "audio_file_seconds")
     return cWorkSongLengthColumn;
   return 0;
+}
+
+void db::work::temp_table_id_columns(QList<int>& ids) {
+  ids << cWorkIdColumn;
+  ids << cWorkArtistIdColumn;
+  ids << cWorkAlbumIdColumn;
+  ids << cWorkAudioFileTypeIdColumn;
 }
 
 int db::work::create(
