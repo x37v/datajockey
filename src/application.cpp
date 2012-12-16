@@ -351,7 +351,7 @@ Application::Application(int & argc, char ** argv) :
          SLOT(filter_expression_error(QString)));
 
      //actually set the expression
-     ftable_model->set_filter_expression("(tag \"" + tag + "\",mix)");
+     ftable_model->set_filter_expression("(tag \"mix\":\"" + tag + "\")");
    }
 
    //XXX hack to write settings before quitting, is there a better way?

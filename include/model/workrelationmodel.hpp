@@ -9,6 +9,7 @@ class WorkRelationModel : public QSqlRelationalTableModel {
   Q_OBJECT
   public:
     WorkRelationModel(const QString& table_name, QObject * parent = NULL, QSqlDatabase db = QSqlDatabase());
+    void setup_relations();
 };
 
 #endif

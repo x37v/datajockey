@@ -288,15 +288,21 @@ bool db::find_artist_and_title_by_id(
   return true;
 }
 
+QString db::work::filtered_table_query(const QString where_clause) throw(std::runtime_error) {
+  QString query_string = QString("SELECT DISTINCT works.* ") +
+    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
+  if (!where_clause.isEmpty())
+    query_string += " WHERE " + where_clause;
+  query_string += " ORDER BY album_id, track";
+  return query_string;
+}
+
 QString db::work::filtered_table(const QString where_clause) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   QString table_name("filtered_works_" + QString::number(cFilteredWorkTableCount++));
 
-  QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT DISTINCT works.* " +
-    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
-  if (!where_clause.isEmpty())
-    query_string += "WHERE " + where_clause;
-  query_string += " ORDER BY album_id, track";
+  QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS " +
+    filtered_table_query(where_clause);
 
   MySqlQuery query(get());
   query.prepare(query_string);

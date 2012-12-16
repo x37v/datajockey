@@ -3,8 +3,10 @@
 
 #include "workrelationmodel.hpp"
 #include <stdexcept>
+#include <QSqlQueryModel>
+#include <QSortFilterProxyModel>
 
-class WorkFilterModel : public WorkRelationModel {
+class WorkFilterModel : public QSortFilterProxyModel {
   Q_OBJECT
 
   public:
@@ -28,6 +30,7 @@ class WorkFilterModel : public WorkRelationModel {
     QString mSQLExpression;
     QString mTable;
     double mCurrentBPM;
+    QSqlQueryModel * mQueryModel;
 };
 
 #endif

@@ -3,6 +3,9 @@
 #include <stdexcept>
 #include <QRegExp>
 #include <QStringList>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QtDebug>
 #include <iostream>
 
 using std::cout;
@@ -12,37 +15,74 @@ using std::endl;
 using namespace dj::model;
 
 namespace {
-  QString remove_quotes(QString input) {
-    return input.remove(QRegExp("^(?:\"|\')")).remove(QRegExp("(?:\"|\')$"));
+  //remove leading & trailing whitespace, and surrounding quotes
+  QString cleanup_string(QString input) {
+    input.replace(QRegExp("^\\s*"), QString::null);
+    input.replace(QRegExp("\\s*$"), QString::null);
+    input.replace(QRegExp("^\'(.+)\'$"), "\\1");
+    input.replace(QRegExp("^\"(.+)\"$"), "\\1");
+    input.replace(QRegExp("^\\s*"), QString::null);
+    input.replace(QRegExp("\\s*$"), QString::null);
+    return input;
   }
 
+  //(tag foo[,bar[,baz:soda..]])
   const QRegExp tag_reg(
-      "\\(tag\\s+((?:\"[^\"]*\")|(?:\'[^\']*\')|\\w+)\\s*(?:,\\s*((?:\"[^\"]*\")|(?:\'[^\']*\')|\\w+)){0,1}\\s*\\)",
+      "\\(tag\\s+((?:[^\\(\\),]+)(?:\\s*,(?:[^\\(\\),]+))*)\\s*\\)",
       Qt::CaseInsensitive);
 
-  //(tag name[,class]) -> (audio_work_tags.tag_id = get_id)
+  //(tag [class:]name) -> (audio_work_tags.tag_id = tag_id)
+  //(tag [class1:]name1,[class2:]name2,..) -> (audio_work_tags.tag_id in (tag_id1, tag_id2, tag_id3..))
   QString replace_tag_expressions(QString expression) throw(std::runtime_error) {
     QRegExp rx(tag_reg);
     rx.setMinimal(true);
 
     int pos = 0;
-    while((pos = rx.indexIn(expression, 0)) != -1) {
-      QString tag_name;
-      const int len = rx.matchedLength();
-      const int capture_count = rx.captureCount();
-      int tag_class_id = -1;
-      QStringList captures = rx.capturedTexts();
+    while ((pos = rx.indexIn(expression, 0)) != -1) {
+      const int tag_expr_len = rx.matchedLength();
+      QStringList tag_expressions = rx.capturedTexts()[1].split(",");
 
-      //grab name and class id
-      tag_name = remove_quotes(captures[1]);
-      if (capture_count == 2 && !captures[2].isEmpty()) {
-        QString tag_class = remove_quotes(captures[2]);
-        tag_class_id = db::tag::find_class(tag_class);
+      //find all the tag ids and fill up the tag_ids list
+      QStringList tag_ids;
+      foreach (QString tag_expr, tag_expressions) {
+        QString tag_name;
+        int tag_class_id = -1;
+
+        //two formats name, or class:name
+        QStringList sub_expr = tag_expr.split(":");
+        switch (sub_expr.length()) {
+          case 1:
+            tag_name = cleanup_string(sub_expr[0]);
+            break;
+          case 2:
+            {
+              QString tag_class = cleanup_string(sub_expr[0]);
+              tag_name = cleanup_string(sub_expr[1]);
+              try {
+                tag_class_id = db::tag::find_class(tag_class);
+              } catch (std::runtime_error& e) {
+                throw std::runtime_error("cannot find tag class: " + tag_class.toStdString() + " for expression: " + tag_expr.toStdString());
+              }
+            }
+            break;
+          default:
+            throw(std::runtime_error("invalid tag expression: " + tag_expr.toStdString()));
+        }
+
+        QString tag_id;
+        try {
+          tag_id.setNum(db::tag::find(tag_name, tag_class_id));
+        } catch (std::runtime_error& e) {
+          throw (std::runtime_error("cannot find tag that matches expression: " + tag_expr.toStdString()));
+        }
+        tag_ids << tag_id;
       }
 
-      QString tag_id;
-      tag_id.setNum(db::tag::find(tag_name, tag_class_id));
-      expression.replace(pos, len, "audio_work_tags.tag_id = " + tag_id);
+      //do the replacement
+      if (tag_ids.length() == 1) 
+        expression.replace(pos, tag_expr_len, "audio_work_tags.tag_id = " + tag_ids[0]);
+      else
+        expression.replace(pos, tag_expr_len, "audio_work_tags.tag_id IN (" + tag_ids.join(", ") + ")");
     }
 
     return expression;
@@ -128,16 +168,33 @@ namespace {
   }
 
   QString filter_to_sql(QString expression, double current_tempo) throw(std::runtime_error) {
+    QString original_expr = expression;
+
+    //make sure that there are spaces before and after 'and' and 'or' when they are between parens
+    QRegExp and_or_paren("\\)\\s*(and|or)\\s*\\(",
+      Qt::CaseInsensitive);
+    and_or_paren.setMinimal(true);
+    expression.replace(and_or_paren, ") \\1 (");
+
     expression = replace_tag_expressions(expression);
     expression = replace_tempo_median(expression, current_tempo);
+
+    //check parenthesis matching
+    if (expression.count('(') != expression.count(')'))
+      throw std::runtime_error("unmatched parenthesis in expression: " + original_expr.toStdString());
+
     return expression;
   }
 }
 
 WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) :
-  WorkRelationModel(db::work::filtered_table(), parent, db),
+  QSortFilterProxyModel(parent),
   mCurrentBPM(120.0)
 {
+  QString query_str = db::work::filtered_table_query();
+  mQueryModel = new QSqlQueryModel(this);
+  mQueryModel->setQuery(query_str, db);
+  setSourceModel(mQueryModel);
 }
 
 void WorkFilterModel::set_filter_expression(QString expression) {
@@ -180,7 +237,13 @@ bool WorkFilterModel::valid_filter_expression(QString /* expression */) {
 
 void WorkFilterModel::apply_filter_expression(QString expression) throw(std::runtime_error) {
   QString sql_expr = filter_to_sql(expression, mCurrentBPM);
-  db::work::filtered_update(tableName(), sql_expr);
   mSQLExpression = sql_expr;
-  select();
+
+  QString query_str = db::work::filtered_table_query(mSQLExpression);
+  mQueryModel->setQuery(query_str);
+
+  if (mQueryModel->lastError().isValid())
+    qDebug() << mQueryModel->lastError();
+  //select();
 }
+

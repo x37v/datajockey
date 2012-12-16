@@ -31,6 +31,7 @@ namespace dj {
           QString& work_title) throw(std::runtime_error);
 
       namespace work {
+        QString filtered_table_query(const QString where_clause = QString()) throw(std::runtime_error);
         QString filtered_table(const QString where_clause = QString()) throw(std::runtime_error);
         void filtered_update(const QString& table_name, const QString where_clause = QString()) throw(std::runtime_error);
         QString filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error);
