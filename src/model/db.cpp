@@ -628,6 +628,8 @@ void db::work::set_played(int work_id) {
   }
 }
 
+int db::work::current_session() { return cCurrentSession; }
+
 int db::tag::find_class(const QString& name) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());

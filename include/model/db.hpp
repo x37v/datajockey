@@ -62,6 +62,8 @@ namespace dj {
 
         //indicate that this work has been played in this session, at time now
         void set_played(int work_id);
+
+        int current_session();
       }
 
       namespace tag {
