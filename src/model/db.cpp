@@ -46,6 +46,15 @@ namespace {
       "(:name, :year, :audio_file_type_id, :audio_file_location, :audio_file_seconds, :audio_file_channels, :artist_id, :created_at, :updated_at)\n"
       );
 
+  const QString cWorkHistoryInsert(
+      "INSERT INTO audio_work_histories\n"
+      "(audio_work_id, session_id, played_at)\n"
+      "VALUES\n"
+      "(:audio_work_id, :session_id, :played_at)"
+      );
+
+  const QString cSessionQuery("SELECT distinct session_id FROM audio_work_histories ORDER BY session_id DESC");
+
   const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
 
   const QString cArtistFind("SELECT id FROM artists where name = :name");
@@ -88,6 +97,8 @@ namespace {
   int cWorkSongLengthColumn = 0;
 
   int cFilteredWorkTableCount = 0;
+
+  int cCurrentSession = 0;
 
   //this class simply wraps the prepare and exec methods of QSqlQuery so it throws exceptions on failures
   class MySqlQuery : public QSqlQuery {
@@ -238,6 +249,15 @@ void db::setup(
     build_work_table();
   } catch (std::runtime_error e) {
     qFatal("couldn't build temporary work table, exception thrown with following message: %s", e.what());
+  }
+
+  //find the current session
+  try {
+    MySqlQuery query(get());
+    query.prepare(cSessionQuery);
+    if(query.exec() && query.first())
+      cCurrentSession = query.value(0).toInt() + 1;
+  } catch (std::runtime_error e) {
   }
 }
 
@@ -590,6 +610,22 @@ void db::work::tag(
   query.bindValue(":tag_id", tag_id);
   query.bindValue(":audio_work_id", work_id);
   query.exec();
+}
+
+void db::work::set_played(int work_id) {
+  QMutexLocker lock(&mMutex);
+  MySqlQuery query(get());
+
+  try {
+    //find the tag class named
+    query.prepare(cWorkHistoryInsert);
+    query.bindValue(":work_id", work_id);
+    query.bindValue(":session_id", cCurrentSession);
+    query.bindValue(":played_at", QDateTime::currentDateTime());
+    query.exec();
+  } catch (std::runtime_error e) {
+    //XXX what's up?
+  }
 }
 
 int db::tag::find_class(const QString& name) throw(std::runtime_error) {

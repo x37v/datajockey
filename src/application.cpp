@@ -19,7 +19,7 @@
 #include "workfiltermodel.hpp"
 #include "workfiltermodelcollection.hpp"
 #include "filtereddbview.hpp"
-
+#include "history_manager.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -104,6 +104,16 @@ Application::Application(int & argc, char ** argv) :
 
    mMIDIMapper = new controller::MIDIMapper(mTop);
    mOSCSender = new controller::OSCSender(mTop);
+   mHistoryManger = new controller::HistoryManager(mTop);
+
+   QObject::connect(mAudioModel,
+         SIGNAL(player_value_changed(int, QString, bool)),
+         mHistoryManger,
+         SLOT(player_set(int, QString, bool)));
+   QObject::connect(mAudioModel,
+         SIGNAL(player_value_changed(int, QString, int)),
+         mHistoryManger,
+         SLOT(player_set(int, QString, int)));
 
    setStyle("plastique");
 

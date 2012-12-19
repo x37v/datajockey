@@ -74,6 +74,7 @@ HEADERS += include/application.hpp \
            include/audio/timepoint.hpp \
            include/audio/transport.hpp \
            include/audio/types.hpp \
+           include/controller/history_manager.hpp \
            include/controller/loaderthread.hpp \
            include/controller/midimapper.hpp \
            include/controller/oscreceiver.hpp \
@@ -124,6 +125,7 @@ SOURCES += src/application.cpp \
            src/audio/stretcherrate.cpp \
            src/audio/timepoint.cpp \
            src/audio/transport.cpp \
+           src/controller/history_manager.cpp \
            src/controller/loaderthread.cpp \
            src/controller/midimapper.cpp \
            src/controller/oscreceiver.cpp \
