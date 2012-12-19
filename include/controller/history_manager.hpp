@@ -10,8 +10,8 @@ namespace dj {
       Q_OBJECT
       public:
         HistoryManager(QObject * parent = NULL);
-        public slots:
-          void player_set(int player_index, QString name, int value);
+      public slots:
+        void player_set(int player_index, QString name, int value);
         void player_set(int player_index, QString name, bool value);
       private:
         QHash<int,int> mLoadedWorks;
