@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QHash>
 
+class QTimer;
+
 namespace dj {
   namespace controller {
     class HistoryManager : public QObject {
@@ -13,10 +15,13 @@ namespace dj {
       public slots:
         void player_set(int player_index, QString name, int value);
         void player_set(int player_index, QString name, bool value);
+      protected slots:
+        void log_work(int player_index);
       signals:
         void updated_history();
       private:
-        QHash<int,int> mLoadedWorks;
+        QList<int> mLoadedWorks;
+        QList<QTimer *> mTimeouts;
         QHash<int,bool> mLoggedWorks;
     };
   }
