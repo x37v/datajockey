@@ -13,6 +13,8 @@ namespace dj {
       public slots:
         void player_set(int player_index, QString name, int value);
         void player_set(int player_index, QString name, bool value);
+      signals:
+        void updated_history();
       private:
         QHash<int,int> mLoadedWorks;
         QHash<int,bool> mLoggedWorks;

@@ -25,6 +25,7 @@ void HistoryManager::player_set(int player_index, QString name, bool value) {
     if (!mLoggedWorks.contains(*it)) {
       db::work::set_played(*it);
       mLoggedWorks[*it] = true;
+      emit(updated_history());
     }
   }
 }
