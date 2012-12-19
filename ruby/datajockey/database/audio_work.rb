@@ -57,6 +57,8 @@ module Datajockey
 
     has_many :descriptor_types, :through => :descriptors
 
+    has_many :audio_work_histories
+
     has_many :tags, :through => :audio_work_tags, :extend => AudioWorkTagsAssociationExtension
 =begin
     #XXX this below doesn't work when we include AudioWork into the Datajockey module, so I
