@@ -176,7 +176,7 @@ namespace {
     query.exec();
 
     //prepare the insert
-    query_string = "INSERT INTO " + table_name + " SELECT DISTINCT works.* " +
+    query_string = "INSERT INTO " + table_name + " SELECT DISTINCT works.*" +
       "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
     if (!where_clause.isEmpty())
       query_string += (" WHERE " + where_clause);
@@ -255,8 +255,10 @@ void db::setup(
   try {
     MySqlQuery query(get());
     query.prepare(cSessionQuery);
-    if(query.exec() && query.first())
+    if(query.exec() && query.first()) {
       cCurrentSession = query.value(0).toInt() + 1;
+      cout << "current session: " << cCurrentSession << endl;
+    }
   } catch (std::runtime_error e) {
   }
 }
@@ -317,11 +319,17 @@ bool db::find_artist_and_title_by_id(
   return true;
 }
 
-QString db::work::filtered_table_query(const QString where_clause) throw(std::runtime_error) {
-  QString query_string = QString("SELECT DISTINCT works.* ") +
-    "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
+QString db::work::filtered_table_query(const QString where_clause, const QString session_clause) throw(std::runtime_error) {
+  //COALESCE fills a 0 in in case of NULL
+  QString query_string = QString("SELECT DISTINCT works.*, COALESCE(MAX(audio_work_histories.session_id), 0) AS session_id, audio_work_histories.played_at AS played_at") +
+    " FROM works" +
+    " LEFT JOIN audio_work_histories ON works.id = audio_work_histories.audio_work_id" +
+    " LEFT JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
   if (!where_clause.isEmpty())
     query_string += " WHERE " + where_clause;
+  query_string += " GROUP BY works.id";
+  if (!session_clause.isEmpty())
+    query_string += " HAVING COALESCE(MAX(audio_work_histories.session_id), 0) " + session_clause;
   query_string += " ORDER BY album_id, track";
   return query_string;
 }

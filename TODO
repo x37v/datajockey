@@ -1,3 +1,5 @@
+session filtering:
+  make it configurable
 clicks:
   changing of tempo causes clicks in synched audio.
 DB:

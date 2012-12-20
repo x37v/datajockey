@@ -239,7 +239,11 @@ void WorkFilterModel::apply_filter_expression(QString expression) throw(std::run
   QString sql_expr = filter_to_sql(expression, mCurrentBPM);
   mSQLExpression = sql_expr;
 
-  QString query_str = db::work::filtered_table_query(mSQLExpression);
+  //XXX hack, remove stuff from this session
+  QString session_id;
+  session_id.setNum(db::work::current_session());
+
+  QString query_str = db::work::filtered_table_query(mSQLExpression, "!= " + session_id);
   mQueryModel->setQuery(query_str);
 
   if (mQueryModel->lastError().isValid())
