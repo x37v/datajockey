@@ -30,9 +30,12 @@ class WorkFilterModelCollection : public QObject {
 
     void select_work(int work_id); //just a relay
 
+    void update_history(); //just a relay
+
   signals:
     void work_selected(int work);
     void current_bpm_changed(double bpm);
+    void history_updated();
 
   protected slots:
     void bpm_send_timeout();

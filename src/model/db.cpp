@@ -255,10 +255,8 @@ void db::setup(
   try {
     MySqlQuery query(get());
     query.prepare(cSessionQuery);
-    if(query.exec() && query.first()) {
+    if(query.exec() && query.first())
       cCurrentSession = query.value(0).toInt() + 1;
-      cout << "current session: " << cCurrentSession << endl;
-    }
   } catch (std::runtime_error e) {
   }
 }

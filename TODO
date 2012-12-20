@@ -1,5 +1,6 @@
 session filtering:
   make it configurable
+  actually, just change coloring in display based on session id, don't filter?
 clicks:
   changing of tempo causes clicks in synched audio.
 DB:

@@ -222,7 +222,16 @@ void WorkFilterModel::set_current_bpm(double bpm) {
   if (mFilterExpression.isEmpty() || !mFilterExpression.contains(current_bpm_presense))
     return;
 
-  //XXX check to see if we actually have current_bpm in our expression
+  try {
+    apply_filter_expression(mFilterExpression);
+  } catch (std::runtime_error& e) {
+    //XXX
+  }
+}
+
+void WorkFilterModel::update_history() {
+  if (mFilterExpression.isEmpty())
+    return;
   try {
     apply_filter_expression(mFilterExpression);
   } catch (std::runtime_error& e) {

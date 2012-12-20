@@ -323,6 +323,12 @@ Application::Application(int & argc, char ** argv) :
    WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
    connect_common_interfaces(mAudioModel, filter_collection);
 
+   QObject::connect(
+       mHistoryManger,
+       SIGNAL(updated_history()),
+       filter_collection,
+       SLOT(update_history()));
+
    foreach(const QString tag, tag_names) {
      WorkFilterModel * ftable_model = filter_collection->new_filter_model();
      FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);

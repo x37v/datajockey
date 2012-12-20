@@ -14,6 +14,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
   public slots:
     void set_filter_expression(QString expression);
     void set_current_bpm(double bpm);
+    void update_history();
 
     //validate a filter expression string
     static bool valid_filter_expression(QString expression);
