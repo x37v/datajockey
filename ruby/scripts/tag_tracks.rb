@@ -27,18 +27,30 @@ Datajockey::connect
 
 include Datajockey
 
-tag_name = 'halloween'
+file_location = ARGV[1]
 
-t = Tag.where(:name => tag_name)
+tag_name = ARGV[0]
+
+puts "tagging files in #{file_location} with tag '#{tag_name}' continue?"
+c = STDIN.gets.chomp.to_s
+exit unless c =~ /y/
+
+puts "doing it"
+
+files = File.readlines(file_location).collect { |f| f.chomp }
+
+c = TagClass.where(:name => 'mix').first
+t = Tag.where(:name => tag_name, :tag_class_id => c.id).first
+
 unless t
-  c = TagClass.where(:name => 'mix').first
+  puts "creating tag #{tag_name}"
   t = Tag.create(:name => tag_name, :tag_class => c)
   t.save
 end
 
 #t2 = Tag.where(:name => 'aug282012').first
 
-ARGV.each do |f|
+files.each do |f|
   next if f =~ /\#/
   f = f.sub("media_drive", "x")
   w = AudioWork.where(:audio_file_location => f).first
@@ -52,3 +64,5 @@ ARGV.each do |f|
     puts "#{f} not found in db"
   end
 end
+
+puts "done!"
