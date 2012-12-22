@@ -229,11 +229,13 @@ void WorkFilterModel::set_current_bpm(double bpm) {
   }
 }
 
-void WorkFilterModel::update_history() {
+void WorkFilterModel::update_history(int work_id, int session_id, QDateTime played_at) {
   if (mFilterExpression.isEmpty())
     return;
   try {
     apply_filter_expression(mFilterExpression);
+    //XXX QSqlQueryModel is read only, we can subclass it, make it read write, the we can update it
+    //mQueryModel->query();
   } catch (std::runtime_error& e) {
     //XXX
   }

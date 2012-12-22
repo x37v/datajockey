@@ -325,9 +325,9 @@ Application::Application(int & argc, char ** argv) :
 
    QObject::connect(
        mHistoryManger,
-       SIGNAL(updated_history()),
+       SIGNAL(updated_history(int, int, QDateTime)),
        filter_collection,
-       SLOT(update_history()));
+       SLOT(update_history(int, int, QDateTime)));
 
    foreach(const QString tag, tag_names) {
      WorkFilterModel * ftable_model = filter_collection->new_filter_model();

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QDateTime>
 
 class QTimer;
 
@@ -18,7 +19,7 @@ namespace dj {
       protected slots:
         void log_work(int player_index);
       signals:
-        void updated_history();
+        void updated_history(int work_id, int session_id, QDateTime played_at);
       private:
         QList<int> mLoadedWorks;
         QList<QTimer *> mTimeouts;

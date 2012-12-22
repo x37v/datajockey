@@ -4,7 +4,7 @@
 #include <QTimer>
 #include <QSignalMapper>
 
-#define LOG_DELAY_MS 5000
+#define LOG_DELAY_S 5
 
 using namespace dj::model;
 using namespace dj::controller;
@@ -34,7 +34,7 @@ void HistoryManager::player_set(int player_index, QString name, int value) {
 void HistoryManager::player_set(int player_index, QString name, bool value) {
   if (name == "audible") {
     if (value)
-      mTimeouts[player_index]->start(LOG_DELAY_MS);
+      mTimeouts[player_index]->start(LOG_DELAY_S * 1000);
     else
       mTimeouts[player_index]->stop();
   }
@@ -45,10 +45,11 @@ void HistoryManager::log_work(int player_index) {
   if (work < 0)
     return;
 
-  //only log the work once
+  //XXX only log the work once
   if (!mLoggedWorks.contains(work)) {
-    db::work::set_played(work);
+    QDateTime time = QDateTime::currentDateTime().addSecs(-LOG_DELAY_S);
+    db::work::set_played(work, db::work::current_session(), time);
     mLoggedWorks[work] = true;
-    emit(updated_history());
+    emit(updated_history(work, db::work::current_session(), time));
   }
 }

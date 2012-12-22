@@ -26,7 +26,7 @@ WorkFilterModel * WorkFilterModelCollection::new_filter_model() {
   m->set_current_bpm(mCurrentBPM);
 
   QObject::connect(this, SIGNAL(current_bpm_changed(double)), m, SLOT(set_current_bpm(double)));
-  QObject::connect(this, SIGNAL(history_updated()), m, SLOT(update_history()));
+  QObject::connect(this, SIGNAL(updated_history(int, int, QDateTime)), m, SLOT(update_history(int, int, QDateTime)));
   return m;
 }
 
@@ -65,7 +65,9 @@ void WorkFilterModelCollection::master_set(QString name, double value){
 }
 
 void WorkFilterModelCollection::select_work(int work_id) { emit(work_selected(work_id)); }
-void WorkFilterModelCollection::update_history() { emit(history_updated()); }
+void WorkFilterModelCollection::update_history(int work_id, int session_id, QDateTime played_at) {
+  emit(updated_history(work_id, session_id, played_at));
+}
 
 void WorkFilterModelCollection::bpm_send_timeout() {
   if (mCurrentBPM != mLastBPM) {

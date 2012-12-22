@@ -54,6 +54,7 @@ namespace {
       );
 
   const QString cSessionQuery("SELECT distinct session_id FROM audio_work_histories ORDER BY session_id DESC");
+  const QString cWorksSessionUpdate("UPDATE works SET session_id = :session_id, last_played_at = :played_at WHERE id = :work_id");
 
   const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
 
@@ -321,15 +322,11 @@ bool db::find_artist_and_title_by_id(
 
 QString db::work::filtered_table_query(const QString where_clause, const QString session_clause) throw(std::runtime_error) {
   //COALESCE fills a 0 in in case of NULL
-  QString query_string = QString("SELECT DISTINCT works.*, COALESCE(MAX(audio_work_histories.session_id), 0) AS session_id, audio_work_histories.played_at AS played_at") +
+  QString query_string = QString("SELECT DISTINCT works.*") +
     " FROM works" +
-    " LEFT JOIN audio_work_histories ON works.id = audio_work_histories.audio_work_id" +
     " LEFT JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
   if (!where_clause.isEmpty())
     query_string += " WHERE " + where_clause;
-  query_string += " GROUP BY works.id";
-  if (!session_clause.isEmpty())
-    query_string += " HAVING COALESCE(MAX(audio_work_histories.session_id), 0) " + session_clause;
   query_string += " ORDER BY album_id, track";
   return query_string;
 }
@@ -620,19 +617,29 @@ void db::work::tag(
   query.exec();
 }
 
-void db::work::set_played(int work_id) {
+void db::work::set_played(int work_id, int session_id, QDateTime time) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   try {
-    //find the tag class named
     query.prepare(cWorkHistoryInsert);
     query.bindValue(":work_id", work_id);
-    query.bindValue(":session_id", cCurrentSession);
-    query.bindValue(":played_at", QDateTime::currentDateTime());
+    query.bindValue(":session_id", session_id);
+    query.bindValue(":played_at", time);
     query.exec();
   } catch (std::runtime_error e) {
     //XXX what's up?
+  }
+
+  try {
+    //XXX hack.. updating temp table
+    query.prepare(cWorksSessionUpdate);
+    query.bindValue(":work_id", work_id);
+    query.bindValue(":session_id", session_id);
+    query.bindValue(":played_at", time);
+    query.exec();
+  } catch (std::runtime_error e) {
+    cerr << "failed to update temp work table" << endl;
   }
 }
 

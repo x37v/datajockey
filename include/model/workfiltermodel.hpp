@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
+#include <QDateTime>
 
 class WorkFilterModel : public QSortFilterProxyModel {
   Q_OBJECT
@@ -14,7 +15,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
   public slots:
     void set_filter_expression(QString expression);
     void set_current_bpm(double bpm);
-    void update_history();
+    void update_history(int work_id, int session_id, QDateTime played_at);
 
     //validate a filter expression string
     static bool valid_filter_expression(QString expression);

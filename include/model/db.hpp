@@ -60,8 +60,8 @@ namespace dj {
             const QString& tag_class,
             const QString& tag_value) throw(std::runtime_error);
 
-        //indicate that this work has been played in this session, at time now
-        void set_played(int work_id);
+        //indicate that this work has been played in this session, at time given
+        void set_played(int work_id, int session_id, QDateTime time);
 
         int current_session();
       }
