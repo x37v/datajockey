@@ -120,21 +120,22 @@ namespace {
   void create_worktable_selects_and_joins() throw (std::runtime_error) {
     QMutexLocker lock(&mMutex);
 
-    work_table_selects << "audio_works.id, audio_works.name, audio_works.artist_id, audio_works.year,"
-      " audio_works.audio_file_type_id, audio_works.audio_file_location, audio_works.audio_file_seconds, audio_works.audio_file_channels,"
-      " audio_works.annotation_file_location, audio_works.created_at, audio_works.updated_at";
+    work_table_selects << "audio_works.id AS id, artists.name AS artist, albums.name AS album, audio_works.name AS name, album_audio_works.track AS track, audio_works.year AS year,"
+      " audio_file_types.name AS file_type, audio_works.audio_file_seconds AS audio_file_seconds, "
+      " COALESCE(MAX(audio_work_histories.session_id), 0) AS session_id, audio_work_histories.played_at AS last_played_at, "
+      " audio_works.audio_file_channels AS audio_file_channels, "
+      " audio_works.audio_file_location AS audio_file_location, audio_works.annotation_file_location AS annotation_file_location, "
+      " audio_works.artist_id AS artist_id, audio_works.created_at AS created_at, audio_works.updated_at AS updated_at";
     work_table_joins << "audio_works";
 
     work_table_selects << "albums.id AS album_id";
-    work_table_selects << "albums.name AS album";
-    work_table_selects << "album_audio_works.track AS track";
-    work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
 
-    work_table_selects << "artists.name AS artist";
+    work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
     work_table_joins << "INNER JOIN artists ON artists.id = audio_works.artist_id";
 
-    work_table_selects << "audio_file_types.name AS file_type";
+    work_table_selects << "audio_works.audio_file_type_id as audio_file_type_id";
     work_table_joins << "INNER JOIN audio_file_types ON audio_file_types.id = audio_works.audio_file_type_id";
+    work_table_joins << "LEFT OUTER JOIN audio_work_histories ON audio_works.id = audio_work_histories.audio_work_id";
 
     //build up descriptor joins
     MySqlQuery query(cDB);
@@ -155,7 +156,8 @@ namespace {
     if (!where_clause.isEmpty())
       query_string += (" WHERE " + where_clause);
 
-    query_string += " ORDER BY album_id, track";
+    query_string += " GROUP BY audio_works.id";
+    query_string += " ORDER BY artist, album, track";
 
     //cout << "temp table creation:" << endl;
     //cout << query_string.toStdString() << endl;
