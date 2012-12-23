@@ -96,6 +96,7 @@ namespace {
   int cWorkAlbumIdColumn = 0;
   int cWorkAudioFileTypeIdColumn = 0;
   int cWorkSongLengthColumn = 0;
+  int cWorkSessionIdColumn = 0;
 
   int cFilteredWorkTableCount = 0;
 
@@ -201,6 +202,7 @@ namespace {
     cWorkAlbumIdColumn = tab.fieldIndex("album_id");
     cWorkAudioFileTypeIdColumn = tab.fieldIndex("audio_file_type_id");
     cWorkSongLengthColumn = tab.fieldIndex("audio_file_seconds");
+    cWorkSessionIdColumn = tab.fieldIndex("session_id");
   };
 }
 
@@ -384,6 +386,8 @@ int db::work::temp_table_id_column(QString id_name) {
     return cWorkAudioFileTypeIdColumn;
   else if (id_name == "audio_file_seconds")
     return cWorkSongLengthColumn;
+  else if (id_name == "session")
+    return cWorkSessionIdColumn;
   return 0;
 }
 

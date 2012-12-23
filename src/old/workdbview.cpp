@@ -47,6 +47,22 @@ class TimeDisplayDelegate : public QStyledItemDelegate {
     }
 };
 
+class SessionDisplayDelegate : public QStyledItemDelegate {
+  public:
+    SessionDisplayDelegate(int current_session, QObject *parent) :
+      QStyledItemDelegate(parent), mCurrentSessionId(current_session) { }
+    virtual ~SessionDisplayDelegate() { }
+
+    virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
+      int session_id = value.toInt();
+      if (session_id == mCurrentSessionId)
+        return QString("PLAYED");
+      else
+        return QString("");
+    }
+  private:
+    int mCurrentSessionId;
+};
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
     QWidget *parent) :
@@ -77,6 +93,9 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
 
   TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
   mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_id_column("audio_file_seconds"), time_delegate);
+
+  SessionDisplayDelegate * session_delegate = new SessionDisplayDelegate(dj::model::db::work::current_session(), this);
+  mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_id_column("session"), session_delegate);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
