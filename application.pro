@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -llilv-0 -lyaml-cpp -loscpack -lboost_regex-mt -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt
+LIBS += -lsndfile -lvorbisfile -lmad -ljack -llilv-0 -lyaml-cpp -loscpack -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
 
@@ -43,9 +43,8 @@ INCLUDEPATH += . \
    include/old \
    include/util \
    ext/jackcpp/include/ \
-   /usr/include/rasqal/ \
-   /usr/local/include/oscpack/ \
-   /usr/local/include/lilv-0/
+   /usr/include/oscpack/ \
+   /usr/include/lilv-0/
 
 QMAKE_CXXFLAGS_DEBUG += -DDEBUG
 

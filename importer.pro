@@ -4,7 +4,8 @@
 
 TEMPLATE = app
 TARGET = datajockey_importer
-LIBS += -lsndfile -lvorbisfile -lmad -lyaml-cpp -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt
+LIBS += -lsndfile -lvorbisfile -lmad -lyaml-cpp -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt -lboost_system-mt 
+
 QT += sql
 QT -= gui
 CONFIG += console

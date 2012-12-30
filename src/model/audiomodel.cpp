@@ -779,6 +779,10 @@ void AudioModel::player_set(int player_index, QString name, double value) {
   }
 }
 
+void AudioModel::player_set(int /*player_index*/, QString /*name*/, QString /*value*/) {
+  //does nothing
+}
+
 void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint value) {
   if (player_index < 0 || player_index >= (int)mNumPlayers)
     return;

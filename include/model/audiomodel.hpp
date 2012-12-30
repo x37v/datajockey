@@ -56,6 +56,7 @@ namespace dj {
         void player_set(int player_index, QString name, bool value);
         void player_set(int player_index, QString name, int value);
         void player_set(int player_index, QString name, double value);
+        void player_set(int player_index, QString name, QString value);
         void player_set(int player_index, QString name, TimePoint value);
         void player_load(int player_index, QString audio_file_path, QString annotation_file_path);
 
@@ -73,9 +74,11 @@ namespace dj {
         void player_value_changed(int player_index, QString name, int value);
         void player_value_changed(int player_index, QString name, QString value);
         void player_value_changed(int player_index, QString name, bool value);
+        void player_value_changed(int player_index, QString name, double value);
         void player_triggered(int player_index, QString name);
         void player_buffers_changed(int player_index, AudioBufferPtr audio_buffer, BeatBufferPtr beatbuffer);
 
+        void master_value_changed(QString name, bool value);
         void master_value_changed(QString name, int value);
         void master_value_changed(QString name, double value);
         void master_value_changed(QString name, TimePoint timepoint);

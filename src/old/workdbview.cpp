@@ -56,7 +56,7 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
     virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
       int session_id = value.toInt();
       if (session_id == mCurrentSessionId)
-        return QString("PLAYED");
+        return QString("XX");
       else
         return QString("");
     }

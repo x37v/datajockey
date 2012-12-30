@@ -318,7 +318,7 @@ Application::Application(int & argc, char ** argv) :
        SLOT(select_work(int)));
 
    QStringList tag_names;
-   tag_names << "aug282012" << "jams" << "techno" << "acid";
+   tag_names << "aug282012" << "jams" << "techno" << "acid" << "booty";
 
    WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
    connect_common_interfaces(mAudioModel, filter_collection);
