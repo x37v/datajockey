@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <QMetaObject>
+#include <QMetaType>
 #include <QTimer>
 
 using namespace dj;

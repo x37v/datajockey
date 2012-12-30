@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include "audiomodel.hpp"
 #include "defines.hpp"
+#include <QVariant>
 
 using std::cout;
 using std::cerr;
