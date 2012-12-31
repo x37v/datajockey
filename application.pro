@@ -4,14 +4,18 @@
 
 TEMPLATE = app
 TARGET = datajockey
-LIBS += -lsndfile -lvorbisfile -lmad -ljack -llilv-0 -lyaml-cpp -loscpack -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
-DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
-QT += dbus sql opengl
-
 VERSION = 0.2.git
 
 CONFIG += DEBUG
 //CONFIG += RELEASE
+CONFIG += link_pkgconfig
+PKGCONFIG += sndfile vorbisfile mad jack lilv-0 yaml-cpp vamp-hostsdk taglib
+LIBS += -loscpack -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+
+DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
+QT += dbus sql opengl
+
+
 
 #profiling:
 #QMAKE_CXXFLAGS_DEBUG += -pg
@@ -42,9 +46,7 @@ INCLUDEPATH += . \
    include/view \
    include/old \
    include/util \
-   ext/jackcpp/include/ \
-   /usr/include/oscpack/ \
-   /usr/include/lilv-0/
+   ext/jackcpp/include/
 
 QMAKE_CXXFLAGS_DEBUG += -DDEBUG
 

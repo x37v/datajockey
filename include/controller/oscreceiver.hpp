@@ -21,8 +21,8 @@
 #ifndef DATAJOCKEY_OSC_RECEIVER_HPP
 #define DATAJOCKEY_OSC_RECEIVER_HPP
 
-#include "osc/OscPacketListener.h"
 #include "timepoint.hpp"
+#include <oscpack/osc/OscPacketListener.h>
 #include <string>
 #include <QThread>
 #include <QObject>

@@ -19,7 +19,8 @@
  */
 
 #include "oscreceiver.hpp"
-#include "osc/OscReceivedElements.h"
+#include <oscpack/osc/OscReceivedElements.h>
+#include <oscpack/ip/UdpSocket.h>
 #include <boost/regex.hpp>
 #include <stdlib.h>
 #include <iostream>
@@ -154,8 +155,6 @@ void OSCReceiver::ProcessMessage( const osc::ReceivedMessage& m, const IpEndpoin
     cerr << "An Exception occured while processing incoming OSC packets." << endl;
   }
 }
-
-#include "ip/UdpSocket.h"
 
 OscThread::OscThread(unsigned int port) {
   mPort = port;

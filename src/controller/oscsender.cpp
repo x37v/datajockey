@@ -1,8 +1,8 @@
 #include "oscsender.hpp"
 #include "config.hpp"
 
-#include <osc/OscOutboundPacketStream.h>
-#include <ip/UdpSocket.h>
+#include <oscpack/osc/OscOutboundPacketStream.h>
+#include <oscpack/ip/UdpSocket.h>
 #include "defines.hpp"
 #include <iostream>
 #include <QDateTime>

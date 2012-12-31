@@ -4,14 +4,17 @@
 
 TEMPLATE = app
 TARGET = datajockey_importer
-LIBS += -lsndfile -lvorbisfile -lmad -lyaml-cpp -ltag -lvamp-hostsdk -lboost_program_options-mt -lboost_filesystem-mt -lboost_system-mt 
-
 VERSION = 0.2.git
+
+CONFIG += DEBUG
+
+CONFIG += link_pkgconfig
+PKGCONFIG += sndfile vorbisfile mad lilv-0 yaml-cpp vamp-hostsdk taglib
+LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 
 QT += sql
 QT -= gui
 CONFIG += console
-CONFIG += DEBUG
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 
 DEPENDPATH += . \
