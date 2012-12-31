@@ -8,6 +8,7 @@ VERSION = 0.2.git
 
 CONFIG += DEBUG
 //CONFIG += RELEASE
+
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad jack lilv-0 yaml-cpp vamp-hostsdk taglib
 LIBS += -loscpack -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
