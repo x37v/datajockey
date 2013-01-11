@@ -3,6 +3,8 @@ session filtering:
   actually, just change coloring in display based on session id, don't filter?
 clicks:
   changing of tempo causes clicks in synched audio.
+Vinyl control:
+	http://xwax.org/devel/source.html
 DB:
   Case insensitive sort
   Load up the whole table for the work lists, so that we have a good scrollbar and can type to search for anything
