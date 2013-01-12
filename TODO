@@ -1,3 +1,6 @@
+auto normalise:
+  compute audio peak on import and use as multiplier for playback
+  so if the peak is 0.7, multiply each sample by 1.0 / 0.7, communicate that to the waveform drawer too..
 session filtering:
   make it configurable
   actually, just change coloring in display based on session id, don't filter?
