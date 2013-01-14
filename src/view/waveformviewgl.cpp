@@ -130,6 +130,10 @@ void WaveFormViewGL::initializeGL(){
    glDisable(GL_DEPTH_TEST);
 
    mVerticies.resize(4 * (mVertical ? mHeight : mWidth));
+   if (mFullView) {
+     mVertexColors.resize((2 * 3) * (mVertical ? mHeight : mWidth));
+     update_colors();
+   }
 }
 
 void WaveFormViewGL::paintGL(){
@@ -164,9 +168,18 @@ void WaveFormViewGL::paintGL(){
          glTranslatef(-mVerticies[mFirstLineIndex * 4], 0, 0);
          qglColor(mColorWaveform);
          glLineWidth(1.0);
-         glEnableClientState(GL_VERTEX_ARRAY);
-         glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
-         glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+
+         if (mFullView) {
+           glEnableClientState(GL_VERTEX_ARRAY);
+           glEnableClientState(GL_COLOR_ARRAY);
+           glColorPointer(3, GL_FLOAT, 0, &mVertexColors.front());
+           glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
+           glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+         } else {
+           glEnableClientState(GL_VERTEX_ARRAY);
+           glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
+           glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+         }
 
          //draw beats if we have them
          if (mBeatVerticiesValid) {
@@ -208,11 +221,19 @@ void WaveFormViewGL::resizeGL(int width, int height) {
    if (mVertical) {
       if (mHeight != height) {
          mVerticies.resize(4 * height);
+         if (mFullView) {
+           mVertexColors.resize(height * (3 * 2));
+           update_colors();
+         }
          mVerticiesValid = false;
       }
    } else {
       if (mWidth != width) {
          mVerticies.resize(4 * width);
+         if (mFullView) {
+           mVertexColors.resize(width * (3 * 2));
+           update_colors();
+         }
          mVerticiesValid = false;
       }
    }
@@ -338,4 +359,14 @@ GLfloat WaveFormViewGL::line_value(int line_index) {
       }
       return (GLfloat)value;
    }
+}
+
+void WaveFormViewGL::update_colors() {
+  int colored_lines = mVertexColors.size() / 6;
+  for (int line = 0; line < colored_lines; line++) {
+    int i = line * 6;
+    mVertexColors[i + 3] = mVertexColors[i] = static_cast<float>(line) / static_cast<float>(colored_lines);
+    mVertexColors[i + 4] = mVertexColors[i + 1] = 0.0;
+    mVertexColors[i + 5] = mVertexColors[i + 2] = 0.5;
+  }
 }

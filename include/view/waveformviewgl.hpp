@@ -48,6 +48,7 @@ namespace dj {
 
             audio::AudioBufferPtr mAudioBuffer;
             std::vector<GLfloat> mVerticies;
+            std::vector<float> mVertexColors;
             int mFirstLineIndex; //which is the first line
             bool mVerticiesValid;
 
@@ -69,6 +70,7 @@ namespace dj {
 
             void update_waveform();
             void update_beats();
+            void update_colors();
             GLfloat line_value(int line_index);
       };
    }
