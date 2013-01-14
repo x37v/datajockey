@@ -14,7 +14,7 @@ namespace dj {
       class WaveFormViewGL : public QGLWidget {
          Q_OBJECT
          public:
-            WaveFormViewGL(QWidget * parent = NULL, bool vertical = false);
+            WaveFormViewGL(QWidget * parent = NULL, bool vertical = false, bool full = false);
             QSize minimumSizeHint() const;
             QSize sizeHint() const;
             void setVertical(bool vert);
@@ -44,6 +44,7 @@ namespace dj {
             int mWidth;
             int mCursorOffset;
             bool mVertical;
+            bool mFullView;
 
             audio::AudioBufferPtr mAudioBuffer;
             std::vector<GLfloat> mVerticies;

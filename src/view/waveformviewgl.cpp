@@ -12,13 +12,14 @@
 
 using namespace dj::view;
 
-WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
+WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical, bool full) :
    QGLWidget(parent),
    mMutex(),
    mHeight(100),
    mWidth(400),
    mCursorOffset(50),
    mVertical(vertical),
+   mFullView(full),
    mFirstLineIndex(0),
    mVerticiesValid(false),
    mBeatBuffer(),
@@ -34,6 +35,8 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mColorBeats(QColor::fromRgb(255,255,0)),
    mLastMousePos(0)
 {
+  if (mFullView)
+    mCursorOffset = 0;
 }
 
 QSize WaveFormViewGL::minimumSizeHint() const { return QSize(100, 100); }
@@ -52,23 +55,32 @@ void WaveFormViewGL::set_buffers(audio::AudioBufferPtr audio_buffer, audio::Beat
    mAudioBuffer.swap(audio_buffer);
    mBeatBuffer.swap(beat_buffer);
 
-   if (mBeatBuffer && mBeatBuffer->length() > 2) {
-      //XXX make configurable
-      double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
-      mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
-      mVerticiesValid = false;
-      update_beats();
-   } else
-      mBeatVerticiesValid = false;
+   if (mFullView) {
+     if (mAudioBuffer) {
+       mFramesPerLine = mAudioBuffer->length() / (mVertical ? mHeight : mWidth);
+       float sample_rate = mAudioBuffer->sample_rate();
+       if (sample_rate != mSampleRate)
+         mSampleRate = sample_rate;
+     }
+   } else {
+     if (mBeatBuffer && mBeatBuffer->length() > 2) {
+       //XXX make configurable
+       double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
+       mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
+       mVerticiesValid = false;
+       update_beats();
+     } else
+       mBeatVerticiesValid = false;
 
-   if (mAudioBuffer) {
-      float sample_rate = mAudioBuffer->sample_rate();
-      if (sample_rate != mSampleRate) {
+     if (mAudioBuffer) {
+       float sample_rate = mAudioBuffer->sample_rate();
+       if (sample_rate != mSampleRate) {
          mSampleRate = sample_rate;
          //if the beat buffer was set before the audio buffer, we'll need to redraw
          if (mBeatVerticiesValid)
-            update_beats();
-      }
+           update_beats();
+       }
+     }
    }
    mVerticiesValid = false;
    update();
@@ -83,8 +95,16 @@ void WaveFormViewGL::clear_beats() {
 void WaveFormViewGL::set_frame(int frame) {
    int prev = mFrame;
    mFrame = frame;
-   if (prev > mFrame || mFrame >= prev + mFramesPerLine)
-      update();
+   if (mFullView) {
+     int offset = frame / mFramesPerLine;
+     if (offset != mCursorOffset) {
+       mCursorOffset = offset;
+       update();
+     }
+   } else {
+     if (prev > mFrame || mFrame >= prev + mFramesPerLine)
+       update();
+   }
 }
 
 void WaveFormViewGL::set_frames_per_line(int num_frames) {
@@ -119,8 +139,13 @@ void WaveFormViewGL::paintGL(){
    glLoadIdentity();
 
    if (mVertical) {
-      glTranslatef(mWidth / 2, mHeight, 0.0);
-      glRotatef(-90.0, 0.0, 0.0, 1.0);
+      if (mFullView) {
+        glTranslatef(mWidth / 2, 0, 0.0);
+        glRotatef(90.0, 0.0, 0.0, 1.0);
+      } else {
+        glTranslatef(mWidth / 2, mHeight, 0.0);
+        glRotatef(-90.0, 0.0, 0.0, 1.0);
+      }
       //-1..1 in the y direction
       glScalef(1.0, mWidth / 2, 1.0);
    } else {
@@ -194,6 +219,9 @@ void WaveFormViewGL::resizeGL(int width, int height) {
 
    mWidth = width;
    mHeight = height;
+
+   if (mFullView && mAudioBuffer)
+     mFramesPerLine = mAudioBuffer->length() / (mVertical ? mHeight : mWidth);
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
