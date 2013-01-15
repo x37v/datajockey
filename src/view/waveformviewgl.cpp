@@ -380,6 +380,7 @@ void WaveFormViewGL::update_colors() {
     const double median = mBeatBuffer->median_difference();
     //first compute the variation in tempo from the neighboring beat
     //then the variation in tempo from the median beat
+    //XXX make this configurable
     for (unsigned int i = 2; i < mBeatBuffer->length(); i++) {
       double diff0 = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
       double diff1 = mBeatBuffer->at(i) - mBeatBuffer->at(i - 1);
