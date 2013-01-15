@@ -1,5 +1,6 @@
 #include "waveformviewgl.hpp"
 #include "audiobuffer.hpp"
+#include "defines.hpp"
 #include <QtGui>
 #include <QMutexLocker>
 #include <stdlib.h>
@@ -62,6 +63,7 @@ void WaveFormViewGL::set_buffers(audio::AudioBufferPtr audio_buffer, audio::Beat
        if (sample_rate != mSampleRate)
          mSampleRate = sample_rate;
      }
+     update_colors();
    } else {
      if (mBeatBuffer && mBeatBuffer->length() > 2) {
        //XXX make configurable
@@ -363,10 +365,45 @@ GLfloat WaveFormViewGL::line_value(int line_index) {
 
 void WaveFormViewGL::update_colors() {
   int colored_lines = mVertexColors.size() / 6;
+  float normal_color[3];
+  normal_color[0] = mColorWaveform.redF();
+  normal_color[1] = mColorWaveform.greenF();
+  normal_color[2] = mColorWaveform.blueF();
+
   for (int line = 0; line < colored_lines; line++) {
     int i = line * 6;
-    mVertexColors[i + 3] = mVertexColors[i] = static_cast<float>(line) / static_cast<float>(colored_lines);
-    mVertexColors[i + 4] = mVertexColors[i + 1] = 0.0;
-    mVertexColors[i + 5] = mVertexColors[i + 2] = 0.5;
+    memcpy(&mVertexColors[i], normal_color, 3 * sizeof(float));
+    memcpy(&mVertexColors[i + 3], normal_color, 3 * sizeof(float));
+  }
+
+  if (mBeatBuffer) {
+    const double median = mBeatBuffer->median_difference();
+    //first compute the variation in tempo from the neighboring beat
+    //then the variation in tempo from the median beat
+    for (unsigned int i = 2; i < mBeatBuffer->length(); i++) {
+      double diff0 = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
+      double diff1 = mBeatBuffer->at(i) - mBeatBuffer->at(i - 1);
+      double off_val = fabsl(diff1 - diff0);
+
+      int start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
+      int end_line = (mSampleRate * mBeatBuffer->at(i)) / mFramesPerLine;
+      for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
+        int line_index = line * 6;
+        mVertexColors[line_index + 1] = clamp(off_val * 1000.0, 0.0, 1.0);
+        //mVertexColors[line_index + 1] = mVertexColors[line_index + 1 + 3] = clamp(off_val * 1000.0, 0.0, 1.0);
+      }
+
+
+      double mdiff = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
+      double moff_val = fabsl(median - mdiff);
+
+      start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
+      end_line = (mSampleRate * mBeatBuffer->at(i - 1)) / mFramesPerLine;
+      for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
+        int line_index = line * 6;
+        mVertexColors[line_index + 2 + 3] = clamp(moff_val * 100.0, 0.0, 1.0);
+        //mVertexColors[line_index + 2] = mVertexColors[line_index + 2 + 3] = clamp(off_val * 100.0, 0.0, 1.0);
+      }
+    }
   }
 }
