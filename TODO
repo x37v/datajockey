@@ -3,7 +3,8 @@ auto normalise:
   so if the peak is 0.7, multiply each sample by 1.0 / 0.7, communicate that to the waveform drawer too..
 session filtering:
   make it configurable
-  actually, just change coloring in display based on session id, don't filter?
+  actually, just change coloring in display based on session id
+  keep work selection intact
 clicks:
   changing of tempo causes clicks in synched audio.
 Vinyl control:
