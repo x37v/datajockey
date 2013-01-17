@@ -1,3 +1,4 @@
+#include "defines.hpp"
 #include "beatbuffer.hpp"
 #include <yaml-cpp/yaml.h>
 #include <vector>
@@ -13,11 +14,6 @@ using std::cerr;
 using std::endl;
 
 using namespace dj::audio;
-
-template<typename Type>
-Type linear_interp(Type v0, Type v1, double dist){
-   return v0 + (v1 - v0) * dist;
-}
 
 namespace {
    //find the mid point between the previous and next values
