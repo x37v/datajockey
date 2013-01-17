@@ -10,8 +10,39 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
-
 using namespace dj::view;
+#include <iostream>
+using std::cout;
+using std::endl;
+
+namespace {
+  QColor color_interp(const QColor& start, const QColor& end, double dist) {
+    if (dist <= 0.0)
+      return start;
+    else if (dist >= 1.0)
+      return end;
+    QColor r;
+    double h,s,v;
+    double s_h, s_s, s_v;
+    double e_h, e_s, e_v;
+    start.getHsvF(&s_h, &s_s, &s_v);
+    end.getHsvF(&e_h, &e_s, &e_v);
+    s_h = dj::clamp(s_h, 0.0, 1.0);
+    s_s = dj::clamp(s_s, 0.0, 1.0);
+    s_v = dj::clamp(s_v, 0.0, 1.0);
+
+    e_h = dj::clamp(e_h, 0.0, 1.0);
+    e_s = dj::clamp(e_s, 0.0, 1.0);
+    e_v = dj::clamp(e_v, 0.0, 1.0);
+
+    h = dj::linear_interp(s_h, e_h, dist);
+    s = dj::linear_interp(s_s, e_s, dist);
+    v = dj::linear_interp(s_v, e_v, dist);
+
+    r.setHsvF(h, s, v);
+    return r;
+  }
+}
 
 WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical, bool full) :
    QGLWidget(parent),
@@ -365,10 +396,15 @@ GLfloat WaveFormViewGL::line_value(int line_index) {
 
 void WaveFormViewGL::update_colors() {
   int colored_lines = mVertexColors.size() / 6;
+  const QColor waveform_color = mColorWaveform;
   float normal_color[3];
-  normal_color[0] = mColorWaveform.redF();
-  normal_color[1] = mColorWaveform.greenF();
-  normal_color[2] = mColorWaveform.blueF();
+  normal_color[0] = waveform_color.redF();
+  normal_color[1] = waveform_color.greenF();
+  normal_color[2] = waveform_color.blueF();
+
+  const QColor slow_color = Qt::blue;
+  const QColor fast_color = Qt::magenta;
+  const QColor tempo_color = Qt::green;
 
   for (int line = 0; line < colored_lines; line++) {
     int i = line * 6;
@@ -385,25 +421,36 @@ void WaveFormViewGL::update_colors() {
       double diff0 = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
       double diff1 = mBeatBuffer->at(i) - mBeatBuffer->at(i - 1);
       double off_val = fabsl(diff1 - diff0);
+      QColor qcolor = color_interp(waveform_color, tempo_color, clamp(off_val * 1000, 0.0, 1.0)); 
+      float color[3];
+      color[0] = qcolor.redF();
+      color[1] = qcolor.greenF();
+      color[2] = qcolor.blueF();
 
       int start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
       int end_line = (mSampleRate * mBeatBuffer->at(i)) / mFramesPerLine;
       for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
         int line_index = line * 6;
-        mVertexColors[line_index + 1] = clamp(off_val * 1000.0, 0.0, 1.0);
+        memcpy(&mVertexColors[line_index], color, sizeof(float) * 3);
         //mVertexColors[line_index + 1] = mVertexColors[line_index + 1 + 3] = clamp(off_val * 1000.0, 0.0, 1.0);
       }
 
 
       double mdiff = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
-      double moff_val = fabsl(median - mdiff);
+      off_val = clamp((median - mdiff) * 100.0, -1.0, 1.0);
+      if (off_val > 0)
+        qcolor = color_interp(waveform_color, fast_color, off_val);
+      else
+        qcolor = color_interp(waveform_color, slow_color, -off_val);
+      color[0] = qcolor.redF();
+      color[1] = qcolor.greenF();
+      color[2] = qcolor.blueF();
 
       start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
       end_line = (mSampleRate * mBeatBuffer->at(i - 1)) / mFramesPerLine;
       for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
         int line_index = line * 6;
-        mVertexColors[line_index + 2 + 3] = clamp(moff_val * 100.0, 0.0, 1.0);
-        //mVertexColors[line_index + 2] = mVertexColors[line_index + 2 + 3] = clamp(off_val * 100.0, 0.0, 1.0);
+        memcpy(&mVertexColors[line_index + 3], color, sizeof(float) * 3);
       }
     }
   }
