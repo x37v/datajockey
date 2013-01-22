@@ -11,3 +11,4 @@ moc/
 Makefile
 Makefile.*
 qrc_*.cpp
+/*.app
