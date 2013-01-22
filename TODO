@@ -22,8 +22,9 @@ Beat Extraction:
 Loading:
    display error message dialog when we cannot load an audio file or buffer.
 Importer:
-   Provide any sort of UI?  At least list the tracks before importing? Display progress.
-   GUI importer, integrate into main app
+	db threading not safe, fix that..
+  Provide any sort of UI?  At least list the tracks before importing? Display progress.
+  GUI importer, integrate into main app
 Audio:
    lilvmm?
 Recently Played Filter:
@@ -34,7 +35,6 @@ Recently Played Filter:
    within x amount of time from now [or the session start if we keep that info?].
 Works:
    Better sorting.. field hiding and reorder?  Save field settings?
-   Filter views
 License:
    Figure out all that we have to display.  Attribution in the GUI?  What about command line?
 Tags:
