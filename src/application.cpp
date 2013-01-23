@@ -317,9 +317,6 @@ Application::Application(int & argc, char ** argv) :
        SIGNAL(work_selected(int)),
        SLOT(select_work(int)));
 
-   QStringList tag_names;
-   tag_names << "aug282012" << "jams" << "techno" << "acid" << "booty";
-
    WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
    connect_common_interfaces(mAudioModel, filter_collection);
 
@@ -328,6 +325,10 @@ Application::Application(int & argc, char ** argv) :
        SIGNAL(updated_history(int, int, QDateTime)),
        filter_collection,
        SLOT(update_history(int, int, QDateTime)));
+
+#if 0
+   QStringList tag_names;
+   tag_names << "aug282012" << "jams" << "techno" << "acid" << "booty";
 
    foreach(const QString tag, tag_names) {
      WorkFilterModel * ftable_model = filter_collection->new_filter_model();
@@ -368,6 +369,7 @@ Application::Application(int & argc, char ** argv) :
      //actually set the expression
      ftable_model->set_filter_expression("(tag \"mix\":\"" + tag + "\")");
    }
+#endif
 
    //XXX hack to write settings before quitting, is there a better way?
    QObject::connect(
