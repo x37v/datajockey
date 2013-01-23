@@ -14,10 +14,10 @@ PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
 LIBS += -loscpack -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 
 macx {
-  QMAKE_LIBDIR += ext/osx/
+  QMAKE_LIBDIR += ext/vamp/osx/
   LIBS += -lvamp-hostsdk -ljack
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
-  INCLUDEPATH += ext/osx/
+  INCLUDEPATH += ext/vamp/
 }
 
 unix:!macx {

@@ -14,9 +14,9 @@ LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboos
 
 macx {
   CONFIG -= app_bundle
-  QMAKE_LIBDIR += ext/osx/
+  QMAKE_LIBDIR += ext/vamp/osx/
   LIBS += -lvamp-hostsdk
-  INCLUDEPATH += ext/osx/
+  INCLUDEPATH += ext/vamp/
 }
 
 unix:!macx {
