@@ -1,8 +1,6 @@
 session filtering:
   make it configurable
   actually, just change coloring in display based on session id, don't filter?
-clicks:
-  changing of tempo causes clicks in synched audio.
 Vinyl control:
 	http://xwax.org/devel/source.html
 DB:
@@ -11,9 +9,6 @@ DB:
 Files:
    make sure that non ascii string named files can be read in [audio files]
    this should be fixed for beat buffers
-Filtering:
-   Create a temporary work table with a where clause for filtering.
-   updates to filter will just clear the table and select -> insert with a new where clause
 Waveform View:
    interpolate values in between frame updates so we can reduce the number of frame updates:
    we know the play rate, we know the sample rate, we just update the frame position when we get an update and guess in between updates
@@ -27,12 +22,6 @@ Importer:
   GUI importer, integrate into main app
 Audio:
    lilvmm?
-Recently Played Filter:
-   Each time you start the app increment a 'session number'.  Each time a song
-   becomes audible [what do we do if they're using direct track outs?] note the
-   song id, session number and date/time in the DB.  You can filter out songs
-   that have been played this session, and/or songs that have been played
-   within x amount of time from now [or the session start if we keep that info?].
 Works:
    Better sorting.. field hiding and reorder?  Save field settings?
 License:

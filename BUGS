@@ -1,2 +1,4 @@
 audio hiccups without displaying xruns?  what is going on?
 figure out mp3 related crashes importing
+clicks:
+  changing of tempo causes clicks in synched audio.
