@@ -35,6 +35,11 @@ namespace dj {
          return val;
       }
 
+   template<typename Type>
+     Type linear_interp(Type v0, Type v1, double dist){
+       return v0 + (v1 - v0) * dist;
+     }
+
    const int volume_slider_height = 200;
 }
 

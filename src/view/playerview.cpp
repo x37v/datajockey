@@ -135,19 +135,25 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mControlLayout->addLayout(mSliderLevelLayout);
    mControlLayout->setContentsMargins(0,0,0,0);
 
-   mWaveFormView = new WaveFormViewGL(this, true);
-   mWaveFormView->setVisible(waveform_orientation != WAVEFORM_NONE);
-   mWaveFormView->setMinimumWidth(220);
+   mWaveFormZoomedView = new WaveFormViewGL(this, true);
+   mWaveFormZoomedView->setVisible(waveform_orientation != WAVEFORM_NONE);
+   mWaveFormZoomedView->setMinimumWidth(220);
+
+   mWaveFormFullView = new WaveFormViewGL(this, true, true);
+   mWaveFormFullView->setVisible(waveform_orientation != WAVEFORM_NONE);
+   mWaveFormFullView->setMinimumWidth(50);
 
    mTopLayout->addLayout(mControlLayout, 0);
-   mTopLayout->addWidget(mWaveFormView, 10);
+   mTopLayout->addWidget(mWaveFormZoomedView, 10);
+   mTopLayout->addWidget(mWaveFormFullView, 4);
    mTopLayout->setContentsMargins(0,0,0,0);
    setLayout(mTopLayout);
 
-   QObject::connect(mWaveFormView, SIGNAL(seek_relative(int)),
+   QObject::connect(mWaveFormZoomedView, SIGNAL(seek_relative(int)),
          SIGNAL(seek_frame_relative(int)));
-   QObject::connect(mWaveFormView, SIGNAL(mouse_down(bool)),
+   QObject::connect(mWaveFormZoomedView, SIGNAL(mouse_down(bool)),
          SIGNAL(seeking(bool)));
+
    QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
          mSpeedView, SLOT(setDisabled(bool)));
    QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
@@ -170,7 +176,8 @@ QRect Player::slider_level_geometry() const { return mSliderLevelLayout->geometr
 void Player::set_audio_level(int percent) { mAudioLevelView->set_level(percent); }
 
 void Player::set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer) {
-   mWaveFormView->set_buffers(audio_buffer, beat_buffer);
+   mWaveFormZoomedView->set_buffers(audio_buffer, beat_buffer);
+   mWaveFormFullView->set_buffers(audio_buffer, beat_buffer);
    mProgressBar->setValue(0);
    if (audio_buffer)
       mFrames = audio_buffer->length();
@@ -179,7 +186,8 @@ void Player::set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPt
 }
 
 void Player::set_audio_frame(int frame) {
-   mWaveFormView->set_frame(frame);
+   mWaveFormZoomedView->set_frame(frame);
+   mWaveFormFullView->set_frame(frame);
 
    if (mFrames) {
       mProgressBar->setValue(frame / (mFrames / 100));

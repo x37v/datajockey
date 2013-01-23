@@ -1,5 +1,6 @@
 #include "waveformviewgl.hpp"
 #include "audiobuffer.hpp"
+#include "defines.hpp"
 #include <QtGui>
 #include <QMutexLocker>
 #include <stdlib.h>
@@ -9,16 +10,48 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
-
 using namespace dj::view;
+#include <iostream>
+using std::cout;
+using std::endl;
 
-WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
+namespace {
+  QColor color_interp(const QColor& start, const QColor& end, double dist) {
+    if (dist <= 0.0)
+      return start;
+    else if (dist >= 1.0)
+      return end;
+    QColor r;
+    double h,s,v;
+    double s_h, s_s, s_v;
+    double e_h, e_s, e_v;
+    start.getHsvF(&s_h, &s_s, &s_v);
+    end.getHsvF(&e_h, &e_s, &e_v);
+    s_h = dj::clamp(s_h, 0.0, 1.0);
+    s_s = dj::clamp(s_s, 0.0, 1.0);
+    s_v = dj::clamp(s_v, 0.0, 1.0);
+
+    e_h = dj::clamp(e_h, 0.0, 1.0);
+    e_s = dj::clamp(e_s, 0.0, 1.0);
+    e_v = dj::clamp(e_v, 0.0, 1.0);
+
+    h = dj::linear_interp(s_h, e_h, dist);
+    s = dj::linear_interp(s_s, e_s, dist);
+    v = dj::linear_interp(s_v, e_v, dist);
+
+    r.setHsvF(h, s, v);
+    return r;
+  }
+}
+
+WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical, bool full) :
    QGLWidget(parent),
    mMutex(),
    mHeight(100),
    mWidth(400),
    mCursorOffset(50),
    mVertical(vertical),
+   mFullView(full),
    mFirstLineIndex(0),
    mVerticiesValid(false),
    mBeatBuffer(),
@@ -34,6 +67,8 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical) :
    mColorBeats(QColor::fromRgb(255,255,0)),
    mLastMousePos(0)
 {
+  if (mFullView)
+    mCursorOffset = 0;
 }
 
 QSize WaveFormViewGL::minimumSizeHint() const { return QSize(100, 100); }
@@ -52,23 +87,33 @@ void WaveFormViewGL::set_buffers(audio::AudioBufferPtr audio_buffer, audio::Beat
    mAudioBuffer.swap(audio_buffer);
    mBeatBuffer.swap(beat_buffer);
 
-   if (mBeatBuffer && mBeatBuffer->length() > 2) {
-      //XXX make configurable
-      double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
-      mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
-      mVerticiesValid = false;
-      update_beats();
-   } else
-      mBeatVerticiesValid = false;
+   if (mFullView) {
+     if (mAudioBuffer) {
+       mFramesPerLine = mAudioBuffer->length() / (mVertical ? mHeight : mWidth);
+       float sample_rate = mAudioBuffer->sample_rate();
+       if (sample_rate != mSampleRate)
+         mSampleRate = sample_rate;
+     }
+     update_colors();
+   } else {
+     if (mBeatBuffer && mBeatBuffer->length() > 2) {
+       //XXX make configurable
+       double frames_per_view = mBeatBuffer->median_difference() * 8.0 * mSampleRate;
+       mFramesPerLine = frames_per_view / (mVertical ? mHeight : mWidth);
+       mVerticiesValid = false;
+       update_beats();
+     } else
+       mBeatVerticiesValid = false;
 
-   if (mAudioBuffer) {
-      float sample_rate = mAudioBuffer->sample_rate();
-      if (sample_rate != mSampleRate) {
+     if (mAudioBuffer) {
+       float sample_rate = mAudioBuffer->sample_rate();
+       if (sample_rate != mSampleRate) {
          mSampleRate = sample_rate;
          //if the beat buffer was set before the audio buffer, we'll need to redraw
          if (mBeatVerticiesValid)
-            update_beats();
-      }
+           update_beats();
+       }
+     }
    }
    mVerticiesValid = false;
    update();
@@ -83,8 +128,16 @@ void WaveFormViewGL::clear_beats() {
 void WaveFormViewGL::set_frame(int frame) {
    int prev = mFrame;
    mFrame = frame;
-   if (prev > mFrame || mFrame >= prev + mFramesPerLine)
-      update();
+   if (mFullView) {
+     int offset = frame / mFramesPerLine;
+     if (offset != mCursorOffset) {
+       mCursorOffset = offset;
+       update();
+     }
+   } else {
+     if (prev > mFrame || mFrame >= prev + mFramesPerLine)
+       update();
+   }
 }
 
 void WaveFormViewGL::set_frames_per_line(int num_frames) {
@@ -110,6 +163,10 @@ void WaveFormViewGL::initializeGL(){
    glDisable(GL_DEPTH_TEST);
 
    mVerticies.resize(4 * (mVertical ? mHeight : mWidth));
+   if (mFullView) {
+     mVertexColors.resize((2 * 3) * (mVertical ? mHeight : mWidth));
+     update_colors();
+   }
 }
 
 void WaveFormViewGL::paintGL(){
@@ -119,8 +176,13 @@ void WaveFormViewGL::paintGL(){
    glLoadIdentity();
 
    if (mVertical) {
-      glTranslatef(mWidth / 2, mHeight, 0.0);
-      glRotatef(-90.0, 0.0, 0.0, 1.0);
+      if (mFullView) {
+        glTranslatef(mWidth / 2, 0, 0.0);
+        glRotatef(90.0, 0.0, 0.0, 1.0);
+      } else {
+        glTranslatef(mWidth / 2, mHeight, 0.0);
+        glRotatef(-90.0, 0.0, 0.0, 1.0);
+      }
       //-1..1 in the y direction
       glScalef(1.0, mWidth / 2, 1.0);
    } else {
@@ -139,9 +201,18 @@ void WaveFormViewGL::paintGL(){
          glTranslatef(-mVerticies[mFirstLineIndex * 4], 0, 0);
          qglColor(mColorWaveform);
          glLineWidth(1.0);
-         glEnableClientState(GL_VERTEX_ARRAY);
-         glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
-         glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+
+         if (mFullView) {
+           glEnableClientState(GL_VERTEX_ARRAY);
+           glEnableClientState(GL_COLOR_ARRAY);
+           glColorPointer(3, GL_FLOAT, 0, &mVertexColors.front());
+           glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
+           glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+         } else {
+           glEnableClientState(GL_VERTEX_ARRAY);
+           glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
+           glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+         }
 
          //draw beats if we have them
          if (mBeatVerticiesValid) {
@@ -183,17 +254,28 @@ void WaveFormViewGL::resizeGL(int width, int height) {
    if (mVertical) {
       if (mHeight != height) {
          mVerticies.resize(4 * height);
+         if (mFullView) {
+           mVertexColors.resize(height * (3 * 2));
+           update_colors();
+         }
          mVerticiesValid = false;
       }
    } else {
       if (mWidth != width) {
          mVerticies.resize(4 * width);
+         if (mFullView) {
+           mVertexColors.resize(width * (3 * 2));
+           update_colors();
+         }
          mVerticiesValid = false;
       }
    }
 
    mWidth = width;
    mHeight = height;
+
+   if (mFullView && mAudioBuffer)
+     mFramesPerLine = mAudioBuffer->length() / (mVertical ? mHeight : mWidth);
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
@@ -310,4 +392,66 @@ GLfloat WaveFormViewGL::line_value(int line_index) {
       }
       return (GLfloat)value;
    }
+}
+
+void WaveFormViewGL::update_colors() {
+  int colored_lines = mVertexColors.size() / 6;
+  const QColor waveform_color = mColorWaveform;
+  float normal_color[3];
+  normal_color[0] = waveform_color.redF();
+  normal_color[1] = waveform_color.greenF();
+  normal_color[2] = waveform_color.blueF();
+
+  const QColor slow_color = Qt::blue;
+  const QColor fast_color = Qt::magenta;
+  const QColor tempo_color = Qt::green;
+
+  for (int line = 0; line < colored_lines; line++) {
+    int i = line * 6;
+    memcpy(&mVertexColors[i], normal_color, 3 * sizeof(float));
+    memcpy(&mVertexColors[i + 3], normal_color, 3 * sizeof(float));
+  }
+
+  if (mBeatBuffer) {
+    const double median = mBeatBuffer->median_difference();
+    //first compute the variation in tempo from the neighboring beat
+    //then the variation in tempo from the median beat
+    //XXX make this configurable
+    for (unsigned int i = 2; i < mBeatBuffer->length(); i++) {
+      double diff0 = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
+      double diff1 = mBeatBuffer->at(i) - mBeatBuffer->at(i - 1);
+      double off_val = fabsl(diff1 - diff0);
+      QColor qcolor = color_interp(waveform_color, tempo_color, clamp(off_val * 1000, 0.0, 1.0)); 
+      float color[3];
+      color[0] = qcolor.redF();
+      color[1] = qcolor.greenF();
+      color[2] = qcolor.blueF();
+
+      int start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
+      int end_line = (mSampleRate * mBeatBuffer->at(i)) / mFramesPerLine;
+      for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
+        int line_index = line * 6;
+        memcpy(&mVertexColors[line_index], color, sizeof(float) * 3);
+        //mVertexColors[line_index + 1] = mVertexColors[line_index + 1 + 3] = clamp(off_val * 1000.0, 0.0, 1.0);
+      }
+
+
+      double mdiff = mBeatBuffer->at(i - 1) - mBeatBuffer->at(i - 2);
+      off_val = clamp((median - mdiff) * 100.0, -1.0, 1.0);
+      if (off_val > 0)
+        qcolor = color_interp(waveform_color, fast_color, off_val);
+      else
+        qcolor = color_interp(waveform_color, slow_color, -off_val);
+      color[0] = qcolor.redF();
+      color[1] = qcolor.greenF();
+      color[2] = qcolor.blueF();
+
+      start_line = (mSampleRate * mBeatBuffer->at(i - 2)) / mFramesPerLine;
+      end_line = (mSampleRate * mBeatBuffer->at(i - 1)) / mFramesPerLine;
+      for (int line = start_line; line <= std::min(end_line, colored_lines); line++) {
+        int line_index = line * 6;
+        memcpy(&mVertexColors[line_index + 3], color, sizeof(float) * 3);
+      }
+    }
+  }
 }

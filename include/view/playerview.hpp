@@ -68,7 +68,8 @@ namespace dj {
             QSlider * mVolumeSlider;
             QSpinBox * mSpeedView;
             QHash<QString, QDial *> mEqDials;
-            WaveFormViewGL * mWaveFormView;
+            WaveFormViewGL * mWaveFormZoomedView;
+            WaveFormViewGL * mWaveFormFullView;
             AudioLevel * mAudioLevelView;
             QBoxLayout * mSliderLevelLayout;
             unsigned int mFrames;
