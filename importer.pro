@@ -9,8 +9,19 @@ VERSION = 0.2.git
 CONFIG += DEBUG
 
 CONFIG += link_pkgconfig
-PKGCONFIG += sndfile vorbisfile mad lilv-0 yaml-cpp vamp-hostsdk taglib
+PKGCONFIG += sndfile vorbisfile mad lilv-0 yaml-cpp taglib
 LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+
+macx {
+  CONFIG -= app_bundle
+  QMAKE_LIBDIR += ext/osx/
+  LIBS += -lvamp-hostsdk
+  INCLUDEPATH += ext/osx/
+}
+
+unix:!macx {
+  PKGCONFIG += vamp-hostsdk
+}
 
 QT += sql
 QT -= gui

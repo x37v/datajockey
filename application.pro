@@ -10,8 +10,20 @@ CONFIG += DEBUG
 //CONFIG += RELEASE
 
 CONFIG += link_pkgconfig
-PKGCONFIG += sndfile vorbisfile mad jack lilv-0 yaml-cpp vamp-hostsdk taglib
+PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
 LIBS += -loscpack -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+
+macx {
+  QMAKE_LIBDIR += ext/osx/
+  LIBS += -lvamp-hostsdk -ljack
+  #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
+  INCLUDEPATH += ext/osx/
+}
+
+unix:!macx {
+  PKGCONFIG += jack lilv-0 vamp-hostsdk
+  DEFINES += USE_LV2
+}
 
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QT += dbus sql opengl
