@@ -30,6 +30,7 @@ Master::Master(){
    mCrossFadeMixers[1] = 1;
    mMaxSampleValue = 0.0f;
 
+#ifdef USE_LV2
    //set up lv2
    mLV2World = lilv_world_new();
    mLV2Plugins = NULL;
@@ -37,6 +38,7 @@ Master::Master(){
       lilv_world_load_all(mLV2World);
       mLV2Plugins = lilv_world_get_all_plugins(mLV2World);
    }
+#endif
 }
 
 Master::~Master(){
@@ -250,8 +252,10 @@ const std::vector<Player *>& Master::players() const { return mPlayers; }
 Scheduler * Master::scheduler(){ return &mScheduler; }
 Transport * Master::transport(){ return &mTransport; }
 
+#ifdef USE_LV2
 LilvWorld * Master::lv2_world() const { return mLV2World; }
 const LilvPlugins * Master::lv2_plugins() const { return mLV2Plugins; }
+#endif
 
 float Master::max_sample_value() const { return mMaxSampleValue; }
 

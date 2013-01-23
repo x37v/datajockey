@@ -8,7 +8,10 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "stretcher.hpp"
+
+#ifdef USE_LV2
 #include <lilv/lilv.h>
+#endif
 
 namespace dj {
   namespace audio {
@@ -131,7 +134,9 @@ namespace dj {
         float mMaxSampleValue;
 
         //the eq instance
+#ifdef USE_LV2
         LilvInstance * mEqInstance;
+#endif
         EqControl mEqControl;
 
         //helpers

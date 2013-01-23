@@ -16,8 +16,10 @@ using namespace dj::audio;
 Player::Player() : 
   mPosition(0.0),
   mTransportOffset(0,0),
-  mMaxSampleValue(0.0),
-  mEqInstance(NULL)
+  mMaxSampleValue(0.0)
+#ifdef USE_LV2
+  ,mEqInstance(NULL)
+#endif
 {
   //states
   mPlayState = PAUSE;
@@ -50,8 +52,10 @@ Player::~Player(){
   //cleanup
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
+#ifdef USE_LV2
   if(mEqInstance)
     lilv_instance_free(mEqInstance);
+#endif
 }
 
 //#error "GO OVER ALL OF THIS!!!!!!!!!!!!!!, stretcher not fully integrated"
@@ -67,6 +71,7 @@ void Player::setup_audio(
     delete [] mVolumeBuffer;
   mVolumeBuffer = new float[maxBufferLen];
 
+#ifdef USE_LV2
   //do lv2
   Master * master = Master::instance();
   LilvNode * plugin_uri = lilv_new_uri(master->lv2_world(), DJ_EQ_URI);
@@ -88,6 +93,7 @@ void Player::setup_audio(
       lilv_instance_activate(mEqInstance);
     }
   }
+#endif
 
   mSetup = true;
 }
@@ -182,6 +188,7 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
   if(!mStretcher->audio_buffer())
     return;
+#ifdef USE_LV2
   if(mEqInstance) {
     lilv_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
     lilv_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
@@ -189,6 +196,7 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
     lilv_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
     lilv_instance_run(mEqInstance, numFrames);
   }
+#endif
 }
 
 //actually fill the output vectors

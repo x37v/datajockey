@@ -5,8 +5,11 @@
 #include "transport.hpp"
 #include "scheduler.hpp"
 #include "types.hpp"
-#include <lilv/lilv.h>
 #include <vector>
+
+#ifdef USE_LV2
+#include <lilv/lilv.h>
+#endif
 
 namespace dj {
    namespace audio {
@@ -41,10 +44,13 @@ namespace dj {
             const std::vector<Player *>& players() const;
             Scheduler * scheduler();
             Transport * transport();
-            LilvWorld * lv2_world() const;
-            const LilvPlugins * lv2_plugins() const;
             float max_sample_value() const;
             bool player_audible(unsigned int player_index) const;
+
+#ifdef USE_LV2
+            LilvWorld * lv2_world() const;
+            const LilvPlugins * lv2_plugins() const;
+#endif
 
             //setters
             void master_volume(float val);
@@ -71,8 +77,10 @@ namespace dj {
             float mCrossFadePosition;
             float mMaxSampleValue;
 
+#ifdef USE_LV2
             LilvWorld * mLV2World;
             const LilvPlugins * mLV2Plugins;
+#endif
       };
       class MasterCommand : public Command {
          public:
