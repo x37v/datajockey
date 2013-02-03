@@ -299,61 +299,6 @@ Application::Application(int & argc, char ** argv) :
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
-#if 0
-   QObject::connect(
-       mHistoryManger,
-       SIGNAL(updated_history(int, int, QDateTime)),
-       filter_collection,
-       SLOT(update_history(int, int, QDateTime)));
-
-   QStringList tag_names;
-   tag_names << "aug282012" << "jams" << "techno" << "acid" << "booty";
-
-   foreach(const QString tag, tag_names) {
-     WorkFilterModel * ftable_model = filter_collection->new_filter_model();
-     FilteredDBView * filtered_view = new FilteredDBView(ftable_model, mTop);
-     db_views << filtered_view;
-     db_view_names << tag;
-
-     //work selection
-     QObject::connect(
-         filtered_view,
-         SIGNAL(work_selected(int)),
-         work_detail,
-         SLOT(setWork(int)));
-
-     QObject::connect(
-         filtered_view,
-         SIGNAL(work_selected(int)),
-         SLOT(select_work(int)));
-
-     QObject::connect(
-         filtered_view,
-         SIGNAL(filter_expression_changed(QString)),
-         ftable_model,
-         SLOT(set_filter_expression(QString)));
-
-     QObject::connect(
-         ftable_model,
-         SIGNAL(filter_expression_changed(QString)),
-         filtered_view,
-         SLOT(set_filter_expression(QString)));
-
-     QObject::connect(
-         ftable_model,
-         SIGNAL(filter_expression_error(QString)),
-         filtered_view,
-         SLOT(filter_expression_error(QString)));
-
-     //actually set the expression
-     ftable_model->set_filter_expression("(tag \"mix\":\"" + tag + "\")");
-   }
-#endif
-
-   //QObject::connect(
-         //this, SIGNAL(aboutToQuit()),
-         //work_db_view, SLOT(write_settings()));
-
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
    QTabWidget * left_tab_view = new QTabWidget(mTop);
@@ -380,6 +325,12 @@ Application::Application(int & argc, char ** argv) :
    splitter->addWidget(works_view);
 
    top_layout->addWidget(splitter);
+
+   QObject::connect(
+       mHistoryManger,
+       SIGNAL(updated_history(int, int, QDateTime)),
+       filter_collection,
+       SLOT(update_history(int, int, QDateTime)));
 
    //set the default sizes
    QList<int> sizes;

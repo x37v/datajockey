@@ -27,7 +27,7 @@ FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QW
   setLayout(layout);
 
   QObject::connect(mDBView, SIGNAL(work_selected(int)), SIGNAL(work_selected(int)));
-  QObject::connect(submit_button, SIGNAL(pressed()), SLOT(submit_pressed()));
+  QObject::connect(submit_button, SIGNAL(pressed()), SLOT(apply()));
 }
 
 QString FilteredDBView::filter_expression() const { return mFilterEditor->toPlainText(); }
@@ -44,7 +44,7 @@ void FilteredDBView::filter_expression_error(QString expression) {
       "invalid filter expression: " + expression);
 }
 
-void FilteredDBView::submit_pressed() {
+void FilteredDBView::apply() {
   emit(filter_expression_changed(mFilterEditor->toPlainText()));
 }
 

@@ -36,8 +36,7 @@ class FilteredDBView : public QWidget {
     void select_work(int work_id);
     void set_filter_expression(QString expression);
     void filter_expression_error(QString expression);
-  protected slots:
-    void submit_pressed();
+    void apply();
   signals:
     void work_selected(int work);
     void filter_expression_changed(QString expression);

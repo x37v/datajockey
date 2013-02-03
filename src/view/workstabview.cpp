@@ -90,8 +90,10 @@ void WorksTabView::create_filter_tab(QString expression, QString label) {
 
   if (label.isEmpty())
     label = QString("filter %1").arg(mTabWidget->count());
-  if (!expression.isEmpty())
+  if (!expression.isEmpty()) {
     view->set_filter_expression(expression);
+    view->apply();
+  }
 
   mTabWidget->addTab(view, label);
 }
