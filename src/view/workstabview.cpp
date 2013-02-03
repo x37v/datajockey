@@ -105,7 +105,10 @@ void WorksTabView::read_settings() {
   const int count = settings.beginReadArray("filters");
   for (int i = 0; i < count; i++) {
     settings.setArrayIndex(i);
-    create_filter_tab(settings.value("expression").toString());
+    QString label;
+    if (settings.contains("label"))
+      label = settings.value("label").toString();
+    create_filter_tab(settings.value("expression").toString(), label);
   }
   settings.endArray();
 
@@ -127,6 +130,7 @@ void WorksTabView::write_settings() {
     settings.setArrayIndex(valid_index);
     valid_index++;
     settings.setValue("expression", expression);
+    settings.setValue("label", mTabWidget->tabText(mTabWidget->indexOf(view)));
   }
   settings.endArray();
 
