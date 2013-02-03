@@ -118,6 +118,12 @@ QTableView * WorkDBView::tableView(){
 }
 
 void WorkDBView::select_work(int work_id) {
+  //see if we are actually selecting it already
+  QModelIndex index = mTableView->selectionModel()->currentIndex(); 
+  index = index.sibling(index.row(), WorkTableModel::idColumn);
+  if (index.isValid() && mTableView->model()->data(index).toInt() == work_id)
+    return; //already selected
+
   //get the first index
   int rows = mTableView->model()->rowCount();
   //iterate to find our work

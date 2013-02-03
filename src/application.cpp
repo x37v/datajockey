@@ -7,8 +7,6 @@
 #include "beatbuffer.hpp"
 #include "db.hpp"
 #include "workdetailview.hpp"
-#include "workdbview.hpp"
-#include "worktablemodel.hpp"
 #include "tagmodel.hpp"
 #include "tageditor.hpp"
 #include "oscreceiver.hpp"
@@ -16,10 +14,15 @@
 #include "config.hpp"
 #include "annotation.hpp"
 #include "appmainwindow.hpp"
+#include "history_manager.hpp"
+
+#include "workstabview.hpp"
+
+#include "workdbview.hpp"
+#include "worktablemodel.hpp"
 #include "workfiltermodel.hpp"
 #include "workfiltermodelcollection.hpp"
 #include "filtereddbview.hpp"
-#include "history_manager.hpp"
 
 #include <QSlider>
 #include <QFile>
@@ -296,37 +299,13 @@ Application::Application(int & argc, char ** argv) :
    TagModel * tag_model = new TagModel(model::db::get(), mTop);
    WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
 
-   QSqlTableModel * rtable_model = new QSqlTableModel(mTop, model::db::get());
-   rtable_model->setTable("works");
-   rtable_model->select();
-
-   QList<QWidget *> db_views;
-   QStringList db_view_names;
-   WorkDBView * work_db_view = new WorkDBView(rtable_model, mTop);
-   db_views << work_db_view;
-   db_view_names << "all";
-
-   //work selection
-   QObject::connect(
-       work_db_view,
-       SIGNAL(work_selected(int)),
-       work_detail,
-       SLOT(setWork(int)));
-   QObject::connect(
-       work_db_view,
-       SIGNAL(work_selected(int)),
-       SLOT(select_work(int)));
-
-   WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
-   connect_common_interfaces(mAudioModel, filter_collection);
-
+#if 0
    QObject::connect(
        mHistoryManger,
        SIGNAL(updated_history(int, int, QDateTime)),
        filter_collection,
        SLOT(update_history(int, int, QDateTime)));
 
-#if 0
    QStringList tag_names;
    tag_names << "aug282012" << "jams" << "techno" << "acid" << "booty";
 
@@ -371,10 +350,9 @@ Application::Application(int & argc, char ** argv) :
    }
 #endif
 
-   //XXX hack to write settings before quitting, is there a better way?
-   QObject::connect(
-         this, SIGNAL(aboutToQuit()),
-         work_db_view, SLOT(write_settings()));
+   //QObject::connect(
+         //this, SIGNAL(aboutToQuit()),
+         //work_db_view, SLOT(write_settings()));
 
    TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
@@ -396,18 +374,17 @@ Application::Application(int & argc, char ** argv) :
    left->setLayout(left_layout);
    splitter->addWidget(left);
 
-   QTabWidget * right_tab_view = new QTabWidget(mTop);
-   for (int i = 0; i < db_views.size(); i++) {
-     right_tab_view->addTab(db_views[i], db_view_names[i]);
-   }
-   splitter->addWidget(right_tab_view);
+   WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
+   connect_common_interfaces(mAudioModel, filter_collection);
+   WorksTabView * works_view = new WorksTabView(filter_collection, mTop);
+   splitter->addWidget(works_view);
 
    top_layout->addWidget(splitter);
 
    //set the default sizes
    QList<int> sizes;
    sizes << mMixerPanel->minimumWidth();
-   sizes << right_tab_view->maximumWidth() - mMixerPanel->minimumWidth();
+   sizes << works_view->maximumWidth() - mMixerPanel->minimumWidth();
    splitter->setSizes(sizes);
 
 
@@ -441,6 +418,16 @@ Application::Application(int & argc, char ** argv) :
    central->setLayout(top_layout);
 
    QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(pre_quit_actions()));
+
+   QObject::connect(
+       this, SIGNAL(aboutToQuit()),
+       works_view, SLOT(write_settings()));
+   QObject::connect(
+       works_view, SIGNAL(work_selected(int)),
+       work_detail, SLOT(setWork(int)));
+   QObject::connect(
+       works_view, SIGNAL(work_selected(int)),
+       SLOT(select_work(int)));
 
    mTop->setCentralWidget(central);
    mTop->show();

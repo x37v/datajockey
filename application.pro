@@ -107,6 +107,7 @@ HEADERS += include/application.hpp \
            include/view/mixerpanel.hpp \
            include/view/playerview.hpp \
            include/view/waveformviewgl.hpp \
+           include/view/workstabview.hpp \
            include/old/tageditor.hpp \
            include/old/tagmodel.hpp \
            include/old/tagview.hpp \
@@ -158,6 +159,7 @@ SOURCES += src/application.cpp \
            src/view/mixerpanel.cpp \
            src/view/playerview.cpp \
            src/view/waveformviewgl.cpp \
+           src/view/workstabview.cpp \
            src/old/tageditor.cpp \
            src/old/tagmodel.cpp \
            src/old/tagview.cpp \

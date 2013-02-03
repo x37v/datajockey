@@ -31,6 +31,7 @@ class FilteredDBView : public QWidget {
   Q_OBJECT
   public:
     FilteredDBView(QAbstractItemModel * model, QWidget *parent = NULL);
+    QString filter_expression() const;
   public slots:
     void select_work(int work_id);
     void set_filter_expression(QString expression);

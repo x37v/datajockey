@@ -30,6 +30,8 @@ FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QW
   QObject::connect(submit_button, SIGNAL(pressed()), SLOT(submit_pressed()));
 }
 
+QString FilteredDBView::filter_expression() const { return mFilterEditor->toPlainText(); }
+
 void FilteredDBView::select_work(int work_id) { mDBView->select_work(work_id); }
 
 void FilteredDBView::set_filter_expression(QString expression) {
