@@ -16,7 +16,7 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
   QWidget(parent),
   mFilterModelCollection(filter_model_collection)
 {
-  mTabWidget = new QTabWidget();
+  mTabWidget = new RenameableTabWidget(this);
 
   QSqlTableModel * maintable = new QSqlTableModel(this, model::db::get());
   maintable->setTable("works");

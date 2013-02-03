@@ -4,6 +4,7 @@
 #include <QTabWidget>
 #include <QList>
 
+#include "renameabletabbar.hpp"
 #include "workdbview.hpp"
 #include "filtereddbview.hpp"
 #include "workfiltermodelcollection.hpp"
@@ -23,7 +24,7 @@ class WorksTabView : public QWidget {
     void work_selected(int work);
   private:
     void create_filter_tab(QString expression = QString(), QString label = QString());
-    QTabWidget * mTabWidget;
+    RenameableTabWidget * mTabWidget;
     WorkFilterModelCollection * mFilterModelCollection;
     WorkDBView * mAllView;
     QList<FilteredDBView *> mFilterViews;

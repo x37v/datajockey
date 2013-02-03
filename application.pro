@@ -108,6 +108,7 @@ HEADERS += include/application.hpp \
            include/view/playerview.hpp \
            include/view/waveformviewgl.hpp \
            include/view/workstabview.hpp \
+           include/view/renameabletabbar.hpp \
            include/old/tageditor.hpp \
            include/old/tagmodel.hpp \
            include/old/tagview.hpp \
@@ -160,6 +161,7 @@ SOURCES += src/application.cpp \
            src/view/playerview.cpp \
            src/view/waveformviewgl.cpp \
            src/view/workstabview.cpp \
+           src/view/renameabletabbar.cpp \
            src/old/tageditor.cpp \
            src/old/tagmodel.cpp \
            src/old/tagview.cpp \
