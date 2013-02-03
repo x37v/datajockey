@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QSqlTableModel>
 #include <QToolButton>
+#include <QSettings>
+#include <QTimer>
 
 using namespace dj;
 
@@ -38,27 +40,32 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
   QObject::connect(
       new_btn,
       SIGNAL(clicked()),
-      SLOT(new_tab()));
+      SLOT(add_filter()));
   mTabWidget->setCornerWidget(new_btn);
 
   QVBoxLayout * layout = new QVBoxLayout(this);
   layout->addWidget(mTabWidget);
   setLayout(layout);
+
+  QTimer::singleShot(0, this, SLOT(read_settings()));
 }
 
 WorksTabView::~WorksTabView() {
-}
-
-void WorksTabView::read_settings() {
 }
 
 void WorksTabView::select_work(int work_id) {
   emit(work_selected(work_id));
 }
 
-void WorksTabView::new_tab() {
+void WorksTabView::add_filter(QString expression, QString label) {
+  create_filter_tab(expression, label);
+  mTabWidget->setCurrentIndex(mTabWidget->count() - 1);
+}
+
+void WorksTabView::create_filter_tab(QString expression, QString label) {
   WorkFilterModel * table = mFilterModelCollection->new_filter_model();
   FilteredDBView * view = new FilteredDBView(table, this);
+  mFilterViews << view;
 
   QObject::connect(
       view,
@@ -81,10 +88,46 @@ void WorksTabView::new_tab() {
       view,
       SLOT(filter_expression_error(QString)));
 
-  mTabWidget->addTab(view, "filtered view");
-  mTabWidget->setCurrentIndex(mTabWidget->count() - 1);
+  if (label.isEmpty())
+    label = QString("filter %1").arg(mTabWidget->count());
+  if (!expression.isEmpty())
+    view->set_filter_expression(expression);
+
+  mTabWidget->addTab(view, label);
 }
 
+void WorksTabView::read_settings() {
+  QSettings settings;
+  settings.beginGroup("WorksTabView");
+
+  const int count = settings.beginReadArray("filters");
+  for (int i = 0; i < count; i++) {
+    settings.setArrayIndex(i);
+    create_filter_tab(settings.value("expression").toString());
+  }
+  settings.endArray();
+
+  settings.endGroup();
+}
+
+
 void WorksTabView::write_settings() {
+  mAllView->write_settings();
+  QSettings settings;
+  settings.beginGroup("WorksTabView");
+
+  int valid_index = 0;
+  settings.beginWriteArray("filters");
+  foreach (FilteredDBView * view, mFilterViews) {
+    QString expression = view->filter_expression();
+    if (expression.isEmpty())
+      continue;
+    settings.setArrayIndex(valid_index);
+    valid_index++;
+    settings.setValue("expression", expression);
+  }
+  settings.endArray();
+
+  settings.endGroup();
 }
 
