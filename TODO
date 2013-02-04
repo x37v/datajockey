@@ -21,6 +21,7 @@ Beat Extraction:
 Loading:
    display error message dialog when we cannot load an audio file or buffer.
 Importer:
+  watch directory.. on startup gui, if there are new files in a 'watch' directory, import them..
 	db threading not safe, fix that..
   Provide any sort of UI?  At least list the tracks before importing? Display progress.
   GUI importer, integrate into main app
