@@ -10,6 +10,12 @@ RenameableTabWidget::RenameableTabWidget(QWidget * parent) :
   setTabBar(bar);
 }
 
+
+void RenameableTabWidget::close_tab(int index) {
+  if (tabsClosable())
+    tabBar()->removeTab(index);
+}
+
 RenameableTabBar::RenameableTabBar(QWidget *parent) :
   QTabBar(parent)
 {

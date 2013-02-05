@@ -4,7 +4,6 @@
 #include <QString>
 #include <QObject>
 #include <QSqlDatabase>
-#include <QList>
 #include <QDateTime>
 
 class WorkFilterModel;
@@ -15,7 +14,7 @@ class WorkFilterModelCollection : public QObject {
 
   public:
     WorkFilterModelCollection(QObject * parent = NULL, QSqlDatabase db = QSqlDatabase());
-    WorkFilterModel * new_filter_model();
+    WorkFilterModel * new_filter_model(QObject * parent = NULL);
 
   public slots:
     void player_trigger(int player_index, QString name);
@@ -45,8 +44,6 @@ class WorkFilterModelCollection : public QObject {
     double mCurrentBPM;
     double mLastBPM;
     QTimer * mBPMTimeout;
-
-    QList<WorkFilterModel *> mFilterModels;
 };
 
 #endif

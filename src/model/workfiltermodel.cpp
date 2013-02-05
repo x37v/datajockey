@@ -197,6 +197,9 @@ WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) :
   setSourceModel(mQueryModel);
 }
 
+WorkFilterModel::~WorkFilterModel() {
+}
+
 void WorkFilterModel::set_filter_expression(QString expression) {
   //XXX just for now, should probably have some sort of 'dirty' flag if we care about
   //current_bpm and other dynamic elements

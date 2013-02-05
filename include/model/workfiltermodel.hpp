@@ -11,6 +11,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
 
   public:
     WorkFilterModel(QObject * parent = NULL, QSqlDatabase db = QSqlDatabase());
+    virtual ~WorkFilterModel();
 
   public slots:
     void set_filter_expression(QString expression);

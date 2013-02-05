@@ -8,6 +8,8 @@ class RenameableTabWidget : public QTabWidget {
   Q_OBJECT
   public:
     RenameableTabWidget(QWidget * parent = NULL);
+  public slots:
+    void close_tab(int index);
 };
 
 class RenameableTabBar : public QTabBar {

@@ -20,9 +20,8 @@ WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatab
   QObject::connect(mBPMTimeout, SIGNAL(timeout()), SLOT(bpm_send_timeout()));
 }
 
-WorkFilterModel * WorkFilterModelCollection::new_filter_model() {
-  WorkFilterModel * m = new WorkFilterModel(this, model::db::get());
-  mFilterModels << m;
+WorkFilterModel * WorkFilterModelCollection::new_filter_model(QObject * parent) {
+  WorkFilterModel * m = new WorkFilterModel(parent, model::db::get());
   m->set_current_bpm(mCurrentBPM);
 
   QObject::connect(this, SIGNAL(current_bpm_changed(double)), m, SLOT(set_current_bpm(double)));

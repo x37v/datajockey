@@ -20,6 +20,7 @@ class WorksTabView : public QWidget {
     void write_settings();
   protected slots:
     void read_settings();
+    void close_tab(int index);
   signals:
     void work_selected(int work);
   private:

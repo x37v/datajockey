@@ -23,6 +23,8 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
   maintable->select();
   mAllView = new WorkDBView(maintable);
   mTabWidget->addTab(mAllView, "all works");
+  mTabWidget->setTabsClosable(true);
+  mTabWidget->setMovable(true);
 
   QObject::connect(
       mAllView,
@@ -42,6 +44,11 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
       SIGNAL(clicked()),
       SLOT(add_filter()));
   mTabWidget->setCornerWidget(new_btn);
+
+  QObject::connect(
+      mTabWidget,
+      SIGNAL(tabCloseRequested(int)),
+      SLOT(close_tab(int)));
 
   QVBoxLayout * layout = new QVBoxLayout(this);
   layout->addWidget(mTabWidget);
@@ -65,6 +72,7 @@ void WorksTabView::add_filter(QString expression, QString label) {
 void WorksTabView::create_filter_tab(QString expression, QString label) {
   WorkFilterModel * table = mFilterModelCollection->new_filter_model();
   FilteredDBView * view = new FilteredDBView(table, this);
+  table->setParent(view);
   mFilterViews << view;
 
   QObject::connect(
@@ -115,6 +123,17 @@ void WorksTabView::read_settings() {
   settings.endGroup();
 }
 
+void WorksTabView::close_tab(int index) {
+  if (index < 0 || index >= mTabWidget->count())
+    return;
+  if (mTabWidget->widget(index) == mAllView)
+    return;
+  FilteredDBView * view = static_cast<FilteredDBView*>(mTabWidget->widget(index));
+  if (mFilterViews.removeAll(view) != 0) {
+    view->deleteLater();
+    mTabWidget->close_tab(index);
+  }
+}
 
 void WorksTabView::write_settings() {
   mAllView->write_settings();
