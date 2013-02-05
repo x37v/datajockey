@@ -2,7 +2,6 @@
 #define WORKS_TAB_VIEW_HPP
 
 #include <QTabWidget>
-#include <QList>
 
 #include "renameabletabbar.hpp"
 #include "workdbview.hpp"
@@ -28,7 +27,6 @@ class WorksTabView : public QWidget {
     RenameableTabWidget * mTabWidget;
     WorkFilterModelCollection * mFilterModelCollection;
     WorkDBView * mAllView;
-    QList<FilteredDBView *> mFilterViews;
 };
 
 #endif

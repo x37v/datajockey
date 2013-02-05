@@ -73,7 +73,6 @@ void WorksTabView::create_filter_tab(QString expression, QString label) {
   WorkFilterModel * table = mFilterModelCollection->new_filter_model();
   FilteredDBView * view = new FilteredDBView(table, this);
   table->setParent(view);
-  mFilterViews << view;
 
   QObject::connect(
       view,
@@ -129,10 +128,8 @@ void WorksTabView::close_tab(int index) {
   if (mTabWidget->widget(index) == mAllView)
     return;
   FilteredDBView * view = static_cast<FilteredDBView*>(mTabWidget->widget(index));
-  if (mFilterViews.removeAll(view) != 0) {
-    view->deleteLater();
-    mTabWidget->close_tab(index);
-  }
+  view->deleteLater();
+  mTabWidget->close_tab(index);
 }
 
 void WorksTabView::write_settings() {
@@ -142,10 +139,17 @@ void WorksTabView::write_settings() {
 
   int valid_index = 0;
   settings.beginWriteArray("filters");
-  foreach (FilteredDBView * view, mFilterViews) {
+  for (int i = 0; i < mTabWidget->count(); i++) {
+    //make sure it is not the all view and the expression isn't empty
+    QWidget * widget = mTabWidget->widget(i);
+    if (widget == mAllView)
+      continue;
+
+    FilteredDBView * view = static_cast<FilteredDBView *>(widget);
     QString expression = view->filter_expression();
     if (expression.isEmpty())
       continue;
+
     settings.setArrayIndex(valid_index);
     valid_index++;
     settings.setValue("expression", expression);
