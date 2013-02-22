@@ -153,6 +153,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
          SIGNAL(seek_frame_relative(int)));
    QObject::connect(mWaveFormZoomedView, SIGNAL(mouse_down(bool)),
          SIGNAL(seeking(bool)));
+   QObject::connect(mWaveFormFullView, SIGNAL(frame_clicked(int)),
+         SIGNAL(seek_to_frame(int)));
 
    QObject::connect(mButtons["sync"], SIGNAL(toggled(bool)),
          mSpeedView, SLOT(setDisabled(bool)));

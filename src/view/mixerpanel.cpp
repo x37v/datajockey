@@ -56,6 +56,10 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
             this,
             SLOT(relay_player_seeking(bool)));
       QObject::connect(player,
+            SIGNAL(seek_to_frame(int)),
+            this,
+            SLOT(relay_player_seek_to_frame(int)));
+      QObject::connect(player,
             SIGNAL(seek_frame_relative(int)),
             this,
             SLOT(relay_player_seek_frame_relative(int)));
@@ -302,6 +306,14 @@ void MixerPanel::relay_player_speed(int val) {
       return;
 
    emit(player_value_changed(player_index.value(), "speed", val));
+}
+
+void MixerPanel::relay_player_seek_to_frame(int frame) {
+   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+   if (player_index == mSenderToIndex.end())
+      return;
+
+   emit(player_value_changed(player_index.value(), "play_frame", frame));
 }
 
 void MixerPanel::relay_player_seek_frame_relative(int frames) {

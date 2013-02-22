@@ -40,6 +40,7 @@ namespace dj {
 
          protected slots:
             void relay_player_value_changed(bool state);
+            void relay_player_seek_to_frame(int frame);
             void relay_player_seek_frame_relative(int frames);
             void relay_player_seeking(bool state);
             void relay_player_triggered();

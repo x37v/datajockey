@@ -56,6 +56,7 @@ namespace dj {
             void set_audio_frame(int frame);
             void set_song_description(QString description);
          signals:
+            void seek_to_frame(int frame);
             void seek_frame_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
             void seeking(bool state);

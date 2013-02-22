@@ -297,6 +297,7 @@ void WaveFormViewGL::mouseMoveEvent(QMouseEvent * event) {
 void WaveFormViewGL::mousePressEvent(QMouseEvent * event) {
    mLastMousePos = event->y();
    emit(mouse_down(true));
+   emit(frame_clicked(mFramesPerLine * mLastMousePos));
 }
 
 void WaveFormViewGL::mouseReleaseEvent(QMouseEvent * /* event */) {

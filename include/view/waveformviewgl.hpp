@@ -37,6 +37,7 @@ namespace dj {
          signals:
             void seek_relative(int);
             void mouse_down(bool);
+            void frame_clicked(int frame);
          private:
             QMutex mMutex;
 
