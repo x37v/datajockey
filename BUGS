@@ -2,3 +2,5 @@ audio hiccups without displaying xruns?  what is going on?
 figure out mp3 related crashes importing
 clicks:
   changing of tempo causes clicks in synched audio.
+work selection:
+  sometimes when you select a work and load you get the song before or after it in the work view list
