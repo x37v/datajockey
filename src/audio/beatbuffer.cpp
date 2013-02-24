@@ -84,9 +84,17 @@ double BeatBuffer::time_at_position(const TimePoint& position) const {
 }
 
 TimePoint BeatBuffer::position_at_time(double seconds) const {
-   TimePoint pos;
-   pos.at_bar(0);
-   return position_at_time(seconds, pos);
+  TimePoint pos;
+  pos.at_bar(0);
+  return position_at_time(seconds, pos);
+}
+
+TimePoint BeatBuffer::beat_closest(double seconds) const {
+  TimePoint pos = position_at_time(seconds);
+  if (pos.pos_in_beat() >= 0.5)
+    pos.advance_beat();
+  pos.pos_in_beat(0);
+  return pos;
 }
 
 TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos) const {

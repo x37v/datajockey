@@ -112,13 +112,14 @@ namespace dj {
         //audio thread this is how we manage the reference counting and
         //avoid having deallocation happen in the audio thread
         QList<AudioBufferPtr> mPlayingAudioFiles;
-        QList<BeatBufferPtr> mPlayingAnnotationFiles;
+        QList<QList<BeatBufferPtr> > mPlayingAnnotationFiles;
 
         //execute/consume the scheduler's done actions
         ConsumeThread * mConsumeThread;
 
         //maintain player state information
         std::vector<PlayerState *> mPlayerStates;
+        QList<QHash<int, unsigned int> > mPlayerCuepoints;
         typedef QPair<PlayerStateCommand::action_t, PlayerStateCommand::action_t> player_onoff_action_pair_t;
         QHash<QString, player_onoff_action_pair_t> mPlayerStateActionMapping;
         QHash<QString, PlayerDoubleCommand::action_t> mPlayerDoubleActionMapping;

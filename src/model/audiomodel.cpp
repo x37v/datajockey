@@ -26,6 +26,8 @@ namespace {
     //*** PLAYER
 
     list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back";
+    list << "set_cuepoint0";
+    list << "jump_cuepoint0";
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
@@ -129,7 +131,7 @@ class AudioModel::PlayerSetBuffersCommand : public dj::audio::PlayerCommand {
       }
       if (mOldBeatBuffer) {
         BeatBufferPtr buffer(mOldBeatBuffer);
-        mAudioModel->mPlayingAnnotationFiles.removeOne(buffer);
+        mAudioModel->mPlayingAnnotationFiles[index()].removeOne(buffer);
       }
       //execute the super class's done action
       PlayerCommand::execute_done();
@@ -231,6 +233,8 @@ AudioModel::AudioModel() :
   for(unsigned int i = 0; i < mNumPlayers; i++) {
     mMaster->add_player();
     mPlayerStates.push_back(new PlayerState());
+    mPlayerCuepoints << QHash<int, unsigned int>();
+    mPlayingAnnotationFiles << QList<BeatBufferPtr>();
     LoaderThread * newThread = new LoaderThread;
     mThreadPool.push_back(newThread);
     QObject::connect(newThread, SIGNAL(load_progress(int, int)),
@@ -429,7 +433,7 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
   pstate->mParamInt["sample_rate"] = audio_buffer->sample_rate();
 
   mPlayingAudioFiles <<  audio_buffer;
-  mPlayingAnnotationFiles << beat_buffer;
+  mPlayingAnnotationFiles[player_index] << beat_buffer;
 
   queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
 
@@ -615,7 +619,28 @@ void AudioModel::player_trigger(int player_index, QString name) {
     set_player_position_beat_relative(player_index, 1);
   else if (name == "seek_back")
     set_player_position_beat_relative(player_index, -1);
-  else if (name.contains("bump_")) {
+  else if (name.contains("cuepoint")) {
+    QString cue_index_str = name;
+    cue_index_str.replace(QRegExp(".*cuepoint"), "");
+    int cue_index = cue_index_str.toInt();
+    if (name.contains("set_")) {
+      //XXX for now lock to closest beat
+      unsigned int frame = pstate->mCurrentFrame;
+      if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
+        //XXX ignoring file sampling rate, using global sampling rate
+        BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
+        TimePoint pos = beat_buff->beat_closest(static_cast<double>(frame) / sample_rate());
+        frame = static_cast<unsigned int>(beat_buff->time_at_position(pos) * static_cast<double>(sample_rate()));
+
+        mPlayerCuepoints[player_index][cue_index] = frame;
+      }
+    } else {
+      if (mPlayerCuepoints[player_index].size() > cue_index) {
+        int frame = static_cast<int>(mPlayerCuepoints[player_index][cue_index]);
+        player_set(player_index, "play_frame", frame);
+      }
+    }
+  } else if (name.contains("bump_")) {
     if(pstate->mParamBool["sync"] || pstate->mPostFreeSpeedUpdates < 2)
       return;
 
@@ -828,6 +853,10 @@ void AudioModel::player_load(int player_index, QString audio_file_path, QString 
 
   player_trigger(player_index, "clear");
   mThreadPool[player_index]->load(player_index, audio_file_path, annotation_file_path);
+  //clear out the cue points
+  mPlayerCuepoints[player_index].clear();
+  //set the first cue point to the first frame
+  mPlayerCuepoints[player_index][0] = 0;
 }
 
 void AudioModel::start_audio() {
