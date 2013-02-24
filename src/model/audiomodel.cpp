@@ -635,7 +635,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
         mPlayerCuepoints[player_index][cue_index] = frame;
       }
     } else {
-      if (mPlayerCuepoints[player_index].size() > cue_index) {
+      if (mPlayerCuepoints[player_index].contains(cue_index)) {
         int frame = static_cast<int>(mPlayerCuepoints[player_index][cue_index]);
         player_set(player_index, "play_frame", frame);
       }
