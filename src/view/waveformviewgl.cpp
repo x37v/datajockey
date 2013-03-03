@@ -158,7 +158,17 @@ void WaveFormViewGL::clear_markers() {
 }
 
 void WaveFormViewGL::add_marker(int id, int frame, QColor color) {
-  mMarkers << marker_t(id, frame, color);
+  bool found = false;
+  for (int i = 0; i < mMarkers.size(); i++) {
+    if (mMarkers[i].id == id) {
+      mMarkers[i].frame = frame;
+      mMarkers[i].color = color;
+      found = true;
+      break;
+    }
+  }
+  if (!found)
+    mMarkers << marker_t(id, frame, color);
   update_markers();
 }
 

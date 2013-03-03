@@ -26,8 +26,8 @@ namespace {
     //*** PLAYER
 
     list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back";
-    list << "set_cuepoint0";
-    list << "jump_cuepoint0";
+    list << "set_cuepoint_0";
+    list << "jump_cuepoint_0";
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
@@ -621,7 +621,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
     set_player_position_beat_relative(player_index, -1);
   else if (name.contains("cuepoint")) {
     QString cue_index_str = name;
-    cue_index_str.replace(QRegExp(".*cuepoint"), "");
+    cue_index_str.replace(QRegExp(".*cuepoint_"), "");
     int cue_index = cue_index_str.toInt();
     if (name.contains("set_")) {
       //XXX for now lock to closest beat
@@ -633,6 +633,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
         frame = static_cast<unsigned int>(beat_buff->time_at_position(pos) * static_cast<double>(sample_rate()));
 
         mPlayerCuepoints[player_index][cue_index] = frame;
+        emit(player_value_changed(player_index, QString("set_cuepoint_%1").arg(cue_index), static_cast<int>(frame)));
       }
     } else {
       if (mPlayerCuepoints[player_index].contains(cue_index)) {

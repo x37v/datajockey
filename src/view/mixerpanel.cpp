@@ -218,6 +218,12 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
       player->eq_dial("high")->setValue(value);
    else if (name == "update_audio_level")
       player->set_audio_level(value);
+   else if (name.contains("set_cuepoint")) {
+     QString id_str = name;
+     id_str.replace("set_cuepoint_", "");
+     int id = id_str.toInt();
+     player->set_cuepoint(id, value);
+   }
 }
 
 void MixerPanel::player_set(int player_index, QString name, QString value) {

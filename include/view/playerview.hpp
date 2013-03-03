@@ -55,6 +55,7 @@ namespace dj {
             void set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
             void set_audio_frame(int frame);
             void set_song_description(QString description);
+            void set_cuepoint(int id, int frame);
          signals:
             void seek_to_frame(int frame);
             void seek_frame_relative(int frames);

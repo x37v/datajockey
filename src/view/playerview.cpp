@@ -210,3 +210,9 @@ void Player::set_song_description(QString description) {
    mTrackDescription[1]->setCursorPosition(0);
 }
 
+void Player::set_cuepoint(int id, int frame) {
+  //XXX make color configurable
+  mWaveFormFullView->add_marker(id, frame, Qt::cyan);
+  mWaveFormZoomedView->add_marker(id, frame, Qt::cyan);
+}
+
