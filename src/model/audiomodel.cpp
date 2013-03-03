@@ -26,8 +26,10 @@ namespace {
     //*** PLAYER
 
     list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back";
-    list << "set_cuepoint_0";
-    list << "jump_cuepoint_0";
+    for (int i = 0; i < 10; i++) {
+      list << QString("set_cuepoint_%1").arg(i);
+      list << QString("jump_cuepoint_%1").arg(i);
+    }
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
