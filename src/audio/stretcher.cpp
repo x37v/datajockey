@@ -49,6 +49,13 @@ namespace dj {
       unsigned int Stretcher::frame() const { return mFrame; }
       double Stretcher::frame_subsample() const { return mFrameSubsample; }
 
+      void Stretcher::seconds(double seconds) {
+         if (!mAudioBuffer)
+            return;
+         unsigned int f = static_cast<unsigned int>(seconds * static_cast<double>(mAudioBuffer->sample_rate()));
+         frame(f);
+      }
+
       //set the playback speed
       void Stretcher::speed(double play_speed) {
          mSpeed = play_speed;

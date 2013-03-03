@@ -20,6 +20,9 @@ namespace dj {
             unsigned int frame() const;
             double frame_subsample() const;
 
+            //updates frame based on sample rate
+            void seconds(double seconds);
+
             //set the playback speed
             void speed(double play_speed);
             double speed() const;

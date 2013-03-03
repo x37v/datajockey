@@ -277,10 +277,29 @@ AudioBuffer * Player::audio_buffer() const { return mStretcher->audio_buffer(); 
 BeatBuffer * Player::beat_buffer() const { return mBeatBuffer; }
 
 //setters
-void Player::play_state(play_state_t val){
+void Player::play_state(play_state_t val, Transport * transport) {
   if (mPlayState != val) {
     mPlayState = val;
     mUpdateTransportOffset = true;
+
+    if (transport && mSync && mPlayState == PLAY) {
+      TimePoint trans_pos = transport->position();
+
+      //get to our closest beat
+      if (mPosition.pos_in_beat() > 0.5)
+        mPosition.advance_beat();
+      mPosition.pos_in_beat(0.0);
+
+      //if the transport is 1/2 through the beat already, sync to the previous beat
+      if (trans_pos.pos_in_beat() > 0.5)
+        mPosition -= TimePoint(0, 1, 0);
+
+      mPosition.pos_in_beat(trans_pos.pos_in_beat());
+      mStretcher->seconds(mBeatBuffer->time_at_position(mPosition));
+
+      update_transport_offset(*transport);
+      update_play_speed(*transport);
+    }
   }
 }
 
@@ -363,15 +382,29 @@ void Player::position(const TimePoint &val){
 
 }
 
-void Player::position_at_frame(unsigned long frame) {
+void Player::position_at_frame(unsigned long frame, Transport * transport) {
   if (!mStretcher->audio_buffer())
     return;
 
   mUpdateTransportOffset = true;
   mStretcher->frame(frame);
 
-  if (mBeatBuffer)
+  if (mBeatBuffer) {
     mPosition = strecher_position();
+    if (transport && mSync && mPlayState == PLAY) {
+      TimePoint trans_pos = transport->position();
+
+      if (mPosition.beat() > 0 || mPosition.bar() > 0) {
+        if (abs(mPosition.pos_in_beat() - trans_pos.pos_in_beat()) > 0.50)
+          mPosition -= TimePoint(0, 1, 0);
+        mPosition.pos_in_beat(trans_pos.pos_in_beat());
+        mStretcher->seconds(mBeatBuffer->time_at_position(mPosition));
+      }
+
+      update_transport_offset(*transport);
+      update_play_speed(*transport);
+    }
+  }
 
   mPositionDirty = false;
 }
@@ -490,9 +523,12 @@ void Player::update_play_speed(const Transport& transport) {
 void Player::update_transport_offset(const Transport& transport) {
   mTransportOffset = (transport.position() - mPosition);
 
+#if 0
   //XXX do we really want to do this?
   if(mTransportOffset.pos_in_beat() > 0.5)
     mTransportOffset.advance_beat();
+#endif
+
   mTransportOffset.pos_in_beat(0.0);
 
   mUpdateTransportOffset = false;
@@ -509,7 +545,9 @@ TimePoint Player::strecher_position() {
 
 //command stuff
 //
-PlayerCommand::PlayerCommand(unsigned int idx){
+PlayerCommand::PlayerCommand(unsigned int idx) : 
+  mMaster(Master::instance())
+{
   mIndex = idx;
 }
 
@@ -546,7 +584,7 @@ void PlayerStateCommand::execute(){
     //execute the action
     switch(mAction){
       case PLAY:
-        p->play_state(Player::PLAY);
+        p->play_state(Player::PLAY, master()->transport());
         break;
       case PAUSE:
         p->play_state(Player::PAUSE);
@@ -810,7 +848,7 @@ void PlayerPositionCommand::execute(){
     switch(mTarget){
       case PLAY:
         if (mUseFrames)
-          p->position_at_frame(mFrames);
+          p->position_at_frame(mFrames, master()->transport());
         else
           p->position(mTimePoint);
         break;

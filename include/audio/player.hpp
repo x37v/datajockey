@@ -78,7 +78,7 @@ namespace dj {
         BeatBuffer * beat_buffer() const;
 
         //setters
-        void play_state(play_state_t val);
+        void play_state(play_state_t val, Transport * transport = NULL);
         void out_state(out_state_t val);
         void mute(bool val);
         void sync(bool val);
@@ -87,7 +87,7 @@ namespace dj {
         void volume(double val);
         void play_speed(double val);
         void position(const TimePoint &val);
-        void position_at_frame(unsigned long frame);
+        void position_at_frame(unsigned long frame, Transport * transport = NULL);
         void start_position(const TimePoint &val);
         void end_position(const TimePoint &val);
         void loop_start_position(const TimePoint &val);
@@ -150,6 +150,9 @@ namespace dj {
         TimePoint strecher_position();
     };
 
+    //forward declaration
+    class Master;
+
     class PlayerCommand : public Command {
       public:
         PlayerCommand(unsigned int idx);
@@ -162,10 +165,12 @@ namespace dj {
         void store(CommandIOData& data, const std::string& name) const;
       protected:
         Player * player();
+        Master * master() const { return mMaster; }
       private:
         unsigned int mIndex;
         //this comes from the player's position
         TimePoint mPositionExecuted;
+        Master * mMaster;
     };
 
     class PlayerStateCommand : public PlayerCommand {
