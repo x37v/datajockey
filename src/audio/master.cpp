@@ -263,8 +263,8 @@ bool Master::player_audible(unsigned int player_index) const {
   if (player_index >= mPlayers.size() ||
       !mPlayers[player_index]->audible() ||
       master_volume() < INAUDIBLE_VOLUME ||
-      (static_cast<int>(player_index) == mCrossFadeMixers[1] && mCrossFadePosition <= INAUDIBLE_VOLUME) ||
-      (static_cast<int>(player_index) == mCrossFadeMixers[0] && (1.0 - mCrossFadePosition) <= INAUDIBLE_VOLUME))
+      (player_index == mCrossFadeMixers[1] && mCrossFadePosition <= INAUDIBLE_VOLUME) ||
+      (player_index == mCrossFadeMixers[0] && (1.0 - mCrossFadePosition) <= INAUDIBLE_VOLUME))
     return false;
   return true;
 }
