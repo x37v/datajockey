@@ -9,6 +9,7 @@
 #include <QToolButton>
 #include <QSettings>
 #include <QTimer>
+#include <QMessageBox>
 
 using namespace dj;
 
@@ -127,9 +128,18 @@ void WorksTabView::close_tab(int index) {
     return;
   if (mTabWidget->widget(index) == mAllView)
     return;
-  FilteredDBView * view = static_cast<FilteredDBView*>(mTabWidget->widget(index));
-  view->deleteLater();
-  mTabWidget->close_tab(index);
+
+  //prompt to be sure
+  QMessageBox::StandardButton btn = QMessageBox::question(this,
+      "Removing filter",
+      QString("Are you sure you want to remove the filter: %1").arg(mTabWidget->tabText(index)),
+      QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
+
+  if (btn == QMessageBox::Yes) {
+    FilteredDBView * view = static_cast<FilteredDBView*>(mTabWidget->widget(index));
+    view->deleteLater();
+    mTabWidget->close_tab(index);
+  }
 }
 
 void WorksTabView::write_settings() {
