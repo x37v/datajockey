@@ -155,6 +155,7 @@ void WaveFormViewGL::set_frames_per_line(int num_frames) {
 void WaveFormViewGL::clear_markers() {
   mMarkers.clear();
   update_markers();
+  update();
 }
 
 void WaveFormViewGL::add_marker(int id, int frame, QColor color) {
@@ -170,6 +171,7 @@ void WaveFormViewGL::add_marker(int id, int frame, QColor color) {
   if (!found)
     mMarkers << marker_t(id, frame, color);
   update_markers();
+  update();
 }
 
 void WaveFormViewGL::remove_marker(int id) {
@@ -181,6 +183,7 @@ void WaveFormViewGL::remove_marker(int id) {
       it++;
   }
   update_markers();
+  update();
 }
 
 void WaveFormViewGL::initializeGL(){
@@ -247,6 +250,7 @@ void WaveFormViewGL::paintGL(){
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, &mVerticies.front());
         glDrawArrays(GL_LINES, 0, mVerticies.size() / 2);
+        glDisableClientState(GL_VERTEX_ARRAY);
       }
 
       //draw beats if we have them
@@ -257,6 +261,7 @@ void WaveFormViewGL::paintGL(){
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, &mBeatVerticies.front());
         glDrawArrays(GL_LINES, 0, mBeatVerticies.size() / 2);
+        glDisableClientState(GL_VERTEX_ARRAY);
         glPopMatrix();
       }
 
