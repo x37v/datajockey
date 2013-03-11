@@ -13,11 +13,34 @@ namespace dj {
   namespace view {
     class WaveFormViewGL : public QGLWidget {
       Q_OBJECT
+
+      Q_PROPERTY(QColor backgroudColor READ backgroud_color WRITE backgroud_color DESIGNABLE true)
+      Q_PROPERTY(QColor waveformColor READ waveform_color WRITE waveform_color DESIGNABLE true)
+      Q_PROPERTY(QColor cursorColor READ cursor_color WRITE cursor_color DESIGNABLE true)
+      Q_PROPERTY(QColor centerLineColor READ centerLine_color WRITE centerLine_color DESIGNABLE true)
+      Q_PROPERTY(QColor beatsColor READ beats_color WRITE beats_color DESIGNABLE true)
+
       public:
         WaveFormViewGL(QWidget * parent = NULL, bool vertical = false, bool full = false);
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
         void setVertical(bool vert);
+
+        void backgroud_color(QColor c) { backgroudColor = c; }
+        QColor backgroud_color() const { return backgroudColor; }
+
+        void waveform_color(QColor c) { waveformColor = c; }
+        QColor waveform_color() const { return waveformColor; }
+
+        void cursor_color(QColor c) { cursorColor = c; }
+        QColor cursor_color() const { return cursorColor; }
+
+        void centerLine_color(QColor c) { centerLineColor = c; }
+        QColor centerLine_color() const { return centerLineColor; }
+
+        void beats_color(QColor c) { beatsColor = c; }
+        QColor beats_color() const { return beatsColor; }
+
       public slots:
         void clear_audio();
         void set_buffers(audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer);
@@ -75,11 +98,11 @@ namespace dj {
         int mFramesPerLine;
         int mFrame;
 
-        QColor mColorBackgroud;
-        QColor mColorWaveform;
-        QColor mColorCursor;
-        QColor mColorCenterLine;
-        QColor mColorBeats;
+        QColor backgroudColor;
+        QColor waveformColor;
+        QColor cursorColor;
+        QColor centerLineColor;
+        QColor beatsColor;
 
         int mLastMousePos;
 

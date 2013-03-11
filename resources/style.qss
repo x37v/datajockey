@@ -31,6 +31,14 @@ SessionDisplayStyle {
   qproperty-backgroundColor: red;
 }
 
+dj--view--WaveFormViewGL {
+  qproperty-backgroudColor: black;
+  qproperty-waveformColor: darkRed;
+  qproperty-cursorColor: blue;
+  qproperty-centerLineColor: green;
+  qproperty-beatsColor: yellow; 
+}
+
 QPushButton {
   border-width: 1px;
   min-width: 24px;

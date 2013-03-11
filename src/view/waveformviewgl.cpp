@@ -61,11 +61,11 @@ WaveFormViewGL::WaveFormViewGL(QWidget * parent, bool vertical, bool full) :
   mSampleRate(44100.0),
   mFramesPerLine(256),
   mFrame(0),
-  mColorBackgroud(QColor::fromRgb(0,0,0)),
-  mColorWaveform(QColor::fromRgb(255,0,0).dark()),
-  mColorCursor(QColor::fromRgb(0,255,0)),
-  mColorCenterLine(QColor::fromRgb(0,0,255)),
-  mColorBeats(QColor::fromRgb(255,255,0)),
+  backgroudColor(Qt::black),
+  waveformColor(Qt::darkRed),
+  cursorColor(Qt::blue),
+  centerLineColor(Qt::green),
+  beatsColor(Qt::yellow),
   mLastMousePos(0)
 {
   if (mFullView)
@@ -189,7 +189,7 @@ void WaveFormViewGL::remove_marker(int id) {
 void WaveFormViewGL::initializeGL(){
   QMutexLocker lock(&mMutex);
 
-  qglClearColor(mColorBackgroud);
+  qglClearColor(backgroudColor);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -235,7 +235,7 @@ void WaveFormViewGL::paintGL(){
       //draw waveform
       glPushMatrix();
       glTranslatef(-mVerticies[mFirstLineIndex * 4], 0, 0);
-      qglColor(mColorWaveform);
+      qglColor(waveformColor);
       glLineWidth(1.0);
 
       if (mFullView) {
@@ -256,7 +256,7 @@ void WaveFormViewGL::paintGL(){
       //draw beats if we have them
       if (mBeatVerticiesValid) {
         glPushMatrix();
-        qglColor(mColorBeats);
+        qglColor(beatsColor);
         glLineWidth(1.0);
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, &mBeatVerticies.front());
@@ -285,7 +285,7 @@ void WaveFormViewGL::paintGL(){
   }
 
   //draw cursor
-  qglColor(mColorCursor);
+  qglColor(cursorColor);
   glLineWidth(2.0);
   glBegin(GL_LINES);
   glVertex2f(mCursorOffset, -1.0);
@@ -293,7 +293,7 @@ void WaveFormViewGL::paintGL(){
   glEnd();
 
   //draw center line
-  qglColor(mColorCenterLine);
+  qglColor(centerLineColor);
   glLineWidth(1.0);
   glBegin(GL_LINES);
   glVertex2f(0, 0);
@@ -454,7 +454,7 @@ GLfloat WaveFormViewGL::line_value(int line_index) {
 
 void WaveFormViewGL::update_colors() {
   int colored_lines = mVertexColors.size() / 6;
-  const QColor waveform_color = mColorWaveform;
+  const QColor waveform_color = waveformColor;
   float normal_color[3];
   normal_color[0] = waveform_color.redF();
   normal_color[1] = waveform_color.greenF();
