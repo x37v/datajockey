@@ -32,6 +32,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QStyledItemDelegate>
+#include <QPainter>
 
 #include <iostream>
 using std::cout;
@@ -53,9 +54,22 @@ class TimeDisplayDelegate : public QStyledItemDelegate {
 class SessionDisplayDelegate : public QStyledItemDelegate {
   public:
     SessionDisplayDelegate(int current_session, QObject *parent) :
-      QStyledItemDelegate(parent), mCurrentSessionId(current_session) { }
+      QStyledItemDelegate(parent), mCurrentSessionId(current_session) {
+        mSessionColumn = dj::model::db::work::temp_table_column("session");
+      }
     virtual ~SessionDisplayDelegate() { }
 
+    virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const {
+      QModelIndex session_index = index.sibling(index.row(), mSessionColumn);
+      if (session_index.data().toInt() == mCurrentSessionId) {
+        painter->setBrush(QBrush(Qt::red));
+        painter->drawRect(option.rect);
+      }
+
+      QStyledItemDelegate::paint(painter, option, index);
+    }
+
+#if 0
     virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
       int session_id = value.toInt();
       if (session_id == mCurrentSessionId)
@@ -63,8 +77,10 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
       else
         return QString("");
     }
+#endif
   private:
     int mCurrentSessionId;
+    int mSessionColumn;
 };
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
@@ -95,11 +111,11 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   //XXX actually do something with editing at some point
   mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
+  SessionDisplayDelegate * session_delegate = new SessionDisplayDelegate(dj::model::db::work::current_session(), this);
+  mTableView->setItemDelegate(session_delegate);
+
   TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
   mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_column("audio_file_seconds"), time_delegate);
-
-  SessionDisplayDelegate * session_delegate = new SessionDisplayDelegate(dj::model::db::work::current_session(), this);
-  mTableView->setItemDelegateForColumn(dj::model::db::work::temp_table_column("session"), session_delegate);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
