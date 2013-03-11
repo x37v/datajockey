@@ -47,6 +47,8 @@ namespace dj {
             bool mLoaded;
             bool mAbort;
             unsigned int mNumChannels;
+            float mMaxSample;
+            bool mNormalize;
       };
 
       typedef QExplicitlySharedDataPointer<AudioBuffer> AudioBufferPtr;
