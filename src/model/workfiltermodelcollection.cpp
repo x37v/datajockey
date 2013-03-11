@@ -9,7 +9,7 @@ namespace {
   const int bpm_timer_timeout_ms = 200;
 }
 
-WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatabase db) :
+WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatabase /*db */) :
   QObject(parent),
   mCurrentBPM(120.0),
   mLastBPM(0.0)
@@ -29,29 +29,29 @@ WorkFilterModel * WorkFilterModelCollection::new_filter_model(QObject * parent) 
   return m;
 }
 
-void WorkFilterModelCollection::player_trigger(int player_index, QString name){
+void WorkFilterModelCollection::player_trigger(int /*player_index*/, QString /*name*/){
 }
 
-void WorkFilterModelCollection::player_set(int player_index, QString name, bool value){
+void WorkFilterModelCollection::player_set(int /*player_index*/, QString /*name*/, bool /*value*/){
 }
 
-void WorkFilterModelCollection::player_set(int player_index, QString name, int value){
+void WorkFilterModelCollection::player_set(int /*player_index*/, QString /*name*/, int /*value*/){
 }
 
-void WorkFilterModelCollection::player_set(int player_index, QString name, double value){
+void WorkFilterModelCollection::player_set(int /*player_index*/, QString /*name*/, double /*value*/){
 }
 
-void WorkFilterModelCollection::player_set(int player_index, QString name, QString value){
+void WorkFilterModelCollection::player_set(int /*player_index*/, QString /*name*/, QString /*value*/){
 }
 
 
-void WorkFilterModelCollection::master_trigger(QString name){
+void WorkFilterModelCollection::master_trigger(QString /*name*/){
 }
 
-void WorkFilterModelCollection::master_set(QString name, bool value){
+void WorkFilterModelCollection::master_set(QString /*name*/, bool /*value*/){
 }
 
-void WorkFilterModelCollection::master_set(QString name, int value){
+void WorkFilterModelCollection::master_set(QString /*name*/, int /*value*/){
 }
 
 void WorkFilterModelCollection::master_set(QString name, double value){
