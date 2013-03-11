@@ -34,6 +34,7 @@ class FilteredDBView : public QWidget {
     QString filter_expression() const;
   public slots:
     void select_work(int work_id);
+    void select_last();
     void set_filter_expression(QString expression);
     void filter_expression_error(QString expression);
     void apply();

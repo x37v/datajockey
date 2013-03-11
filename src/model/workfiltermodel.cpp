@@ -232,7 +232,7 @@ void WorkFilterModel::set_current_bpm(double bpm) {
   }
 }
 
-void WorkFilterModel::update_history(int work_id, int session_id, QDateTime played_at) {
+void WorkFilterModel::update_history(int /*work_id*/, int /*session_id*/, QDateTime /*played_at*/) {
   if (mFilterExpression.isEmpty())
     return;
   try {
@@ -262,5 +262,6 @@ void WorkFilterModel::apply_filter_expression(QString expression) throw(std::run
 
   if (mQueryModel->lastError().isValid())
     qDebug() << mQueryModel->lastError();
+  emit(applied());
 }
 

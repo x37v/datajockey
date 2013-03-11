@@ -33,6 +33,7 @@ FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QW
 QString FilteredDBView::filter_expression() const { return mFilterEditor->toPlainText(); }
 
 void FilteredDBView::select_work(int work_id) { mDBView->select_work(work_id); }
+void FilteredDBView::select_last() { mDBView->select_last(); }
 
 void FilteredDBView::set_filter_expression(QString expression) {
   mFilterEditor->setPlainText(expression);

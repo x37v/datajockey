@@ -25,6 +25,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
     void filter_expression_changed(QString expression);
     void filter_expression_error(QString expression);
     void sql_changed(QString sql_expression);
+    void applied();
 
   private:
     void apply_filter_expression(QString expression) throw(std::runtime_error);

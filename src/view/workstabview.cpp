@@ -95,6 +95,11 @@ void WorksTabView::create_filter_tab(QString expression, QString label) {
       SIGNAL(filter_expression_error(QString)),
       view,
       SLOT(filter_expression_error(QString)));
+  QObject::connect(
+      table,
+      SIGNAL(applied()),
+      view,
+      SLOT(select_last()));
 
   if (label.isEmpty())
     label = QString("filter %1").arg(mTabWidget->count());

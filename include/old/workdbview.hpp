@@ -37,16 +37,19 @@ class WorkDBView : public QWidget {
     void shouldWriteSettings(bool write);
   public slots:
     void select_work(int work_id);
+    void select_last();
     void write_settings();
   protected slots:
     void read_settings();
     //void selectWork(const QModelIndex & index);
     void set_selection(const QItemSelection & selected);
+    void set_selected_last(int work_id);
   signals:
     void work_selected(int work);
   private:
     QTableView * mTableView;
     bool mWriteSettings;
+    int mLastWork;
 };
 
 #endif

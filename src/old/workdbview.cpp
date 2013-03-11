@@ -33,6 +33,10 @@
 #include <QTime>
 #include <QStyledItemDelegate>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 class TimeDisplayDelegate : public QStyledItemDelegate {
   public:
     TimeDisplayDelegate(QObject *parent) : QStyledItemDelegate(parent) { }
@@ -66,7 +70,8 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
 WorkDBView::WorkDBView(QAbstractItemModel * model, 
     QWidget *parent) :
   QWidget(parent),
-  mWriteSettings(true)
+  mWriteSettings(true),
+  mLastWork(-1)
 {
   //create the layouts
   QVBoxLayout * layout = new QVBoxLayout(this);
@@ -108,6 +113,8 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
       this,
       SLOT(set_selection(const QItemSelection)));
 
+  QObject::connect(this, SIGNAL(work_selected(int)), SLOT(set_selected_last(int)));
+
   //schedule the settings reading to happen after view construction
   QTimer::singleShot(0, this, SLOT(read_settings()));
 }
@@ -137,6 +144,11 @@ void WorkDBView::select_work(int work_id) {
   }
 }
 
+void WorkDBView::select_last() {
+  if (mLastWork >= 0)
+    select_work(mLastWork);
+}
+
 /*
    void WorkDBView::selectWork(const QModelIndex & index ){
    QSqlRecord record = ((QSqlTableModel *)mTableView->model())->record(index.row());
@@ -157,6 +169,11 @@ void WorkDBView::set_selection(const QItemSelection & selected) {
   if(index.isValid())
     work_id = mTableView->model()->data(index).toInt();
   emit(work_selected(work_id));
+}
+
+void WorkDBView::set_selected_last(int work_id) {
+  if (work_id >= 0)
+    mLastWork = work_id;
 }
 
 void WorkDBView::write_settings() {
