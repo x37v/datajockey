@@ -24,10 +24,26 @@
 #include <QWidget>
 #include <QModelIndex>
 #include <QItemSelection>
+#include <QColor>
 
 class QTableView;
 class QPushButton;
 class QAbstractItemModel;
+
+//since we cannot style a QStyledItemDelegate we use this widget to specify style info
+
+class SessionDisplayStyle : public QWidget {
+  Q_OBJECT
+  Q_PROPERTY(QColor backgroundColor READ background_color WRITE background_color DESIGNABLE true)
+
+  public:
+    SessionDisplayStyle() : backgroundColor(Qt::red) { }
+
+    QColor background_color() const { return backgroundColor; }
+    void background_color(QColor color) { backgroundColor = color; }
+  private:
+    QColor backgroundColor;
+};
 
 class WorkDBView : public QWidget {
   Q_OBJECT

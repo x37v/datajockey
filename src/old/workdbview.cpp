@@ -18,8 +18,8 @@
  *		with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "db.hpp"
 #include "workdbview.hpp"
+#include "db.hpp"
 #include <QTableView>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -31,8 +31,8 @@
 #include <QSettings>
 #include <QTimer>
 #include <QTime>
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 #include <iostream>
 using std::cout;
@@ -62,7 +62,7 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
     virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const {
       QModelIndex session_index = index.sibling(index.row(), mSessionColumn);
       if (session_index.data().toInt() == mCurrentSessionId) {
-        painter->setBrush(QBrush(Qt::red));
+        painter->setBrush(QBrush(mStyle.background_color()));
         painter->drawRect(option.rect);
       }
 
@@ -81,6 +81,7 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
   private:
     int mCurrentSessionId;
     int mSessionColumn;
+    SessionDisplayStyle mStyle;
 };
 
 WorkDBView::WorkDBView(QAbstractItemModel * model, 

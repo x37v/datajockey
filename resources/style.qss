@@ -27,6 +27,10 @@ QPushButton {
 }
 */
 
+SessionDisplayStyle {
+  qproperty-backgroundColor: red;
+}
+
 QPushButton {
 	border-width: 1px;
 	min-width: 24px;
