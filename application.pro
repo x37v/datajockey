@@ -117,7 +117,6 @@ HEADERS += include/application.hpp \
            include/old/workdbview.hpp \
            include/old/workdetailview.hpp \
            #include/old/workpreviewer.hpp \
-           include/old/worktablemodel.hpp \
            include/old/worktagmodelfilter.hpp \
            ext/jackcpp/include/jackaudioio.hpp \
            ext/jackcpp/include/jackmidiport.hpp \
@@ -170,7 +169,6 @@ SOURCES += src/application.cpp \
            src/old/workdbview.cpp \
            src/old/workdetailview.cpp \
            #src/old/workpreviewer.cpp \
-           src/old/worktablemodel.cpp \
            src/old/worktagmodelfilter.cpp \
            ext/jackcpp/src/jackaudioio.cpp \
            ext/jackcpp/src/jackmidiport.cpp

@@ -19,7 +19,6 @@
 #include "workstabview.hpp"
 
 #include "workdbview.hpp"
-#include "worktablemodel.hpp"
 #include "workfiltermodel.hpp"
 #include "workfiltermodelcollection.hpp"
 #include "filtereddbview.hpp"

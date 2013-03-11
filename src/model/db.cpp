@@ -375,7 +375,7 @@ QString db::work::filtered_table_by_tag(QString tag, QString tag_class) throw(st
   return filtered_table_by_tag(tag_id);
 }
 
-int db::work::temp_table_id_column(QString id_name) {
+int db::work::temp_table_column(QString id_name) {
   if (id_name == "id")
     return cWorkIdColumn;
   else if (id_name == "artist")
@@ -391,7 +391,7 @@ int db::work::temp_table_id_column(QString id_name) {
   return 0;
 }
 
-void db::work::temp_table_id_columns(QList<int>& ids) {
+void db::work::temp_table_columns(QList<int>& ids) {
   ids << cWorkIdColumn;
   ids << cWorkArtistIdColumn;
   ids << cWorkAlbumIdColumn;
