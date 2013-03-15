@@ -155,6 +155,16 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
     mStretcher->next_frame(buffer);
     mixBuffer[0][frame] = buffer[0];
     mixBuffer[1][frame] = buffer[1];
+
+    if (mLoop) {
+      //XXX maybe use frames so we don't have to do so much math?
+      mPosition = strecher_position();
+      if(mLoopEndPosition.valid() && 
+          mLoopStartPosition.valid() &&
+          mPosition >= mLoopEndPosition) {
+        position(mLoopStartPosition);
+      }
+    }
   }
 
 #if 0

@@ -44,6 +44,7 @@ namespace dj {
             Player(QWidget * parent = NULL, WaveformOrientation waveform_orientation = WAVEFORM_RIGHT);
             QPushButton * button(QString name) const;
             QList<QPushButton *> buttons() const;
+            QSpinBox * loop_measures_control() const;
             QDial * eq_dial(QString name) const;
             QList<QDial *> eq_dials() const;
             QSlider * volume_slider() const;
@@ -64,6 +65,8 @@ namespace dj {
          private:
             QProgressBar * mProgressBar;
             QHash<QString, QPushButton *> mButtons;
+            QSpinBox * mLoopMeasures;
+
             QBoxLayout * mTopLayout;
             QBoxLayout * mControlLayout;
             QLineEdit * mTrackDescription[2];

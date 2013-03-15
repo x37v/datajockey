@@ -25,7 +25,7 @@ namespace {
 
     //*** PLAYER
 
-    list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back";
+    list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back" << "loop_now" << "loop_off" << "loop_shift_back" << "loop_shift_forward";
     for (int i = 0; i < 10; i++) {
       list << QString("set_cuepoint_%1").arg(i);
       list << QString("jump_cuepoint_%1").arg(i);
@@ -33,7 +33,7 @@ namespace {
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
-    list << "cue" << "sync" << "pause";
+    list << "cue" << "sync" << "pause" << "loop_now";
     AudioModel::player_signals["bool"] = list;
 
     list.clear();
@@ -73,6 +73,7 @@ namespace {
     foreach(signal, list) {
       list_with_rel << signal << (signal + "_relative");
     }
+    list_with_rel << "loop_measures" << "loop_shift";
     AudioModel::player_signals["int"] = list_with_rel;
 
     list_with_rel.clear();
@@ -158,7 +159,10 @@ class AudioModel::PlayerState {
       mSpeed(0.0),
       mPostFreeSpeedUpdates(0),
       mMaxSampleValue(0.0),
-      mAudible(false) { }
+      mAudible(false),
+      mLooping(false),
+      mLoopMeasures(1)
+  { }
 
     QHash<QString, bool> mParamBool;
     QHash<QString, int> mParamInt;
@@ -173,6 +177,8 @@ class AudioModel::PlayerState {
     unsigned int mPostFreeSpeedUpdates;
     float mMaxSampleValue;
     bool mAudible;
+    bool mLooping;
+    unsigned int mLoopMeasures;
 };
 
 class AudioModel::ConsumeThread : public QThread {
@@ -660,9 +666,30 @@ void AudioModel::player_trigger(int player_index, QString name) {
 
     unsigned int frames = seconds * (double)pstate->mParamInt["sample_rate"];
     queue_command(new PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, frames));
-  } else if (name == "clear")
+  } else if (name == "clear") {
     queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
-  else if (name != "load") {
+  } else if (name == "loop_now") {
+    if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
+      //XXX ignoring file sampling rate, using global sampling rate
+      BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
+      TimePoint start_pos = beat_buff->position_at_time(static_cast<double>(pstate->mCurrentFrame) / sample_rate());
+      start_pos.pos_in_beat(0);
+
+      TimePoint loop_length(pstate->mLoopMeasures, 0);
+      TimePoint end_pos = start_pos + loop_length;
+
+      player_set(player_index, "loop_end", end_pos);
+      player_set(player_index, "loop_start", start_pos);
+      queue_command(new PlayerPositionCommand(player_index, PlayerPositionCommand::LOOP_START, start_pos));
+      player_set(player_index, "loop", true);
+    }
+  } else if (name == "loop_off") {
+    player_set(player_index, "loop", false);
+  } else if (name == "loop_shift_back") {
+    player_set(player_index, "loop_shift", -1);
+  } else if (name == "loop_shift_forward") {
+    player_set(player_index, "loop_shift", 1);
+  } else if (name != "load") {
     PlayerState * pstate = mPlayerStates[player_index];
     QHash<QString, bool>::iterator state_itr = pstate->mParamBool.find(name);
     if (state_itr == pstate->mParamBool.end()) {
@@ -692,6 +719,9 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
         queue_command(new dj::audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY));
     }
     return;
+  } else if (name == "loop_now") {
+    player_trigger(player_index, value ? "loop_now" : "loop_off");
+    return;
   }
 
   //get the state for this name
@@ -715,7 +745,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
   //set the new value
   *state_itr = value;
 
-  //if we'return going free, set our post free speed update index
+  //if we're going free, set our post free speed update index
   if (name == "sync" && !value)
     pstate->mPostFreeSpeedUpdates = 0;
 
@@ -748,6 +778,24 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     set_player_position_beat_relative(player_index, value);
   } else if (name == "load") {
     emit(player_value_changed(player_index, "load", value));
+  } else if (name == "loop_measures") {
+    if (value > 0) {
+      pstate->mLoopMeasures = value;
+
+      //update the end position
+      TimePoint amt(value, 0);
+      TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
+      player_set(player_index, "loop_end", end_pos);
+      emit(player_value_changed(player_index, "loop_measures", value));
+    }
+  } else if (name == "loop_shift") {
+    TimePoint amt(0, value);
+
+    TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_end"] + amt;
+    player_set(player_index, "loop_end", end_pos);
+
+    TimePoint start_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
+    player_set(player_index, "loop_start", start_pos);
   } else {
     //get the state for this name
     QHash<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
@@ -855,6 +903,7 @@ void AudioModel::player_load(int player_index, QString audio_file_path, QString 
     return;
 
   player_trigger(player_index, "clear");
+  player_trigger(player_index, "loop_off");
   mThreadPool[player_index]->load(player_index, audio_file_path, annotation_file_path);
   //clear out the cue points
   mPlayerCuepoints[player_index].clear();

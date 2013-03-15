@@ -56,6 +56,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       {2, 2, false, ">>", "seek_forward", true},
       {3, 0, false, "<b", "bump_back", true},
       {3, 2, false, "b>", "bump_forward", true},
+      {4, 0, false, "<l", "loop_shift_back", true},
+      {4, 1, true,  "lp",  "loop_now", false},
+      {4, 2, false, "l>", "loop_shift_forward", true},
    };
 
    mTopLayout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -84,7 +87,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       mButtons.insert(items[i].name, btn);
       button_layout->addWidget(btn, items[i].row, items[i].col + 1);
       //XXX tmp
-      if (items[i].name.contains("bump_"))
+      if (items[i].name.contains("bump_") || items[i].name.contains("loop"))
          btn->setText(items[i].label);
       if (items[i].auto_repeat)
          btn->setAutoRepeat(true);
@@ -96,6 +99,12 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    button_layout->setColumnStretch(0, 100);
    button_layout->setColumnStretch(4, 100);
    mControlLayout->addLayout(button_layout);
+
+   mLoopMeasures = new QSpinBox(this);
+   mLoopMeasures->setRange(1, 16);
+   QLabel * loop_lab = new QLabel("loop measures", this);
+   mControlLayout->addWidget(loop_lab, 0, Qt::AlignHCenter);
+   mControlLayout->addWidget(mLoopMeasures, 0, Qt::AlignHCenter);
 
    mSpeedView = new SpeedSpinBox(this);
    mSpeedView->setDisabled(true);
@@ -168,6 +177,7 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
 QList<QPushButton *> Player::buttons() const { return mButtons.values(); }
+QSpinBox * Player::loop_measures_control() const { return mLoopMeasures; }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }

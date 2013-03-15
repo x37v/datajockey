@@ -53,8 +53,13 @@ QPushButton {
 QPushButton::pressed {
   border: 1px solid white;
   border-radius: 3px;
-  /*background: #aa1717; */
+  background: #aa1717;
   color: white;
+}
+
+QPushButton::checked {
+  background: #aa1717;
+  color: black;
 }
 
 QPushButton[dj_name="load"],
@@ -71,28 +76,52 @@ QPushButton[dj_name="load"],
 }
 
 QPushButton[dj_name="seek_forward"] { image: url(:resources/icons/seekfwd.png); }
-QPushButton[dj_name="seek_forward"]::pressed { image: url(:resources/icons/seekfwd_off.png); }
+QPushButton[dj_name="seek_forward"]::pressed {
+  image: url(:resources/icons/seekfwd_off.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="seek_back"] { image: url(:resources/icons/seekbkd.png); }
-QPushButton[dj_name="seek_back"]::pressed { image: url(:resources/icons/seekbkd_off.png); }
+QPushButton[dj_name="seek_back"]::pressed {
+  image: url(:resources/icons/seekbkd_off.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="load"] { image: url(:resources/icons/load.png); } 
-QPushButton[dj_name="load"]::pressed { image: url(:resources/icons/load_off.png); }
+QPushButton[dj_name="load"]::pressed {
+  image: url(:resources/icons/load_off.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="reset"] { image: url(:resources/icons/reset.png); } 
-QPushButton[dj_name="reset"]::pressed { image: url(:resources/icons/reset_off.png); }
+QPushButton[dj_name="reset"]::pressed {
+  image: url(:resources/icons/reset_off.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="cue"] { image: url(:resources/icons/cue_off.png); }
-QPushButton[dj_name="cue"]::checked { image: url(:resources/icons/cue.png); }
+QPushButton[dj_name="cue"]::checked {
+  image: url(:resources/icons/cue.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="sync"] { image: url(:resources/icons/sync_off.png); }
-QPushButton[dj_name="sync"]::checked { image: url(:resources/icons/sync.png); }
+QPushButton[dj_name="sync"]::checked {
+  image: url(:resources/icons/sync.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="pause"] { image: url(:resources/icons/play.png); }
-QPushButton[dj_name="pause"]::checked { image: url(:resources/icons/pause.png); }
+QPushButton[dj_name="pause"]::checked {
+  image: url(:resources/icons/pause.png);
+  background-color: #131313;
+}
 
 QPushButton[dj_name="mute"] { image: url(:resources/icons/mute.png); } 
-QPushButton[dj_name="mute"]::checked { image: url(:resources/icons/mute_off.png); }
+QPushButton[dj_name="mute"]::checked {
+  image: url(:resources/icons/mute_off.png);
+  background-color: #131313;
+}
 
 /*
 QPushButton:hover {
