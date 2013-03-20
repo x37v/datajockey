@@ -191,6 +191,9 @@ void MixerPanel::player_set(int player_index, QString name, bool value) {
     mPlayers[player_index]->button("sync")->setDisabled(value);
     //disable sync to player if syncing isn't available or player is in sync running mode
     mSyncToPlayer[player_index]->setDisabled(value || mPlayers[player_index]->button("sync")->isChecked());
+  } else if (name == "loop") {
+    mPlayers[player_index]->loop_enable(0, value);
+    player_set(player_index, "loop_now", value);
   } else if(QPushButton * button = mPlayers[player_index]->button(name)) {
     button->setChecked(value);
     //only enable sync to player when the player is running in free mode and it can sync
@@ -199,7 +202,7 @@ void MixerPanel::player_set(int player_index, QString name, bool value) {
         mSyncToPlayer[player_index]->setDisabled(false);
       else
         mSyncToPlayer[player_index]->setDisabled(true);
-    }
+    } 
   }
 }
 
@@ -226,6 +229,10 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
     player->set_audio_level(value);
   else if (name == "loop_measures")
     player->loop_measures_control()->setValue(value);
+  else if (name == "loop_start")
+    player->loop_start(0, value);
+  else if (name == "loop_end")
+    player->loop_end(0, value);
   else if (name.contains("set_cuepoint")) {
     QString id_str = name;
     id_str.replace("set_cuepoint_", "");

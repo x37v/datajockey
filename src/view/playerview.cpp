@@ -226,3 +226,49 @@ void Player::set_cuepoint(int id, int frame) {
   mWaveFormZoomedView->add_marker(id, frame, Qt::cyan);
 }
 
+void Player::loop_start(int id, int frame) {
+  QHash<int, loop_t>::iterator it = mLoops.find(id);
+  loop_t loop;
+  if (it != mLoops.end())
+    loop = it.value();
+  loop.start_frame = frame;
+
+  mLoops[id] = loop;
+  if (loop.enabled) {
+    mWaveFormFullView->add_loop(id, loop.start_frame, loop.end_frame);
+    mWaveFormZoomedView->add_loop(id, loop.start_frame, loop.end_frame);
+  }
+}
+
+void Player::loop_end(int id, int frame) {
+  QHash<int, loop_t>::iterator it = mLoops.find(id);
+  loop_t loop;
+  if (it != mLoops.end())
+    loop = it.value();
+  loop.end_frame = frame;
+
+  mLoops[id] = loop;
+  if (loop.enabled) {
+    mWaveFormFullView->add_loop(id, loop.start_frame, loop.end_frame);
+    mWaveFormZoomedView->add_loop(id, loop.start_frame, loop.end_frame);
+  }
+}
+
+void Player::loop_enable(int id, bool enable) {
+  QHash<int, loop_t>::iterator it = mLoops.find(id);
+  loop_t loop;
+  if (it != mLoops.end())
+    loop = it.value();
+
+  if (enable) {
+    loop.enabled = true;
+    mWaveFormFullView->add_loop(id, loop.start_frame, loop.end_frame);
+    mWaveFormZoomedView->add_loop(id, loop.start_frame, loop.end_frame);
+  } else {
+    mWaveFormFullView->remove_loop(id);
+    mWaveFormZoomedView->remove_loop(id);
+    loop.enabled = false;
+  }
+  mLoops[id] = loop;
+}
+

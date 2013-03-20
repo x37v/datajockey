@@ -57,6 +57,11 @@ namespace dj {
             void set_audio_frame(int frame);
             void set_song_description(QString description);
             void set_cuepoint(int id, int frame);
+
+            void loop_start(int id, int frame);
+            void loop_end(int id, int frame);
+            void loop_enable(int id, bool enable);
+
          signals:
             void seek_to_frame(int frame);
             void seek_frame_relative(int frames);
@@ -79,6 +84,20 @@ namespace dj {
             QBoxLayout * mSliderLevelLayout;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
+
+            struct loop_t {
+              int start_frame;
+              int end_frame;
+              bool enabled;
+              loop_t() : start_frame(0), end_frame(0), enabled(false) {}
+              loop_t(const loop_t& other) {
+                start_frame = other.start_frame;
+                end_frame = other.end_frame;
+                enabled = other.enabled;
+              }
+            };
+
+            QHash<int, loop_t> mLoops;
       };
    }
 }
