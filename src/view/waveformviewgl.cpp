@@ -118,6 +118,8 @@ void WaveFormViewGL::set_buffers(audio::AudioBufferPtr audio_buffer, audio::Beat
   }
   mVerticiesValid = false;
   clear_markers();
+  clear_loops();
+
   update();
 }
 
@@ -183,6 +185,34 @@ void WaveFormViewGL::remove_marker(int id) {
       it++;
   }
   update_markers();
+  update();
+}
+
+void WaveFormViewGL::clear_loops() {
+  mLoopVerticies.clear();
+  mLoops.clear();
+  update();
+}
+
+void WaveFormViewGL::add_loop(int id, int frame_start, int frame_end) {
+  loop_t loop(frame_start, frame_end, Qt::cyan); //XXX make color configurable
+  mLoops[id] = loop;
+
+  GLfloat x0 = static_cast<GLfloat>(frame_start) / static_cast<GLfloat>(mFramesPerLine);
+  GLfloat x1 = static_cast<GLfloat>(frame_end) / static_cast<GLfloat>(mFramesPerLine);
+  gl_rect_t rect(x0, static_cast<GLfloat>(1.0), x1, static_cast<GLfloat>(-1.0));
+
+  mLoopVerticies[id] = rect;
+}
+
+void WaveFormViewGL::remove_loop(int id) {
+  {
+    QHash<int, loop_t>::iterator it = mLoops.find(id);
+    if (it != mLoops.end())
+      mLoops.erase(it);
+  }
+
+  mLoopVerticies.erase(id);
   update();
 }
 
@@ -280,6 +310,31 @@ void WaveFormViewGL::paintGL(){
         glPopMatrix();
       }
 
+      if (!mLoopVerticies.empty()) {
+        glPushMatrix();
+        //XXX make color configurable
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        qglColor(QColor(0, 255, 255, 64));
+
+        glLineWidth(1.0);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        //glEnableClientState(GL_COLOR_ARRAY);
+        //glColorPointer(3, GL_FLOAT, 0, &mMarkerColors.front());
+
+        for (std::map<int, gl_rect_t>::iterator it = mLoopVerticies.begin(); it != mLoopVerticies.end(); it++) {
+          glVertexPointer(2, GL_FLOAT, 0, it->second.points);
+          glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+
+        //glDisableClientState(GL_COLOR_ARRAY);
+        glDisableClientState(GL_VERTEX_ARRAY);
+
+        glPopMatrix();
+      }
+
+
       glPopMatrix();
     }
   }
@@ -305,27 +360,32 @@ void WaveFormViewGL::paintGL(){
 
 void WaveFormViewGL::resizeGL(int width, int height) {
   QMutexLocker lock(&mMutex);
+  bool changed = false;
 
   if (mVertical) {
     if (mHeight != height) {
+      changed = true;
       mVerticies.resize(4 * height);
       if (mFullView) {
         mVertexColors.resize(height * (3 * 2));
         update_colors();
       }
-      update_markers();
-      mVerticiesValid = false;
     }
   } else {
     if (mWidth != width) {
+      changed = true;
       mVerticies.resize(4 * width);
       if (mFullView) {
         mVertexColors.resize(width * (3 * 2));
         update_colors();
       }
-      update_markers();
-      mVerticiesValid = false;
     }
+  }
+
+  if (changed) {
+    update_markers();
+    update_loops();
+    mVerticiesValid = false;
   }
 
   mWidth = width;
@@ -520,15 +580,11 @@ void WaveFormViewGL::update_markers() {
   mMarkerColors.resize((2 * 3) * mMarkers.size());
 
   for (int i = 0; i < mMarkers.size(); i++) {
-    if (mVertical) {
-      int line_index = i * 4;
-      GLfloat pos = static_cast<GLfloat>(mMarkers[i].frame) / static_cast<GLfloat>(mFramesPerLine);
-      mMarkerVerticies[line_index] = mMarkerVerticies[line_index + 2] = pos;
-      mMarkerVerticies[line_index + 1] = static_cast<GLfloat>(1.0);
-      mMarkerVerticies[line_index + 3] = static_cast<GLfloat>(-1.0);
-    } else {
-      //XXX
-    }
+    int line_index = i * 4;
+    GLfloat pos = static_cast<GLfloat>(mMarkers[i].frame) / static_cast<GLfloat>(mFramesPerLine);
+    mMarkerVerticies[line_index] = mMarkerVerticies[line_index + 2] = pos;
+    mMarkerVerticies[line_index + 1] = static_cast<GLfloat>(1.0);
+    mMarkerVerticies[line_index + 3] = static_cast<GLfloat>(-1.0);
 
     //set up color
     int color_index = i * 6;
@@ -538,5 +594,15 @@ void WaveFormViewGL::update_markers() {
     color[2] = mMarkers[i].color.blueF();
     memcpy(&mMarkerColors[color_index], color, 3 * sizeof(float));
     memcpy(&mMarkerColors[color_index + 3], color, 3 * sizeof(float));
+  }
+}
+
+void WaveFormViewGL::update_loops() {
+  for(QHash<int, loop_t>::iterator it = mLoops.begin(); it != mLoops.end(); it++) {
+    GLfloat x0 = static_cast<GLfloat>(it.value().frame_start) / static_cast<GLfloat>(mFramesPerLine);
+    GLfloat x1 = static_cast<GLfloat>(it.value().frame_end) / static_cast<GLfloat>(mFramesPerLine);
+    gl_rect_t rect(x0, static_cast<GLfloat>(1.0), x1, static_cast<GLfloat>(-1.0));
+
+    mLoopVerticies[it.key()] = rect;
   }
 }

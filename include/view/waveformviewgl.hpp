@@ -5,7 +5,9 @@
 #include <QtOpenGL>
 #include <QMutex>
 #include <QColor>
+#include <QHash>
 #include <vector>
+#include <map>
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 
@@ -53,6 +55,11 @@ namespace dj {
         void clear_markers();
         void add_marker(int id, int frame, QColor color);
         void remove_marker(int id);
+
+        void clear_loops();
+        void add_loop(int id, int frame_start, int frame_end);
+        void remove_loop(int id);
+
       protected:
         void initializeGL();
         void paintGL();
@@ -95,6 +102,40 @@ namespace dj {
         std::vector<GLfloat> mMarkerVerticies;
         std::vector<float> mMarkerColors;
 
+        struct loop_t {
+          loop_t(int f, int e, QColor c) : frame_start(f), frame_end(e), color(c) { }
+          loop_t(const loop_t& l) {
+            frame_start = l.frame_start;
+            frame_end = l.frame_end;
+            color = l.color;
+          }
+
+          loop_t() : frame_start(0), frame_end(0), color(Qt::black) { }
+
+          int frame_start;
+          int frame_end;
+          QColor color;
+        };
+
+        struct gl_rect_t {
+          GLfloat points[12]; //2d rect
+
+          gl_rect_t(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1) {
+            points[0 * 2 + 0] = x0; points[0 * 2 + 1] = y0;
+            points[1 * 2 + 0] = x1; points[1 * 2 + 1] = y0;
+            points[2 * 2 + 0] = x1; points[2 * 2 + 1] = y1;
+
+            points[3 * 2 + 0] = x0; points[3 * 2 + 1] = y0;
+            points[4 * 2 + 0] = x1; points[4 * 2 + 1] = y1;
+            points[5 * 2 + 0] = x0; points[5 * 2 + 1] = y1;
+          }
+          gl_rect_t(const gl_rect_t& q) { memcpy(points, q.points, 12 * sizeof(GLfloat)); }
+          gl_rect_t() { bzero(points, 12 * sizeof(GLfloat)); };
+        };
+
+        QHash<int, loop_t> mLoops;
+        std::map<int, gl_rect_t> mLoopVerticies; //QHash doesn't align memory nicely for gl drawing
+
         int mFramesPerLine;
         int mFrame;
 
@@ -110,6 +151,7 @@ namespace dj {
         void update_beats();
         void update_colors();
         void update_markers();
+        void update_loops();
         GLfloat line_value(int line_index);
     };
   }
