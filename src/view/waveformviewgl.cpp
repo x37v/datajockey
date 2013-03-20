@@ -315,7 +315,10 @@ void WaveFormViewGL::paintGL(){
         //XXX make color configurable
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        qglColor(QColor(0, 255, 255, 64));
+        if (mFullView)
+          qglColor(QColor(0, 255, 255, 255));
+        else
+          qglColor(QColor(0, 255, 255, 64));
 
         glLineWidth(1.0);
 
