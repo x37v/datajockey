@@ -15,6 +15,8 @@ using namespace dj::audio;
 
 Player::Player() : 
   mPosition(0.0),
+  mLoopStartFrame(0),
+  mLoopEndFrame(0),
   mTransportOffset(0,0),
   mMaxSampleValue(0.0)
 #ifdef USE_LV2
@@ -157,13 +159,8 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
     mixBuffer[1][frame] = buffer[1];
 
     if (mLoop) {
-      //XXX maybe use frames so we don't have to do so much math?
-      mPosition = strecher_position();
-      if(mLoopEndPosition.valid() && 
-          mLoopStartPosition.valid() &&
-          mPosition >= mLoopEndPosition) {
-        position(mLoopStartPosition);
-      }
+      if(mLoopEndFrame > mLoopStartFrame && mStretcher->frame() >= mLoopEndFrame)
+        position_at_frame(mLoopStartFrame);
     }
   }
 
@@ -259,8 +256,6 @@ const TimePoint& Player::position() {
 
 const TimePoint& Player::start_position() const { return mStartPosition; }
 const TimePoint& Player::end_position() const { return mEndPosition; }
-const TimePoint& Player::loop_start_position() const { return mLoopStartPosition; }
-const TimePoint& Player::loop_end_position() const { return mLoopEndPosition; }
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
 float Player::max_sample_value() const { return mMaxSampleValue; }
 
@@ -427,12 +422,12 @@ void Player::end_position(const TimePoint &val){
   mEndPosition = val;
 }
 
-void Player::loop_start_position(const TimePoint &val){
-  mLoopStartPosition = val;
+void Player::loop_start_frame(unsigned int val){
+  mLoopStartFrame = val;
 }
 
-void Player::loop_end_position(const TimePoint &val){
-  mLoopEndPosition = val;
+void Player::loop_end_frame(unsigned int val){
+  mLoopEndFrame = val;
 }
 
 void Player::audio_buffer(AudioBuffer * buf){
@@ -876,10 +871,10 @@ void PlayerPositionCommand::execute(){
         p->end_position(mTimePoint);
         break;
       case LOOP_START:
-        p->loop_start_position(mTimePoint);
+        p->loop_start_frame(mFrames);
         break;
       case LOOP_END:
-        p->loop_end_position(mTimePoint);
+        p->loop_end_frame(mFrames);
         break;
     };
     //TODO shouldn't it update the position if dirty?
