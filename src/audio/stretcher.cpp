@@ -48,6 +48,11 @@ namespace dj {
 
       unsigned int Stretcher::frame() const { return mFrame; }
       double Stretcher::frame_subsample() const { return mFrameSubsample; }
+      double Stretcher::seconds() const {
+         if (!mAudioBuffer)
+            return 0.0;
+         return static_cast<double>(mFrame) / static_cast<double>(mAudioBuffer->sample_rate());
+      }
 
       void Stretcher::seconds(double seconds) {
          if (!mAudioBuffer)

@@ -230,18 +230,15 @@ void Master::sync_to_player(unsigned int player_index) {
    if (bpm < 20.0 || bpm > 250.0)
       return;
 
-   const TimePoint player_pos = player->position();
+   const double pos_in_beat = player->pos_in_beat();
+   TimePoint position = mTransport.position();
+   //move transport forward if the new pos in beat is less than the current
+   if (pos_in_beat < position.pos_in_beat())
+     position.advance_beat();
+   position.pos_in_beat(pos_in_beat);
 
-   //always move the transport forward, so if our pos in beat is 
-   TimePoint new_pos = mTransport.position();
-   if (new_pos.beat() > player_pos.beat() || 
-         (new_pos.beat() == player_pos.beat() && new_pos.pos_in_beat() > player_pos.pos_in_beat())) {
-      new_pos += TimePoint(1,0);
-   }
-   new_pos.pos_in_beat(player_pos.pos_in_beat());
-
-   //update position and bpm of transpor
-   mTransport.position(new_pos);
+   //update position and bpm of transport
+   mTransport.position(position);
    mTransport.bpm(bpm);
 
    //update the player

@@ -97,6 +97,22 @@ TimePoint BeatBuffer::beat_closest(double seconds) const {
   return pos;
 }
 
+unsigned int BeatBuffer::index(double seconds) const {
+  if (mBeatData.size() < 1)
+    return 0;
+  if (mBeatData.front() > seconds)
+    return 0;
+  if (mBeatData.back() < seconds)
+    return mBeatData.size() - 1;
+
+  //XXX do a more intelligent search
+  for (unsigned int i = 0; i < mBeatData.size() - 1; i++) {
+    if (mBeatData[i] <= seconds && mBeatData[i + 1] > seconds)
+      return i;
+  }
+  return mBeatData.size() - 1;
+}
+
 TimePoint BeatBuffer::position_at_time(double seconds, const TimePoint& lastPos) const {
    TimePoint pos;
    unsigned int size = mBeatData.size();

@@ -19,6 +19,7 @@ namespace dj {
             void frame(unsigned int frame, double frame_subsamp = 0.0);
             unsigned int frame() const;
             double frame_subsample() const;
+            double seconds() const;
 
             //updates frame based on sample rate
             void seconds(double seconds);

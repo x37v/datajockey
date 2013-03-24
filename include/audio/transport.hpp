@@ -14,6 +14,7 @@ namespace dj {
             //getters
             const TimePoint& position() const;
             double bpm() const;
+            double seconds_per_beat() const;
 
             //setters
             void position(const TimePoint &pos);

@@ -2,7 +2,6 @@
 #define DATAJOCKEY_PLAYER_HPP
 
 #include "command.hpp"
-#include "timepoint.hpp"
 #include "transport.hpp"
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
@@ -64,10 +63,11 @@ namespace dj {
         bool looping() const;
         double volume() const;
         double play_speed() const;
-        const TimePoint& position();
         unsigned int frame() const;
+        unsigned int beat_index() const;
         float max_sample_value() const;
         double bpm();
+        double pos_in_beat() const;
         bool audible() const;
 
         AudioBuffer * audio_buffer() const;
@@ -82,10 +82,9 @@ namespace dj {
         void loop(bool val);
         void volume(double val);
         void play_speed(double val);
-        void position(const TimePoint &val);
         void position_at_frame(unsigned long frame, Transport * transport = NULL);
-        void position_at_beat(unsigned long beat, Transport * transport = NULL);
-        void position_at_beat_relative(long offset, Transport * transport = NULL);
+        void position_at_beat(unsigned int beat, Transport * transport = NULL);
+        void position_at_beat_relative(int offset, Transport * transport = NULL);
 
         void loop_start_frame(unsigned int val);
         void loop_end_frame(unsigned int val);
@@ -96,13 +95,13 @@ namespace dj {
         void max_sample_value_reset();
 
         //misc
-        void position_relative(TimePoint amt); //go to a position relative to the current position
         void position_at_frame_relative(long offset);
         void play_speed_relative(double amt); //increment or decrement the current play speed by amt
         void volume_relative(double amt); //increment or decrement the current volume
 
       private:
         //states
+        unsigned int mBeatIndex;
         play_state_t mPlayState;
         out_state_t mOutState;
         bool mCueMutesMain;
@@ -113,14 +112,9 @@ namespace dj {
 
         //continuous
         double mVolume;
-        TimePoint mPosition; //the current position in the audio
-        bool mPositionDirty; //indicates if the sampleindex needs update based
 
         unsigned int mLoopStartFrame;
         unsigned int mLoopEndFrame;
-
-        bool mUpdateTransportOffset;
-        TimePoint mTransportOffset; //an offset to the transport, for syncing
 
         //internals, bookkeeping, etc
         unsigned int mSampleRate;
@@ -136,14 +130,9 @@ namespace dj {
         EqControl mEqControl;
 
         //helpers
-        void update_position(const Transport& transport);
         //for updating the play speed while syncing
-        void update_play_speed(const Transport& transport);
-        void update_transport_offset(const Transport& transport);
-
-        //gives the current position based on the stretcher frame + beat buffer
-        //requires beat buffer and stretcher be valid
-        TimePoint strecher_position();
+        void update_play_speed(const Transport * transport);
+        void sync_to_transport(const Transport * transport);
     };
 
     //forward declaration
@@ -154,9 +143,9 @@ namespace dj {
         PlayerCommand(unsigned int idx);
         //getters
         unsigned int index() const;
-        const TimePoint& position_executed() const;
+        unsigned int beat_executed() const;
         //setters
-        void position_executed(TimePoint const & t);
+        void beat_executed(unsigned int beat);
         //misc
         void store(CommandIOData& data, const std::string& name) const;
       protected:
@@ -164,8 +153,8 @@ namespace dj {
         Master * master() const { return mMaster; }
       private:
         unsigned int mIndex;
-        //this comes from the player's position
-        TimePoint mPositionExecuted;
+        //this comes from the player
+        unsigned int mBeatExecuted;
         Master * mMaster;
     };
 
