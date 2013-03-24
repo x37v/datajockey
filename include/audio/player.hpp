@@ -65,8 +65,6 @@ namespace dj {
         double volume() const;
         double play_speed() const;
         const TimePoint& position();
-        const TimePoint& start_position() const;
-        const TimePoint& end_position() const;
         unsigned int frame() const;
         float max_sample_value() const;
         double bpm();
@@ -86,10 +84,12 @@ namespace dj {
         void play_speed(double val);
         void position(const TimePoint &val);
         void position_at_frame(unsigned long frame, Transport * transport = NULL);
-        void start_position(const TimePoint &val);
-        void end_position(const TimePoint &val);
+        void position_at_beat(unsigned long beat, Transport * transport = NULL);
+        void position_at_beat_relative(long offset, Transport * transport = NULL);
+
         void loop_start_frame(unsigned int val);
         void loop_end_frame(unsigned int val);
+
         void audio_buffer(AudioBuffer * buf);
         void beat_buffer(BeatBuffer * buf);
         void eq(eq_band_t band, double value);
@@ -115,9 +115,7 @@ namespace dj {
         double mVolume;
         TimePoint mPosition; //the current position in the audio
         bool mPositionDirty; //indicates if the sampleindex needs update based
-        //on the position update
-        TimePoint mStartPosition; //where we start the playback
-        TimePoint mEndPosition; //where we end the playback
+
         unsigned int mLoopStartFrame;
         unsigned int mLoopEndFrame;
 
@@ -242,17 +240,15 @@ namespace dj {
       public:
         enum position_t {
           PLAY, PLAY_RELATIVE, 
-          START, END, LOOP_START, LOOP_END
+          PLAY_BEAT, PLAY_BEAT_RELATIVE,
+          LOOP_START, LOOP_END
         };
-        PlayerPositionCommand(unsigned int idx, position_t target, const TimePoint & timepoint);
-        PlayerPositionCommand(unsigned int idx, position_t target, long frames);
+        PlayerPositionCommand(unsigned int idx, position_t target, long value);
         virtual void execute();
         virtual bool store(CommandIOData& data) const;
       private:
-        TimePoint mTimePoint;
         position_t mTarget;
-        long mFrames;
-        bool mUseFrames;
+        long mValue;
     };
   }
 }

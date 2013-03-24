@@ -9,7 +9,7 @@
 namespace dj {
    namespace audio {
       //this is the type of data which we use for storing and restoring a command from file
-      typedef std::map<std::string, boost::variant<std::string, int, double> > CommandIOData;
+      typedef std::map<std::string, boost::variant<std::string, int, long, double> > CommandIOData;
       //typedef yaml::map CommandIOData;
    }
 }

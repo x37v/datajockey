@@ -139,7 +139,8 @@ class AudioModel::PlayerSetBuffersCommand : public dj::audio::PlayerCommand {
       //execute the super class's done action
       PlayerCommand::execute_done();
     }
-    virtual bool store(CommandIOData& /*data*/) const {
+    virtual bool store(CommandIOData& data) const {
+      PlayerCommand::store(data, "PlayerSetBuffersCommand");
       //TODO
       return false;
     }
@@ -267,8 +268,6 @@ AudioModel::AudioModel() :
   //set up position mappings
   mPlayerPositionActionMapping["play"] = PlayerPositionCommand::PLAY;
   mPlayerPositionActionMapping["play_relative"] = PlayerPositionCommand::PLAY_RELATIVE;
-  mPlayerPositionActionMapping["start"] = PlayerPositionCommand::START;
-  mPlayerPositionActionMapping["end"] = PlayerPositionCommand::END;
   mPlayerPositionActionMapping["loop_start"] = PlayerPositionCommand::LOOP_START;
   mPlayerPositionActionMapping["loop_end"] = PlayerPositionCommand::LOOP_END;
 
@@ -293,9 +292,7 @@ AudioModel::AudioModel() :
     mPlayerStates[i]->mParamInt["sample_rate"] = 44100;
 
     //position
-    mPlayerStates[i]->mParamPosition["start"] = player->start_position();
     //XXX should we query these on each load?
-    mPlayerStates[i]->mParamPosition["end"] = TimePoint(-1);
     mPlayerStates[i]->mParamPosition["loop_start"] = TimePoint(-1);
     mPlayerStates[i]->mParamPosition["loop_end"] = TimePoint(-1);
   }
@@ -336,20 +333,6 @@ AudioModel * AudioModel::instance(){
 unsigned int AudioModel::sample_rate() const { return mAudioIO->getSampleRate(); }
 unsigned int AudioModel::player_count() const { return mNumPlayers; }
 
-void AudioModel::set_player_position(int player_index, const TimePoint &val, bool absolute){
-  if (player_index < 0 || player_index >= (int)mNumPlayers)
-    return;
-
-  Command * cmd = NULL;
-  if (absolute)
-    cmd = new dj::audio::PlayerPositionCommand(
-        player_index, PlayerPositionCommand::PLAY, val);
-  else
-    cmd = new dj::audio::PlayerPositionCommand(
-        player_index, PlayerPositionCommand::PLAY_RELATIVE, val);
-  queue_command(cmd);
-}
-
 void AudioModel::set_player_position_frame(int player_index, int frame, bool absolute) {
   if (player_index < 0 || player_index >= (int)mNumPlayers)
     return;
@@ -374,18 +357,9 @@ void AudioModel::set_player_position_frame(int player_index, int frame, bool abs
 }
 
 void AudioModel::set_player_position_beat_relative(int player_index, int beats) {
-  TimePoint point;
-  unsigned int abs_beat = abs(beats);
-  int bar = 0;
-  while(abs_beat >= 4) {
-    abs_beat -= 4;
-    bar += 1;
-  }
-  point.at_bar(bar, abs_beat);
-  if (beats < 0)
-    point = -point;
-
-  set_player_position(player_index, point, false);
+  if (player_index < 0 || player_index >= (int)mNumPlayers)
+    return;
+  queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_BEAT_RELATIVE, beats));
 }
 
 void AudioModel::set_player_eq(int player_index, int band, int value) {
@@ -843,16 +817,16 @@ void AudioModel::player_set(int player_index, QString name, double value) {
   make_slotarg_absolute(pstate->mParamDouble, name, value);
   slotval_clamp(name, value);
 
-  if (name == "play_position") {
-    if (value < 0.0)
-      value = 0.0;
-    queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, TimePoint(value)));
-  } else if (name == "play_position_relative") {
-    queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, TimePoint(value)));
-  } else {
+  //if (name == "play_position") {
+    //if (value < 0.0)
+      //value = 0.0;
+    //queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, TimePoint(value)));
+  //} else if (name == "play_position_relative") {
+    //queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, TimePoint(value)));
+  //} else {
     cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (double) arg" << endl;
     return;
-  }
+  //}
 }
 
 void AudioModel::player_set(int /*player_index*/, QString /*name*/, QString /*value*/) {
@@ -872,11 +846,7 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
     return;
   }
 
-  if (name == "play") {
-    queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY, value));
-  } else if (name == "play_relative") {
-    queue_command(new dj::audio::PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, value));
-  } else if (name.contains("loop_")) {
+  if (name.contains("loop_")) {
     if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
       BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
       //XXX ignoring file sampling rate, using global sampling rate
@@ -891,23 +861,8 @@ void AudioModel::player_set(int player_index, QString name, dj::audio::TimePoint
       }
     }
   } else {
-    //get the state for this name
-    QHash<QString, TimePoint>::iterator state_itr = pstate->mParamPosition.find(name);
-    if (state_itr == pstate->mParamPosition.end()) {
-      cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg" << endl;
-      return;
-    }
-    //return if there isn't anything to be done
-    if (*state_itr == value)
-      return;
-
-    //set the new value
-    *state_itr = value;
-
-    //queue the actual command [who's action is stored in the action_itr]
-    queue_command(new dj::audio::PlayerPositionCommand(player_index, *action_itr, value));
-
-    //XXX TODO emit(player_position_changed(player_index, name, value));
+    cerr << DJ_FILEANDLINE << name.toStdString() << " is not a valid player_set (TimePoint) arg" << endl;
+    return;
   }
 }
 
@@ -951,6 +906,12 @@ void AudioModel::stop_audio() {
 }
 
 void AudioModel::queue_command(dj::audio::Command * cmd){
+  /*
+  dj::audio::CommandIOData io_data;
+  cmd->store(io_data);
+  cout << "queue_command " << io_data["name"] << " " << io_data["target"] << " " << io_data["value"] << endl;
+  */
+
   mMaster->scheduler()->execute(cmd);
 }
 

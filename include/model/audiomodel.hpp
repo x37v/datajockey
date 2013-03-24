@@ -150,7 +150,6 @@ namespace dj {
 
         //eq the eq 0 is the lowest, 2 is high, one_scale is the top
         void set_player_eq(int player_index, int band, int value);
-        void set_player_position(int player_index, const TimePoint &val, bool absolute = true);
         void set_player_position_frame(int player_index, int frame, bool absolute = true);
         void set_player_position_beat_relative(int player_index, int beats);
 

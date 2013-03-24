@@ -41,9 +41,6 @@ Player::Player() :
   //XXX who should keep track of these stretchers?
   mStretcher = new StretcherRate();
 
-  //by default we start at the beginning of the audio
-  mStartPosition.at_bar(0);
-
   mPositionDirty = false;
   mSetup = false;
 
@@ -103,7 +100,6 @@ void Player::setup_audio(
 //the audio computation methods
 //setup for audio computation
 void Player::audio_pre_compute(unsigned int /* numFrames */, float ** /* mixBuffer */, const Transport& transport){ 
-
   if(!mStretcher->audio_buffer())
     return;
 
@@ -118,8 +114,6 @@ void Player::audio_pre_compute(unsigned int /* numFrames */, float ** /* mixBuff
   }
 
   if(mStretcher->frame() >= mStretcher->audio_buffer()->length())
-    return;
-  if(mEndPosition.valid() && mPosition >= mEndPosition)
     return;
 }
 
@@ -163,32 +157,6 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
         position_at_frame(mLoopStartFrame);
     }
   }
-
-#if 0
-  //XXX what to do?
-  //update our position
-  if(mBeatBuffer){
-    mPosition = mBeatBuffer->position_at_time(
-        ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate, mPosition);
-    //if we've reached the end then stop, if we've reached the end of the loop
-    //reposition to the beginning of the loop
-    if(mEndPosition.valid() && mPosition >= mEndPosition)
-      break;
-    else if(mLoop && mLoopEndPosition.valid() && 
-        mLoopStartPosition.valid() &&
-        mPosition >= mLoopEndPosition) {
-      position(mLoopStartPosition);
-    }
-  } else {
-    //XXX deal with position if there is no beat buffer
-    if (mPosition.type() == TimePoint::SECONDS) {
-      double seconds = ((double)mSampleIndex + mSampleIndexResidual) / (double)mSampleRate;
-      mPosition.seconds(seconds);
-    } else {
-      //TODO what?
-    }
-  }
-#endif
 }
 
 //finalize audio computation, apply effects, etc.
@@ -254,8 +222,6 @@ const TimePoint& Player::position() {
   return mPosition; 
 }
 
-const TimePoint& Player::start_position() const { return mStartPosition; }
-const TimePoint& Player::end_position() const { return mEndPosition; }
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
 float Player::max_sample_value() const { return mMaxSampleValue; }
 
@@ -384,7 +350,6 @@ void Player::position(const TimePoint &val){
     mStretcher->frame(frame);
   } else
     mPositionDirty = true;
-
 }
 
 void Player::position_at_frame(unsigned long frame, Transport * transport) {
@@ -414,12 +379,29 @@ void Player::position_at_frame(unsigned long frame, Transport * transport) {
   mPositionDirty = false;
 }
 
-void Player::start_position(const TimePoint &val){
-  mStartPosition = val;
+void Player::position_at_beat(unsigned long beat, Transport * transport) {
+  if (!mStretcher->audio_buffer() || !mBeatBuffer || mBeatBuffer->length() <= beat)
+    return;
+
+  //find the frame for this beat
+  unsigned long frame = static_cast<unsigned long>(mBeatBuffer->at(beat) * mStretcher->audio_buffer()->sample_rate());
+  position_at_frame(frame, transport);
 }
 
-void Player::end_position(const TimePoint &val){
-  mEndPosition = val;
+void Player::position_at_beat_relative(long offset, Transport * transport) {
+  if (!mStretcher->audio_buffer() || !mBeatBuffer)
+    return;
+  //find our current position
+  double seconds = static_cast<double>(mStretcher->frame()) / static_cast<double>(mStretcher->audio_buffer()->sample_rate());
+  TimePoint pos = mBeatBuffer->position_at_time(seconds);
+ 
+  //offset
+  pos += TimePoint(0,offset);
+  seconds = mBeatBuffer->time_at_position(pos);
+
+  //position at that frame
+  unsigned long frame = seconds * mStretcher->audio_buffer()->sample_rate();
+  position_at_frame(frame, transport);
 }
 
 void Player::loop_start_frame(unsigned int val){
@@ -432,18 +414,18 @@ void Player::loop_end_frame(unsigned int val){
 
 void Player::audio_buffer(AudioBuffer * buf){
   mStretcher->audio_buffer(buf);
-  //set at the start
-  //TODO what if the start position's type is not the same as the position type?
-  //mPosition = mStartPosition;
+  //XXX what's wrong with this? mPosition.at_bar(0);
+  mStretcher->frame(0);
 }
 
 void Player::beat_buffer(BeatBuffer * buf){
   mBeatBuffer = buf;
   //set at the start
   //TODO what if the start position's type is not the same as the position type?
-  if (mBeatBuffer)
-    mPosition = mStartPosition;
-  else {
+  if (mBeatBuffer) {
+    //XXX what's wrong with this? mPosition.at_bar(0);
+    mStretcher->frame(0);
+  } else {
     mPosition.type(TimePoint::SECONDS);
     mPosition.seconds(0.0);
   }
@@ -585,7 +567,7 @@ void PlayerStateCommand::execute(){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
-    position_executed(p->position());
+    //position_executed(p->position());
     //execute the action
     switch(mAction){
       case PLAY:
@@ -672,7 +654,7 @@ void PlayerDoubleCommand::execute(){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
-    position_executed(p->position());
+    //position_executed(p->position());
     //execute the action
     switch(mAction){
       case VOLUME:
@@ -742,7 +724,7 @@ void PlayerSetAudioBufferCommand::execute(){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
-    position_executed(p->position());
+    //position_executed(p->position());
     //store the old buffer pointer
     mOldBuffer = p->audio_buffer();
     //execute the action
@@ -794,7 +776,7 @@ void PlayerSetBeatBufferCommand::execute(){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
-    position_executed(p->position());
+    //position_executed(p->position());
     //store the old buffer pointer
     mOldBuffer = p->beat_buffer();
     //execute the action
@@ -827,54 +809,36 @@ void PlayerSetBeatBufferCommand::buffer(BeatBuffer * buffer) {
 }
 
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
-    position_t target, const TimePoint & timepoint) : 
+    position_t target, long value) : 
   PlayerCommand(idx),
-  mTimePoint(timepoint),
   mTarget(target),
-  mFrames(0),
-  mUseFrames(false)
-{ }
-
-PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, 
-    position_t target, long frames) : 
-  PlayerCommand(idx),
-  mTimePoint(),
-  mTarget(target),
-  mFrames(frames),
-  mUseFrames(true)
+  mValue(value)
 { }
 
 void PlayerPositionCommand::execute(){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
-    position_executed(p->position());
+    //position_executed(p->position());
     //execute the action
     switch(mTarget){
       case PLAY:
-        if (mUseFrames)
-          p->position_at_frame(mFrames, master()->transport());
-        else
-          p->position(mTimePoint);
+        p->position_at_frame(mValue, master()->transport());
         break;
       case PLAY_RELATIVE:
-        if (mUseFrames)
-          p->position_at_frame_relative(mFrames);
-        else
-          p->position_relative(mTimePoint);
+        p->position_at_frame_relative(mValue);
         break;
-      case START:
-        //TODO mUseFrames
-        p->start_position(mTimePoint);
+      case PLAY_BEAT:
+        p->position_at_beat(mValue, master()->transport());
         break;
-      case END:
-        p->end_position(mTimePoint);
+      case PLAY_BEAT_RELATIVE:
+        p->position_at_beat_relative(mValue);
         break;
       case LOOP_START:
-        p->loop_start_frame(mFrames);
+        p->loop_start_frame(mValue);
         break;
       case LOOP_END:
-        p->loop_end_frame(mFrames);
+        p->loop_end_frame(mValue);
         break;
     };
     //TODO shouldn't it update the position if dirty?
@@ -890,11 +854,11 @@ bool PlayerPositionCommand::store(CommandIOData& data) const{
     case PLAY_RELATIVE:
       data["target"] = "play_relative";
       break;
-    case START:
-      data["target"] = "start";
+    case PLAY_BEAT:
+      data["target"] = "play_beat";
       break;
-    case END:
-      data["target"] = "end";
+    case PLAY_BEAT_RELATIVE:
+      data["target"] = "play_beat_relative";
       break;
     case LOOP_START:
       data["target"] = "loop_start";
@@ -903,8 +867,8 @@ bool PlayerPositionCommand::store(CommandIOData& data) const{
       data["target"] = "loop_end";
       break;
   };
-  //XXX string representation of time point;
-  //data["time_point"] = mTimePoint;
+
+  data["value"] = mValue;
   return false;
 }
 

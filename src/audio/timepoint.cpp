@@ -82,6 +82,7 @@ void TimePoint::beat_type(unsigned int val){
 void TimePoint::seconds(double val){ mSeconds = val; }
 
 void TimePoint::at_bar(int newBar, unsigned int newBeat, double newPos){
+   mType = BEAT_BAR;
    //fix up range!
    while(newPos >= 1.0){
       newBeat += 1;
@@ -100,6 +101,7 @@ void TimePoint::at_bar(int newBar, unsigned int newBeat, double newPos){
 }
 
 void TimePoint::at_beat(int newBeat, double newPos){
+   mType = BEAT_BAR;
    //fix up range!
    while(newPos >= 1.0){
       newBeat += 1;
