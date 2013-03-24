@@ -414,7 +414,7 @@ void Player::loop_end_frame(unsigned int val){
 
 void Player::audio_buffer(AudioBuffer * buf){
   mStretcher->audio_buffer(buf);
-  //XXX what's wrong with this? mPosition.at_bar(0);
+  mPosition.at_bar(0);
   mStretcher->frame(0);
 }
 
@@ -423,7 +423,7 @@ void Player::beat_buffer(BeatBuffer * buf){
   //set at the start
   //TODO what if the start position's type is not the same as the position type?
   if (mBeatBuffer) {
-    //XXX what's wrong with this? mPosition.at_bar(0);
+    mPosition.at_bar(0);
     mStretcher->frame(0);
   } else {
     mPosition.type(TimePoint::SECONDS);

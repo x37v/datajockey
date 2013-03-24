@@ -11,6 +11,7 @@ TimePoint::TimePoint(time_type t){
 }
 
 TimePoint::TimePoint(double sec) {
+   mBeatsPerBar = mBeatType = 4;
    mType = SECONDS;
    seconds(sec);
 }
@@ -90,11 +91,11 @@ void TimePoint::at_bar(int newBar, unsigned int newBeat, double newPos){
    }
    if(newPos < 0)
       newPos = 0;
+
    //TODO does this still work with negative bar?
-   while(newBeat >= mBeatsPerBar){
-      newBeat -= mBeatsPerBar;
-      newBar += 1;
-   }
+   newBar += (newBeat / mBeatsPerBar);
+   newBeat = newBeat % mBeatsPerBar;
+
    bar(newBar);
    beat(newBeat);
    pos_in_beat(newPos);
