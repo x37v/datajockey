@@ -8,6 +8,7 @@
 #define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
 
 #include <iostream>
+#include <iomanip>
 using std::cerr;
 using std::endl;
 
@@ -244,13 +245,12 @@ void Player::play_state(play_state_t val, Transport * transport) {
     mPlayState = val;
 
     if (mBeatBuffer) {
-      //update our index
-      mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
-
       //sync to transport if we should
       if (transport && mSync && mPlayState == PLAY) {
         sync_to_transport(transport);
         update_play_speed(transport);
+      } else {
+        mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
       }
     }
   }
@@ -387,42 +387,30 @@ void Player::update_play_speed(const Transport * transport) {
   if (!mBeatBuffer || mBeatBuffer->length() < 3)
     return;
 
-  unsigned int beat = mBeatIndex;
   double seconds = mStretcher->seconds();
-  if (beat + 1 >= mBeatBuffer->length()) {
-    beat = mBeatBuffer->length() - 2;
-    seconds = mBeatBuffer->at(beat);
+  unsigned int beat_closest = mBeatBuffer->index_closest(seconds);
+
+  if (beat_closest + 2 >= mBeatBuffer->length()) {
+    beat_closest = mBeatBuffer->length() - 3;
+    seconds = mBeatBuffer->at(beat_closest);
   }
+
+  //target the next beat
+  double target_offset = mBeatBuffer->at(beat_closest + 1) - seconds;
+  double time_till_target = transport->seconds_per_beat() * (1.0 - transport->position().pos_in_beat());
   
-  double div = (mBeatBuffer->at(mBeatIndex + 1) - mBeatBuffer->at(mBeatIndex));
-  if (div <= 0)
+  if (time_till_target <= 0)
     return;
-  double speed = div / transport->seconds_per_beat();
+
+  double speed = target_offset / time_till_target;
   mStretcher->speed(speed);
-
-  //XXX ignoring position right now.. shouldn't do that
-  
-  //we target our sync for 1 beat + the current offset out
-  //double seconds_to_sync = transport->seconds_per_beat() * (1.0 + transport->position()->pos_in_beat());
-    
-#if 0
-  TimePoint next = mPosition;
-  next.advance_beat();
-
-  double newSpeed = mBeatBuffer->time_at_position(next) - mBeatBuffer->time_at_position(mPosition);
-  newSpeed /= secTillBeat; 
-
-  //XXX should make this a setting
-  //should we at least set no sync and notify observers?
-  //also, if we do abs(newSpeed) we could allow for going backwards?
-  if(newSpeed > 0.25 && newSpeed < 4)
-    mStretcher->speed(newSpeed);
-#endif
 }
 
 void Player::sync_to_transport(const Transport * transport) {
   TimePoint trans_pos = transport->position();
-  if (mBeatIndex + 1 < mBeatBuffer->length()) {
+  unsigned int beat_closest = mBeatBuffer->index_closest(mStretcher->seconds());
+  if (beat_closest + 1 < mBeatBuffer->length()) {
+    mBeatIndex = beat_closest;
     double seconds = mBeatBuffer->at(mBeatIndex);
     seconds += trans_pos.pos_in_beat() * (mBeatBuffer->at(mBeatIndex + 1) - seconds);
     mStretcher->seconds(seconds);

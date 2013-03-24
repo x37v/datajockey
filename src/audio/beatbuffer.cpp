@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -109,6 +110,22 @@ unsigned int BeatBuffer::index(double seconds) const {
   for (unsigned int i = 0; i < mBeatData.size() - 1; i++) {
     if (mBeatData[i] <= seconds && mBeatData[i + 1] > seconds)
       return i;
+  }
+  return mBeatData.size() - 1;
+}
+
+unsigned int BeatBuffer::index_closest(double seconds) const {
+  if (mBeatData.size() < 1)
+    return 0;
+  if (mBeatData.front() > seconds)
+    return 0;
+  if (mBeatData.back() < seconds)
+    return mBeatData.size() - 1;
+
+  //XXX do a more intelligent search
+  for (unsigned int i = 0; i < mBeatData.size() - 1; i++) {
+    if (mBeatData[i] <= seconds && mBeatData[i + 1] > seconds)
+      return fabs(mBeatData[i] - seconds) < fabs(mBeatData[i + 1] - seconds) ? i : (i + 1);
   }
   return mBeatData.size() - 1;
 }

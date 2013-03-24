@@ -26,6 +26,7 @@ namespace dj {
             TimePoint position_at_time(double seconds) const;
             TimePoint beat_closest(double seconds) const;
             unsigned int index(double seconds) const; //which index would we be at at this time
+            unsigned int index_closest(double seconds) const;
 
             //this one lets us give a 'last position' helper so we don't have to
             //search the whole thing
