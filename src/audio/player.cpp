@@ -216,19 +216,9 @@ double Player::pos_in_beat() const {
   double seconds = mStretcher->seconds();
   unsigned int beat = mBeatBuffer->index(seconds);
 
-  if (beat + 1 >= mBeatBuffer->length())
-    return 0.0;
-
-  double beat_times[2];
-  beat_times[0] = mBeatBuffer->at(beat);
-  beat_times[1] = mBeatBuffer->at(beat + 1);
-
-  double div = (beat_times[1] - beat_times[0]);
-  if (div <= 0.0)
-    return 0.0;
-
-  return (seconds - beat_times[0]) / div;
+  return pos_in_beat(seconds, beat);
 }
+
 
 bool Player::audible() const {
   if (!mStretcher->audio_buffer() || muted() || play_state() == PAUSE || volume() < INAUDIBLE_VOLUME || frame() >= mStretcher->audio_buffer()->length())
@@ -310,16 +300,30 @@ void Player::position_at_beat(unsigned int beat, Transport * transport) {
 void Player::position_at_beat_relative(int offset, Transport * transport) {
   if (!mStretcher->audio_buffer() || !mBeatBuffer)
     return;
-  //find our current position
-  double seconds = mStretcher->seconds();
-  TimePoint pos = mBeatBuffer->position_at_time(seconds);
- 
-  //offset
-  pos += TimePoint(0,offset);
-  seconds = mBeatBuffer->time_at_position(pos);
 
-  //position at that frame
-  unsigned long frame = seconds * mStretcher->audio_buffer()->sample_rate();
+  //find our current position
+  const double current_seconds = mStretcher->seconds();
+  const unsigned int current_beat = mBeatBuffer->index(current_seconds);
+  unsigned long frame = 0;
+
+  if (offset < 0 && current_beat < static_cast<unsigned int>(-offset)) {
+    mBeatIndex = 0;
+  } else {
+    //offset the beat
+    unsigned int new_beat = current_beat + offset;
+
+    if (new_beat + 1 < mBeatBuffer->length()) {
+      //find the new position in seconds, offset by our old beat offset
+      double new_seconds = mBeatBuffer->at(new_beat);
+      new_seconds += pos_in_beat(current_seconds, current_beat) * (mBeatBuffer->at(new_beat + 1) - new_seconds);
+
+      frame = new_seconds * mStretcher->audio_buffer()->sample_rate();
+    } else {
+      new_beat = mBeatBuffer->length() - 1;
+      frame = mBeatBuffer->at(mBeatBuffer->length() - 1) * mStretcher->audio_buffer()->sample_rate();
+    }
+    mBeatIndex = new_beat;
+  }
   position_at_frame(frame, transport);
 }
 
@@ -419,7 +423,24 @@ void Player::sync_to_transport(const Transport * transport) {
     double speed = (next_beat_seconds - beat_seconds) / transport->seconds_per_beat();
     mStretcher->speed(speed);
   }
+
 }
+
+double Player::pos_in_beat(double seconds, unsigned int beat) const {
+  if (beat + 1 >= mBeatBuffer->length())
+    return 0.0;
+
+  double beat_times[2];
+  beat_times[0] = mBeatBuffer->at(beat);
+  beat_times[1] = mBeatBuffer->at(beat + 1);
+
+  double div = (beat_times[1] - beat_times[0]);
+  if (div <= 0.0)
+    return 0.0;
+
+  return (seconds - beat_times[0]) / div;
+}
+
 
 //command stuff
 //

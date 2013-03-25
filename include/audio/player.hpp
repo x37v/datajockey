@@ -132,6 +132,7 @@ namespace dj {
         //for updating the play speed while syncing
         void update_play_speed(const Transport * transport);
         void sync_to_transport(const Transport * transport);
+        double pos_in_beat(double pos_seconds, unsigned int pos_beat) const;
     };
 
     //forward declaration
