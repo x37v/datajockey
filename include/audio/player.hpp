@@ -77,8 +77,7 @@ namespace dj {
         void play_state(play_state_t val, Transport * transport = NULL);
         void out_state(out_state_t val);
         void mute(bool val);
-        void sync(bool val);
-        void sync(bool val, const Transport& transport);
+        void sync(bool val, const Transport * transport = NULL);
         void loop(bool val);
         void volume(double val);
         void play_speed(double val);

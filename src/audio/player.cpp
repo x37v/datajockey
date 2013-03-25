@@ -213,7 +213,7 @@ double Player::pos_in_beat() const {
   if (!mBeatBuffer || !mStretcher->audio_buffer())
     return 0.0;
 
-  double seconds = static_cast<double>(mStretcher->frame()) / static_cast<double>(mStretcher->audio_buffer()->sample_rate());
+  double seconds = mStretcher->seconds();
   unsigned int beat = mBeatBuffer->index(seconds);
 
   if (beat + 1 >= mBeatBuffer->length())
@@ -246,12 +246,10 @@ void Player::play_state(play_state_t val, Transport * transport) {
 
     if (mBeatBuffer) {
       //sync to transport if we should
-      if (transport && mSync && mPlayState == PLAY) {
+      if (transport && mSync && mPlayState == PLAY)
         sync_to_transport(transport);
-        update_play_speed(transport);
-      } else {
+      else
         mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
-      }
     }
   }
 }
@@ -264,16 +262,12 @@ void Player::mute(bool val){
   mMute = val;
 }
 
-void Player::sync(bool val){
-  if (val != mSync)
+void Player::sync(bool val, const Transport * transport) {
+  if (val != mSync) {
     mSync = val;
-}
-
-void Player::sync(bool val, const Transport& transport) {
-  if (val != mSync)
-    mSync = val;
-
-  //XXX change
+    if (transport && mSync)
+      sync_to_transport(transport);
+  }
 }
 
 void Player::loop(bool val){
@@ -295,12 +289,10 @@ void Player::position_at_frame(unsigned long frame, Transport * transport) {
   mStretcher->frame(frame);
 
   if (mBeatBuffer) {
-    mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
-
-    if (transport && mSync && mPlayState == PLAY) {
+    if (transport && mSync && mPlayState == PLAY)
       sync_to_transport(transport);
-      update_play_speed(transport);
-    }
+    else
+      mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
   }
 }
 
@@ -319,7 +311,7 @@ void Player::position_at_beat_relative(int offset, Transport * transport) {
   if (!mStretcher->audio_buffer() || !mBeatBuffer)
     return;
   //find our current position
-  double seconds = static_cast<double>(mStretcher->frame()) / static_cast<double>(mStretcher->audio_buffer()->sample_rate());
+  double seconds = mStretcher->seconds();
   TimePoint pos = mBeatBuffer->position_at_time(seconds);
  
   //offset
@@ -408,13 +400,18 @@ void Player::update_play_speed(const Transport * transport) {
 
 void Player::sync_to_transport(const Transport * transport) {
   TimePoint trans_pos = transport->position();
-  unsigned int beat_closest = mBeatBuffer->index_closest(mStretcher->seconds());
-  if (beat_closest + 1 < mBeatBuffer->length()) {
-    mBeatIndex = beat_closest;
+
+  unsigned int beat = mBeatBuffer->index_closest(mStretcher->seconds());
+  if (trans_pos.pos_in_beat() > 0.5 && beat > 1)
+    beat -= 1;
+
+  if (beat + 1 < mBeatBuffer->length()) {
+    mBeatIndex = beat;
     double seconds = mBeatBuffer->at(mBeatIndex);
     seconds += trans_pos.pos_in_beat() * (mBeatBuffer->at(mBeatIndex + 1) - seconds);
     mStretcher->seconds(seconds);
   }
+  update_play_speed(transport);
 }
 
 //command stuff
@@ -470,7 +467,7 @@ void PlayerStateCommand::execute(){
         p->out_state(Player::CUE);
         break;
       case SYNC:
-        p->sync(true, *Master::instance()->transport());
+        p->sync(true, master()->transport());
         break;
       case NO_SYNC:
         p->sync(false);

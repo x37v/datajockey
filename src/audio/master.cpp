@@ -242,7 +242,7 @@ void Master::sync_to_player(unsigned int player_index) {
    mTransport.bpm(bpm);
 
    //update the player
-   player->sync(true, mTransport);
+   player->sync(true, &mTransport);
 }
 
 const std::vector<Player *>& Master::players() const { return mPlayers; }
