@@ -265,7 +265,7 @@ void Player::mute(bool val){
 void Player::sync(bool val, const Transport * transport) {
   if (val != mSync) {
     mSync = val;
-    if (transport && mSync)
+    if (transport && mSync && mPlayState == PLAY)
       sync_to_transport(transport);
   }
 }
@@ -406,12 +406,19 @@ void Player::sync_to_transport(const Transport * transport) {
     beat -= 1;
 
   if (beat + 1 < mBeatBuffer->length()) {
+    //store index
     mBeatIndex = beat;
-    double seconds = mBeatBuffer->at(mBeatIndex);
-    seconds += trans_pos.pos_in_beat() * (mBeatBuffer->at(mBeatIndex + 1) - seconds);
-    mStretcher->seconds(seconds);
+
+    //update position
+    const double beat_seconds = mBeatBuffer->at(beat);
+    const double next_beat_seconds = mBeatBuffer->at(beat + 1);
+    const double pos_seconds = beat_seconds + trans_pos.pos_in_beat() * (next_beat_seconds - beat_seconds);
+    mStretcher->seconds(pos_seconds);
+
+    //update rate
+    double speed = (next_beat_seconds - beat_seconds) / transport->seconds_per_beat();
+    mStretcher->speed(speed);
   }
-  update_play_speed(transport);
 }
 
 //command stuff

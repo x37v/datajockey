@@ -241,8 +241,8 @@ void Master::sync_to_player(unsigned int player_index) {
    mTransport.position(position);
    mTransport.bpm(bpm);
 
-   //update the player
-   player->sync(true, &mTransport);
+   //update the player, no transport because we're already in sync
+   player->sync(true);
 }
 
 const std::vector<Player *>& Master::players() const { return mPlayers; }
