@@ -1,6 +1,5 @@
 session filtering:
   make it configurable
-  actually, just change coloring in display based on session id, don't filter?
   keep work selection intact
 Vinyl control:
 	http://xwax.org/devel/source.html
