@@ -216,7 +216,8 @@ AudioModel::AudioModel() :
   mPlayerStates(),
   mPlayerAudibleThresholdVolume(0.05 * one_scale), //XXX make this configurable?
   mCrossfadeAudibleThresholdPosition(0.05 * one_scale),
-  mBumpSeconds(0.25)
+  mBumpSeconds(0.25),
+  mCueOnLoad(true)
 {
   unsigned int num_players = 2;
 
@@ -418,6 +419,11 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
   mPlayingAnnotationFiles[player_index] << beat_buffer;
 
   queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
+
+  if (mCueOnLoad) {
+    for (int i = 0; i < mNumPlayers; i++)
+      player_set(i, "cue", i == player_index);
+  }
 
   if (beat_buffer.data() == NULL) {
     player_set(player_index, "sync", false);

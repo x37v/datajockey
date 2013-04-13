@@ -135,6 +135,7 @@ namespace dj {
         int mCrossfadeAudibleThresholdPosition;
 
         double mBumpSeconds;
+        bool mCueOnLoad;
 
         //**** private methods
 
