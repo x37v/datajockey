@@ -55,6 +55,9 @@ namespace dj {
          QString db_username();
          QString db_password();
 
+         //if populated, run this after startup
+         QString post_start_script();
+
          unsigned int osc_in_port();
          const QList<OscNetAddr> osc_destinations() const;
 
@@ -71,6 +74,8 @@ namespace dj {
          QString mDBName;
          QString mDBUserName;
          QString mDBPassword;
+
+         QString mPostStartScript;
 
          unsigned int mOscInPort;
          QList<OscNetAddr> mOscDestinations;

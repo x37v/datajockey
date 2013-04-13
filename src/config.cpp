@@ -115,6 +115,13 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
           osc["in_port"] >> mOscInPort;
         } catch (...) { /* do nothing */ }
 
+        const YAML::Node& scripts = root["script"];
+        try {
+          std::string s;
+          scripts["post_startup"] >> s;
+          mPostStartScript = QString::fromStdString(s);
+        } catch (...) { /* do nothing */ }
+
         const YAML::Node& osc_out = osc["out"];
         //the destinations could be a list or a map
         try {
@@ -204,6 +211,10 @@ QString Configuration::db_name() { return mDBName; }
 QString Configuration::db_password() { return mDBPassword; }
 QString Configuration::db_username() { return mDBUserName; }
 
+QString Configuration::post_start_script() {
+  return mPostStartScript;
+}
+
 unsigned int Configuration::osc_in_port(){ return mOscInPort; }
 const QList<OscNetAddr> Configuration::osc_destinations() const { return mOscDestinations; }
 QString Configuration::annotation_dir() { return mAnnotationDir; }
@@ -220,6 +231,8 @@ void Configuration::restore_defaults() {
    mDBPassword = "";
    mDBAdapter = "QSQLITE";
    mDBName = DEFAULT_DB_NAME;
+
+   mPostStartScript.clear();
 
    mAnnotationDir = DEFAULT_ANNOTATION_DIR;
 
