@@ -29,6 +29,7 @@ namespace dj {
             double speed() const;
 
             void next_frame(float * frame); 
+            void next(float * frame_buffer, unsigned int frames);
 
             virtual bool pitch_independent() const;
 

@@ -14,6 +14,7 @@ namespace dj {
    //this is the value we use to scale from an int to a double, this
    //represents 'one' as a double in int terms.
    extern const unsigned int one_scale;
+   extern const double pi;
    
    const QString version_string = STRINGIFY(DJ_VERSION);
 

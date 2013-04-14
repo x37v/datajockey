@@ -77,6 +77,7 @@ HEADERS += include/application.hpp \
            include/audio/beatbuffer.hpp \
            include/audio/command.hpp \
            include/audio/doublelinkedlist.hpp \
+           include/audio/envelope.hpp \
            include/audio/master.hpp \
            include/audio/player.hpp \
            include/audio/scheduledataparser.hpp \
@@ -131,6 +132,7 @@ SOURCES += src/application.cpp \
            src/audio/beatbuffer.cpp \
            src/audio/command.cpp \
            src/audio/doublelinkedlist.cpp \
+           src/audio/envelope.cpp \
            src/audio/master.cpp \
            src/audio/player.cpp \
            src/audio/schedulenode.cpp \

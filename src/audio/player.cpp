@@ -18,7 +18,9 @@ Player::Player() :
   mBeatIndex(0),
   mLoopStartFrame(0),
   mLoopEndFrame(0),
-  mMaxSampleValue(0.0)
+  mMaxSampleValue(0.0),
+  mEnvelope(dj::audio::quarter_sin, 4410),
+  mFadeoutIndex(0)
 #ifdef USE_LV2
   ,mEqInstance(NULL)
 #endif
@@ -67,6 +69,11 @@ void Player::setup_audio(
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
   mVolumeBuffer = new float[maxBufferLen];
+
+  unsigned int fade_length = static_cast<double>(sampleRate) * 0.015; //15 ms
+  mEnvelope.length(fade_length);
+  mFadeoutBuffer.resize(2 * (fade_length + 1));
+  mFadeoutIndex = mFadeoutBuffer.size();
 
 #ifdef USE_LV2
   //do lv2
@@ -118,7 +125,7 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
   mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
   //compute the actual frame
-  if(mPlayState == PLAY){
+  if(mPlayState == PLAY) {
     //only update the rate on the beat.
     if(inbeat && mSync && mBeatBuffer) {
       mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
@@ -127,6 +134,13 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
 
     float buffer[2];
     mStretcher->next_frame(buffer);
+
+    if (!mEnvelope.at_end()) {
+      double v = mEnvelope.value_step();
+      buffer[0] *= v;
+      buffer[1] *= v;
+    }
+
     mixBuffer[0][frame] = buffer[0];
     mixBuffer[1][frame] = buffer[1];
 
@@ -134,6 +148,12 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
       if(mLoopEndFrame > mLoopStartFrame && mStretcher->frame() >= mLoopEndFrame)
         position_at_frame(mLoopStartFrame);
     }
+  }
+
+  if (mFadeoutIndex < mFadeoutBuffer.size()) {
+    mixBuffer[0][frame] += mFadeoutBuffer[mFadeoutIndex];
+    mixBuffer[1][frame] += mFadeoutBuffer[mFadeoutIndex + 1];
+    mFadeoutIndex += 2;
   }
 }
 
@@ -222,7 +242,6 @@ double Player::pos_in_beat() const {
   return pos_in_beat(seconds, beat);
 }
 
-
 bool Player::audible() const {
   if (!mStretcher->audio_buffer() || muted() || play_state() == PAUSE || volume() < INAUDIBLE_VOLUME || frame() >= mStretcher->audio_buffer()->length())
     return false;
@@ -243,6 +262,16 @@ void Player::play_state(play_state_t val, Transport * transport) {
         sync_to_transport(transport);
       else
         mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
+    }
+
+    //render our fadeout
+    if (mPlayState == PAUSE && audio_buffer()) {
+      const unsigned int frame = mStretcher->frame();
+      fill_fade_buffer();
+      mStretcher->frame(frame);
+      mFadeoutIndex = 0;
+    } else if (mPlayState == PLAY) {
+      mEnvelope.reset();
     }
   }
 }
@@ -279,6 +308,8 @@ void Player::position_at_frame(unsigned long frame, Transport * transport) {
   if (!mStretcher->audio_buffer())
     return;
 
+  if (mPlayState == PLAY)
+    setup_seek_fade();
   mStretcher->frame(frame);
 
   if (mBeatBuffer) {
@@ -293,6 +324,8 @@ void Player::position_at_beat(unsigned int beat, Transport * transport) {
   if (!mStretcher->audio_buffer() || !mBeatBuffer || mBeatBuffer->length() <= beat)
     return;
 
+  if (mPlayState == PLAY)
+    setup_seek_fade();
   mBeatIndex = beat;
 
   //find the frame for this beat
@@ -444,6 +477,31 @@ double Player::pos_in_beat(double seconds, unsigned int beat) const {
   return (seconds - beat_times[0]) / div;
 }
 
+
+void Player::fill_fade_buffer() {
+  const unsigned int channels = audio_buffer()->channels();
+  const unsigned int fade_frames = mFadeoutBuffer.size() / channels;
+
+  //get our data
+  mStretcher->next(&mFadeoutBuffer.front(), fade_frames);
+
+  //apply envelope
+  for (unsigned int i = 0; i < fade_frames; i++) {
+    double e = mEnvelope.reversed_value_at(i);
+    for (unsigned int c = 0; c < channels; c++)
+      mFadeoutBuffer[i * channels + c] *= e;
+  }
+}
+
+void Player::setup_seek_fade() {
+  if (mFadeoutIndex < mFadeoutBuffer.size())
+    return;
+
+  //fade on seek
+  fill_fade_buffer();
+  mFadeoutIndex = 0;
+  mEnvelope.reset();
+}
 
 //command stuff
 //

@@ -7,6 +7,7 @@
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 #include "stretcher.hpp"
+#include "envelope.hpp"
 
 #ifdef USE_LV2
 #include <lilv/lilv.h>
@@ -122,6 +123,11 @@ namespace dj {
         Stretcher * mStretcher;
         float mMaxSampleValue;
 
+        Envelope mEnvelope;
+
+        unsigned int mFadeoutIndex;
+        std::vector<float> mFadeoutBuffer;
+
         //the eq instance
 #ifdef USE_LV2
         LilvInstance * mEqInstance;
@@ -133,6 +139,8 @@ namespace dj {
         void update_play_speed(const Transport * transport);
         void sync_to_transport(const Transport * transport);
         double pos_in_beat(double pos_seconds, unsigned int pos_beat) const;
+        void fill_fade_buffer(); //moves our stretcher index..
+        void setup_seek_fade();
     };
 
     //forward declaration

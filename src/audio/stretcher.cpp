@@ -105,6 +105,15 @@ namespace dj {
          compute_frame(frame, mFrame, mFrameSubsample, last_frame, last_frame_subsamp);
       }
 
+      void Stretcher::next(float * frame_buffer, unsigned int frames) {
+        if (!mAudioBuffer)
+          return;
+
+        const unsigned int channels = mAudioBuffer->channels();
+        for (unsigned int i = 0; i < frames * channels; i += channels)
+          next_frame(frame_buffer + i);
+      }
+
       bool Stretcher::pitch_independent() const { return false; }
 
 
