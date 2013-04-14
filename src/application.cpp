@@ -395,6 +395,7 @@ void Application::post_start_actions() {
     QObject::connect(process, SIGNAL(error(QProcess::ProcessError)), SLOT(startup_script_error(QProcess::ProcessError)));
     process->start(post_start);
   }
+  mAudioModel->master_set("volume", static_cast<int>(0.7 * dj::one_scale));
 }
 
 void Application::pre_quit_actions() {
