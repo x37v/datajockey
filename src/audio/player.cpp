@@ -201,11 +201,14 @@ double Player::bpm() {
   if (!mBeatBuffer)
     return 0.0;
 
+  mBeatIndex = mBeatBuffer->index(mStretcher->seconds());
   unsigned int beat = mBeatIndex;
   if (beat + 1 >= mBeatBuffer->length())
     beat = mBeatBuffer->length() - 2;
 
-  double s_per_beat = (mBeatBuffer->at(beat + 1) - mBeatBuffer->at(beat)) / play_speed();
+  const double dist = (mBeatBuffer->at(beat + 1) - mBeatBuffer->at(beat));
+  const double s_per_beat = dist / play_speed();
+
   return 60.0 / s_per_beat; //becomes beats per min
 }
 
