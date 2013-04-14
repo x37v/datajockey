@@ -319,7 +319,6 @@ AudioModel::AudioModel() :
 
   mConsumeThread = new ConsumeThread(query_cmd, mMaster->scheduler());
   mConsumeThread->start();
-
 }
 
 AudioModel::~AudioModel() {
@@ -421,7 +420,7 @@ void AudioModel::relay_player_buffers_loaded(int player_index,
   queue_command(new PlayerSetBuffersCommand(player_index, this, audio_buffer.data(), beat_buffer.data()));
 
   if (mCueOnLoad) {
-    for (int i = 0; i < mNumPlayers; i++)
+    for (int i = 0; i < (int)mNumPlayers; i++)
       player_set(i, "cue", i == player_index);
   }
 
