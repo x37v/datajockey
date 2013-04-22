@@ -45,6 +45,7 @@ static inline signed int madScale(mad_fixed_t sample);
 SoundFile::SoundFile(std::string location) : 
    mSndFile(location.c_str()), 
    mType(UNSUPPORTED),
+   mPCMData(NULL),
    mSampleRate(0),
    mChannels(0),
    mLocation(location)
@@ -104,6 +105,7 @@ SoundFile::SoundFile(std::string location) :
          mChannels = mMP3Data.synth.pcm.channels;
       }
    }
+   mPCMData = new short[1024 * channels()];
 }
 
 SoundFile::~SoundFile(){
@@ -124,6 +126,9 @@ SoundFile::~SoundFile(){
       default:
          break;
    };
+
+   if (mPCMData)
+     delete [] mPCMData;
 }
 
 unsigned int SoundFile::samplerate(){
@@ -135,21 +140,24 @@ unsigned int SoundFile::channels(){
 }
 
 unsigned int SoundFile::readFloatFrame(float *ptr, unsigned int frames){
-   short pcmData[mChannels * 1024];
    int toRead = frames;
    unsigned int framesRead;
    float * curBufPtr = ptr;
+   if (mChannels == 0) {
+     return 0;
+   }
+
    while(toRead > 0){
       if (mType == OGG){
          if(toRead > 1024)
-            framesRead = oggReadShortFrame(pcmData, 1024);
+            framesRead = oggReadShortFrame(mPCMData, 1024);
          else
-            framesRead = oggReadShortFrame(pcmData, toRead);
+            framesRead = oggReadShortFrame(mPCMData, toRead);
       } else {
          if(toRead > 1024)
-            framesRead = mp3ReadShortFrame(pcmData, 1024);
+            framesRead = mp3ReadShortFrame(mPCMData, 1024);
          else
-            framesRead = mp3ReadShortFrame(pcmData, toRead);
+            framesRead = mp3ReadShortFrame(mPCMData, toRead);
       }
       //if we didn't read anything then we're at the end of the file..
       if (framesRead == 0) {
@@ -157,8 +165,8 @@ unsigned int SoundFile::readFloatFrame(float *ptr, unsigned int frames){
       } else {
          //XXX deal with sample rate changes
          //convert to float
-         for(unsigned int i = 0; i < framesRead * mChannels; i++)
-            curBufPtr[i] = ((float)pcmData[i]) / INT16_MAX;
+         for(int i = 0; i < framesRead * mChannels; i++)
+            curBufPtr[i] = ((float)mPCMData[i]) / INT16_MAX;
          //inc the current buffer pointer for the next round
          //decrement the number of frames to read next round
          curBufPtr += framesRead * mChannels;

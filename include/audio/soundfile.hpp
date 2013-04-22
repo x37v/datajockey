@@ -55,6 +55,8 @@ class SoundFile {
     int mOggIndex;
     MP3FileData mMP3Data;
 
+    short * mPCMData;
+
     void synthMadFrame();
     int mSampleRate;
     unsigned int mChannels;
