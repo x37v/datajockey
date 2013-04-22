@@ -189,8 +189,16 @@ void AudioInfoExtractor::extract_data(const QString& audio_file_path) {
 
     //grab audio
     audio::AudioBufferPtr audio_buffer(new audio::AudioBuffer(audio_file_path.toStdString()));
-    if(!audio_buffer->load())
-      throw(std::runtime_error(DJ_FILEANDLINE + " failed to load audio buffer " + audio_file_path.toStdString()));
+    if (audio_buffer->channels() != 2) {
+      emit(extraction_failed(audio_file_path, QString("%1 channel file, only stereo is supported").arg(audio_buffer->channels())));
+      return;
+    }
+
+    if(!audio_buffer->load()) {
+      emit(extraction_failed(audio_file_path, "failed to load audio buffer"));
+      return;
+    }
+
     tag_data["seconds"] = static_cast<unsigned int>(static_cast<double>(audio_buffer->length()) / static_cast<double>(audio_buffer->sample_rate()));
 
     //extract beats

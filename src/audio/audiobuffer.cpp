@@ -71,8 +71,15 @@ QString AudioBuffer::file_location() const {
   return QString::fromStdString(mSoundFile.location());
 }
 
+#include <iostream>
+using std::cerr;
+using std::endl;
+
 void AudioBuffer::fill_mono(data_buffer_t& buffer, unsigned int start_index) const {
   const unsigned int num_channels = channels();
+  if (num_channels == 0) {
+    cerr << "num_channels == 0" << endl;
+  }
   const unsigned int frames = buffer.size();
   const unsigned int frames_total = mAudioData.size() / num_channels;
   const unsigned int valid_frames = ((frames + start_index) <= frames_total) ? frames : frames_total - start_index;
