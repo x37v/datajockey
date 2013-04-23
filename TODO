@@ -1,3 +1,6 @@
+check denormals:
+  http://users.ecs.soton.ac.uk/swh/denormal-finder
+
 session filtering:
   make it configurable
   keep work selection intact
