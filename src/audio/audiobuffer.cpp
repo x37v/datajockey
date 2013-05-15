@@ -68,7 +68,7 @@ float AudioBuffer::sample(unsigned int channel, unsigned int index, double subsa
 }
 
 QString AudioBuffer::file_location() const {
-  return QString::fromStdString(mSoundFile.location());
+  return mSoundFile.location();
 }
 
 #include <iostream>

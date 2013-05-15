@@ -22,7 +22,8 @@
 #define ALEX_SOUNDFILE_HPP
 
 #include <sndfile.hh>
-#include <string>
+#include <QString>
+#include <QFile>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 #include <mad.h>
@@ -40,7 +41,7 @@ class SoundFile {
       unsigned char *inputBuffer;
       unsigned long inBufLength;
       std::ifstream inputFile;
-      
+
       bool endOfFile;
 
       //this is a count of unread frames remaining in synth.pcm
@@ -49,6 +50,7 @@ class SoundFile {
   private:
     enum filetype {UNSUPPORTED, SNDFILE, OGG, MP3};
 
+    QFile mFile;
     SndfileHandle mSndFile;
     filetype mType;
     OggVorbis_File mOggFile;
@@ -60,7 +62,7 @@ class SoundFile {
     void synthMadFrame();
     int mSampleRate;
     unsigned int mChannels;
-    std::string mLocation;
+    QString mLocation;
 
     //private member functions for reading ogg/mp3 shorts
     unsigned int oggReadShortFrame (short *ptr, unsigned int frames);
@@ -68,16 +70,16 @@ class SoundFile {
     //this will read either mp3 or ogg float frames
     unsigned int readFloatFrame (float *ptr, unsigned int frames);
   public:
-    SoundFile(std::string location);
+    SoundFile(QString location);
     ~SoundFile();
     unsigned int samplerate();
     unsigned int channels();
     unsigned int readf (float *ptr, unsigned int frames) ;
     unsigned int readf (short *ptr, unsigned int frames) ;
-    std::string location() const;
+    QString location() const;
     operator bool () const ;
-      bool valid() const;
-      unsigned int frames();
+    bool valid() const;
+    unsigned int frames();
 };
 
 #endif
