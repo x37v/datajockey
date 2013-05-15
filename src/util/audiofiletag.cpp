@@ -1,6 +1,7 @@
 #include "audiofiletag.hpp"
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
+#include <QFile>
 
 using namespace dj::util;
 
@@ -12,7 +13,7 @@ namespace {
 }
 
 void audiofile_tag::extract(const QString& path_to_file, QHash<QString, QVariant>& tag_data) throw(std::runtime_error) {
-	TagLib::FileRef tag_file(path_to_file.toAscii());
+	TagLib::FileRef tag_file(QFile::encodeName(path_to_file));
 	if (tag_file.isNull())
 		throw std::runtime_error("audiofile_tag::extract cannot open file: " + path_to_file.toStdString());
 	if (!tag_file.tag())
