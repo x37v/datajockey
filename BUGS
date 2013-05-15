@@ -1,5 +1,6 @@
 audio hiccups without displaying xruns?  what is going on?
-figure out mp3 related crashes importing
+SoundFile:
+  cannot open files with special characters in their names [non ascii]
 clicks:
   changing of tempo causes clicks in synched audio.
 work selection:
