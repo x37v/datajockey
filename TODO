@@ -1,3 +1,6 @@
+temp table:
+	why use a temp table?  Why not just have new descriptors modify the main work table, adding a new column?
+
 check denormals:
   http://users.ecs.soton.ac.uk/swh/denormal-finder
 
