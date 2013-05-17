@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 22) do
+ActiveRecord::Schema.define(:version => 23) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -76,21 +76,9 @@ ActiveRecord::Schema.define(:version => 22) do
     t.integer  "artist_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "descriptor_tempo_median"
+    t.float    "descriptor_tempo_average"
   end
-
-  create_table "descriptor_types", :force => true do |t|
-    t.string "name"
-  end
-
-  create_table "descriptors", :force => true do |t|
-    t.integer "descriptor_type_id"
-    t.integer "audio_work_id"
-    t.float   "value"
-  end
-
-  add_index "descriptors", ["audio_work_id", "descriptor_type_id"], :name => "index_descriptors_on_audio_work_id_and_descriptor_type_id"
-  add_index "descriptors", ["audio_work_id"], :name => "index_descriptors_on_audio_work_id"
-  add_index "descriptors", ["descriptor_type_id"], :name => "index_descriptors_on_descriptor_type_id"
 
   create_table "tag_classes", :force => true do |t|
     t.string "name"
