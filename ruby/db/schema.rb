@@ -10,21 +10,12 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 24) do
+ActiveRecord::Schema.define(:version => 25) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
     t.integer "artist_id"
   end
-
-  create_table "album_audio_works", :force => true do |t|
-    t.integer "album_id"
-    t.integer "audio_work_id"
-    t.integer "track"
-  end
-
-  add_index "album_audio_works", ["album_id"], :name => "index_album_audio_works_on_album_id"
-  add_index "album_audio_works", ["audio_work_id"], :name => "index_album_audio_works_on_audio_work_id"
 
   create_table "albums", :force => true do |t|
     t.string  "name"
@@ -80,6 +71,8 @@ ActiveRecord::Schema.define(:version => 24) do
     t.float    "descriptor_tempo_average"
     t.integer  "last_session_id"
     t.datetime "last_played_at"
+    t.integer  "album_id"
+    t.integer  "album_track"
   end
 
   create_table "tag_classes", :force => true do |t|

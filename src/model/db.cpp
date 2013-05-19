@@ -54,7 +54,7 @@ namespace {
       );
 
   const QString cSessionQuery("SELECT distinct session_id FROM audio_work_histories ORDER BY session_id DESC");
-  const QString cWorksSessionUpdate("UPDATE works SET session_id = :session_id, last_played_at = :played_at WHERE id = :work_id");
+  const QString cWorksSessionUpdate("UPDATE audio_works SET last_session_id = :last_session_id, last_played_at = :played_at WHERE id = :work_id");
 
   const QString cWorkIDFromLocation("SELECT id FROM audio_works where audio_works.audio_file_location = :audio_file_location");
 
@@ -119,57 +119,6 @@ namespace {
       }
   };
 
-  void create_worktable_selects_and_joins() throw (std::runtime_error) {
-    QMutexLocker lock(&mMutex);
-
-    work_table_selects << "audio_works.id AS id, artists.name AS artist, albums.name AS album, audio_works.name AS name, album_audio_works.track AS track, audio_works.year AS year,"
-      " audio_file_types.name AS file_type, audio_works.audio_file_seconds AS audio_file_seconds, "
-      " COALESCE(MAX(audio_work_histories.session_id), 0) AS session_id, audio_work_histories.played_at AS last_played_at, "
-      " audio_works.audio_file_channels AS audio_file_channels, "
-      " audio_works.audio_file_location AS audio_file_location, audio_works.annotation_file_location AS annotation_file_location, "
-      " audio_works.artist_id AS artist_id, audio_works.created_at AS created_at, audio_works.updated_at AS updated_at";
-    work_table_joins << "audio_works";
-
-    work_table_selects << "albums.id AS album_id";
-
-    work_table_joins << "INNER JOIN album_audio_works ON album_audio_works.audio_work_id = audio_works.id INNER JOIN albums ON albums.id = album_audio_works.album_id";
-    work_table_joins << "INNER JOIN artists ON artists.id = audio_works.artist_id";
-
-    work_table_selects << "audio_works.audio_file_type_id as audio_file_type_id";
-    work_table_joins << "INNER JOIN audio_file_types ON audio_file_types.id = audio_works.audio_file_type_id";
-    work_table_joins << "LEFT OUTER JOIN audio_work_histories ON audio_works.id = audio_work_histories.audio_work_id";
-
-    //build up descriptor joins
-    MySqlQuery query(cDB);
-    query.prepare(cDescriptorTypesAll);
-    query.exec();
-    while(query.next()) {
-      QString name = query.value(1).toString();
-      QString id = query.value(0).toString();
-      work_table_joins << "LEFT JOIN descriptors as `" + name.replace(QRegExp("\\s+"), "_") + "` ON audio_works.id = `" + name + "`.audio_work_id AND `" + name + "`.descriptor_type_id = " + id;
-      work_table_selects << "`" + name + "`.value as `" + name + "`";
-    }
-  }
-
-  void create_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
-    QMutexLocker lock(&mMutex);
-    QString query_string = "CREATE TEMPORARY TABLE " + table_name + " AS SELECT " + work_table_selects.join(", ") + " FROM " + work_table_joins.join(" ");
-
-    if (!where_clause.isEmpty())
-      query_string += (" WHERE " + where_clause);
-
-    query_string += " GROUP BY audio_works.id";
-    query_string += " ORDER BY artist, album, track";
-
-    //cout << "temp table creation:" << endl;
-    //cout << query_string.toStdString() << endl;
-
-    //actually create the table
-    MySqlQuery query(cDB);
-    query.prepare(query_string);
-    query.exec();
-  }
-
   void update_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
     QMutexLocker lock(&mMutex);
     MySqlQuery query(cDB);
@@ -180,8 +129,8 @@ namespace {
     query.exec();
 
     //prepare the insert
-    query_string = "INSERT INTO " + table_name + " SELECT DISTINCT works.*" +
-      "FROM works LEFT OUTER JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
+    query_string = "INSERT INTO " + table_name + " SELECT DISTINCT audio_works.*" +
+      "FROM audio_Works LEFT OUTER JOIN audio_work_tags ON audio_works.id = audio_work_tags.audio_work_id";
     if (!where_clause.isEmpty())
       query_string += (" WHERE " + where_clause);
     query_string += " ORDER BY album_id, track";
@@ -191,12 +140,9 @@ namespace {
     query.exec();
   }
 
-  void build_work_table() throw(std::runtime_error) {
-    //create_temp_work_table("works", "audio_works.id IN (select audio_work_id from audio_work_tags where audio_work_tags.tag_id in (2,3,4))");
-    create_temp_work_table("works");
-
+  void get_column_numbers() throw(std::runtime_error) {
     QSqlTableModel tab;
-    tab.setTable("works");
+    tab.setTable("audio_works");
     cWorkIdColumn = tab.fieldIndex("id");
     cWorkArtistIdColumn = tab.fieldIndex("artist_id");
     cWorkAlbumIdColumn = tab.fieldIndex("album_id");
@@ -245,15 +191,9 @@ void db::setup(
     has_transactions = true;
 
   try {
-    create_worktable_selects_and_joins();
+    get_column_numbers();
   } catch (std::runtime_error e) {
-    qFatal("couldn't create worktable selects and joins, exception thrown with following message: %s", e.what());
-  }
-
-  try {
-    build_work_table();
-  } catch (std::runtime_error e) {
-    qFatal("couldn't build temporary work table, exception thrown with following message: %s", e.what());
+    qFatal("couldn't bind audio works column numbers: %s", e.what());
   }
 
   //find the current session
@@ -324,9 +264,9 @@ bool db::find_artist_and_title_by_id(
 
 QString db::work::filtered_table_query(const QString where_clause, const QString session_clause) throw(std::runtime_error) {
   //COALESCE fills a 0 in in case of NULL
-  QString query_string = QString("SELECT DISTINCT works.*") +
-    " FROM works" +
-    " LEFT JOIN audio_work_tags ON works.id = audio_work_tags.audio_work_id";
+  QString query_string = QString("SELECT DISTINCT audio_works.*") +
+    " FROM audio_works" +
+    " LEFT JOIN audio_work_tags ON audio_works.id = audio_work_tags.audio_work_id";
   if (!where_clause.isEmpty())
     query_string += " WHERE " + where_clause;
   query_string += " ORDER BY album_id, track";
@@ -344,10 +284,6 @@ QString db::work::filtered_table(const QString where_clause) throw(std::runtime_
   query.prepare(query_string);
   query.exec();
   return table_name;
-}
-
-void db::work::filtered_update(const QString& table_name, const QString where_clause) throw(std::runtime_error) {
-  update_temp_work_table(table_name, where_clause);
 }
 
 QString db::work::filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error) {
@@ -375,7 +311,7 @@ QString db::work::filtered_table_by_tag(QString tag, QString tag_class) throw(st
   return filtered_table_by_tag(tag_id);
 }
 
-int db::work::temp_table_column(QString id_name) {
+int db::work::work_table_column(QString id_name) {
   if (id_name == "id")
     return cWorkIdColumn;
   else if (id_name == "artist")
@@ -391,7 +327,7 @@ int db::work::temp_table_column(QString id_name) {
   return 0;
 }
 
-void db::work::temp_table_columns(QList<int>& ids) {
+void db::work::work_table_columns(QList<int>& ids) {
   ids << cWorkIdColumn;
   ids << cWorkArtistIdColumn;
   ids << cWorkAlbumIdColumn;
@@ -636,14 +572,13 @@ void db::work::set_played(int work_id, int session_id, QDateTime time) {
   }
 
   try {
-    //XXX hack.. updating temp table
     query.prepare(cWorksSessionUpdate);
     query.bindValue(":work_id", work_id);
-    query.bindValue(":session_id", session_id);
-    query.bindValue(":played_at", time);
+    query.bindValue(":last_session_id", session_id);
+    query.bindValue(":last_played_at", time);
     query.exec();
   } catch (std::runtime_error e) {
-    cerr << "failed to update temp work table" << endl;
+    cerr << "failed to update audio works table" << endl;
   }
 }
 

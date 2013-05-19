@@ -33,13 +33,12 @@ namespace dj {
       namespace work {
         QString filtered_table_query(const QString where_clause = QString(), const QString session_clause = QString()) throw(std::runtime_error);
         QString filtered_table(const QString where_clause = QString()) throw(std::runtime_error);
-        void filtered_update(const QString& table_name, const QString where_clause = QString()) throw(std::runtime_error);
         QString filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error);
         QString filtered_table_by_tag(int tag_id) throw(std::runtime_error);
         QString filtered_table_by_tag(QString tag, QString tag_class = QString()) throw(std::runtime_error);
 
-        int temp_table_column(QString id_name);
-        void temp_table_columns(QList<int>& ids);
+        int work_table_column(QString id_name);
+        void work_table_columns(QList<int>& ids);
 
         int create(
             const QHash<QString, QVariant>& attributes,
