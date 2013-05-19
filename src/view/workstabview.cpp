@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <QMessageBox>
+#include <QSqlRelationalTableModel>
 
 using namespace dj;
 
@@ -19,10 +20,12 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
 {
   mTabWidget = new RenameableTabWidget(this);
 
-  QSqlTableModel * maintable = new QSqlTableModel(this, model::db::get());
-  maintable->setTable("works");
-  maintable->select();
-  mAllView = new WorkDBView(maintable);
+  QSqlQueryModel * maintable = new QSqlQueryModel(this);
+  maintable->setQuery(model::db::work::table_query(), model::db::get());
+  QSortFilterProxyModel * sortable = new QSortFilterProxyModel(maintable);
+  sortable->setSourceModel(maintable);
+
+  mAllView = new WorkDBView(sortable);
   mTabWidget->addTab(mAllView, "all works");
   mTabWidget->setTabsClosable(true);
   mTabWidget->setMovable(true);

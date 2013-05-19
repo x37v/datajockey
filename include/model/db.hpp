@@ -31,14 +31,9 @@ namespace dj {
           QString& work_title) throw(std::runtime_error);
 
       namespace work {
-        QString filtered_table_query(const QString where_clause = QString(), const QString session_clause = QString()) throw(std::runtime_error);
-        QString filtered_table(const QString where_clause = QString()) throw(std::runtime_error);
-        QString filtered_table_by_tags(QList<int> tag_ids) throw(std::runtime_error);
-        QString filtered_table_by_tag(int tag_id) throw(std::runtime_error);
-        QString filtered_table_by_tag(QString tag, QString tag_class = QString()) throw(std::runtime_error);
+        QString table_query(const QString where_clause = QString(), const QString session_clause = QString()) throw(std::runtime_error);
 
-        int work_table_column(QString id_name);
-        void work_table_columns(QList<int>& ids);
+        int table_column(QString id_name);
 
         int create(
             const QHash<QString, QVariant>& attributes,
@@ -58,6 +53,7 @@ namespace dj {
             int work_id,
             const QString& tag_class,
             const QString& tag_value) throw(std::runtime_error);
+        void set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
 
         //indicate that this work has been played in this session, at time given
         void set_played(int work_id, int session_id, QDateTime time);
@@ -76,7 +72,6 @@ namespace dj {
 
       namespace album {
         int find(const QString& name, bool create = false) throw(std::runtime_error);
-        void add_work(int album_id, int work_id, int track_num) throw(std::runtime_error);
       }
 
       namespace file_type {

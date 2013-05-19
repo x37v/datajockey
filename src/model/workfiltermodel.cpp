@@ -191,7 +191,7 @@ WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) :
   QSortFilterProxyModel(parent),
   mCurrentBPM(120.0)
 {
-  QString query_str = db::work::filtered_table_query();
+  QString query_str = db::work::table_query();
   mQueryModel = new QSqlQueryModel(this);
   mQueryModel->setQuery(query_str, db);
   setSourceModel(mQueryModel);
@@ -257,7 +257,7 @@ void WorkFilterModel::apply_filter_expression(QString expression) throw(std::run
   QString session_id;
   session_id.setNum(db::work::current_session());
 
-  QString query_str = db::work::filtered_table_query(mSQLExpression, "!= " + session_id);
+  QString query_str = db::work::table_query(mSQLExpression, "!= " + session_id);
   mQueryModel->setQuery(query_str);
 
   if (mQueryModel->lastError().isValid())
