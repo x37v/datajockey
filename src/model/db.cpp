@@ -256,7 +256,7 @@ bool db::find_artist_and_title_by_id(
   return true;
 }
 
-QString db::work::table_query(const QString where_clause, const QString session_clause) throw(std::runtime_error) {
+QString db::work::table_query(const QString where_clause) throw(std::runtime_error) {
   QString from(" FROM audio_works as w");
 
   QString joins = QString(" LEFT JOIN albums ON w.album_id = albums.id") +

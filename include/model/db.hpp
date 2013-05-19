@@ -31,7 +31,7 @@ namespace dj {
           QString& work_title) throw(std::runtime_error);
 
       namespace work {
-        QString table_query(const QString where_clause = QString(), const QString session_clause = QString()) throw(std::runtime_error);
+        QString table_query(const QString where_clause = QString()) throw(std::runtime_error);
 
         int table_column(QString id_name);
 
