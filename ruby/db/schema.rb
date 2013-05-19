@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 23) do
+ActiveRecord::Schema.define(:version => 24) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -78,6 +78,8 @@ ActiveRecord::Schema.define(:version => 23) do
     t.datetime "updated_at"
     t.float    "descriptor_tempo_median"
     t.float    "descriptor_tempo_average"
+    t.integer  "last_session_id"
+    t.datetime "last_played_at"
   end
 
   create_table "tag_classes", :force => true do |t|

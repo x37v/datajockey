@@ -18,7 +18,11 @@
 class DescriptorType < ActiveRecord::Base
 end
 
-class AudioWorks < ActiveRecord::Base
+class Descriptor < ActiveRecord::Base
+  has_one :descriptor_type
+end
+
+class AudioWork < ActiveRecord::Base
   has_many :descriptors
 end
 
@@ -27,12 +31,14 @@ class ConsolidateDescriptors < ActiveRecord::Migration
     add_column :audio_works, :descriptor_tempo_median, :float
     add_column :audio_works, :descriptor_tempo_average, :float
 
+    AudioWork.reset_column_information
+
     median_type = DescriptorType.where(:name => 'tempo median').first
     average_type = DescriptorType.where(:name => 'tempo average').first
 
     if median_type
       id = median_type.id
-      AudioWorks.all.each do |w|
+      AudioWork.all.each do |w|
         d = w.descriptors.where(:descriptor_type_id => id).first
         w.update_attribute(:descriptor_tempo_median, d.value) if d
       end
@@ -40,7 +46,7 @@ class ConsolidateDescriptors < ActiveRecord::Migration
 
     if average_type
       id = average_type.id
-      AudioWorks.all.each do |w|
+      AudioWork.all.each do |w|
         d = w.descriptors.where(:descriptor_type_id => id).first
         w.update_attribute(:descriptor_tempo_average, d.value) if d
       end
