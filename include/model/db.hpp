@@ -47,7 +47,7 @@ namespace dj {
             const QVariant& value) throw(std::runtime_error);
         void descriptor_create_or_update(
             int work_id,
-            const QString& descriptor_type_name,
+            QString descriptor_type_name,
             double value) throw(std::runtime_error);
         void tag(
             int work_id,

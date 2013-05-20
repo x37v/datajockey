@@ -70,13 +70,6 @@ namespace {
   const QString cFileTypeFind("SELECT id FROM audio_file_types where name = :name");
   const QString cFileTypeInsert("INSERT INTO audio_file_types (name) values (:name)");
 
-  const QString cDescriptorTypesAll("SELECT id, name FROM descriptor_types");
-  const QString cDescriptorTypeFind("SELECT id FROM descriptor_types WHERE name = :name");
-  const QString cDescriptorTypeCreate("INSERT INTO descriptor_types (name) VALUES ( :name )");
-  const QString cDescriptorFindByWorkId("SELECT id FROM descriptors WHERE descriptor_type_id = :descriptor_type_id AND audio_work_id = :audio_work_id");
-  const QString cDescriptorUpdateValueById("UPDATE descriptors SET value = :value WHERE id = :id");
-  const QString cDescriptorInsert("INSERT INTO descriptors (descriptor_type_id, audio_work_id, value) VALUES(:descriptor_type_id, :audio_work_id, :value)");
-
   const QString cTagClassFind("SELECT id FROM tag_classes WHERE name = :name");
   const QString cTagClassCreate("INSERT INTO tag_classes (name) VALUES (:name)");
 
@@ -90,9 +83,9 @@ namespace {
   QStringList work_table_selects;
   QStringList work_table_joins;
 
-  int cWorkIdColumn = 0;
-  int cWorkSongLengthColumn = 6;
-  int cWorkSessionIdColumn = 8;
+  const int cWorkIdColumn = 0;
+  const int cWorkSongLengthColumn = 6;
+  const int cWorkSessionIdColumn = 8;
 
   const QString cWorkTableSelectColumns(
       " w.id, "
@@ -108,9 +101,8 @@ namespace {
       "audio_file_types.name as file_type, "
       "w.created_at");
 
-  int cFilteredWorkTableCount = 0;
-
   int cCurrentSession = 0;
+  QStringList cDescriptorTypes;
 
   //this class simply wraps the prepare and exec methods of QSqlQuery so it throws exceptions on failures
   class MySqlQuery : public QSqlQuery {
@@ -149,7 +141,6 @@ namespace {
     query.prepare(query_string);
     query.exec();
   }
-
 }
 
 using namespace dj::model;
@@ -197,7 +188,12 @@ void db::setup(
     if(query.exec() && query.first())
       cCurrentSession = query.value(0).toInt() + 1;
   } catch (std::runtime_error e) {
+    cerr << "query failed, couldn't set current session: " << e.what() << endl;
   }
+
+  //XXX update descriptor list from columns
+  cDescriptorTypes << "tempo_median";
+  cDescriptorTypes << "tempo_average";
 }
 
 QSqlDatabase db::get() { return cDB; }
@@ -402,7 +398,7 @@ void db::work::update_attribute(
 
   MySqlQuery query(get());
 
-  QString update_string("UPDATE audio_works SET " + name + " = :value WHERE audio_works.id = :id");
+  QString update_string = QString("UPDATE audio_works SET %1=:value WHERE audio_works.id = :id").arg(name);
 
   //try to find an artist by the same name
   query.prepare(update_string);
@@ -415,46 +411,15 @@ void db::work::update_attribute(
 
 void db::work::descriptor_create_or_update(
     int work_id,
-    const QString& descriptor_type_name,
+    QString name,
     double value) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-  MySqlQuery query(get());
 
-  //find the descriptor type named
-  query.prepare(cDescriptorTypeFind);
-  query.bindValue(":name", descriptor_type_name);
-  query.exec();
+  name.replace(QRegExp("\\s"), "_"); //replace any spaces with underscore
+  if (!cDescriptorTypes.contains(name))
+    throw std::runtime_error("invalid descriptor type: " + name.toStdString());
 
-  //if it was found, get the id, otherwise create a descriptor type with this name
-  int descriptor_type_id = 0;
-  if (query.first())
-    descriptor_type_id = query.value(0).toInt();
-  else {
-    query.prepare(cDescriptorTypeCreate);
-    query.bindValue(":name", descriptor_type_name);
-    query.exec();
-    descriptor_type_id = query.lastInsertId().toInt();
-  }
-
-  //see if there is an existing descriptor to update
-  query.prepare(cDescriptorFindByWorkId);
-  query.bindValue(":descriptor_type_id", descriptor_type_id);
-  query.bindValue(":audio_work_id", work_id);
-  query.exec();
-
-  if (query.first()) {
-    int descriptor_id = query.value(0).toInt();
-    query.prepare(cDescriptorUpdateValueById);
-    query.bindValue(":id", descriptor_id);
-    query.bindValue(":value", value);
-    query.exec();
-  } else {
-    query.prepare(cDescriptorInsert);
-    query.bindValue(":descriptor_type_id", descriptor_type_id);
-    query.bindValue(":audio_work_id", work_id);
-    query.bindValue(":value", value);
-    query.exec();
-  }
+  QString column_name = QString("descriptor_%1").arg(name);
+  update_attribute(work_id, column_name, value);
 }
 
 void db::work::tag(
