@@ -134,23 +134,23 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mAudioLevelView = new AudioLevel(this);
 
    mSliderLevelLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->addStretch(100);
    mSliderLevelLayout->addWidget(mVolumeSlider, 1, Qt::AlignHCenter);
    mSliderLevelLayout->addWidget(mAudioLevelView, 1, Qt::AlignHCenter);
-   mSliderLevelLayout->addStretch(10);
+   mSliderLevelLayout->addStretch(100);
    mSliderLevelLayout->setContentsMargins(0,0,0,0);
 
-   mControlLayout->addStretch(10);
+   mControlLayout->addStretch(100);
    mControlLayout->addLayout(mSliderLevelLayout);
    mControlLayout->setContentsMargins(0,0,0,0);
 
    mWaveFormZoomedView = new WaveFormViewGL(this, true);
    mWaveFormZoomedView->setVisible(waveform_orientation != WAVEFORM_NONE);
-   mWaveFormZoomedView->setMinimumWidth(220);
+   mWaveFormZoomedView->setMinimumWidth(50);
 
    mWaveFormFullView = new WaveFormViewGL(this, true, true);
    mWaveFormFullView->setVisible(waveform_orientation != WAVEFORM_NONE);
-   mWaveFormFullView->setMinimumWidth(50);
+   mWaveFormFullView->setMinimumWidth(20);
 
    mTopLayout->addLayout(mControlLayout, 0);
    mTopLayout->addWidget(mWaveFormZoomedView, 10);
