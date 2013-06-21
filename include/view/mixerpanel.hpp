@@ -46,6 +46,7 @@ namespace dj {
         void relay_player_triggered();
         void relay_player_volume(int val);
         void relay_player_speed(int val);
+        void relay_player_loop_now(int val);
         void relay_player_loop_beats(int val);
         void relay_player_loop_shift_forward();
         void relay_player_loop_shift_back();

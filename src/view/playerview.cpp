@@ -289,12 +289,20 @@ void Player::loop_end(int id, int frame) {
 }
 
 void Player::loop_button_pressed(int id) {
+  bool any_checked = false;
   for (auto button: mLoopGroup->buttons()) {
-    if (id != mLoopGroup->id(button))
-      button->setChecked(false);
-    else
-      emit(loop(button->isChecked() ? id : 0));
+    if (id != mLoopGroup->id(button)) {
+      if (button->isChecked()) {
+        any_checked = true;
+        button->setChecked(false);
+      }
+    }
   }
+
+  if (any_checked)
+    emit(loop_beats(mLoopGroup->button(id)->isChecked() ? id : 0));
+  else
+    emit(loop_now(mLoopGroup->button(id)->isChecked() ? id : 0));
 }
 
 void Player::loop_enable(int id, bool enable) {

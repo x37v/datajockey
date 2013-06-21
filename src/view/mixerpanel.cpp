@@ -53,7 +53,11 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
         SLOT(relay_player_speed(int)));
 
     QObject::connect(player,
-        SIGNAL(loop(int)),
+        SIGNAL(loop_now(int)),
+        SLOT(relay_player_loop_now(int)));
+
+    QObject::connect(player,
+        SIGNAL(loop_beats(int)),
         SLOT(relay_player_loop_beats(int)));
 
     QObject::connect(player,
@@ -336,13 +340,21 @@ void MixerPanel::relay_player_speed(int val) {
   emit(player_value_changed(player_index.value(), "speed", val));
 }
 
-void MixerPanel::relay_player_loop_beats(int val) {
+void MixerPanel::relay_player_loop_now(int val) {
   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
   if (player_index == mSenderToIndex.end())
     return;
 
   emit(player_value_changed(player_index.value(), "loop_beats", val));
   emit(player_value_changed(player_index.value(), "loop_now", val != 0));
+}
+
+void MixerPanel::relay_player_loop_beats(int val) {
+  QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+  if (player_index == mSenderToIndex.end())
+    return;
+
+  emit(player_value_changed(player_index.value(), "loop_beats", val));
 }
 
 void MixerPanel::relay_player_loop_shift_forward() {
