@@ -69,7 +69,6 @@ namespace dj {
             void seek_frame_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
             void seeking(bool state);
-            void loop_now(int beats); //zero means off
             void loop_beats(int beats); //zero means off
             void loop_shift_forward();
             void loop_shift_back();

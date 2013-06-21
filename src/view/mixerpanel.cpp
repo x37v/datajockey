@@ -53,10 +53,6 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
         SLOT(relay_player_speed(int)));
 
     QObject::connect(player,
-        SIGNAL(loop_now(int)),
-        SLOT(relay_player_loop_now(int)));
-
-    QObject::connect(player,
         SIGNAL(loop_beats(int)),
         SLOT(relay_player_loop_beats(int)));
 
@@ -204,7 +200,6 @@ void MixerPanel::player_set(int player_index, QString name, bool value) {
     mSyncToPlayer[player_index]->setDisabled(value || mPlayers[player_index]->button("sync")->isChecked());
   } else if (name == "loop") {
     mPlayers[player_index]->loop_enable(0, value);
-    player_set(player_index, "loop_now", value);
   } else if(QPushButton * button = mPlayers[player_index]->button(name)) {
     button->setChecked(value);
     //only enable sync to player when the player is running in free mode and it can sync
@@ -338,16 +333,6 @@ void MixerPanel::relay_player_speed(int val) {
     return;
 
   emit(player_value_changed(player_index.value(), "speed", val));
-}
-
-void MixerPanel::relay_player_loop_now(int val) {
-  QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
-  if (player_index == mSenderToIndex.end())
-    return;
-
-  //XXX this logic should go into the controller ditch 'loop_now'
-  emit(player_value_changed(player_index.value(), "loop_beats", val));
-  emit(player_value_changed(player_index.value(), "loop_now", val != 0));
 }
 
 void MixerPanel::relay_player_loop_beats(int val) {

@@ -299,10 +299,7 @@ void Player::loop_button_pressed(int id) {
     }
   }
 
-  if (any_checked)
-    emit(loop_beats(mLoopGroup->button(id)->isChecked() ? id : 0));
-  else
-    emit(loop_now(mLoopGroup->button(id)->isChecked() ? id : 0));
+  emit(loop_beats(mLoopGroup->button(id)->isChecked() ? id : 0));
 }
 
 void Player::loop_enable(int id, bool enable) {

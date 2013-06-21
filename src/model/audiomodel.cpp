@@ -25,7 +25,7 @@ namespace {
 
     //*** PLAYER
 
-    list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back" << "loop_now" << "loop_off" << "loop_shift_back" << "loop_shift_forward";
+    list << "load" << "reset" << "seek_forward" << "seek_back" << "bump_forward" << "bump_back" << "loop" << "loop_off" << "loop_shift_back" << "loop_shift_forward";
     for (int i = 0; i < 10; i++) {
       list << QString("set_cuepoint_%1").arg(i);
       list << QString("jump_cuepoint_%1").arg(i);
@@ -33,7 +33,7 @@ namespace {
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
-    list << "cue" << "sync" << "pause" << "loop_now";
+    list << "cue" << "sync" << "pause" << "loop";
     AudioModel::player_signals["bool"] = list;
 
     list.clear();
@@ -161,7 +161,6 @@ class AudioModel::PlayerState {
       mPostFreeSpeedUpdates(0),
       mMaxSampleValue(0.0),
       mAudible(false),
-      mLooping(false),
       mLoopBeats(4)
   { }
 
@@ -178,7 +177,6 @@ class AudioModel::PlayerState {
     unsigned int mPostFreeSpeedUpdates;
     float mMaxSampleValue;
     bool mAudible;
-    bool mLooping;
     unsigned int mLoopBeats;
 };
 
@@ -647,18 +645,21 @@ void AudioModel::player_trigger(int player_index, QString name) {
     queue_command(new PlayerPositionCommand(player_index, PlayerPositionCommand::PLAY_RELATIVE, frames));
   } else if (name == "clear") {
     queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
-  } else if (name == "loop_now") {
+  } else if (name == "loop") {
     if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
-      //XXX ignoring file sampling rate, using global sampling rate
-      BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
-      TimePoint start_pos = beat_buff->position_at_time(static_cast<double>(pstate->mCurrentFrame) / sample_rate());
-      start_pos.pos_in_beat(0);
+      if (!pstate->mParamBool["loop"]) {
+        //XXX ignoring file sampling rate, using global sampling rate
+        BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
 
-      TimePoint loop_length(0, pstate->mLoopBeats);
-      TimePoint end_pos = start_pos + loop_length;
+        TimePoint start_pos = beat_buff->position_at_time(static_cast<double>(pstate->mCurrentFrame) / sample_rate());
+        start_pos.pos_in_beat(0);
 
-      player_set(player_index, "loop_end", end_pos);
-      player_set(player_index, "loop_start", start_pos);
+        TimePoint loop_length(0, pstate->mLoopBeats);
+        TimePoint end_pos = start_pos + loop_length;
+
+        player_set(player_index, "loop_end", end_pos);
+        player_set(player_index, "loop_start", start_pos);
+      }
       player_set(player_index, "loop", true);
     }
   } else if (name == "loop_off") {
@@ -696,9 +697,6 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
       if (!pstate->mParamBool["pause"])
         queue_command(new dj::audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY));
     }
-    return;
-  } else if (name == "loop_now") {
-    player_trigger(player_index, value ? "loop_now" : "loop_off");
     return;
   }
 
@@ -765,7 +763,13 @@ void AudioModel::player_set(int player_index, QString name, int value) {
       TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
       player_set(player_index, "loop_end", end_pos);
       emit(player_value_changed(player_index, "loop_beats", value));
-    }
+
+      //if not looping, we loop
+      //XXX make this configurable!
+      if (!pstate->mParamBool["loop"])
+        player_trigger(player_index, "loop");
+    } else
+      player_set(player_index, "loop", false);
   } else if (name == "loop_shift") {
     TimePoint amt(0, value);
 
@@ -877,6 +881,7 @@ void AudioModel::player_load(int player_index, QString audio_file_path, QString 
 
   player_trigger(player_index, "clear");
   player_trigger(player_index, "loop_off");
+
   mThreadPool[player_index]->load(player_index, audio_file_path, annotation_file_path);
   //clear out the cue points
   mPlayerCuepoints[player_index].clear();
