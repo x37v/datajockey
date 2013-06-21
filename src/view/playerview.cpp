@@ -150,6 +150,8 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mLoopGroup = new QButtonGroup(this);
    mLoopGroup->setExclusive(false); //exclusive doesn't allow for all off
    loop_layout->addStretch(100);
+
+   //XXX make loop lengths configurable
    int beats[] = {1, 2, 4, 8, 16};
 
    for(auto beat: beats) {
@@ -163,11 +165,13 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    {
      QPushButton * btn = new QPushButton("<l", this);
      btn->setCheckable(false);
+     btn->setAutoRepeat(true);
      loop_layout->addWidget(btn);
      QObject::connect(btn, SIGNAL(clicked()), SIGNAL(loop_shift_back()));
 
      btn = new QPushButton("l>", this);
      btn->setCheckable(false);
+     btn->setAutoRepeat(true);
      loop_layout->addWidget(btn);
      QObject::connect(btn, SIGNAL(clicked()), SIGNAL(loop_shift_forward()));
    }
