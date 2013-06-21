@@ -73,7 +73,7 @@ namespace {
     foreach(signal, list) {
       list_with_rel << signal << (signal + "_relative");
     }
-    list_with_rel << "loop_measures" << "loop_shift";
+    list_with_rel << "loop_beats" << "loop_shift";
     AudioModel::player_signals["int"] = list_with_rel;
 
     list_with_rel.clear();
@@ -162,7 +162,7 @@ class AudioModel::PlayerState {
       mMaxSampleValue(0.0),
       mAudible(false),
       mLooping(false),
-      mLoopMeasures(1)
+      mLoopBeats(4)
   { }
 
     QHash<QString, bool> mParamBool;
@@ -179,7 +179,7 @@ class AudioModel::PlayerState {
     float mMaxSampleValue;
     bool mAudible;
     bool mLooping;
-    unsigned int mLoopMeasures;
+    unsigned int mLoopBeats;
 };
 
 class AudioModel::ConsumeThread : public QThread {
@@ -654,7 +654,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
       TimePoint start_pos = beat_buff->position_at_time(static_cast<double>(pstate->mCurrentFrame) / sample_rate());
       start_pos.pos_in_beat(0);
 
-      TimePoint loop_length(pstate->mLoopMeasures, 0);
+      TimePoint loop_length(0, pstate->mLoopBeats);
       TimePoint end_pos = start_pos + loop_length;
 
       player_set(player_index, "loop_end", end_pos);
@@ -756,15 +756,15 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     set_player_position_beat_relative(player_index, value);
   } else if (name == "load") {
     emit(player_value_changed(player_index, "load", value));
-  } else if (name == "loop_measures") {
+  } else if (name == "loop_beats") {
     if (value > 0) {
-      pstate->mLoopMeasures = value;
+      pstate->mLoopBeats = value;
 
       //update the end position
-      TimePoint amt(value, 0);
+      TimePoint amt(0, value);
       TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
       player_set(player_index, "loop_end", end_pos);
-      emit(player_value_changed(player_index, "loop_measures", value));
+      emit(player_value_changed(player_index, "loop_beats", value));
     }
   } else if (name == "loop_shift") {
     TimePoint amt(0, value);

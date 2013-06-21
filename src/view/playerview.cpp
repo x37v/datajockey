@@ -4,6 +4,7 @@
 #include "audiobuffer.hpp"
 #include "audiolevel.hpp"
 
+#include <QButtonGroup>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QSlider>
@@ -11,6 +12,8 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QSpinBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 using namespace dj::view;
 
@@ -56,9 +59,6 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       {2, 2, false, ">>", "seek_forward", true},
       {3, 0, false, "<b", "bump_back", true},
       {3, 2, false, "b>", "bump_forward", true},
-      {4, 0, false, "<l", "loop_shift_back", true},
-      {4, 1, true,  "lp",  "loop_now", false},
-      {4, 2, false, "l>", "loop_shift_forward", true},
    };
 
    mTopLayout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -100,17 +100,15 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    button_layout->setColumnStretch(4, 100);
    mControlLayout->addLayout(button_layout);
 
-   mLoopMeasures = new QSpinBox(this);
-   mLoopMeasures->setRange(1, 16);
-   QLabel * loop_lab = new QLabel("loop measures", this);
-   mControlLayout->addWidget(loop_lab, 0, Qt::AlignHCenter);
-   mControlLayout->addWidget(mLoopMeasures, 0, Qt::AlignHCenter);
-
    mSpeedView = new SpeedSpinBox(this);
    mSpeedView->setDisabled(true);
    QLabel * speed_lab = new QLabel("speed %", this);
    mControlLayout->addWidget(speed_lab, 0, Qt::AlignHCenter);
    mControlLayout->addWidget(mSpeedView, 0, Qt::AlignHCenter);
+
+   QHBoxLayout * lower_layout = new QHBoxLayout();
+   QVBoxLayout * eq_layout = new QVBoxLayout();
+   QVBoxLayout * eq_slider_layout = new QVBoxLayout();
 
    QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
@@ -122,8 +120,9 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
       dial->setRange(-one_scale, one_scale);
       dial->setProperty("dj_name", QString("eq_") + eq[i]);
       mEqDials.insert(eq[i], dial);
-      mControlLayout->addWidget(dial, 0, Qt::AlignHCenter);
+      eq_layout->addWidget(dial, 0, Qt::AlignHCenter);
    }
+   eq_slider_layout->addLayout(eq_layout);
 
    mVolumeSlider = new QSlider(Qt::Vertical, this);
    mVolumeSlider->setRange(0, static_cast<int>(1.5 * static_cast<float>(one_scale)));
@@ -140,9 +139,45 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mSliderLevelLayout->addStretch(100);
    mSliderLevelLayout->setContentsMargins(0,0,0,0);
 
-   mControlLayout->addStretch(100);
-   mControlLayout->addLayout(mSliderLevelLayout);
-   mControlLayout->setContentsMargins(0,0,0,0);
+   eq_slider_layout->addStretch(100);
+   eq_slider_layout->addLayout(mSliderLevelLayout);
+   eq_slider_layout->setContentsMargins(0,0,0,0);
+
+   lower_layout->addLayout(eq_slider_layout);
+
+   //loops
+   QVBoxLayout * loop_layout = new QVBoxLayout();
+   mLoopGroup = new QButtonGroup(this);
+   mLoopGroup->setExclusive(false); //exclusive doesn't allow for all off
+   loop_layout->addStretch(100);
+   int beats[] = {1, 2, 4, 8, 16};
+
+   for(auto beat: beats) {
+      QPushButton * btn = new QPushButton(QString::number(beat), this);
+      //btn->setProperty("dj_name", items[i].name);
+      btn->setCheckable(true);
+      mLoopGroup->addButton(btn, beat);
+      loop_layout->addWidget(btn);
+   }
+
+   {
+     QPushButton * btn = new QPushButton("<l", this);
+     btn->setCheckable(false);
+     loop_layout->addWidget(btn);
+     QObject::connect(btn, SIGNAL(clicked()), SIGNAL(loop_shift_back()));
+
+     btn = new QPushButton("l>", this);
+     btn->setCheckable(false);
+     loop_layout->addWidget(btn);
+     QObject::connect(btn, SIGNAL(clicked()), SIGNAL(loop_shift_forward()));
+   }
+
+   loop_layout->addStretch(100);
+   QObject::connect(mLoopGroup, SIGNAL(buttonClicked(int)),
+       SLOT(loop_button_pressed(int)));
+
+   lower_layout->addLayout(loop_layout);
+   mControlLayout->addLayout(lower_layout);
 
    mWaveFormZoomedView = new WaveFormViewGL(this, true);
    mWaveFormZoomedView->setVisible(waveform_orientation != WAVEFORM_NONE);
@@ -177,7 +212,6 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
 
 QPushButton * Player::button(QString name) const { return mButtons[name]; }
 QList<QPushButton *> Player::buttons() const { return mButtons.values(); }
-QSpinBox * Player::loop_measures_control() const { return mLoopMeasures; }
 QDial * Player::eq_dial(QString name) const { return mEqDials[name]; }
 QList<QDial *> Player::eq_dials() const { return mEqDials.values(); }
 QSlider * Player::volume_slider() const { return mVolumeSlider; }
@@ -251,6 +285,15 @@ void Player::loop_end(int id, int frame) {
   if (loop.enabled) {
     mWaveFormFullView->add_loop(id, loop.start_frame, loop.end_frame);
     mWaveFormZoomedView->add_loop(id, loop.start_frame, loop.end_frame);
+  }
+}
+
+void Player::loop_button_pressed(int id) {
+  for (auto button: mLoopGroup->buttons()) {
+    if (id != mLoopGroup->id(button))
+      button->setChecked(false);
+    else
+      emit(loop(button->isChecked() ? id : 0));
   }
 }
 

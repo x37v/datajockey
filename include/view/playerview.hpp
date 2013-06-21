@@ -20,6 +20,7 @@ class QDial;
 class QProgressBar;
 class QGraphicsScene;
 class QTimer;
+class QButtonGroup;
 
 namespace dj {
    namespace view {
@@ -44,7 +45,6 @@ namespace dj {
             Player(QWidget * parent = NULL, WaveformOrientation waveform_orientation = WAVEFORM_RIGHT);
             QPushButton * button(QString name) const;
             QList<QPushButton *> buttons() const;
-            QSpinBox * loop_measures_control() const;
             QDial * eq_dial(QString name) const;
             QList<QDial *> eq_dials() const;
             QSlider * volume_slider() const;
@@ -61,16 +61,20 @@ namespace dj {
             void loop_start(int id, int frame);
             void loop_end(int id, int frame);
             void loop_enable(int id, bool enable);
+          protected slots:
+            void loop_button_pressed(int id);
 
          signals:
             void seek_to_frame(int frame);
             void seek_frame_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
             void seeking(bool state);
+            void loop(int beats); //zero means off
+            void loop_shift_forward();
+            void loop_shift_back();
          private:
             QProgressBar * mProgressBar;
             QHash<QString, QPushButton *> mButtons;
-            QSpinBox * mLoopMeasures;
 
             QBoxLayout * mTopLayout;
             QBoxLayout * mControlLayout;
@@ -84,6 +88,8 @@ namespace dj {
             QBoxLayout * mSliderLevelLayout;
             unsigned int mFrames;
             bool mWasPausedPreSeek;
+
+            QButtonGroup * mLoopGroup;
 
             struct loop_t {
               int start_frame;

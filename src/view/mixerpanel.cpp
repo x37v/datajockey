@@ -40,7 +40,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
     mSenderToIndex[player] = i;
     mSenderToIndex[player->volume_slider()] = i;
     mSenderToIndex[player->speed_view()] = i;
-    mSenderToIndex[player->loop_measures_control()] = i;
+    //mSenderToIndex[player->loop_measures_control()] = i;
 
     QObject::connect(player->volume_slider(),
         SIGNAL(valueChanged(int)),
@@ -52,10 +52,17 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
         this,
         SLOT(relay_player_speed(int)));
 
-    QObject::connect(player->loop_measures_control(),
-        SIGNAL(valueChanged(int)),
-        this,
-        SLOT(relay_player_loop_measures(int)));
+    QObject::connect(player,
+        SIGNAL(loop(int)),
+        SLOT(relay_player_loop_beats(int)));
+
+    QObject::connect(player,
+        SIGNAL(loop_shift_forward()),
+        SLOT(relay_player_loop_shift_forward()));
+
+    QObject::connect(player,
+        SIGNAL(loop_shift_back()),
+        SLOT(relay_player_loop_shift_back()));
 
     QObject::connect(player,
         SIGNAL(seeking(bool)),
@@ -227,9 +234,9 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
     player->eq_dial("high")->setValue(value);
   else if (name == "update_audio_level")
     player->set_audio_level(value);
-  else if (name == "loop_measures")
-    player->loop_measures_control()->setValue(value);
-  else if (name == "loop_start")
+  else if (name == "loop_beats") {
+    //player->loop_measures_control()->setValue(value);
+  } else if (name == "loop_start")
     player->loop_start(0, value);
   else if (name == "loop_end")
     player->loop_end(0, value);
@@ -329,12 +336,29 @@ void MixerPanel::relay_player_speed(int val) {
   emit(player_value_changed(player_index.value(), "speed", val));
 }
 
-void MixerPanel::relay_player_loop_measures(int val) {
+void MixerPanel::relay_player_loop_beats(int val) {
   QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
   if (player_index == mSenderToIndex.end())
     return;
 
-  emit(player_value_changed(player_index.value(), "loop_measures", val));
+  emit(player_value_changed(player_index.value(), "loop_beats", val));
+  emit(player_value_changed(player_index.value(), "loop_now", val != 0));
+}
+
+void MixerPanel::relay_player_loop_shift_forward() {
+  QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+  if (player_index == mSenderToIndex.end())
+    return;
+
+  emit(player_value_changed(player_index.value(), "loop_shift", 1));
+}
+
+void MixerPanel::relay_player_loop_shift_back() {
+  QHash<QObject *, int>::const_iterator player_index = mSenderToIndex.find(sender());
+  if (player_index == mSenderToIndex.end())
+    return;
+
+  emit(player_value_changed(player_index.value(), "loop_shift", -1));
 }
 
 void MixerPanel::relay_player_seek_to_frame(int frame) {
