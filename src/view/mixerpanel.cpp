@@ -345,6 +345,7 @@ void MixerPanel::relay_player_loop_now(int val) {
   if (player_index == mSenderToIndex.end())
     return;
 
+  //XXX this logic should go into the controller ditch 'loop_now'
   emit(player_value_changed(player_index.value(), "loop_beats", val));
   emit(player_value_changed(player_index.value(), "loop_now", val != 0));
 }
