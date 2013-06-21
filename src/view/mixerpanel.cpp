@@ -53,7 +53,7 @@ MixerPanel::MixerPanel(QWidget * parent) : QWidget(parent), mSettingTempo(false)
         SLOT(relay_player_speed(int)));
 
     QObject::connect(player,
-        SIGNAL(loop_beats(int)),
+        SIGNAL(loop_beats_changed(int)),
         SLOT(relay_player_loop_beats(int)));
 
     QObject::connect(player,
@@ -234,7 +234,7 @@ void MixerPanel::player_set(int player_index, QString name, int value) {
   else if (name == "update_audio_level")
     player->set_audio_level(value);
   else if (name == "loop_beats") {
-    //player->loop_measures_control()->setValue(value);
+    player->loop_beats(value);
   } else if (name == "loop_start")
     player->loop_start(0, value);
   else if (name == "loop_end")

@@ -260,6 +260,11 @@ void Player::set_cuepoint(int id, int frame) {
   mWaveFormZoomedView->add_marker(id, frame, Qt::cyan);
 }
 
+void Player::loop_beats(int beats) {
+  for (auto button: mLoopGroup->buttons())
+    button->setChecked(beats == mLoopGroup->id(button));
+}
+
 void Player::loop_start(int id, int frame) {
   QHash<int, loop_t>::iterator it = mLoops.find(id);
   loop_t loop;
@@ -289,17 +294,14 @@ void Player::loop_end(int id, int frame) {
 }
 
 void Player::loop_button_pressed(int id) {
-  bool any_checked = false;
   for (auto button: mLoopGroup->buttons()) {
     if (id != mLoopGroup->id(button)) {
-      if (button->isChecked()) {
-        any_checked = true;
+      if (button->isChecked())
         button->setChecked(false);
-      }
     }
   }
 
-  emit(loop_beats(mLoopGroup->button(id)->isChecked() ? id : 0));
+  emit(loop_beats_changed(mLoopGroup->button(id)->isChecked() ? id : 0));
 }
 
 void Player::loop_enable(int id, bool enable) {
@@ -318,5 +320,12 @@ void Player::loop_enable(int id, bool enable) {
     loop.enabled = false;
   }
   mLoops[id] = loop;
+
+  if (id == 0 && !enable) {
+    for (auto button: mLoopGroup->buttons()) {
+      if (button->isChecked())
+        button->setChecked(false);
+    }
+  }
 }
 

@@ -58,6 +58,7 @@ namespace dj {
             void set_song_description(QString description);
             void set_cuepoint(int id, int frame);
 
+            void loop_beats(int beats);
             void loop_start(int id, int frame);
             void loop_end(int id, int frame);
             void loop_enable(int id, bool enable);
@@ -69,7 +70,7 @@ namespace dj {
             void seek_frame_relative(int frames);
             //tells the controller that we are going to seek, may toggle pause
             void seeking(bool state);
-            void loop_beats(int beats); //zero means off
+            void loop_beats_changed(int beats); //zero means off
             void loop_shift_forward();
             void loop_shift_back();
          private:
