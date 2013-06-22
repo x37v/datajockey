@@ -263,7 +263,6 @@ AudioModel::AudioModel() :
   //set up the bool action mappings
   mPlayerStateActionMapping["mute"] = player_onoff_action_pair_t(PlayerStateCommand::MUTE, PlayerStateCommand::NO_MUTE);
   mPlayerStateActionMapping["sync"] = player_onoff_action_pair_t(PlayerStateCommand::SYNC, PlayerStateCommand::NO_SYNC);
-  mPlayerStateActionMapping["loop"] = player_onoff_action_pair_t(PlayerStateCommand::LOOP, PlayerStateCommand::NO_LOOP);
   mPlayerStateActionMapping["cue"] = player_onoff_action_pair_t(PlayerStateCommand::OUT_CUE, PlayerStateCommand::OUT_MAIN);
   mPlayerStateActionMapping["pause"] = player_onoff_action_pair_t(PlayerStateCommand::PAUSE, PlayerStateCommand::PLAY);
 
@@ -482,6 +481,15 @@ void AudioModel::relay_player_bool(int player_index, QString name, bool value) {
   }
 }
 
+void AudioModel::relay_player_loop_frames(int player_index, long start_frame, long end_frame) {
+  emit(player_value_changed(player_index, "loop_start", static_cast<int>(start_frame)));
+  emit(player_value_changed(player_index, "loop_end", static_cast<int>(end_frame)));
+}
+
+void AudioModel::relay_player_looping(int player_index, bool looping) {
+  emit(player_value_changed(player_index, "loop", looping));
+}
+
 void AudioModel::relay_audio_file_load_progress(int player_index, int percent){
   emit(player_value_changed(player_index, "update_progress", percent));
 }
@@ -653,22 +661,7 @@ void AudioModel::player_trigger(int player_index, QString name) {
   } else if (name == "clear") {
     queue_command(new PlayerSetBuffersCommand(player_index, this, NULL, NULL));
   } else if (name == "loop") {
-    if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
-      if (!pstate->mParamBool["loop"]) {
-        //XXX ignoring file sampling rate, using global sampling rate
-        BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
-
-        TimePoint start_pos = beat_buff->position_at_time(static_cast<double>(pstate->mCurrentFrame) / sample_rate());
-        start_pos.pos_in_beat(0);
-
-        TimePoint loop_length(0, pstate->mLoopBeats);
-        TimePoint end_pos = start_pos + loop_length;
-
-        player_set(player_index, "loop_end", end_pos);
-        player_set(player_index, "loop_start", start_pos);
-      }
-      player_set(player_index, "loop", true);
-    }
+    player_set(player_index, "loop", true);
   } else if (name == "loop_off") {
     player_set(player_index, "loop", false);
   } else if (name == "loop_shift_back") {
@@ -704,6 +697,28 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
       if (!pstate->mParamBool["pause"])
         queue_command(new dj::audio::PlayerStateCommand(player_index, PlayerStateCommand::PLAY));
     }
+    return;
+  } else if (name == "loop") {
+    if (value) {
+      PlayerLoopCommandReport * cmd = new PlayerLoopCommandReport(player_index, pstate->mLoopBeats, value);
+      //XXX if we are currently looping, institute configurable loop behavior:
+      //shrink from front vs back, grow from front vs back, 
+
+      //hook up signal
+      QObject::connect(cmd, 
+          SIGNAL(player_loop_frames(int, long, long)),
+          SLOT(relay_player_loop_frames(int, long, long)));
+
+      queue_command(cmd);
+    } else {
+      queue_command(new PlayerStateCommand(player_index, PlayerStateCommand::NO_LOOP));
+    }
+
+    if (pstate->mParamBool["loop"] != value) {
+      pstate->mParamBool["loop"] = value;
+      emit(player_value_changed(player_index, "loop", value));
+    }
+
     return;
   }
 
@@ -763,34 +778,14 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     emit(player_value_changed(player_index, "load", value));
   } else if (name == "loop_beats") {
     if (value > 0) {
-      unsigned int beats_last = pstate->mLoopBeats;
+      //unsigned int beats_last = pstate->mLoopBeats;
       pstate->mLoopBeats = player_loop_beats[value - 1];
-
-      //if we are looping and we have fewer beats now.. then we loop from where we are
-      if (!pstate->mParamBool["loop"] && beats_last < pstate->mLoopBeats) {
-        pstate->mParamBool["loop"] = false; //set it to false so we loop 'now'
-      }
-
-      //update the end position
-      TimePoint amt(0, pstate->mLoopBeats);
-      TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
-      player_set(player_index, "loop_end", end_pos);
+      player_set(player_index, "loop", true);
       emit(player_value_changed(player_index, "loop_beats", value));
-
-      //if not looping, we loop
-      //XXX make this configurable!
-      if (!pstate->mParamBool["loop"])
-        player_trigger(player_index, "loop");
     } else
       player_set(player_index, "loop", false);
   } else if (name == "loop_shift") {
-    TimePoint amt(0, value);
-
-    TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_end"] + amt;
-    player_set(player_index, "loop_end", end_pos);
-
-    TimePoint start_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
-    player_set(player_index, "loop_start", start_pos);
+    //XXX do it
   } else {
     //get the state for this name
     QHash<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
@@ -1020,5 +1015,22 @@ void MasterSyncToPlayerCommand::execute() {
 
 void MasterSyncToPlayerCommand::execute_done() {
   emit(master_value_update("bpm", mBPM));
+}
+
+PlayerLoopCommandReport::PlayerLoopCommandReport(unsigned int idx, long beats, bool start_looping) :
+  QObject(),
+  PlayerLoopCommand(idx, beats, start_looping)
+{
+}
+
+PlayerLoopCommandReport::PlayerLoopCommandReport(unsigned int idx, long start_frame, long end_frame, bool start_looping) :
+  QObject(),
+  PlayerLoopCommand(idx, start_frame, end_frame, start_looping)
+{
+}
+
+void PlayerLoopCommandReport::execute_done() {
+  emit(player_loop_frames(static_cast<int>(index()), start_frame(), end_frame()));
+  emit(player_looping(static_cast<int>(index()), looping()));
 }
 

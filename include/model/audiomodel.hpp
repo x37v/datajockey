@@ -94,6 +94,9 @@ namespace dj {
         void relay_player_value(int player_index, QString name, int value);
         void relay_player_bool(int player_index, QString name, bool value);
 
+        void relay_player_loop_frames(int player_index, long start_frame, long end_frame);
+        void relay_player_looping(int player_index, bool looping);
+
         //relay methods are called with queued connections across threads so that
         //they relay signals into the main thread, they simply emit signals
         void relay_audio_file_load_progress(int player_index, int percent);
@@ -212,6 +215,17 @@ namespace dj {
         void master_value_update(QString name, double value);
       private:
         double mBPM;
+    };
+
+    class PlayerLoopCommandReport : public QObject, public PlayerLoopCommand {
+      Q_OBJECT
+      public:
+        PlayerLoopCommandReport(unsigned int idx, long beats, bool start_looping = true);
+        PlayerLoopCommandReport(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
+        virtual void execute_done();
+      signals:
+        void player_loop_frames(int player_index, long frame_start, long frame_end);
+        void player_looping(int player_index, bool looping);
     };
 
   }

@@ -844,3 +844,67 @@ bool PlayerPositionCommand::store(CommandIOData& data) const{
   return false;
 }
 
+
+PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, long beats, bool start_looping) :
+  PlayerCommand(idx),
+  mStartLooping(start_looping),
+  mBeats(beats)
+{
+}
+
+PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping) :
+  PlayerCommand(idx),
+  mStartLooping(start_looping),
+  mStartFrame(start_frame), mEndFrame(end_frame)
+{
+}
+
+void PlayerLoopCommand::execute() {
+  Player * p = player();
+  BeatBuffer * beat_buff = p->beat_buffer();
+  AudioBuffer * audio = p->audio_buffer();
+  if (!audio)
+    return;
+  double sample_rate = static_cast<double>(audio->sample_rate());
+
+  if (mEndFrame < 0) {
+    if (!beat_buff)
+      return;
+    if (mStartFrame < 0) {
+      //find both start and end frame based on current location
+      //we don't use the closest index, we use the last index before our frame so we stay in the current beat
+      unsigned int beat = beat_buff->index(static_cast<double>(p->frame()) / sample_rate);
+      if (beat + mBeats >= beat_buff->length())
+        return;
+
+      mStartFrame = static_cast<long>(sample_rate * beat_buff->at(beat));
+      mEndFrame = static_cast<long>(sample_rate * beat_buff->at(beat + mBeats));
+    } else {
+      unsigned int beat_end = beat_buff->index_closest(static_cast<double>(mStartFrame) / sample_rate) + mBeats;
+      mEndFrame = static_cast<long>(sample_rate * beat_buff->at(beat_end));
+    }
+  } else if (mStartFrame < 0) {
+    if (!beat_buff)
+      return;
+    unsigned int beat_end = beat_buff->index_closest(static_cast<double>(mEndFrame) / sample_rate);
+    if (beat_end < mBeats)
+      mStartFrame = 0;
+    else
+      mStartFrame = static_cast<long>(sample_rate * beat_buff->at(beat_end - mBeats));
+  }
+
+  p->loop_start_frame(mStartFrame);
+  p->loop_end_frame(mEndFrame);
+  if (mStartLooping)
+    p->loop(true);
+  mLooping = p->looping();
+}
+
+bool PlayerLoopCommand::store(CommandIOData& data) const {
+  PlayerCommand::store(data, "PlayerLoopCommand");
+  data["beats"] = mBeats;
+  data["start_frame"] = mStartFrame;
+  data["end_frame"] = mEndFrame;
+  return false;
+}
+

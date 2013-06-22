@@ -247,6 +247,23 @@ namespace dj {
         position_t mTarget;
         long mValue;
     };
+
+    class PlayerLoopCommand : public PlayerCommand {
+      public:
+        PlayerLoopCommand(unsigned int idx, long beats, bool start_looping = true);
+        PlayerLoopCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
+        virtual void execute();
+        virtual bool store(CommandIOData& data) const;
+        long start_frame() const { return mStartFrame; }
+        long end_frame() const { return mEndFrame; }
+        bool looping() const { return mLooping; }
+      private:
+        bool mStartLooping = true;
+        bool mLooping = true;
+        long mBeats = 0;
+        long mStartFrame = -1; //less than zero implies that we need to compute it
+        long mEndFrame = -1; //if they are both less than zero, we compute from current location
+    };
   }
 }
 
