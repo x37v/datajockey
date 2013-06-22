@@ -87,7 +87,10 @@ namespace dj {
         void position_at_beat_relative(int offset, Transport * transport = NULL);
 
         void loop_start_frame(unsigned int val);
+        unsigned int loop_start_frame() const { return mLoopStartFrame; }
+
         void loop_end_frame(unsigned int val);
+        unsigned int loop_end_frame() const { return mLoopEndFrame; }
 
         void audio_buffer(AudioBuffer * buf);
         void beat_buffer(BeatBuffer * buf);
@@ -263,6 +266,22 @@ namespace dj {
         long mBeats = 0;
         long mStartFrame = -1; //less than zero implies that we need to compute it
         long mEndFrame = -1; //if they are both less than zero, we compute from current location
+    };
+
+    class PlayerLoopShiftCommand : public PlayerCommand {
+      public:
+        PlayerLoopShiftCommand(unsigned int idx, int beats);
+        virtual void execute();
+        virtual bool store(CommandIOData& data) const;
+
+        long start_frame() const { return mStartFrame; }
+        long end_frame() const { return mEndFrame; }
+        bool looping() const { return mLooping; }
+      private:
+        bool mLooping = true;
+        int mBeats = 0;
+        long mStartFrame = -1;
+        long mEndFrame = -1;
     };
   }
 }

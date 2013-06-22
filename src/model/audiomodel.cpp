@@ -718,7 +718,6 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
       pstate->mParamBool["loop"] = value;
       emit(player_value_changed(player_index, "loop", value));
     }
-
     return;
   }
 
@@ -785,7 +784,15 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     } else
       player_set(player_index, "loop", false);
   } else if (name == "loop_shift") {
-    //XXX do it
+    PlayerLoopShiftCommandReport * cmd = new PlayerLoopShiftCommandReport(player_index, value);
+
+    //hook up signal
+    QObject::connect(cmd, 
+        SIGNAL(player_loop_frames(int, long, long)),
+        SLOT(relay_player_loop_frames(int, long, long)));
+
+    queue_command(cmd);
+    return;
   } else {
     //get the state for this name
     QHash<QString, int>::iterator state_itr = pstate->mParamInt.find(name);
@@ -1034,3 +1041,13 @@ void PlayerLoopCommandReport::execute_done() {
   emit(player_looping(static_cast<int>(index()), looping()));
 }
 
+PlayerLoopShiftCommandReport::PlayerLoopShiftCommandReport(unsigned int idx, int beats) :
+  QObject(),
+  PlayerLoopShiftCommand(idx, beats)
+{
+}
+
+void PlayerLoopShiftCommandReport::execute_done() {
+  emit(player_loop_frames(static_cast<int>(index()), start_frame(), end_frame()));
+  emit(player_looping(static_cast<int>(index()), looping()));
+}

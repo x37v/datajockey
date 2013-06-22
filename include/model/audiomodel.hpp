@@ -228,6 +228,15 @@ namespace dj {
         void player_looping(int player_index, bool looping);
     };
 
+    class PlayerLoopShiftCommandReport : public QObject, public PlayerLoopShiftCommand {
+      Q_OBJECT
+      public:
+        PlayerLoopShiftCommandReport(unsigned int idx, int beats);
+        virtual void execute_done();
+      signals:
+        void player_loop_frames(int player_index, long frame_start, long frame_end);
+        void player_looping(int player_index, bool looping);
+    };
   }
 }
 

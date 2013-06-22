@@ -908,3 +908,53 @@ bool PlayerLoopCommand::store(CommandIOData& data) const {
   return false;
 }
 
+
+PlayerLoopShiftCommand::PlayerLoopShiftCommand(unsigned int idx, int beats) :
+  PlayerCommand(idx),
+  mBeats(beats)
+{
+}
+
+void PlayerLoopShiftCommand::execute() {
+  Player * p = player();
+  BeatBuffer * beat_buff = p->beat_buffer();
+  AudioBuffer * audio = p->audio_buffer();
+  if (!audio || !beat_buff)
+    return;
+  double sample_rate = static_cast<double>(audio->sample_rate());
+
+  int beat_start = beat_buff->index_closest(static_cast<double>(p->loop_start_frame()) / sample_rate);
+  int beat_end = beat_buff->index_closest(static_cast<double>(p->loop_end_frame()) / sample_rate);
+
+  beat_start += mBeats;
+  beat_end += mBeats;
+  if (beat_start < 0)
+    beat_start = 0;
+  if (beat_end < 0)
+    beat_start = 1;
+
+  mStartFrame = sample_rate * beat_buff->at(beat_start);
+  mEndFrame = sample_rate * beat_buff->at(beat_end);
+
+  p->loop_start_frame(mStartFrame);
+  p->loop_end_frame(mEndFrame);
+  mLooping = p->looping();
+
+  //see if we need to update the position
+  if (mLooping) {
+    if (mStartFrame > p->frame()) {
+      //XXX do anything?
+    } else if (mEndFrame <= p->frame()) {
+      unsigned int new_frame = mStartFrame + (p->frame() - mEndFrame);
+      p->position_at_frame(new_frame);
+    }
+  }
+}
+
+bool PlayerLoopShiftCommand::store(CommandIOData& data) const {
+  PlayerCommand::store(data, "PlayerLoopShiftCommand");
+  data["beats"] = mBeats;
+  data["start_frame"] = mStartFrame;
+  data["end_frame"] = mEndFrame;
+  return false;
+}
