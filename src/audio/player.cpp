@@ -867,6 +867,11 @@ void PlayerLoopCommand::execute() {
     return;
   double sample_rate = static_cast<double>(audio->sample_rate());
 
+  if (p->looping() && mStartFrame < 0 && mEndFrame < 0) {
+    //XXX make this a policy, keep start or end frame or what?
+    mStartFrame = p->loop_start_frame();
+  }
+
   if (mEndFrame < 0) {
     if (!beat_buff)
       return;
@@ -898,6 +903,18 @@ void PlayerLoopCommand::execute() {
   if (mStartLooping)
     p->loop(true);
   mLooping = p->looping();
+
+  //if we are past the end point, fold
+  if (p->looping() && p->frame() > mEndFrame) {
+    if (mBeats > 0) {
+      //estimate
+      int beat_frames = (mEndFrame - mStartFrame) / mBeats;
+      int offset = beat_frames * ((p->frame() - mStartFrame) / beat_frames);
+      p->position_at_frame(p->frame() - offset);
+    } else {
+      //XXX don't know what to do
+    }
+  }
 }
 
 bool PlayerLoopCommand::store(CommandIOData& data) const {
