@@ -763,7 +763,13 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     emit(player_value_changed(player_index, "load", value));
   } else if (name == "loop_beats") {
     if (value > 0) {
+      unsigned int beats_last = pstate->mLoopBeats;
       pstate->mLoopBeats = player_loop_beats[value - 1];
+
+      //if we are looping and we have fewer beats now.. then we loop from where we are
+      if (!pstate->mParamBool["loop"] && beats_last < pstate->mLoopBeats) {
+        pstate->mParamBool["loop"] = false; //set it to false so we loop 'now'
+      }
 
       //update the end position
       TimePoint amt(0, pstate->mLoopBeats);
