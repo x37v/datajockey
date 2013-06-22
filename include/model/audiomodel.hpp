@@ -44,6 +44,8 @@ namespace dj {
         static QHash<QString, QStringList> player_signals; //type, name list
         static QHash<QString, QStringList> master_signals; //type, name list
 
+        static QList<int> loop_beats();
+
         class PlayerState;
         static AudioModel * instance();
 

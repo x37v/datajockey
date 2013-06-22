@@ -3,6 +3,7 @@
 #include "waveformviewgl.hpp"
 #include "audiobuffer.hpp"
 #include "audiolevel.hpp"
+#include "audiomodel.hpp"
 
 #include <QButtonGroup>
 #include <QPushButton>
@@ -151,15 +152,12 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    mLoopGroup->setExclusive(false); //exclusive doesn't allow for all off
    loop_layout->addStretch(100);
 
-   //XXX make loop lengths configurable
-   int beats[] = {1, 2, 4, 8, 16};
-
-   for(auto beat: beats) {
-      QPushButton * btn = new QPushButton(QString::number(beat), this);
-      //btn->setProperty("dj_name", items[i].name);
-      btn->setCheckable(true);
-      mLoopGroup->addButton(btn, beat);
-      loop_layout->addWidget(btn);
+   for(int i = 0; i < audio::AudioModel::loop_beats().size(); i++) {
+     auto beat = audio::AudioModel::loop_beats()[i];
+     QPushButton * btn = new QPushButton(QString::number(beat), this);
+     btn->setCheckable(true);
+     mLoopGroup->addButton(btn, i + 1);
+     loop_layout->addWidget(btn);
    }
 
    {
@@ -264,9 +262,9 @@ void Player::set_cuepoint(int id, int frame) {
   mWaveFormZoomedView->add_marker(id, frame, Qt::cyan);
 }
 
-void Player::loop_beats(int beats) {
+void Player::loop_beats(int beats_index) {
   for (auto button: mLoopGroup->buttons())
-    button->setChecked(beats == mLoopGroup->id(button));
+    button->setChecked(beats_index == mLoopGroup->id(button));
 }
 
 void Player::loop_start(int id, int frame) {

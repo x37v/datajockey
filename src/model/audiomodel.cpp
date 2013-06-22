@@ -20,6 +20,8 @@ namespace {
   const int one_point_five = static_cast<int>((double)one_scale * 1.5);
   const int ione_scale = one_scale;
 
+  QList<int> player_loop_beats = {1, 2, 4, 8, 16};
+
   void init_signal_hashes() {
     QStringList list;
 
@@ -30,6 +32,7 @@ namespace {
       list << QString("set_cuepoint_%1").arg(i);
       list << QString("jump_cuepoint_%1").arg(i);
     }
+
     AudioModel::player_signals["trigger"] = list;
 
     list.clear();
@@ -101,6 +104,10 @@ namespace {
 
 QHash<QString, QStringList> AudioModel::player_signals;
 QHash<QString, QStringList> AudioModel::master_signals;
+
+QList<int> AudioModel::loop_beats() {
+  return player_loop_beats;
+}
 
 class AudioModel::PlayerSetBuffersCommand : public dj::audio::PlayerCommand {
   public:
@@ -756,10 +763,10 @@ void AudioModel::player_set(int player_index, QString name, int value) {
     emit(player_value_changed(player_index, "load", value));
   } else if (name == "loop_beats") {
     if (value > 0) {
-      pstate->mLoopBeats = value;
+      pstate->mLoopBeats = player_loop_beats[value - 1];
 
       //update the end position
-      TimePoint amt(0, value);
+      TimePoint amt(0, pstate->mLoopBeats);
       TimePoint end_pos = mPlayerStates[player_index]->mParamPosition["loop_start"] + amt;
       player_set(player_index, "loop_end", end_pos);
       emit(player_value_changed(player_index, "loop_beats", value));

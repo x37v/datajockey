@@ -58,7 +58,7 @@ namespace dj {
             void set_song_description(QString description);
             void set_cuepoint(int id, int frame);
 
-            void loop_beats(int beats);
+            void loop_beats(int beats_index); //zero means off
             void loop_start(int id, int frame);
             void loop_end(int id, int frame);
             void loop_enable(int id, bool enable);
