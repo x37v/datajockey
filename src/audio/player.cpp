@@ -57,8 +57,6 @@ Player::~Player(){
 #endif
 }
 
-//#error "GO OVER ALL OF THIS!!!!!!!!!!!!!!, stretcher not fully integrated"
-
 //this creates internal buffers
 //** must be called BEFORE the audio callback starts
 void Player::setup_audio(
@@ -70,7 +68,7 @@ void Player::setup_audio(
     delete [] mVolumeBuffer;
   mVolumeBuffer = new float[maxBufferLen];
 
-  unsigned int fade_length = static_cast<double>(sampleRate) * 0.015; //15 ms
+  unsigned int fade_length = static_cast<double>(sampleRate) * 0.020; //seconds
   mEnvelope.length(fade_length);
   mFadeoutBuffer.resize(2 * (fade_length + 1));
   mFadeoutIndex = mFadeoutBuffer.size();
@@ -956,10 +954,11 @@ void PlayerLoopShiftCommand::execute() {
 
   beat_start += mBeats;
   beat_end += mBeats;
-  if (beat_start < 0)
-    beat_start = 0;
-  if (beat_end < 0)
-    beat_start = 1;
+  if (beat_start < 0 || beat_end <= 0) {
+    mStartFrame = p->loop_start_frame();
+    mEndFrame = p->loop_end_frame();
+    return;
+  }
 
   mStartFrame = sample_rate * beat_buff->at(beat_start);
   mEndFrame = sample_rate * beat_buff->at(beat_end);
@@ -974,6 +973,8 @@ void PlayerLoopShiftCommand::execute() {
       //XXX do anything?
     } else if (mEndFrame <= p->frame()) {
       unsigned int new_frame = mStartFrame + (p->frame() - mEndFrame);
+      if (new_frame > p->frame())
+        new_frame = 0;
       p->position_at_frame(new_frame);
     }
   }
