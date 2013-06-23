@@ -700,7 +700,7 @@ void AudioModel::player_set(int player_index, QString name, bool value) {
     return;
   } else if (name == "loop") {
     if (value) {
-      PlayerLoopCommandReport * cmd = new PlayerLoopCommandReport(player_index, pstate->mLoopBeats, value);
+      PlayerLoopCommandReport * cmd = new PlayerLoopCommandReport(player_index, pstate->mLoopBeats);
       //XXX if we are currently looping, institute configurable loop behavior:
       //shrink from front vs back, grow from front vs back, 
 
@@ -1024,9 +1024,9 @@ void MasterSyncToPlayerCommand::execute_done() {
   emit(master_value_update("bpm", mBPM));
 }
 
-PlayerLoopCommandReport::PlayerLoopCommandReport(unsigned int idx, long beats, bool start_looping) :
+PlayerLoopCommandReport::PlayerLoopCommandReport(unsigned int idx, unsigned int beats, PlayerLoopCommand::resize_policy_t resize_policy, bool start_looping) :
   QObject(),
-  PlayerLoopCommand(idx, beats, start_looping)
+  PlayerLoopCommand(idx, beats, resize_policy, start_looping)
 {
 }
 

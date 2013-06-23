@@ -220,8 +220,8 @@ namespace dj {
     class PlayerLoopCommandReport : public QObject, public PlayerLoopCommand {
       Q_OBJECT
       public:
-        PlayerLoopCommandReport(unsigned int idx, long beats, bool start_looping = true);
-        PlayerLoopCommandReport(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
+        explicit PlayerLoopCommandReport(unsigned int idx, unsigned int beats, PlayerLoopCommand::resize_policy_t resize_policy = PlayerLoopCommand::RESIZE_FROM_FRONT, bool start_looping = true);
+        explicit PlayerLoopCommandReport(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
         virtual void execute_done();
       signals:
         void player_loop_frames(int player_index, long frame_start, long frame_end);

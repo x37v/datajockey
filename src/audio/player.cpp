@@ -845,8 +845,9 @@ bool PlayerPositionCommand::store(CommandIOData& data) const{
 }
 
 
-PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, long beats, bool start_looping) :
+PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, unsigned int beats, resize_policy_t resize_policy, bool start_looping) :
   PlayerCommand(idx),
+  mResizePolicy(resize_policy),
   mStartLooping(start_looping),
   mBeats(beats)
 {
@@ -868,8 +869,18 @@ void PlayerLoopCommand::execute() {
   double sample_rate = static_cast<double>(audio->sample_rate());
 
   if (p->looping() && mStartFrame < 0 && mEndFrame < 0) {
-    //XXX make this a policy, keep start or end frame or what?
-    mStartFrame = p->loop_start_frame();
+    switch (mResizePolicy) {
+      case RESIZE_FROM_FRONT:
+        mStartFrame = p->loop_start_frame();
+        break;
+      case RESIZE_FROM_BACK:
+        mEndFrame = p->loop_end_frame();
+        break;
+      case RESIZE_AT_POSITION:
+      default:
+        //do nothing as this is the default when nothing is set
+        break;
+    }
   }
 
   if (mEndFrame < 0) {
@@ -919,7 +930,7 @@ void PlayerLoopCommand::execute() {
 
 bool PlayerLoopCommand::store(CommandIOData& data) const {
   PlayerCommand::store(data, "PlayerLoopCommand");
-  data["beats"] = mBeats;
+  data["beats"] = static_cast<int>(mBeats);
   data["start_frame"] = mStartFrame;
   data["end_frame"] = mEndFrame;
   return false;
