@@ -20,7 +20,7 @@ namespace {
   const int one_point_five = static_cast<int>((double)one_scale * 1.5);
   const int ione_scale = one_scale;
 
-  QList<int> player_loop_beats = {1, 2, 4, 8, 16};
+  QList<int> player_loop_beats = {1, 2, 3, 4, 8, 16, 24};
 
   void init_signal_hashes() {
     QStringList list;
