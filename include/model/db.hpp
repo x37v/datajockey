@@ -30,53 +30,43 @@ namespace dj {
           QString& artist_name,
           QString& work_title) throw(std::runtime_error);
 
-      namespace work {
-        QString table_query(const QString where_clause = QString()) throw(std::runtime_error);
+      QString work_table_query(const QString where_clause = QString()) throw(std::runtime_error);
 
-        int table_column(QString id_name);
+      int work_table_column(QString id_name);
 
-        int create(
-            const QHash<QString, QVariant>& attributes,
-            const QString& audio_file_location
-            ) throw(std::runtime_error);
-        int find_by_audio_file_location(
-            const QString& audio_file_location) throw(std::runtime_error);
-        void update_attribute(
-            int work_id,
-            const QString& name,
-            const QVariant& value) throw(std::runtime_error);
-        void descriptor_create_or_update(
-            int work_id,
-            QString descriptor_type_name,
-            double value) throw(std::runtime_error);
-        void tag(
-            int work_id,
-            const QString& tag_class,
-            const QString& tag_value) throw(std::runtime_error);
-        void set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
+      int work_create(
+          const QHash<QString, QVariant>& attributes,
+          const QString& audio_file_location
+          ) throw(std::runtime_error);
+      int work_find_by_audio_file_location(
+          const QString& audio_file_location) throw(std::runtime_error);
+      void work_update_attribute(
+          int work_id,
+          const QString& name,
+          const QVariant& value) throw(std::runtime_error);
+      void work_descriptor_create_or_update(
+          int work_id,
+          QString descriptor_type_name,
+          double value) throw(std::runtime_error);
+      void work_tag(
+          int work_id,
+          const QString& tag_class,
+          const QString& tag_value) throw(std::runtime_error);
+      void work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
 
-        //indicate that this work has been played in this session, at time given
-        void set_played(int work_id, int session_id, QDateTime time);
+      //indicate that this work has been played in this session, at time given
+      void work_set_played(int work_id, int session_id, QDateTime time);
 
-        int current_session();
-      }
+      int work_current_session();
 
-      namespace tag {
-        int find_class(const QString& name) throw(std::runtime_error);
-        int find(const QString& name, int tag_class_id = -1) throw(std::runtime_error);
-      }
+      int tag_find_class(const QString& name) throw(std::runtime_error);
+      int tag_find(const QString& name, int tag_class_id = -1) throw(std::runtime_error);
 
-      namespace artist {
-        int find(const QString& name, bool create = false) throw(std::runtime_error);
-      }
+      int artist_find(const QString& name, bool create = false) throw(std::runtime_error);
 
-      namespace album {
-        int find(const QString& name, bool create = false) throw(std::runtime_error);
-      }
+      int album_find(const QString& name, bool create = false) throw(std::runtime_error);
 
-      namespace file_type {
-        int find(const QString& name, bool create = false) throw(std::runtime_error);
-      }
+      int file_type_find(const QString& name, bool create = false) throw(std::runtime_error);
     }
   }
 }

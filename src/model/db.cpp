@@ -252,7 +252,7 @@ bool db::find_artist_and_title_by_id(
   return true;
 }
 
-QString db::work::table_query(const QString where_clause) throw(std::runtime_error) {
+QString db::work_table_query(const QString where_clause) throw(std::runtime_error) {
   QString from(" FROM audio_works as w");
 
   QString joins = QString(" LEFT JOIN albums ON w.album_id = albums.id") +
@@ -274,7 +274,7 @@ QString db::work::table_query(const QString where_clause) throw(std::runtime_err
   return query_string;
 }
 
-int db::work::table_column(QString id_name) {
+int db::work_table_column(QString id_name) {
   if (id_name == "id")
     return cWorkIdColumn;
   else if (id_name == "audio_file_seconds")
@@ -284,7 +284,7 @@ int db::work::table_column(QString id_name) {
   return 0;
 }
 
-int db::work::create(
+int db::work_create(
     const QHash<QString, QVariant>& attributes,
     const QString& audio_file_location
     ) throw(std::runtime_error) {
@@ -339,7 +339,7 @@ int db::work::create(
       file_type_name = i.value().toString();
     else
       file_type_name = QFileInfo(audio_file_location).suffix().toLower();
-    query.bindValue(":audio_file_type_id", file_type::find(file_type_name, true));
+    query.bindValue(":audio_file_type_id", file_type_find(file_type_name, true));
 
     i = attributes.find("artist_id");
     if (i != attributes.end())
@@ -347,7 +347,7 @@ int db::work::create(
     else {
       i = attributes.find("artist");
       if (i != attributes.end()) {
-        query.bindValue(":artist_id", artist::find(i.value().toString(), true));
+        query.bindValue(":artist_id", artist_find(i.value().toString(), true));
       } else {
         query.bindValue(":artist_id", QVariant::Int);
       }
@@ -358,10 +358,10 @@ int db::work::create(
 
     i = attributes.find("album");
     if (i != attributes.end()) {
-      album_id = album::find(i.value().toString(), true);
+      album_id = album_find(i.value().toString(), true);
       i = attributes.find("track");
       int track_num = (i != attributes.end()) ? i.value().toInt() : 0;
-      db::work::set_album(work_id, album_id, track_num);
+      db::work_set_album(work_id, album_id, track_num);
     }
     if (has_transactions) {
       if (!db_driver->commitTransaction())
@@ -376,7 +376,7 @@ int db::work::create(
   return work_id;
 }
 
-int db::work::find_by_audio_file_location(
+int db::work_find_by_audio_file_location(
     const QString& audio_file_location) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
 
@@ -390,7 +390,7 @@ int db::work::find_by_audio_file_location(
   return query.value(0).toInt();
 }
 
-void db::work::update_attribute(
+void db::work_update_attribute(
     int work_id,
     const QString& name,
     const QVariant& value) throw(std::runtime_error) {
@@ -409,7 +409,7 @@ void db::work::update_attribute(
   query.exec();
 }
 
-void db::work::descriptor_create_or_update(
+void db::work_descriptor_create_or_update(
     int work_id,
     QString name,
     double value) throw(std::runtime_error) {
@@ -419,10 +419,10 @@ void db::work::descriptor_create_or_update(
     throw std::runtime_error("invalid descriptor type: " + name.toStdString());
 
   QString column_name = QString("descriptor_%1").arg(name);
-  update_attribute(work_id, column_name, value);
+  work_update_attribute(work_id, column_name, value);
 }
 
-void db::work::tag(
+void db::work_tag(
     int work_id,
     const QString& tag_class,
     const QString& tag_value) throw(std::runtime_error) {
@@ -476,7 +476,7 @@ void db::work::tag(
   query.exec();
 }
 
-void db::work::set_played(int work_id, int session_id, QDateTime time) {
+void db::work_set_played(int work_id, int session_id, QDateTime time) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -501,9 +501,9 @@ void db::work::set_played(int work_id, int session_id, QDateTime time) {
   }
 }
 
-int db::work::current_session() { return cCurrentSession; }
+int db::work_current_session() { return cCurrentSession; }
 
-void db::work::set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error) {
+void db::work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -515,7 +515,7 @@ void db::work::set_album(int work_id, int album_id, int track_num)  throw(std::r
 }
 
 
-int db::tag::find_class(const QString& name) throw(std::runtime_error) {
+int db::tag_find_class(const QString& name) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -529,7 +529,7 @@ int db::tag::find_class(const QString& name) throw(std::runtime_error) {
   throw std::runtime_error("cannot find tag class with name " + name.toStdString());
 }
 
-int db::tag::find(const QString& name, int tag_class_id) throw(std::runtime_error) {
+int db::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -548,7 +548,7 @@ int db::tag::find(const QString& name, int tag_class_id) throw(std::runtime_erro
   throw std::runtime_error("cannot find tag with name " + name.toStdString());
 }
 
-int db::artist::find(const QString& name, bool create) throw(std::runtime_error) {
+int db::artist_find(const QString& name, bool create) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -572,7 +572,7 @@ int db::artist::find(const QString& name, bool create) throw(std::runtime_error)
   return query.lastInsertId().toInt();
 }
 
-int db::album::find(const QString& name, bool create)  throw(std::runtime_error) {
+int db::album_find(const QString& name, bool create)  throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -596,7 +596,7 @@ int db::album::find(const QString& name, bool create)  throw(std::runtime_error)
   return query.lastInsertId().toInt();
 }
 
-int db::file_type::find(const QString& name, bool create) throw(std::runtime_error) {
+int db::file_type_find(const QString& name, bool create) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 

@@ -48,8 +48,8 @@ void HistoryManager::log_work(int player_index) {
   //XXX only log the work once
   if (!mLoggedWorks.contains(work)) {
     QDateTime time = QDateTime::currentDateTime().addSecs(-LOG_DELAY_S);
-    db::work::set_played(work, db::work::current_session(), time);
+    db::work_set_played(work, db::work_current_session(), time);
     mLoggedWorks[work] = true;
-    emit(updated_history(work, db::work::current_session(), time));
+    emit(updated_history(work, db::work_current_session(), time));
   }
 }

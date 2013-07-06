@@ -7,6 +7,8 @@
 #include <QVariant>
 #include <QRegExp>
 #include <QThreadPool>
+#include <QThread>
+#include <QMutex>
 
 #include "beatbuffer.hpp"
 
@@ -23,6 +25,22 @@ namespace dj {
       signals:
         void extracted_data(QString audio_file, QHash<QString, QVariant> tag_data, BeatBufferPtr beat_data);
         void extraction_failed(QString audio_file, QString message);
+    };
+
+    class NewSongFinder : public QThread {
+      Q_OBJECT
+      public:
+        NewSongFinder(QObject * parent = NULL);
+        virtual void run();
+      public slots:
+        void watch_dir(const QString& dir);
+        void ignore_pattern(QRegExp ignore_pattern);
+      signals:
+        void found_files(QStringList files);
+      private:
+        QList<QRegExp> mIgnorePatterns;
+        QStringList mWatchDirs;
+        QMutex mMutex;
     };
 
     class Importer : public QObject {

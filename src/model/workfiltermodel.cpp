@@ -59,7 +59,7 @@ namespace {
               QString tag_class = cleanup_string(sub_expr[0]);
               tag_name = cleanup_string(sub_expr[1]);
               try {
-                tag_class_id = db::tag::find_class(tag_class);
+                tag_class_id = db::tag_find_class(tag_class);
               } catch (std::runtime_error& e) {
                 throw std::runtime_error("cannot find tag class: " + tag_class.toStdString() + " for expression: " + tag_expr.toStdString());
               }
@@ -71,7 +71,7 @@ namespace {
 
         QString tag_id;
         try {
-          tag_id.setNum(db::tag::find(tag_name, tag_class_id));
+          tag_id.setNum(db::tag_find(tag_name, tag_class_id));
         } catch (std::runtime_error& e) {
           throw (std::runtime_error("cannot find tag that matches expression: " + tag_expr.toStdString()));
         }
@@ -191,7 +191,7 @@ WorkFilterModel::WorkFilterModel(QObject * parent, QSqlDatabase db) :
   QSortFilterProxyModel(parent),
   mCurrentBPM(120.0)
 {
-  QString query_str = db::work::table_query();
+  QString query_str = db::work_table_query();
   mQueryModel = new QSqlQueryModel(this);
   mQueryModel->setQuery(query_str, db);
   setSourceModel(mQueryModel);
@@ -253,7 +253,7 @@ void WorkFilterModel::apply_filter_expression(QString expression) throw(std::run
   QString sql_expr = filter_to_sql(expression, mCurrentBPM);
   mSQLExpression = sql_expr;
 
-  QString query_str = db::work::table_query(mSQLExpression);
+  QString query_str = db::work_table_query(mSQLExpression);
   mQueryModel->setQuery(query_str);
 
   if (mQueryModel->lastError().isValid())

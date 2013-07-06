@@ -21,7 +21,7 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
   mTabWidget = new RenameableTabWidget(this);
 
   QSqlQueryModel * maintable = new QSqlQueryModel(this);
-  maintable->setQuery(model::db::work::table_query(), model::db::get());
+  maintable->setQuery(model::db::work_table_query(), model::db::get());
   QSortFilterProxyModel * sortable = new QSortFilterProxyModel(maintable);
   sortable->setSourceModel(maintable);
 
