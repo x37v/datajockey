@@ -206,10 +206,12 @@ bool Configuration::db_get(YAML::Node& doc, QString element, QString &result) {
    return false;
 }
 
-QString Configuration::db_adapter() { return mDBAdapter; }
-QString Configuration::db_name() { return mDBName; }
-QString Configuration::db_password() { return mDBPassword; }
-QString Configuration::db_username() { return mDBUserName; }
+QString Configuration::db_adapter() const { return mDBAdapter; }
+QString Configuration::db_name() const { return mDBName; }
+QString Configuration::db_password() const { return mDBPassword; }
+QString Configuration::db_username() const { return mDBUserName; }
+QString Configuration::db_host() const { return mDBHost; }
+int Configuration::db_port() const { return mDBPort; }
 
 QString Configuration::post_start_script() {
   return mPostStartScript;
@@ -231,6 +233,8 @@ void Configuration::restore_defaults() {
    mDBPassword = "";
    mDBAdapter = "QSQLITE";
    mDBName = DEFAULT_DB_NAME;
+   mDBHost = "localhost";
+   mDBPort = -1;
 
    mPostStartScript.clear();
 

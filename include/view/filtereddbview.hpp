@@ -22,6 +22,7 @@
 #define FILTERED_DB_VIEW_HPP
 
 #include <QWidget>
+#include "db.hpp"
 
 class WorkDBView;
 class QAbstractItemModel;
@@ -30,7 +31,7 @@ class QTextEdit;
 class FilteredDBView : public QWidget {
   Q_OBJECT
   public:
-    FilteredDBView(QAbstractItemModel * model, QWidget *parent = NULL);
+    FilteredDBView(dj::model::DB * db, QAbstractItemModel * model, QWidget *parent = NULL);
     QString filter_expression() const;
   public slots:
     void select_work(int work_id);

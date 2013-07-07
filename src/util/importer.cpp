@@ -152,7 +152,9 @@ void NewSongFinder::ignore_pattern(QRegExp ignore_pattern) {
   mIgnorePatterns.push_back(ignore_pattern);
 }
 
-Importer::Importer(QObject * parent) : QObject(parent), mImportingCount(0) {
+Importer::Importer(dj::model::DB *db, QObject * parent) : QObject(parent), 
+  mDB(db),
+  mImportingCount(0) {
 }
 
 void Importer::import(const QStringList& file_list, bool recurse_directories, QList<QRegExp> ignore_patterns) {
@@ -161,7 +163,7 @@ void Importer::import(const QStringList& file_list, bool recurse_directories, QL
     QFileInfo info(item);
     if (!info.exists() || !info.isFile() || !valid_file_types.contains(info.suffix().toLower()))
       continue;
-    if (model::db::work_find_by_audio_file_location(item) != 0)
+    if (mDB->work_find_by_audio_file_location(item) != 0)
       continue;
 
     //push this job
@@ -180,7 +182,7 @@ void Importer::import(const QStringList& file_list, bool recurse_directories, QL
 
 void Importer::import_data(QString audio_file_path, QHash<QString, QVariant> tag_data, BeatBufferPtr beat_buffer) {
   try {
-    if (model::db::work_find_by_audio_file_location(audio_file_path) != 0) {
+    if (mDB->work_find_by_audio_file_location(audio_file_path) != 0) {
       qWarning() << audio_file_path << " already in database, skipping";
       decrement_count();
       return;
@@ -192,7 +194,7 @@ void Importer::import_data(QString audio_file_path, QHash<QString, QVariant> tag
     annotation.beat_buffer(beat_buffer);
 
     //create db entry
-    int work_id = model::db::work_create(
+    int work_id = mDB->work_create(
         tag_data,
         audio_file_path);
 
@@ -203,13 +205,13 @@ void Importer::import_data(QString audio_file_path, QHash<QString, QVariant> tag
         beat_buffer->median_and_mean(median, mean);
         //XXX assuming 4/4 time
         if (median > 0.0) {
-          model::db::work_descriptor_create_or_update(
+          mDB->work_descriptor_create_or_update(
               work_id,
               "tempo median",
               60.0 / median);
         }
         if (mean > 0.0) {
-          model::db::work_descriptor_create_or_update(
+          mDB->work_descriptor_create_or_update(
               work_id,
               "tempo average",
               60.0 / mean);
@@ -223,7 +225,7 @@ void Importer::import_data(QString audio_file_path, QHash<QString, QVariant> tag
     QVariant genre = tag_data["genre"];
     if (genre.isValid()) {
       try {
-        model::db::work_tag(work_id, QString("genre"), genre.toString());
+        mDB->work_tag(work_id, QString("genre"), genre.toString());
       } catch (std::exception& e) {
         qWarning() << "failed to create genre tag for " << audio_file_path << " " << e.what();
       }
@@ -232,7 +234,7 @@ void Importer::import_data(QString audio_file_path, QHash<QString, QVariant> tag
     //write annotation file and store the location in the db
     QString annotation_file_location = annotation.default_file_location(work_id);
     annotation.write_file(annotation_file_location);
-    model::db::work_update_attribute(
+    mDB->work_update_attribute(
         work_id,
         "annotation_file_location",
         annotation_file_location);

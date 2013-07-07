@@ -25,6 +25,7 @@
 #include <QModelIndex>
 #include <QItemSelection>
 #include <QColor>
+#include "db.hpp"
 
 class QTableView;
 class QPushButton;
@@ -48,7 +49,7 @@ class SessionDisplayStyle : public QWidget {
 class WorkDBView : public QWidget {
   Q_OBJECT
   public:
-    WorkDBView(QAbstractItemModel * model, QWidget *parent = NULL);
+    WorkDBView(dj::model::DB * db, QAbstractItemModel * model, QWidget *parent = NULL);
     QTableView * tableView();
     void shouldWriteSettings(bool write);
   public slots:
@@ -63,6 +64,7 @@ class WorkDBView : public QWidget {
   signals:
     void work_selected(int work);
   private:
+    dj::model::DB * mDB;
     QTableView * mTableView;
     bool mWriteSettings;
     int mLastWork;

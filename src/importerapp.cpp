@@ -24,19 +24,22 @@ using dj::audio::BeatBufferPtr;
 ImporterApplication::ImporterApplication(int& argc, char ** argv) : QCoreApplication(argc, argv) {
   qRegisterMetaType<BeatBufferPtr>("BeatBufferPtr");
 
-  mImporter = new dj::util::Importer(this);
+  dj::Configuration * config = dj::Configuration::instance();
+  dj::model::DB * db = new dj::model::DB(
+      config->db_adapter(),
+      config->db_name(),
+      config->db_username(),
+      config->db_password(),
+      config->db_port(),
+      config->db_host(),
+      this);
+
+  mImporter = new dj::util::Importer(db, this);
   QObject::connect(mImporter, SIGNAL(finished()), SLOT(quit()));
   QObject::connect(this, SIGNAL(aboutToQuit()), SLOT(cleanup()));
 
   QObject::connect(mImporter, SIGNAL(imported_file(QString, int)), SLOT(report_success(QString, int)));
   QObject::connect(mImporter, SIGNAL(import_failed(QString, QString)), SLOT(report_failure(QString, QString)));
-
-  dj::Configuration * config = dj::Configuration::instance();
-  dj::model::db::setup(
-      config->db_adapter(),
-      config->db_name(),
-      config->db_username(),
-      config->db_password());
 
   //create the annotation directory if it doesn't already exist
   QString annotation_dir_name = config->annotation_dir();
@@ -61,7 +64,7 @@ void ImporterApplication::import() {
 }
 
 void ImporterApplication::cleanup() {
-  dj::model::db::close();
+  //XXX close db?
 }
 
 void ImporterApplication::report_success(QString path, int work_id) {

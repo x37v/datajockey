@@ -15,6 +15,9 @@ namespace dj {
     class OSCSender;
     class HistoryManager;
   }
+  namespace model {
+    class DB;
+  }
 
   class Application : public QApplication {
     Q_OBJECT
@@ -30,6 +33,7 @@ namespace dj {
     private:
       audio::AudioModel * mAudioModel;
       view::MixerPanel * mMixerPanel;
+      model::DB * mDB;
       controller::MIDIMapper * mMIDIMapper;
       controller::OSCSender * mOSCSender;
       controller::HistoryManager * mHistoryManger;

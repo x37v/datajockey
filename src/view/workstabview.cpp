@@ -14,18 +14,21 @@
 
 using namespace dj;
 
-WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, QWidget * parent) :
+WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection, 
+    dj::model::DB * db,
+    QWidget * parent) :
   QWidget(parent),
-  mFilterModelCollection(filter_model_collection)
+  mFilterModelCollection(filter_model_collection),
+  mDB(db)
 {
   mTabWidget = new RenameableTabWidget(this);
 
   QSqlQueryModel * maintable = new QSqlQueryModel(this);
-  maintable->setQuery(model::db::work_table_query(), model::db::get());
+  maintable->setQuery(db->work_table_query(), db->get());
   QSortFilterProxyModel * sortable = new QSortFilterProxyModel(maintable);
   sortable->setSourceModel(maintable);
 
-  mAllView = new WorkDBView(sortable);
+  mAllView = new WorkDBView(mDB, sortable);
   mTabWidget->addTab(mAllView, "all works");
   mTabWidget->setTabsClosable(true);
   mTabWidget->setMovable(true);
@@ -75,7 +78,7 @@ void WorksTabView::add_filter(QString expression, QString label) {
 
 void WorksTabView::create_filter_tab(QString expression, QString label) {
   WorkFilterModel * table = mFilterModelCollection->new_filter_model();
-  FilteredDBView * view = new FilteredDBView(table, this);
+  FilteredDBView * view = new FilteredDBView(mDB, table, this);
   table->setParent(view);
 
   QObject::connect(

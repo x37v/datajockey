@@ -11,6 +11,7 @@
 #include <QMutex>
 
 #include "beatbuffer.hpp"
+#include "db.hpp"
 
 namespace dj {
   namespace util {
@@ -46,7 +47,7 @@ namespace dj {
     class Importer : public QObject {
       Q_OBJECT
       public:
-        Importer(QObject * parent = NULL);
+        Importer(dj::model::DB *db, QObject * parent = NULL);
       public slots:
         void import(const QStringList& file_list, bool recurse_directories = true, QList<QRegExp> ignore_patterns = QList<QRegExp>());
 
@@ -58,6 +59,7 @@ namespace dj {
         void imported_file(QString path, int work_id);
         void import_failed(QString path, QString message);
       private:
+        dj::model::DB * mDB;
         QThreadPool mExtractorPool;
         int mImportingCount;
         void decrement_count();

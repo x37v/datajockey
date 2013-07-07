@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QWidget(parent) {
+FilteredDBView::FilteredDBView(dj::model::DB * db, QAbstractItemModel * model, QWidget *parent) : QWidget(parent) {
   //create the layouts
   QVBoxLayout * layout = new QVBoxLayout(this);
 
@@ -15,7 +15,7 @@ FilteredDBView::FilteredDBView(QAbstractItemModel * model, QWidget *parent) : QW
 
   QPushButton * submit_button = new QPushButton("apply filter", this);
 
-  mDBView = new WorkDBView(model, this);
+  mDBView = new WorkDBView(db, model, this);
   mDBView->shouldWriteSettings(false);
 
   layout->addWidget(mFilterEditor);

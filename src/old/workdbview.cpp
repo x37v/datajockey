@@ -19,7 +19,6 @@
  */
 
 #include "workdbview.hpp"
-#include "db.hpp"
 #include <QTableView>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -53,9 +52,8 @@ class TimeDisplayDelegate : public QStyledItemDelegate {
 
 class SessionDisplayDelegate : public QStyledItemDelegate {
   public:
-    SessionDisplayDelegate(int current_session, QObject *parent) :
-      QStyledItemDelegate(parent), mCurrentSessionId(current_session) {
-        mSessionColumn = dj::model::db::work_table_column("session");
+    SessionDisplayDelegate(int current_session, int session_column, QObject *parent) :
+      QStyledItemDelegate(parent), mCurrentSessionId(current_session), mSessionColumn(session_column) {
       }
     virtual ~SessionDisplayDelegate() { }
 
@@ -84,9 +82,12 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
     SessionDisplayStyle mStyle;
 };
 
-WorkDBView::WorkDBView(QAbstractItemModel * model, 
+WorkDBView::WorkDBView(
+    dj::model::DB * db,
+    QAbstractItemModel * model, 
     QWidget *parent) :
   QWidget(parent),
+  mDB(db),
   mWriteSettings(true),
   mLastWork(-1)
 {
@@ -108,11 +109,14 @@ WorkDBView::WorkDBView(QAbstractItemModel * model,
   //XXX actually do something with editing at some point
   mTableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
-  SessionDisplayDelegate * session_delegate = new SessionDisplayDelegate(dj::model::db::work_current_session(), this);
+  SessionDisplayDelegate * session_delegate = new SessionDisplayDelegate(
+      mDB->current_session(), 
+      mDB->work_table_column("session"),
+      this);
   mTableView->setItemDelegate(session_delegate);
 
   TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
-  mTableView->setItemDelegateForColumn(dj::model::db::work_table_column("audio_file_seconds"), time_delegate);
+  mTableView->setItemDelegateForColumn(mDB->work_table_column("audio_file_seconds"), time_delegate);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
@@ -139,7 +143,7 @@ QTableView * WorkDBView::tableView(){
 void WorkDBView::select_work(int work_id) {
   //see if we are actually selecting it already
   QModelIndex index = mTableView->selectionModel()->currentIndex(); 
-  index = index.sibling(index.row(), dj::model::db::work_table_column("id"));
+  index = index.sibling(index.row(), mDB->work_table_column("id"));
   if (index.isValid() && mTableView->model()->data(index).toInt() == work_id)
     return; //already selected
 
@@ -147,7 +151,7 @@ void WorkDBView::select_work(int work_id) {
   int rows = mTableView->model()->rowCount();
   //iterate to find our work
   for(int i = 0; i < rows; i++){
-    QModelIndex index = mTableView->model()->index(i, dj::model::db::work_table_column("id"));
+    QModelIndex index = mTableView->model()->index(i, mDB->work_table_column("id"));
     QVariant data = index.data();
     if(data.isValid() && data.canConvert(QVariant::Int) && data.toInt() == work_id){
       mTableView->selectRow(index.row());
@@ -177,7 +181,7 @@ emit(work_selected(work));
 void WorkDBView::set_selection(const QItemSelection & selected) {
   Q_UNUSED(selected);
   QModelIndex index = mTableView->selectionModel()->currentIndex(); 
-  index = index.sibling(index.row(), dj::model::db::work_table_column("id"));
+  index = index.sibling(index.row(), mDB->work_table_column("id"));
   int work_id = -1;
   if(index.isValid())
     work_id = mTableView->model()->data(index).toInt();

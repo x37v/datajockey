@@ -23,7 +23,6 @@ using std::cerr;
 using std::endl;
 
 namespace {
-  QSqlDatabase cDB;
   QMutex mMutex(QMutex::Recursive);
   bool has_transactions = false;
 
@@ -121,9 +120,10 @@ namespace {
       }
   };
 
+  /*
   void update_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
     QMutexLocker lock(&mMutex);
-    MySqlQuery query(cDB);
+    MySqlQuery query(mDB);
 
     //delete everything from the table
     QString query_string = "DELETE FROM " + table_name;
@@ -141,17 +141,20 @@ namespace {
     query.prepare(query_string);
     query.exec();
   }
+  */
 }
 
 using namespace dj::model;
 
-void db::setup(
+DB::DB(
     QString type, 
     QString name_or_loc, 
     QString username,
     QString password,
     int /* port */,
-    QString /* host */) throw(std::runtime_error) {
+    QString /* host */,
+    QObject * parent
+    ) throw(std::runtime_error) : QObject(parent) { 
   QMutexLocker lock(&mMutex);
 
   //create an empty sqlite db if it doesn't already exist at name_or_loc
@@ -169,16 +172,16 @@ void db::setup(
     }
   }
 
-  cDB = QSqlDatabase::addDatabase(type);
-  cDB.setDatabaseName(name_or_loc);
+  mDB = QSqlDatabase::addDatabase(type);
+  mDB.setDatabaseName(name_or_loc);
   if(!username.isEmpty())
-    cDB.setUserName(username);
+    mDB.setUserName(username);
   if(!password.isEmpty())
-    cDB.setPassword(password);
-  if(!cDB.open())
+    mDB.setPassword(password);
+  if(!mDB.open())
     throw std::runtime_error("cannot open database");
 
-  if(cDB.driver()->hasFeature(QSqlDriver::Transactions))
+  if(mDB.driver()->hasFeature(QSqlDriver::Transactions))
     has_transactions = true;
 
   //find the current session
@@ -196,13 +199,18 @@ void db::setup(
   cDescriptorTypes << "tempo_average";
 }
 
-QSqlDatabase db::get() { return cDB; }
-void db::close() {
-  cDB.close();
-  cDB = QSqlDatabase();
+DB::~DB() {
+  close();
 }
 
-bool db::find_locations_by_id(
+QSqlDatabase DB::get() { return mDB; }
+
+void DB::close() {
+  mDB.close();
+  mDB = QSqlDatabase();
+}
+
+bool DB::find_locations_by_id(
     int work_id,
     QString& audio_file_loc,
     QString& annotation_file_loc) throw(std::runtime_error) {
@@ -226,7 +234,7 @@ bool db::find_locations_by_id(
   return true;
 }
 
-bool db::find_artist_and_title_by_id(
+bool DB::find_artist_and_title_by_id(
     int work_id,
     QString& artist_name,
     QString& work_title) throw(std::runtime_error) {
@@ -252,7 +260,7 @@ bool db::find_artist_and_title_by_id(
   return true;
 }
 
-QString db::work_table_query(const QString where_clause) throw(std::runtime_error) {
+QString DB::work_table_query(const QString where_clause) throw(std::runtime_error) {
   QString from(" FROM audio_works as w");
 
   QString joins = QString(" LEFT JOIN albums ON w.album_id = albums.id") +
@@ -274,7 +282,7 @@ QString db::work_table_query(const QString where_clause) throw(std::runtime_erro
   return query_string;
 }
 
-int db::work_table_column(QString id_name) {
+int DB::work_table_column(QString id_name) {
   if (id_name == "id")
     return cWorkIdColumn;
   else if (id_name == "audio_file_seconds")
@@ -284,7 +292,7 @@ int db::work_table_column(QString id_name) {
   return 0;
 }
 
-int db::work_create(
+int DB::work_create(
     const QHash<QString, QVariant>& attributes,
     const QString& audio_file_location
     ) throw(std::runtime_error) {
@@ -361,7 +369,7 @@ int db::work_create(
       album_id = album_find(i.value().toString(), true);
       i = attributes.find("track");
       int track_num = (i != attributes.end()) ? i.value().toInt() : 0;
-      db::work_set_album(work_id, album_id, track_num);
+      DB::work_set_album(work_id, album_id, track_num);
     }
     if (has_transactions) {
       if (!db_driver->commitTransaction())
@@ -376,7 +384,7 @@ int db::work_create(
   return work_id;
 }
 
-int db::work_find_by_audio_file_location(
+int DB::work_find_by_audio_file_location(
     const QString& audio_file_location) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
 
@@ -390,7 +398,7 @@ int db::work_find_by_audio_file_location(
   return query.value(0).toInt();
 }
 
-void db::work_update_attribute(
+void DB::work_update_attribute(
     int work_id,
     const QString& name,
     const QVariant& value) throw(std::runtime_error) {
@@ -409,7 +417,7 @@ void db::work_update_attribute(
   query.exec();
 }
 
-void db::work_descriptor_create_or_update(
+void DB::work_descriptor_create_or_update(
     int work_id,
     QString name,
     double value) throw(std::runtime_error) {
@@ -422,7 +430,7 @@ void db::work_descriptor_create_or_update(
   work_update_attribute(work_id, column_name, value);
 }
 
-void db::work_tag(
+void DB::work_tag(
     int work_id,
     const QString& tag_class,
     const QString& tag_value) throw(std::runtime_error) {
@@ -476,34 +484,34 @@ void db::work_tag(
   query.exec();
 }
 
-void db::work_set_played(int work_id, int session_id, QDateTime time) {
+void DB::work_set_played(int work_id, QDateTime time) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   try {
     query.prepare(cWorkHistoryInsert);
     query.bindValue(":work_id", work_id);
-    query.bindValue(":session_id", session_id);
+    query.bindValue(":session_id", cCurrentSession);
     query.bindValue(":played_at", time);
     query.exec();
   } catch (std::runtime_error e) {
-    //XXX what's up?
+    cerr << "failed to update sessions table: " << e.what() << endl;
   }
 
   try {
     query.prepare(cWorksSessionUpdate);
     query.bindValue(":work_id", work_id);
-    query.bindValue(":last_session_id", session_id);
+    query.bindValue(":last_session_id", cCurrentSession);
     query.bindValue(":last_played_at", time);
     query.exec();
   } catch (std::runtime_error e) {
-    cerr << "failed to update audio works table" << endl;
+    cerr << "failed to update audio works table: " << e.what() << endl;
   }
 }
 
-int db::work_current_session() { return cCurrentSession; }
+int DB::current_session() { return cCurrentSession; }
 
-void db::work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error) {
+void DB::work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -515,7 +523,7 @@ void db::work_set_album(int work_id, int album_id, int track_num)  throw(std::ru
 }
 
 
-int db::tag_find_class(const QString& name) throw(std::runtime_error) {
+int DB::tag_find_class(const QString& name) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -529,7 +537,7 @@ int db::tag_find_class(const QString& name) throw(std::runtime_error) {
   throw std::runtime_error("cannot find tag class with name " + name.toStdString());
 }
 
-int db::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error) {
+int DB::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -548,7 +556,7 @@ int db::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error
   throw std::runtime_error("cannot find tag with name " + name.toStdString());
 }
 
-int db::artist_find(const QString& name, bool create) throw(std::runtime_error) {
+int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -572,7 +580,7 @@ int db::artist_find(const QString& name, bool create) throw(std::runtime_error) 
   return query.lastInsertId().toInt();
 }
 
-int db::album_find(const QString& name, bool create)  throw(std::runtime_error) {
+int DB::album_find(const QString& name, bool create)  throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
@@ -596,7 +604,7 @@ int db::album_find(const QString& name, bool create)  throw(std::runtime_error) 
   return query.lastInsertId().toInt();
 }
 
-int db::file_type_find(const QString& name, bool create) throw(std::runtime_error) {
+int DB::file_type_find(const QString& name, bool create) throw(std::runtime_error) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 

@@ -50,10 +50,12 @@ namespace dj {
          static QString file();
 
          //get database data
-         QString db_adapter();
-         QString db_name();
-         QString db_username();
-         QString db_password();
+         QString db_adapter() const;
+         QString db_name() const;
+         QString db_username() const;
+         QString db_password() const;
+         QString db_host() const;
+         int db_port() const;
 
          //if populated, run this after startup
          QString post_start_script();
@@ -74,6 +76,8 @@ namespace dj {
          QString mDBName;
          QString mDBUserName;
          QString mDBPassword;
+         QString mDBHost;
+         int mDBPort;
 
          QString mPostStartScript;
 

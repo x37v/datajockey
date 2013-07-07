@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QDateTime>
+#include "db.hpp"
 
 class WorkFilterModel;
 class QTimer;
@@ -13,7 +14,7 @@ class WorkFilterModelCollection : public QObject {
   Q_OBJECT
 
   public:
-    WorkFilterModelCollection(QObject * parent = NULL, QSqlDatabase db = QSqlDatabase());
+    WorkFilterModelCollection(dj::model::DB * db, QObject * parent = NULL);
     WorkFilterModel * new_filter_model(QObject * parent = NULL);
 
   public slots:
@@ -30,12 +31,12 @@ class WorkFilterModelCollection : public QObject {
 
     void select_work(int work_id); //just a relay
 
-    void update_history(int work_id, int session_id, QDateTime played_at); //just a relay
+    void update_history(int work_id, QDateTime played_at); //just a relay
 
   signals:
     void work_selected(int work);
     void current_bpm_changed(double bpm);
-    void updated_history(int work_id, int session_id, QDateTime played_at);
+    void updated_history(int work_id, QDateTime played_at);
 
   protected slots:
     void bpm_send_timeout();
@@ -44,6 +45,7 @@ class WorkFilterModelCollection : public QObject {
     double mCurrentBPM;
     double mLastBPM;
     QTimer * mBPMTimeout;
+    dj::model::DB * mDB;
 };
 
 #endif

@@ -5,18 +5,19 @@
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
 #include <QDateTime>
+#include "db.hpp"
 
 class WorkFilterModel : public QSortFilterProxyModel {
   Q_OBJECT
 
   public:
-    WorkFilterModel(QObject * parent = NULL, QSqlDatabase db = QSqlDatabase());
+    WorkFilterModel(dj::model::DB * db, QObject * parent = NULL);
     virtual ~WorkFilterModel();
 
   public slots:
     void set_filter_expression(QString expression);
     void set_current_bpm(double bpm);
-    void update_history(int work_id, int session_id, QDateTime played_at);
+    void update_history(int work_id, QDateTime played_at);
 
     //validate a filter expression string
     static bool valid_filter_expression(QString expression);
@@ -34,6 +35,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
     QString mTable;
     double mCurrentBPM;
     QSqlQueryModel * mQueryModel;
+    dj::model::DB * mDB;
 };
 
 #endif

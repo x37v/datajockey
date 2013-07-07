@@ -9,10 +9,11 @@ namespace {
   const int bpm_timer_timeout_ms = 200;
 }
 
-WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatabase /*db */) :
+WorkFilterModelCollection::WorkFilterModelCollection(dj::model::DB * db, QObject * parent) :
   QObject(parent),
   mCurrentBPM(120.0),
-  mLastBPM(0.0)
+  mLastBPM(0.0),
+  mDB(db)
 {
   //timeout timer
   mBPMTimeout = new QTimer(this);
@@ -21,11 +22,11 @@ WorkFilterModelCollection::WorkFilterModelCollection(QObject * parent, QSqlDatab
 }
 
 WorkFilterModel * WorkFilterModelCollection::new_filter_model(QObject * parent) {
-  WorkFilterModel * m = new WorkFilterModel(parent, model::db::get());
+  WorkFilterModel * m = new WorkFilterModel(mDB, parent);
   m->set_current_bpm(mCurrentBPM);
 
   QObject::connect(this, SIGNAL(current_bpm_changed(double)), m, SLOT(set_current_bpm(double)));
-  QObject::connect(this, SIGNAL(updated_history(int, int, QDateTime)), m, SLOT(update_history(int, int, QDateTime)));
+  QObject::connect(this, SIGNAL(updated_history(int, QDateTime)), m, SLOT(update_history(int, QDateTime)));
   return m;
 }
 
@@ -64,8 +65,8 @@ void WorkFilterModelCollection::master_set(QString name, double value){
 }
 
 void WorkFilterModelCollection::select_work(int work_id) { emit(work_selected(work_id)); }
-void WorkFilterModelCollection::update_history(int work_id, int session_id, QDateTime played_at) {
-  emit(updated_history(work_id, session_id, played_at));
+void WorkFilterModelCollection::update_history(int work_id, QDateTime played_at) {
+  emit(updated_history(work_id, played_at));
 }
 
 void WorkFilterModelCollection::bpm_send_timeout() {

@@ -1,12 +1,10 @@
 #include "history_manager.hpp"
-#include "db.hpp"
 #include "audiomodel.hpp"
 #include <QTimer>
 #include <QSignalMapper>
 
 #define LOG_DELAY_S 5
 
-using namespace dj::model;
 using namespace dj::controller;
 
 HistoryManager::HistoryManager(QObject * parent) : QObject(parent) {
@@ -48,8 +46,8 @@ void HistoryManager::log_work(int player_index) {
   //XXX only log the work once
   if (!mLoggedWorks.contains(work)) {
     QDateTime time = QDateTime::currentDateTime().addSecs(-LOG_DELAY_S);
-    db::work_set_played(work, db::work_current_session(), time);
     mLoggedWorks[work] = true;
-    emit(updated_history(work, db::work_current_session(), time));
+    emit(updated_history(work, time));
   }
 }
+

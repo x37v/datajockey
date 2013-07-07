@@ -97,11 +97,12 @@ Application::Application(int & argc, char ** argv) :
 
   Configuration * config = Configuration::instance();
 
-  model::db::setup(
+  mDB = new model::DB(
       config->db_adapter(),
       config->db_name(),
       config->db_username(),
-      config->db_password());
+      config->db_password()
+      );
 
   mAudioModel = audio::AudioModel::instance();
   mTop = new MainWindow;
@@ -298,8 +299,8 @@ Application::Application(int & argc, char ** argv) :
 
   QObject::connect(this, SIGNAL(aboutToQuit()), mOSCSender, SLOT(send_quit()));
 
-  TagModel * tag_model = new TagModel(model::db::get(), mTop);
-  WorkDetailView * work_detail = new WorkDetailView(tag_model, model::db::get(), mTop);
+  TagModel * tag_model = new TagModel(mDB->get(), mTop);
+  WorkDetailView * work_detail = new WorkDetailView(tag_model, mDB->get(), mTop);
 
   TagEditor * tag_editor = new TagEditor(tag_model, mTop);
 
@@ -321,18 +322,24 @@ Application::Application(int & argc, char ** argv) :
   left->setLayout(left_layout);
   splitter->addWidget(left);
 
-  WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mTop, model::db::get());
+  WorkFilterModelCollection * filter_collection = new WorkFilterModelCollection(mDB, mTop);
   connect_common_interfaces(mAudioModel, filter_collection);
-  WorksTabView * works_view = new WorksTabView(filter_collection, mTop);
+  WorksTabView * works_view = new WorksTabView(filter_collection, mDB, mTop);
   splitter->addWidget(works_view);
 
   top_layout->addWidget(splitter);
 
   QObject::connect(
       mHistoryManger,
-      SIGNAL(updated_history(int, int, QDateTime)),
+      SIGNAL(updated_history(int, QDateTime)),
+      mDB,
+      SLOT(work_set_played(int, QDateTime)));
+
+  QObject::connect(
+      mHistoryManger,
+      SIGNAL(updated_history(int, QDateTime)),
       filter_collection,
-      SLOT(update_history(int, int, QDateTime)));
+      SLOT(update_history(int, QDateTime)));
 
   //set the default sizes
   QList<int> sizes;
@@ -401,7 +408,7 @@ void Application::post_start_actions() {
 void Application::pre_quit_actions() {
   sleep(1);
   mAudioModel->stop_audio();
-  model::db::close();
+  mDB->close();
 }
 
 void Application::select_work(int work_id) {
@@ -415,7 +422,7 @@ void Application::player_trigger(int player_index, QString name) {
   //find the file locations
   QString audio_file;
   QString annotation_file;
-  if (!model::db::find_locations_by_id(mCurrentwork, audio_file, annotation_file))
+  if (!mDB->find_locations_by_id(mCurrentwork, audio_file, annotation_file))
     return;
   mAudioModel->player_load(
       player_index,
@@ -427,7 +434,7 @@ void Application::player_trigger(int player_index, QString name) {
   //find the work info
   QString artist_name;
   QString work_title;
-  if (model::db::find_artist_and_title_by_id(mCurrentwork, artist_name, work_title)) {
+  if (mDB->find_artist_and_title_by_id(mCurrentwork, artist_name, work_title)) {
     //XXX invoke or is this okay?
     mMixerPanel->player_set(player_index,
         "song_description",

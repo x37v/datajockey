@@ -7,11 +7,14 @@
 #include "workdbview.hpp"
 #include "filtereddbview.hpp"
 #include "workfiltermodelcollection.hpp"
+#include "db.hpp"
 
 class WorksTabView : public QWidget {
   Q_OBJECT
   public:
-    WorksTabView(WorkFilterModelCollection * filter_model_collection, QWidget * parent = NULL);
+    WorksTabView(WorkFilterModelCollection * filter_model_collection,
+        dj::model::DB * db,
+        QWidget * parent = NULL);
     virtual ~WorksTabView();
   public slots:
     void select_work(int work_id);
@@ -27,6 +30,7 @@ class WorksTabView : public QWidget {
     RenameableTabWidget * mTabWidget;
     WorkFilterModelCollection * mFilterModelCollection;
     WorkDBView * mAllView;
+    dj::model::DB * mDB;
 };
 
 #endif
