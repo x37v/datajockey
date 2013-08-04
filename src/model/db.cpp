@@ -63,7 +63,7 @@ namespace {
   const QString cAlbumFind("SELECT id FROM albums where name = :name");
   const QString cAlbumInsert("INSERT INTO albums (name) values (:name)");
   const QString cWorkUpdateAlbum(
-      "UPDATE audio_works SET album_id = :album_id, album_track = :track \n"
+      "UPDATE audio_works SET album_id = :album_id, album_track = :album_track \n"
       "WHERE audio_works.id = :audio_work_id");
 
   const QString cFileTypeFind("SELECT id FROM audio_file_types where name = :name");
@@ -110,12 +110,12 @@ namespace {
       }
       bool prepare(const QString & query){
         if (!QSqlQuery::prepare(query))
-          throw(std::runtime_error("failed to query: " + lastError().text().toStdString()));
+          throw(std::runtime_error("failed to query: " + QSqlQuery::lastQuery().toStdString() + " error:" + lastError().text().toStdString()));
         return true;
       }
       bool exec() {
         if (!QSqlQuery::exec())
-          throw(std::runtime_error("failed to exec: " + lastError().text().toStdString()));
+          throw(std::runtime_error("failed to exec: " + QSqlQuery::lastQuery().toStdString() + " error:" + lastError().text().toStdString()));
         return true;
       }
   };
