@@ -95,6 +95,8 @@ void BeatExtractor::allocate_plugin(int sample_rate)
 {
 	mSampleRate = sample_rate;
 	mPlugin = load_plugin(mSampleRate);
+  if (!mPlugin)
+    throw std::runtime_error("couldn't load beat extractor plugin");
 	mBlockSize = mPlugin->getPreferredBlockSize();
 	mStepSize = mPlugin->getPreferredStepSize();
 	if (mBlockSize == 0)

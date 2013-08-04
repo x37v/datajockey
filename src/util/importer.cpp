@@ -18,6 +18,7 @@ using namespace dj;
 using namespace dj::util;
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
 namespace {
@@ -71,7 +72,11 @@ namespace {
             mImporter,
             SLOT(report_failure(QString, QString)));
 
-        extractor->extract_data(mAudioFilePath);
+        try {
+          extractor->extract_data(mAudioFilePath);
+        } catch (std::runtime_error& e) {
+          cerr << "error extracting data from " << qPrintable(mAudioFilePath) << " " << e.what() << endl;
+        }
         extractor->deleteLater();
       }
     private:
