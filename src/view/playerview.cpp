@@ -101,15 +101,16 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    button_layout->setColumnStretch(4, 100);
    mControlLayout->addLayout(button_layout);
 
+   QVBoxLayout * eq_slider_layout = new QVBoxLayout();
+
    mSpeedView = new SpeedSpinBox(this);
    mSpeedView->setDisabled(true);
    QLabel * speed_lab = new QLabel("speed %", this);
-   mControlLayout->addWidget(speed_lab, 0, Qt::AlignHCenter);
-   mControlLayout->addWidget(mSpeedView, 0, Qt::AlignHCenter);
+   eq_slider_layout->addWidget(speed_lab, 0, Qt::AlignHCenter);
+   eq_slider_layout->addWidget(mSpeedView, 0, Qt::AlignHCenter);
 
    QHBoxLayout * lower_layout = new QHBoxLayout();
    QVBoxLayout * eq_layout = new QVBoxLayout();
-   QVBoxLayout * eq_slider_layout = new QVBoxLayout();
 
    QString eq[3] = { "high", "mid", "low" };
    for (unsigned int i = 0; i < 3; i++) {
@@ -155,10 +156,12 @@ Player::Player(QWidget * parent, WaveformOrientation waveform_orientation) : QWi
    for(int i = 0; i < audio::AudioModel::loop_beats().size(); i++) {
      auto beat = audio::AudioModel::loop_beats()[i];
      QPushButton * btn = new QPushButton(QString::number(beat), this);
+     btn->setFixedSize(btn->minimumSizeHint());
      btn->setCheckable(true);
      mLoopGroup->addButton(btn, i + 1);
      loop_layout->addWidget(btn);
    }
+   loop_layout->setContentsMargins(0,0,0,0);
 
    {
      QPushButton * btn = new QPushButton("<l", this);

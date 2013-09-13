@@ -41,7 +41,7 @@ namespace dj {
        return v0 + (v1 - v0) * dist;
      }
 
-   const int volume_slider_height = 200;
+   const int volume_slider_height = 50;
 }
 
 
