@@ -31,6 +31,7 @@ FilteredDBView::FilteredDBView(dj::model::DB * db, QAbstractItemModel * model, Q
 }
 
 QString FilteredDBView::filter_expression() const { return mFilterEditor->toPlainText(); }
+int FilteredDBView::last_selected() const { return mDBView->last_selected(); }
 
 void FilteredDBView::select_work(int work_id) { mDBView->select_work(work_id); }
 void FilteredDBView::select_last() { mDBView->select_last(); }

@@ -33,6 +33,8 @@ class FilteredDBView : public QWidget {
   public:
     FilteredDBView(dj::model::DB * db, QAbstractItemModel * model, QWidget *parent = NULL);
     QString filter_expression() const;
+    //return the id of the last work that was selected
+    int last_selected() const;
   public slots:
     void select_work(int work_id);
     void select_last();

@@ -52,6 +52,7 @@ class WorkDBView : public QWidget {
     WorkDBView(dj::model::DB * db, QAbstractItemModel * model, QWidget *parent = NULL);
     QTableView * tableView();
     void shouldWriteSettings(bool write);
+    int last_selected() const { return mLastWork; }
   public slots:
     void select_work(int work_id);
     void select_last();
