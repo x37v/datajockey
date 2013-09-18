@@ -147,10 +147,6 @@ void WorksTabView::close_tab(int index) {
   }
 }
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
 void WorksTabView::tab_selected(int index) {
   //when we change tabs select the work for that tab
   QWidget * widget = mTabWidget->widget(index);
@@ -164,7 +160,6 @@ void WorksTabView::tab_selected(int index) {
     FilteredDBView * view = static_cast<FilteredDBView*>(widget);
     last = view->last_selected();
   }
-  cout << "tab: " << index << " work: " << last << endl;
   emit(work_selected(last));
 }
 
