@@ -37,11 +37,6 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection,
       mAllView,
       SIGNAL(work_selected(int)),
       SLOT(select_work(int)));
-  QObject::connect(
-      this,
-      SIGNAL(work_selected(int)),
-      mAllView,
-      SLOT(select_work(int)));
 
   //set up the new tab button
   QToolButton * new_btn = new QToolButton(this);
