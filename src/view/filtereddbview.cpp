@@ -12,15 +12,15 @@ FilteredDBView::FilteredDBView(dj::model::DB * db, QAbstractItemModel * model, Q
 
   mFilterEditor = new QTextEdit(this);
   mFilterEditor->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-
+  
   QPushButton * submit_button = new QPushButton("apply filter", this);
 
   mDBView = new WorkDBView(db, model, this);
   mDBView->shouldWriteSettings(false);
 
-  layout->addWidget(mFilterEditor);
-  layout->addWidget(submit_button);
-  layout->addWidget(mDBView);
+  layout->addWidget(mFilterEditor, 1);
+  layout->addWidget(submit_button, 0);
+  layout->addWidget(mDBView, 20);
 
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(1);
