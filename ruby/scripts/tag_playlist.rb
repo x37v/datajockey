@@ -40,6 +40,10 @@ puts "doing it"
 files = File.readlines(file_location).collect { |f| f.chomp }
 
 c = TagClass.where(:name => 'mix').first
+unless c
+  c = TagClass.create(:name => 'mix')
+  c.save
+end
 t = Tag.where(:name => tag_name, :tag_class_id => c.id).first
 
 unless t
@@ -52,7 +56,7 @@ end
 
 files.each do |f|
   next if f =~ /\#/
-  f = f.sub("media_drive", "x")
+  f = f.sub("/media/media_drive", "/home/alex")
   w = AudioWork.where(:audio_file_location => f).first
   if w
     #unless w.tags.include?(t2) or w.tags.include?(t)
