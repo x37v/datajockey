@@ -10,7 +10,8 @@ CONFIG += DEBUG
 
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
-LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+//LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+LIBS += -lboost_program_options -lboost_filesystem -lboost_regex -lboost_system 
 
 macx {
   CONFIG -= app_bundle
