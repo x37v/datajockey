@@ -1,2 +1,7 @@
 work selection:
   sometimes when you select a work and load you get the song before or after it in the work view list
+
+SYNC:
+	48khz quick markers aren't lining up correctly with beats..
+	try Voiski.
+	sync to 48khz track doesn't work either.
