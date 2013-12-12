@@ -627,10 +627,10 @@ void AudioModel::player_trigger(int player_index, QString name) {
       //XXX for now lock to closest beat
       unsigned int frame = pstate->mCurrentFrame;
       if (mPlayingAnnotationFiles[player_index].size() > 0 && mPlayingAnnotationFiles[player_index].last()) {
-        //XXX ignoring file sampling rate, using global sampling rate
+        double file_sr = mPlayerStates[player_index]->mParamInt["sample_rate"];
         BeatBufferPtr beat_buff = mPlayingAnnotationFiles[player_index].last();
-        TimePoint pos = beat_buff->beat_closest(static_cast<double>(frame) / sample_rate());
-        frame = static_cast<unsigned int>(beat_buff->time_at_position(pos) * static_cast<double>(sample_rate()));
+        TimePoint pos = beat_buff->beat_closest(static_cast<double>(frame) / file_sr);
+        frame = static_cast<unsigned int>(beat_buff->time_at_position(pos) * file_sr);
 
         mPlayerCuepoints[player_index][cue_index] = frame;
         emit(player_value_changed(player_index, QString("set_cuepoint_%1").arg(cue_index), static_cast<int>(frame)));
