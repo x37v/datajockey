@@ -6,7 +6,7 @@ require './subsonic'
 require 'datajockey/base'
 require 'datajockey/db'
 
-MUSIC_BASE = "/media/alex/x/music"
+MUSIC_BASE = "/home/alex/music"
 
 config = YAML.load_file("/home/alex/.datajockey/subsonic.yaml")
 s = Subsonic.new(config['server'], config['user'], config['password'])
