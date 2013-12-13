@@ -1,6 +1,38 @@
-temp table:
-	why use a temp table?  Why not just have new descriptors modify the main work table, adding a new column?
-
+EQ:
+	calf 5 band seems to work nicely:
+    http://calf.sourceforge.net/plugins/Equalizer5Band
+		<preset bank="0" program="0" plugin="eq5" name="dj3band">
+			<param name="bypass" value="0" />
+			<param name="level_in" value="1" />
+			<param name="level_out" value="1" />
+			<param name="meter_inL" value="0.437821" />
+			<param name="meter_inR" value="0.39326" />
+			<param name="meter_outL" value="0.437821" />
+			<param name="meter_outR" value="0.393259" />
+			<param name="clip_inL" value="0" />
+			<param name="clip_inR" value="0" />
+			<param name="clip_outL" value="0" />
+			<param name="clip_outR" value="0" />
+			<param name="ls_active" value="1" />
+			<param name="ls_level" value="1" />
+			<param name="ls_freq" value="220.772" />
+			<param name="hs_active" value="1" />
+			<param name="hs_level" value="1" />
+			<param name="hs_freq" value="4000" />
+			<param name="p1_active" value="0" />
+			<param name="p1_level" value="1.18099" />
+			<param name="p1_freq" value="250" />
+			<param name="p1_q" value="0.218776" />
+			<param name="p2_active" value="1" />
+			<param name="p2_level" value="1" />
+			<param name="p2_freq" value="1015.32" />
+			<param name="p2_q" value="0.252348" />
+			<param name="p3_active" value="0" />
+			<param name="p3_level" value="1" />
+			<param name="p3_freq" value="2500" />
+			<param name="p3_q" value="1" />
+		</preset>
+	zameq?
 check denormals:
   http://users.ecs.soton.ac.uk/swh/denormal-finder
 

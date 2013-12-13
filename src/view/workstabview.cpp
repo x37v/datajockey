@@ -37,11 +37,6 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection,
       mAllView,
       SIGNAL(work_selected(int)),
       SLOT(select_work(int)));
-  QObject::connect(
-      this,
-      SIGNAL(work_selected(int)),
-      mAllView,
-      SLOT(select_work(int)));
 
   //set up the new tab button
   QToolButton * new_btn = new QToolButton(this);
@@ -56,6 +51,10 @@ WorksTabView::WorksTabView(WorkFilterModelCollection * filter_model_collection,
       mTabWidget,
       SIGNAL(tabCloseRequested(int)),
       SLOT(close_tab(int)));
+  QObject::connect(
+      mTabWidget,
+      SIGNAL(currentChanged(int)),
+      SLOT(tab_selected(int)));
 
   QVBoxLayout * layout = new QVBoxLayout(this);
   layout->addWidget(mTabWidget);
@@ -101,11 +100,6 @@ void WorksTabView::create_filter_tab(QString expression, QString label) {
       SIGNAL(filter_expression_error(QString)),
       view,
       SLOT(filter_expression_error(QString)));
-  QObject::connect(
-      table,
-      SIGNAL(applied()),
-      view,
-      SLOT(select_last()));
 
   if (label.isEmpty())
     label = QString("filter %1").arg(mTabWidget->count());
@@ -151,6 +145,22 @@ void WorksTabView::close_tab(int index) {
     view->deleteLater();
     mTabWidget->close_tab(index);
   }
+}
+
+void WorksTabView::tab_selected(int index) {
+  //when we change tabs select the work for that tab
+  QWidget * widget = mTabWidget->widget(index);
+  if (!widget)
+    return;
+
+  int last = 0;
+  if (index == 0) {
+    last = mAllView->last_selected();
+  } else {
+    FilteredDBView * view = static_cast<FilteredDBView*>(widget);
+    last = view->last_selected();
+  }
+  emit(work_selected(last));
 }
 
 void WorksTabView::write_settings() {

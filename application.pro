@@ -11,7 +11,9 @@ CONFIG += DEBUG
 
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
-LIBS += -loscpack -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+LIBS += -loscpack
+//LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
+LIBS += -lboost_program_options -lboost_filesystem -lboost_regex -lboost_system
 
 macx {
   QMAKE_LIBDIR += ext/vamp/osx/
