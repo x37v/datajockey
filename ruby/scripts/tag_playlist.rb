@@ -52,7 +52,7 @@ end
 
 files.each do |f|
   next if f =~ /\#/
-  f = f.sub("media_drive", "x")
+  f = f.sub("media_drive", "alex/x")
   w = AudioWork.where(:audio_file_location => f).first
   if w
     #unless w.tags.include?(t2) or w.tags.include?(t)
