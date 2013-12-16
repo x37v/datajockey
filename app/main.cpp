@@ -1,13 +1,12 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QStyleFactory>
+#include "db.h"
 
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
   QApplication::setStyle(QStyleFactory::create("Fusion"));
-  MainWindow w;
-  w.show();
 
   QPalette palette;
   palette.setColor(QPalette::Window, QColor(53,53,53));
@@ -24,6 +23,11 @@ int main(int argc, char *argv[])
   palette.setColor(QPalette::Highlight, QColor(142,45,197).lighter());
   palette.setColor(QPalette::HighlightedText, Qt::black);
   a.setPalette(palette);
+
+  DB * db = new DB("QSQLITE", "/home/alex/.datajockey/database.sqlite3");
+
+  MainWindow w(db);
+  w.show();
 
   return a.exec();
 }

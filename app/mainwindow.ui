@@ -57,10 +57,15 @@
        <property name="movable">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="allworks">
+       <widget class="QWidget" name="allWorksTab">
         <attribute name="title">
          <string>All</string>
         </attribute>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="WorksTableView" name="allWorks"/>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="workfilter">
         <attribute name="title">
@@ -111,6 +116,11 @@
    <extends>QWidget</extends>
    <header>tagsview.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorksTableView</class>
+   <extends>QTableView</extends>
+   <header>workstableview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

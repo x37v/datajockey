@@ -1,5 +1,5 @@
-#include "db.hpp"
-#include "defines.hpp"
+#include "db.h"
+//#include "defines.hpp"
 #include <stdexcept>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -143,8 +143,6 @@ namespace {
   }
   */
 }
-
-using namespace dj::model;
 
 DB::DB(
     QString type, 
