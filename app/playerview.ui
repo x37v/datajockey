@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="2">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="songInfoLabel">
+      <widget class="QLabel" name="workInfo">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -52,7 +52,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QToolButton" name="loadButton">
+        <widget class="QToolButton" name="load">
          <property name="text">
           <string>L</string>
          </property>
@@ -63,12 +63,18 @@
          <property name="text">
           <string>C</string>
          </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="3">
         <widget class="QToolButton" name="playPause">
          <property name="text">
           <string>P</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -83,6 +89,9 @@
         <widget class="QToolButton" name="sync">
          <property name="text">
           <string>S</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

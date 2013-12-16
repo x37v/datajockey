@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include "db.h"
+#include "audiomodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,8 +26,9 @@ int main(int argc, char *argv[])
   a.setPalette(palette);
 
   DB * db = new DB("QSQLITE", "/home/alex/.datajockey/database.sqlite3");
+  AudioModel * audio = new AudioModel();
 
-  MainWindow w(db);
+  MainWindow w(db, audio);
   w.show();
 
   return a.exec();

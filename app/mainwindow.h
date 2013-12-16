@@ -8,13 +8,14 @@ namespace Ui {
 }
 
 class DB;
+class AudioModel;
 
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
   public:
-    explicit MainWindow(DB* db, QWidget *parent = 0);
+    explicit MainWindow(DB* db, AudioModel * audio, QWidget *parent = 0);
     ~MainWindow();
 
   private:

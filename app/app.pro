@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     tagsview.cpp \
     workfilterview.cpp \
     db.cpp \
-    workstableview.cpp
+    workstableview.cpp \
+    audiomodel.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -30,7 +31,8 @@ HEADERS  += mainwindow.h \
     tagsview.h \
     workfilterview.h \
     db.h \
-    workstableview.h
+    workstableview.h \
+    audiomodel.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
