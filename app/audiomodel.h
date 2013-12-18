@@ -23,6 +23,9 @@ class AudioModel : public QObject
     void masterSetValueInt(QString name, int v);
     void masterSetValueBool(QString name, bool v);
     void masterTrigger(QString name);
+
+    //start/stop the audio processing
+    void processAudio(bool doit);
 };
 
 #endif // AUDIOMODEL_H
