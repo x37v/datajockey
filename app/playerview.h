@@ -17,6 +17,10 @@ class PlayerView : public QWidget
     ~PlayerView();
   public slots:
     void setWorkInfo(QString info);
+
+    void setValueDouble(QString name, double v);
+    void setValueInt(QString name, int v);
+    void setValueBool(QString name, bool v);
   signals:
     void valueChangedDouble(QString name, double v);
     void valueChangedInt(QString name, int v);

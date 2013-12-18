@@ -55,6 +55,31 @@ void PlayerView::setWorkInfo(QString info) {
   ui->workInfo->setText(info);
 }
 
+void PlayerView::setValueDouble(QString name, double v) {
+  if (name == "speed")
+    ui->speedBox->setValue(v);
+}
+
+void PlayerView::setValueInt(QString name, int v) {
+  if (name == "volume")
+    ui->volume->setValue(v);
+  else if (name == "eq_high")
+    ui->eqHigh->setValue(v);
+  else if (name == "eq_mid")
+    ui->eqMid->setValue(v);
+  else if (name == "eq_low")
+    ui->eqLow->setValue(v);
+}
+
+void PlayerView::setValueBool(QString name, bool v) {
+  if (name == "cue")
+    ui->cue->setChecked(v);
+  else if (name == "play")
+    ui->playPause->setChecked(v);
+  else if (name == "sync")
+    ui->sync->setChecked(v);
+}
+
 PlayerView::~PlayerView()
 {
   delete ui;
