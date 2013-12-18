@@ -2,6 +2,7 @@
 #include "db.h"
 #include <QSqlQueryModel>
 #include <QHeaderView>
+#include <QSortFilterProxyModel>
 
 WorksTableView::WorksTableView(QWidget *parent) :
   QTableView(parent)
@@ -13,7 +14,11 @@ void WorksTableView::setDB(DB * db) {
 
   QSqlQueryModel *model = new QSqlQueryModel(this);
   model->setQuery(db->work_table_query(), db->get());
-  setModel(model);
+
+  QSortFilterProxyModel * sortable = new QSortFilterProxyModel(model);
+  sortable->setSourceModel(model);
+
+  setModel(sortable);
 
   //hide the id
   setColumnHidden(0, true);
