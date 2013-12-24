@@ -85,6 +85,13 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="3">
+        <widget class="QToolButton" name="seekFwd">
+         <property name="text">
+          <string>&gt;&gt;</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="2">
         <widget class="QToolButton" name="sync">
          <property name="text">
@@ -92,13 +99,6 @@
          </property>
          <property name="checkable">
           <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QToolButton" name="seekFwd">
-         <property name="text">
-          <string>&gt;&gt;</string>
          </property>
         </widget>
        </item>
@@ -114,7 +114,7 @@
      <item>
       <widget class="QLabel" name="speedLabel">
        <property name="text">
-        <string>speed %</string>
+        <string>speed</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -123,11 +123,20 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="speedBox">
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="suffix">
+        <string>%</string>
+       </property>
        <property name="decimals">
         <number>3</number>
        </property>
        <property name="minimum">
         <double>-99.989999999999995</double>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
