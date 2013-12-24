@@ -8,6 +8,7 @@ class AudioModel : public QObject
   Q_OBJECT
   public:
     explicit AudioModel(QObject *parent = 0);
+    ~AudioModel();
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
