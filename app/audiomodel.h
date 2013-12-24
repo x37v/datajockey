@@ -1,6 +1,5 @@
 #ifndef AUDIOMODEL_H
 #define AUDIOMODEL_H
-
 #include <QObject>
 
 class AudioModel : public QObject

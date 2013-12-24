@@ -9,6 +9,10 @@ AudioModel::AudioModel(QObject *parent) :
 {
 }
 
+AudioModel::~AudioModel() {
+  processAudio(false);
+}
+
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {
   cout << player << " name " << qPrintable(name) << v << endl;
 }
