@@ -4,18 +4,16 @@
 #include "command.hpp"
 #include "timepoint.hpp"
 
-namespace dj {
-   namespace audio {
-      class ScheduleNode {
-         public:
-            ScheduleNode(Command * c, const TimePoint& t);
-            ~ScheduleNode();
-            ScheduleNode * next;
-            ScheduleNode * prev;
-            Command * command;
-            TimePoint time;
-      };
-   }
+namespace djaudio {
+  class ScheduleNode {
+    public:
+      ScheduleNode(Command * c, const TimePoint& t);
+      ~ScheduleNode();
+      ScheduleNode * next;
+      ScheduleNode * prev;
+      Command * command;
+      TimePoint time;
+  };
 }
 
 #endif

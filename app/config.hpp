@@ -37,70 +37,70 @@
 #include "defines.hpp"
 
 namespace dj {
-   class Configuration {
-      public:
-         static Configuration * instance();
-         //this finds a config file in a default location
-         void load_default();
-         //void load(QString yaml_data);
-         void load_file(const QString& path) throw(std::runtime_error);
-         bool valid_file();
+  class Configuration {
+    public:
+      static Configuration * instance();
+      //this finds a config file in a default location
+      void load_default();
+      //void load(QString yaml_data);
+      void load_file(const QString& path) throw(std::runtime_error);
+      bool valid_file();
 
-         //returns the path to the config file has been loaded
-         static QString file();
+      //returns the path to the config file has been loaded
+      static QString file();
 
-         //get database data
-         QString db_adapter() const;
-         QString db_name() const;
-         QString db_username() const;
-         QString db_password() const;
-         QString db_host() const;
-         int db_port() const;
+      //get database data
+      QString db_adapter() const;
+      QString db_name() const;
+      QString db_username() const;
+      QString db_password() const;
+      QString db_host() const;
+      int db_port() const;
 
-         //if populated, run this after startup
-         QString post_start_script();
+      //if populated, run this after startup
+      QString post_start_script();
 
-         unsigned int osc_in_port();
-         const QList<OscNetAddr> osc_destinations() const;
+      unsigned int osc_in_port();
+      const QList<dj::OscNetAddr> osc_destinations() const;
 
-         QString annotation_dir();
-         QString midi_mapping_file();
-         bool midi_mapping_auto_save();
+      QString annotation_dir();
+      QString midi_mapping_file();
+      bool midi_mapping_auto_save();
 
-         const QStringList& import_ignores() const;
-      private:
-         bool db_get(YAML::Node& doc, QString entry, QString &result);
-         QString mFile;
+      const QStringList& import_ignores() const;
+    private:
+      bool db_get(YAML::Node& doc, QString entry, QString &result);
+      QString mFile;
 
-         QString mDBAdapter;
-         QString mDBName;
-         QString mDBUserName;
-         QString mDBPassword;
-         QString mDBHost;
-         int mDBPort;
+      QString mDBAdapter;
+      QString mDBName;
+      QString mDBUserName;
+      QString mDBPassword;
+      QString mDBHost;
+      int mDBPort;
 
-         QString mPostStartScript;
+      QString mPostStartScript;
 
-         unsigned int mOscInPort;
-         QList<OscNetAddr> mOscDestinations;
+      unsigned int mOscInPort;
+      QList<dj::OscNetAddr> mOscDestinations;
 
-         QString mAnnotationDir;
+      QString mAnnotationDir;
 
-         QString mMIDIMapFile;
-         bool mMIDIMapAutoSave;
+      QString mMIDIMapFile;
+      bool mMIDIMapAutoSave;
 
-         QStringList mImportIgnores;
+      QStringList mImportIgnores;
 
-      protected:
-         Configuration();
-         Configuration(const Configuration&);
-         Configuration& operator=(const Configuration&);
-         virtual ~Configuration();
-      private:
-         void restore_defaults();
-         static Configuration * cInstance;
-         bool mValidFile;
-   };
+    protected:
+      Configuration();
+      Configuration(const Configuration&);
+      Configuration& operator=(const Configuration&);
+      virtual ~Configuration();
+    private:
+      void restore_defaults();
+      static Configuration * cInstance;
+      bool mValidFile;
+  };
 }
 
 #endif

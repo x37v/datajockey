@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 
   DB * db = new DB("QSQLITE", "/home/alex/.datajockey/database.sqlite3");
   AudioModel * audio = new AudioModel();
+  audio->run(true);
 
   MainWindow w(db, audio);
   w.show();

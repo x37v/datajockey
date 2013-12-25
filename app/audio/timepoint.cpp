@@ -1,7 +1,7 @@
 #include "timepoint.hpp"
 #include <stdlib.h>
 
-using namespace dj::audio;
+using namespace djaudio;
 
 TimePoint::TimePoint(time_type t){
   mType = t;
@@ -303,12 +303,10 @@ TimePoint& TimePoint::operator-=(const TimePoint &other) {
   return *this;
 }
 
-namespace dj {
-  namespace audio {
-    TimePoint operator-(const TimePoint &timepoint) {
-      TimePoint output(0,0);
-      output -= timepoint;
-      return output;
-    }
+namespace djaudio {
+  TimePoint operator-(const TimePoint &timepoint) {
+    TimePoint output(0,0);
+    output -= timepoint;
+    return output;
   }
 }

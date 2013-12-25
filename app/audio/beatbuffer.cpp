@@ -14,7 +14,7 @@ namespace fs = boost::filesystem;
 using std::cerr;
 using std::endl;
 
-using namespace dj::audio;
+using namespace djaudio;
 
 namespace {
    //find the mid point between the previous and next values
@@ -77,7 +77,7 @@ double BeatBuffer::time_at_position(const TimePoint& position) const {
                (position.pos_in_beat() > 0 && (unsigned int)beat + 1 >= size))
             return mBeatData[beat];
          else
-            return linear_interp(mBeatData[beat], 
+            return dj::linear_interp(mBeatData[beat],
                   mBeatData[beat + 1], position.pos_in_beat());
       } else
          return 0.0;

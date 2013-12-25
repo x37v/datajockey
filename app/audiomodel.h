@@ -1,6 +1,7 @@
 #ifndef AUDIOMODEL_H
 #define AUDIOMODEL_H
 #include <QObject>
+#include "audioio.hpp"
 
 class AudioModel : public QObject
 {
@@ -25,7 +26,9 @@ class AudioModel : public QObject
     void masterTrigger(QString name);
 
     //start/stop the audio processing
-    void processAudio(bool doit);
+    void run(bool doit);
+  private:
+    djaudio::AudioIO * mAudioIO = nullptr;
 };
 
 #endif // AUDIOMODEL_H

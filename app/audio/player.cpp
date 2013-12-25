@@ -12,14 +12,14 @@
 using std::cerr;
 using std::endl;
 
-using namespace dj::audio;
+using namespace djaudio;
 
 Player::Player() : 
   mBeatIndex(0),
   mLoopStartFrame(0),
   mLoopEndFrame(0),
   mMaxSampleValue(0.0),
-  mEnvelope(dj::audio::quarter_sin, 4410),
+  mEnvelope(djaudio::quarter_sin, 4410),
   mFadeoutIndex(0)
 #ifdef USE_LV2
   ,mEqInstance(NULL)

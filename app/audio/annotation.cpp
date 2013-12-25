@@ -7,8 +7,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-
-using namespace dj::audio;
+using namespace djaudio;
 
 namespace {
    void recursively_add(YAML::Emitter& yaml, const QHash<QString, QVariant>& attributes) {

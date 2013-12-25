@@ -6,7 +6,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-using namespace dj::audio;
+using namespace djaudio;
 
 Scheduler::Scheduler() : 
    mCommandsIn(1024), mCommandsOut(1024)

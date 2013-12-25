@@ -1,6 +1,6 @@
 #include "transport.hpp"
 
-using namespace dj::audio;
+using namespace djaudio;
 
 Transport::Transport(){
    mPosition.at_bar(0);

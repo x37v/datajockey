@@ -1,7 +1,7 @@
 #include "envelope.hpp"
 #include <cmath>
 
-using namespace dj::audio;
+using namespace djaudio;
 
 Envelope::Envelope(envelope_func_t func, unsigned int length) :
   mFunc(func),
@@ -24,11 +24,11 @@ void Envelope::step(bool forward) {
   }
 }
 
-double Envelope::value_at(unsigned int pos) const { return mFunc(clamp(static_cast<double>(pos) / mLengthMinusOne, 0.0, 1.0)); }
-double Envelope::reversed_value_at(unsigned int pos) const { return mFunc(clamp(1.0 - static_cast<double>(pos) / mLengthMinusOne, 0.0, 1.0)); }
+double Envelope::value_at(unsigned int pos) const { return mFunc(dj::clamp(static_cast<double>(pos) / mLengthMinusOne, 0.0, 1.0)); }
+double Envelope::reversed_value_at(unsigned int pos) const { return mFunc(dj::clamp(1.0 - static_cast<double>(pos) / mLengthMinusOne, 0.0, 1.0)); }
 
-double Envelope::value() const { return mFunc(clamp(mPosition / mLengthMinusOne, 0.0, 1.0)); }
-double Envelope::reversed_value() const { return mFunc(clamp(1.0 - mPosition / mLengthMinusOne, 0.0, 1.0)); }
+double Envelope::value() const { return mFunc(dj::clamp(mPosition / mLengthMinusOne, 0.0, 1.0)); }
+double Envelope::reversed_value() const { return mFunc(dj::clamp(1.0 - mPosition / mLengthMinusOne, 0.0, 1.0)); }
 
 double Envelope::value_step(bool forward) {
   double v = value();
@@ -36,5 +36,5 @@ double Envelope::value_step(bool forward) {
   return v;
 }
 
-double dj::audio::half_sin(double p) { return sin(p * dj::pi); }
-double dj::audio::quarter_sin(double p) { return half_sin(p * 0.5); }
+double djaudio::half_sin(double p) { return sin(p * dj::pi); }
+double djaudio::quarter_sin(double p) { return half_sin(p * 0.5); }

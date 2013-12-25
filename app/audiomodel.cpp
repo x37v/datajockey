@@ -10,7 +10,7 @@ AudioModel::AudioModel(QObject *parent) :
 }
 
 AudioModel::~AudioModel() {
-  processAudio(false);
+  run(false);
 }
 
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {
@@ -45,5 +45,9 @@ void AudioModel::masterTrigger(QString name) {
   cout << "master name " << qPrintable(name) << endl;
 }
 
-void AudioModel::processAudio(bool doit) {
+void AudioModel::run(bool doit) {
+  if (!mAudioIO)
+    mAudioIO = djaudio::AudioIO::instance();
+  mAudioIO->run(doit);
 }
+

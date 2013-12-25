@@ -1,6 +1,6 @@
 #include "command.hpp"
 
-using namespace dj::audio;
+using namespace djaudio;
 
 Command::~Command(){
 }

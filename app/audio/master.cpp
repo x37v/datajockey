@@ -2,7 +2,7 @@
 #include "defines.hpp"
 #include <math.h>
 
-using namespace dj::audio;
+using namespace djaudio;
 
 #define DEFAULT_NUM_PLAYERS 2
 Master * Master::cInstance = NULL;
