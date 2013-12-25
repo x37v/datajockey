@@ -19,6 +19,7 @@ class AudioModel : public QObject
     void playerSetValueInt(int player, QString name, int v);
     void playerSetValueBool(int player, QString name, bool v);
     void playerTrigger(int player, QString name);
+    void playerLoad(int player, QString audio_file_path, QString annotation_file_path);
 
     void masterSetValueDouble(QString name, double v);
     void masterSetValueInt(QString name, int v);
@@ -29,6 +30,11 @@ class AudioModel : public QObject
     void run(bool doit);
   private:
     djaudio::AudioIO * mAudioIO = nullptr;
+    djaudio::Master * mMaster = nullptr;
+    int mNumPlayers = 2;
+
+    bool inRange(int player);
+    void queue(djaudio::Command * cmd);
 };
 
 #endif // AUDIOMODEL_H
