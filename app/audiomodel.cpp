@@ -21,7 +21,9 @@ class ConsumeThread : public QThread {
     QTimer * mTimer;
     //QueryPlayState * mQueryCmd;
   public:
-    ConsumeThread(djaudio::Scheduler * scheduler) : mScheduler(scheduler)
+    ConsumeThread(djaudio::Scheduler * scheduler, QObject * parent) : 
+      QThread(parent),
+      mScheduler(scheduler)
   {
     mTimer = new QTimer(this);
     //XXX if the UI becomes unresponsive, increase this value
@@ -55,7 +57,7 @@ AudioModel::AudioModel(QObject *parent) :
     mMaster->add_player();
   }
 
-  mConsumeThread = new ConsumeThread(mMaster->scheduler());
+  mConsumeThread = new ConsumeThread(mMaster->scheduler(), this);
 }
 
 AudioModel::~AudioModel() {
