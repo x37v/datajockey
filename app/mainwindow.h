@@ -9,6 +9,7 @@ namespace Ui {
 
 class DB;
 class AudioModel;
+class AudioLoader;
 
 class MainWindow : public QMainWindow
 {
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow
 
   public:
     explicit MainWindow(DB* db, AudioModel * audio, QWidget *parent = 0);
+    void loader(AudioLoader * loader);
     ~MainWindow();
 
   private:

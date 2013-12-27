@@ -45,7 +45,7 @@ void AudioModel::playerTrigger(int player, QString name) {
   cout << player << " name " << qPrintable(name) << endl;
 }
 
-void AudioModel::playerLoad(int player, QString audio_file_path, QString annotation_file_path) {
+void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
   if (!inRange(player))
     return;
 }

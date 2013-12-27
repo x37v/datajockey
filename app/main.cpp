@@ -3,6 +3,7 @@
 #include <QStyleFactory>
 #include "db.h"
 #include "audiomodel.h"
+#include "audioloader.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +30,11 @@ int main(int argc, char *argv[])
   AudioModel * audio = new AudioModel();
   audio->run(true);
 
+  AudioLoader * loader = new AudioLoader(db, audio);
+  QObject::connect(loader, &AudioLoader::playerLoaded, audio, &AudioModel::playerLoad);
+
   MainWindow w(db, audio);
+  w.loader(loader);
   w.show();
 
   return a.exec();

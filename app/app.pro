@@ -64,7 +64,9 @@ SOURCES += main.cpp\
     ../ext/jackcpp/src/jackblockingaudioio.cpp \
     ../ext/jackcpp/src/jackaudioio.cpp \
     defines.cpp \
-    config.cpp
+    config.cpp \
+    audioloader.cpp \
+    loaderthread.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -98,7 +100,9 @@ HEADERS  += mainwindow.h \
     ../ext/jackcpp/include/jackblockingaudioio.hpp \
     ../ext/jackcpp/include/jackaudioio.hpp \
     defines.hpp \
-    config.hpp
+    config.hpp \
+    audioloader.h \
+    loaderthread.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

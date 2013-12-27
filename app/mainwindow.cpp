@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "db.h"
 #include "audiomodel.h"
+#include "audioloader.h"
 #include "mixerpanelview.h"
 
 #include <QSqlQueryModel>
@@ -23,6 +24,13 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(mixer, &MixerPanelView::masterValueChangedInt, audio, &AudioModel::masterSetValueInt);
   connect(mixer, &MixerPanelView::masterValueChangedBool, audio, &AudioModel::masterSetValueBool);
   connect(mixer, &MixerPanelView::masterTriggered, audio, &AudioModel::masterTrigger);
+}
+
+void MainWindow::loader(AudioLoader * loader) {
+  MixerPanelView * mixer = ui->mixer;
+  connect(mixer, &MixerPanelView::playerTriggered, loader, &AudioLoader::playerTrigger);
+  connect(ui->allWorks, &WorksTableView::workSelected, loader, &AudioLoader::selectWork);
+  ui->allWorks->setDB(mDB);
 }
 
 MainWindow::~MainWindow()
