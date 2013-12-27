@@ -1,10 +1,17 @@
 #include "audiomodel.h"
 #include "defines.hpp"
+#include "player.hpp"
+#include "command.hpp"
 
 #include <iostream>
 using std::cout;
 using std::cerr;
 using std::endl;
+
+using djaudio::AudioBuffer;
+using djaudio::AudioBufferPtr;
+using djaudio::BeatBuffer;
+using djaudio::BeatBufferPtr;
 
 AudioModel::AudioModel(QObject *parent) :
   QObject(parent)
@@ -48,7 +55,20 @@ void AudioModel::playerTrigger(int player, QString name) {
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
   if (!inRange(player))
     return;
-  //XXX load up audio
+
+  //store a copy
+  if (audio_buffer)
+    mAudioBuffers.push_back(audio_buffer);
+  if (beat_buffer)
+    mBeatBuffers.push_back(beat_buffer);
+
+  PlayerSetBuffersCommand * cmd = new PlayerSetBuffersCommand(player, audio_buffer.data(), beat_buffer.data());
+  connect(cmd, &PlayerSetBuffersCommand::done,
+      [this](AudioBufferPtr ab, BeatBufferPtr bb) {
+        mAudioBuffers.removeOne(ab);
+        mBeatBuffers.removeOne(bb);
+      });
+  queue(cmd);
 }
 
 
@@ -87,4 +107,43 @@ bool AudioModel::inRange(int player) {
 
 void AudioModel::queue(djaudio::Command * cmd) {
   mMaster->scheduler()->execute(cmd);
+}
+
+
+PlayerSetBuffersCommand::PlayerSetBuffersCommand(unsigned int idx,
+    AudioBuffer * audio_buffer, BeatBuffer * beat_buffer) :
+  QObject(nullptr),
+  djaudio::PlayerCommand(idx),
+  mAudioBuffer(audio_buffer),
+  mBeatBuffer(beat_buffer),
+  mOldAudioBuffer(nullptr),
+  mOldBeatBuffer(nullptr)
+{ }
+
+PlayerSetBuffersCommand::~PlayerSetBuffersCommand() { }
+
+void PlayerSetBuffersCommand::execute() {
+  djaudio::Player * p = player(); 
+  if(p != NULL){
+    mOldBeatBuffer = p->beat_buffer();
+    mOldAudioBuffer = p->audio_buffer();
+    p->audio_buffer(mAudioBuffer);
+    p->beat_buffer(mBeatBuffer);
+    p->play_state(djaudio::Player::PLAY);
+    p->volume(1.0);
+  }
+}
+
+void PlayerSetBuffersCommand::execute_done() {
+  AudioBufferPtr audio_buffer(mOldAudioBuffer);
+  BeatBufferPtr beat_buffer(mOldBeatBuffer);
+  emit(done(audio_buffer, beat_buffer));
+  //execute the super class's done action
+  PlayerCommand::execute_done();
+}
+
+bool PlayerSetBuffersCommand::store(djaudio::CommandIOData& data) const {
+  PlayerCommand::store(data, "PlayerSetBuffersCommand");
+  //TODO
+  return false;
 }

@@ -165,3 +165,4 @@ void AudioBuffer::abort_load(){ mAbort = true; }
 const AudioBuffer::data_buffer_t& AudioBuffer::raw_buffer() const {
   return mAudioData;
 }
+
