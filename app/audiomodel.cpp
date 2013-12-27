@@ -2,6 +2,8 @@
 #include "defines.hpp"
 #include "player.hpp"
 #include "command.hpp"
+#include <QThread>
+#include <QTimer>
 
 #include <iostream>
 using std::cout;
@@ -13,6 +15,36 @@ using djaudio::AudioBufferPtr;
 using djaudio::BeatBuffer;
 using djaudio::BeatBufferPtr;
 
+class ConsumeThread : public QThread {
+  private:
+    djaudio::Scheduler * mScheduler;
+    QTimer * mTimer;
+    //QueryPlayState * mQueryCmd;
+  public:
+    ConsumeThread(djaudio::Scheduler * scheduler) : mScheduler(scheduler)
+  {
+    mTimer = new QTimer(this);
+    //XXX if the UI becomes unresponsive, increase this value
+    mTimer->setInterval(15);
+
+    connect(mTimer, &QTimer::timeout, this, &ConsumeThread::grabCommands);
+    connect(this, &QThread::finished, mTimer, &QTimer::stop);
+  }
+
+    void grabCommands() {
+      mScheduler->execute_done_actions();
+      while (djaudio::Command * cmd = mScheduler->pop_complete_command()) {
+        if (cmd)
+          delete cmd;
+      }
+    }
+
+    void run() {
+      mTimer->start();
+      exec();
+    }
+};
+
 AudioModel::AudioModel(QObject *parent) :
   QObject(parent)
 {
@@ -22,6 +54,8 @@ AudioModel::AudioModel(QObject *parent) :
   for(int i = 0; i < mNumPlayers; i++) {
     mMaster->add_player();
   }
+
+  mConsumeThread = new ConsumeThread(mMaster->scheduler());
 }
 
 AudioModel::~AudioModel() {
@@ -91,6 +125,7 @@ void AudioModel::masterTrigger(QString name) {
 void AudioModel::run(bool doit) {
   mAudioIO->run(doit);
   if (doit) {
+    mConsumeThread->start();
     //XXX make this configurable
     try {
       mAudioIO->connectToPhysical(0,0);
@@ -98,6 +133,8 @@ void AudioModel::run(bool doit) {
     } catch (...) {
       cerr << "couldn't connect to physical jack audio ports" << endl;
     }
+  } else {
+    mConsumeThread->quit();
   }
 }
 
@@ -131,6 +168,7 @@ void PlayerSetBuffersCommand::execute() {
     p->beat_buffer(mBeatBuffer);
     p->play_state(djaudio::Player::PLAY);
     p->volume(1.0);
+    p->sync(true);
   }
 }
 

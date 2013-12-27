@@ -5,6 +5,7 @@
 #include <QList>
 #include "audioio.hpp"
 
+class ConsumeThread;
 class AudioModel : public QObject {
   Q_OBJECT
   public:
@@ -33,6 +34,7 @@ class AudioModel : public QObject {
     djaudio::AudioIO * mAudioIO = nullptr;
     djaudio::Master * mMaster = nullptr;
     int mNumPlayers = 2;
+    ConsumeThread * mConsumeThread;
 
     //holding on to a reference so that we only dealloc in the GUI thread
     QList<djaudio::AudioBufferPtr> mAudioBuffers;
