@@ -6,13 +6,15 @@ AudioLoader::AudioLoader(DB * db, QObject * parent) :
   QObject(parent),
   mDB(db)
 {
+  qRegisterMetaType<djaudio::AudioBufferPtr>("djaudio::AudioBufferPtr");
+  qRegisterMetaType<djaudio::BeatBufferPtr>("djaudio::BeatBufferPtr");
 }
 
 void AudioLoader::playerTrigger(int player, QString name) {
   if (player < 0 || name != "load")
     return;
 
-  while (player > mLoaders.size()) {
+  while (player >= mLoaders.size()) {
     int p = mLoaders.size();
     djaudio::LoaderThread * loader = new djaudio::LoaderThread(this);
     mLoaders.push_back(loader);

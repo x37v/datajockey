@@ -48,6 +48,7 @@ void AudioModel::playerTrigger(int player, QString name) {
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
   if (!inRange(player))
     return;
+  //XXX load up audio
 }
 
 
