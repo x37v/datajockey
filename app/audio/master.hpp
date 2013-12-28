@@ -29,7 +29,7 @@ namespace djaudio {
           unsigned int sampleRate,
           unsigned int maxBufferLen);
       //cannot be called while audio callback is running
-      void add_player();
+      Player * add_player();
       //actually compute nframes of audio
       void audio_compute_and_fill(JackCpp::AudioIO::audioBufVector outBufferVector,
           unsigned int numFrames);
