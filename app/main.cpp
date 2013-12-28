@@ -32,6 +32,10 @@ int main(int argc, char *argv[])
 
   AudioLoader * loader = new AudioLoader(db, audio);
   QObject::connect(loader, &AudioLoader::playerLoaded, audio, &AudioModel::playerLoad);
+  QObject::connect(loader, &AudioLoader::playerLoadingInfo,
+      [audio](int player, QString info) {
+        audio->playerClear(player);
+      });
 
   MainWindow w(db, audio);
   w.loader(loader);

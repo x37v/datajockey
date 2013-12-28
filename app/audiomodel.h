@@ -22,6 +22,7 @@ class AudioModel : public QObject {
     void playerSetValueBool(int player, QString name, bool v);
     void playerTrigger(int player, QString name);
     void playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
+    void playerClear(int player);
 
     void masterSetValueDouble(QString name, double v);
     void masterSetValueInt(QString name, int v);

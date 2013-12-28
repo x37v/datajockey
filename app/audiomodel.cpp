@@ -107,6 +107,9 @@ void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, dj
   queue(cmd);
 }
 
+void AudioModel::playerClear(int player) {
+  playerLoad(player, djaudio::AudioBufferPtr(), djaudio::BeatBufferPtr());
+}
 
 void AudioModel::masterSetValueDouble(QString name, double v) {
   cout << "master name " << qPrintable(name) << v << endl;

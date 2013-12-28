@@ -69,6 +69,8 @@ void PlayerView::setValueInt(QString name, int v) {
     ui->eqMid->setValue(v);
   else if (name == "eq_low")
     ui->eqLow->setValue(v);
+  else if (name == "load_percent")
+    ui->progressBar->setValue(v);
 }
 
 void PlayerView::setValueBool(QString name, bool v) {

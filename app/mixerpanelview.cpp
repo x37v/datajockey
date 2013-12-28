@@ -40,8 +40,30 @@ MixerPanelView::~MixerPanelView()
 }
 
 void MixerPanelView::playerSetWorkInfo(int player, QString info) {
-  if (player < 0 || player >= mPlayerViews.size())
+  if (!inRange(player))
     return;
   mPlayerViews[player]->setWorkInfo(info);
+}
+
+void MixerPanelView::playerSetValueInt(int player, QString name, int value) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->setValueInt(name, value);
+}
+
+void MixerPanelView::playerSetValueBool(int player, QString name, bool value) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->setValueBool(name, value);
+}
+
+void MixerPanelView::playerSetValueDouble(int player, QString name, double value) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->setValueDouble(name, value);
+}
+
+bool MixerPanelView::inRange(int player) {
+  return player >= 0 && player < mPlayerViews.size();
 }
 

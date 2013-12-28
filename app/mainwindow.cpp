@@ -33,6 +33,14 @@ void MainWindow::loader(AudioLoader * loader) {
   ui->allWorks->setDB(mDB);
 
   connect(loader, &AudioLoader::playerLoadedInfo, mixer, &MixerPanelView::playerSetWorkInfo);
+  connect(loader, &AudioLoader::playerLoadingInfo,
+      [mixer](int player, QString info) {
+        mixer->playerSetWorkInfo(player, "loading: " + info);
+      });
+  connect(loader, &AudioLoader::playerLoadProgress,
+      [mixer](int player, int percent) {
+        mixer->playerSetValueInt(player, "load_percent", percent);
+      });
 }
 
 MainWindow::~MainWindow()

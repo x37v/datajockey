@@ -19,6 +19,9 @@ class MixerPanelView : public QWidget
     ~MixerPanelView();
   public slots:
     void playerSetWorkInfo(int player, QString info);
+    void playerSetValueInt(int player, QString name, int value);
+    void playerSetValueBool(int player, QString name, bool value);
+    void playerSetValueDouble(int player, QString name, double value);
 
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
@@ -34,6 +37,8 @@ class MixerPanelView : public QWidget
   private:
     Ui::MixerPanelView *ui;
     QList<PlayerView *> mPlayerViews;
+
+    bool inRange(int player);
 };
 
 #endif // MIXERPANELVIEW_H
