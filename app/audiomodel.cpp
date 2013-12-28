@@ -4,6 +4,7 @@
 #include "command.hpp"
 #include <QThread>
 #include <QTimer>
+#include <QHash>
 
 #include <iostream>
 using std::cout;
@@ -14,6 +15,17 @@ using djaudio::AudioBuffer;
 using djaudio::AudioBufferPtr;
 using djaudio::BeatBuffer;
 using djaudio::BeatBufferPtr;
+using djaudio::Command;
+
+namespace {
+  const double done_scale = static_cast<double>(dj::one_scale);
+  int to_int(double v) {
+    return static_cast<int>(v * done_scale);
+  }
+  double to_double(int v) {
+    return static_cast<double>(v) / done_scale;
+  }
+}
 
 class ConsumeThread : public QThread {
   private:
@@ -47,6 +59,20 @@ class ConsumeThread : public QThread {
     }
 };
 
+struct EnginePlayerState {
+  unsigned int frame_current;
+  unsigned int frame_count;
+  double play_speed;
+  float max_sample_value;
+  bool audible;
+};
+
+struct PlayerState {
+  QHash<QString, bool> boolValue;
+  QHash<QString, int> intValue;
+  QHash<QString, double> doubleValue;
+};
+
 AudioModel::AudioModel(QObject *parent) :
   QObject(parent)
 {
@@ -54,7 +80,20 @@ AudioModel::AudioModel(QObject *parent) :
   mMaster  = djaudio::Master::instance();
 
   for(int i = 0; i < mNumPlayers; i++) {
-    mMaster->add_player();
+    djaudio::Player * p = mMaster->add_player();
+    PlayerState * pstate = new PlayerState;
+    mPlayerStates.push_back(pstate);
+    pstate->intValue["volume"] = to_int(p->volume());
+    pstate->intValue["eq_high"] = 0;
+    pstate->intValue["eq_mid"] = 0;
+    pstate->intValue["eq_low"] = 0;
+
+    pstate->boolValue["sync"] = p->syncing();
+    pstate->boolValue["play"] = p->play_state() == djaudio::Player::PLAY;
+    pstate->boolValue["cue"] = p->out_state() == djaudio::Player::CUE;
+    pstate->boolValue["mute"] = p->muted();
+
+    pstate->doubleValue["speed"] = p->play_speed();
   }
 
   mConsumeThread = new ConsumeThread(mMaster->scheduler(), this);
@@ -65,26 +104,56 @@ AudioModel::~AudioModel() {
 }
 
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {
-  if (!inRange(player))
-    return;
+  playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
+    {
+      return nullptr;
+    });
   cout << player << " name " << qPrintable(name) << v << endl;
 }
 
 void AudioModel::playerSetValueInt(int player, QString name, int v) {
-  if (!inRange(player))
-    return;
+  playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
+    {
+      djaudio::Command * cmd = nullptr;
+      if (pstate->intValue.contains(name) && pstate->intValue[name] == v)
+        return nullptr;
+      if (name == "volume")
+        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::VOLUME, to_double(v));
+      if (cmd) {
+        pstate->intValue[name] = v;
+        emit(playerValueChangedInt(player, name, v));
+      }
+      return cmd;
+    });
   cout << player << " name " << qPrintable(name) << v << endl;
 }
 
 void AudioModel::playerSetValueBool(int player, QString name, bool v) {
-  if (!inRange(player))
-    return;
+  playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
+    {
+      djaudio::Command * cmd = nullptr;
+      if (pstate->boolValue.contains(name) && pstate->boolValue[name] == v)
+        return nullptr;
+
+      if (name == "cue")
+        cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::OUT_CUE : djaudio::PlayerStateCommand::OUT_MAIN);
+      else if (name == "play")
+        cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PLAY : djaudio::PlayerStateCommand::PAUSE);
+      else if (name == "sync")
+        cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::SYNC : djaudio::PlayerStateCommand::NO_SYNC);
+      else if (name == "mute")
+        cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
+
+      if (cmd) {
+        pstate->boolValue[name] = v;
+        emit(playerValueChangedBool(player, name, v));
+      }
+      return cmd;
+    });
   cout << player << " name " << qPrintable(name) << v << endl;
 }
 
 void AudioModel::playerTrigger(int player, QString name) {
-  if (!inRange(player))
-    return;
   cout << player << " name " << qPrintable(name) << endl;
 }
 
@@ -145,6 +214,14 @@ void AudioModel::run(bool doit) {
 
 bool AudioModel::inRange(int player) {
   return player >= 0 && player < mNumPlayers;
+}
+
+void AudioModel::playerSet(int player, std::function<djaudio::Command *(PlayerState * state)> func) {
+  if (!inRange(player))
+    return;
+  Command * cmd = func(mPlayerStates[player]);
+  if (cmd)
+    queue(cmd);
 }
 
 void AudioModel::queue(djaudio::Command * cmd) {

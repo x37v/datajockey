@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QList>
+#include <functional>
 #include "audioio.hpp"
 
 class ConsumeThread;
+struct PlayerState;
+
 class AudioModel : public QObject {
   Q_OBJECT
   public:
@@ -40,9 +43,11 @@ class AudioModel : public QObject {
     //holding on to a reference so that we only dealloc in the GUI thread
     QList<djaudio::AudioBufferPtr> mAudioBuffers;
     QList<djaudio::BeatBufferPtr> mBeatBuffers;
+    QList<PlayerState *> mPlayerStates;
 
     bool inRange(int player);
     void queue(djaudio::Command * cmd);
+    void playerSet(int player, std::function<djaudio::Command *(PlayerState * state)> func);
 };
 
 
