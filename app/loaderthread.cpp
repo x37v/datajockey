@@ -28,9 +28,10 @@ void LoaderThread::relay_load_progress(int percent) {
   emit(loadProgress(percent));
 }
 
-void LoaderThread::load(QString audio_file_location, QString annotation_file_location) {
+void LoaderThread::load(QString audio_file_location, QString annotation_file_location, QString songinfo) {
   QMutexLocker lock(&mMutex);
   mAborted = false;
+  mSongInfo = songinfo;
 
   if (isRunning()) {
     abort();
@@ -59,7 +60,7 @@ void LoaderThread::run() {
     }
 
     if (mAudioBuffer->load(LoaderThread::progress_callback, this))
-      emit(loadComplete(mAudioBuffer, mBeatBuffer));
+      emit(loadComplete(mAudioBuffer, mBeatBuffer, mSongInfo));
     else
       emit(loadError("problem loading audio file: " + mAudioFileName));
   } catch (std::exception& e) {

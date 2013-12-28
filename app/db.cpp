@@ -232,6 +232,24 @@ bool DB::find_locations_by_id(
   return true;
 }
 
+void DB::format_string_by_id(int work_id, QString& info) throw(std::runtime_error) {
+  QMutexLocker lock(&mMutex);
+
+  //build up query
+  MySqlQuery query(get());
+  query.prepare(cWorkInfoQuery);
+  query.bindValue(":id", work_id);
+
+  //execute
+  if(!(query.exec() && query.first()))
+    return;
+
+  QSqlRecord rec = query.record();
+  info.replace("$artist", query.value(rec.indexOf("title")).toString());
+  info.replace("$title", query.value(rec.indexOf("artist")).toString());
+  //XXX do album etc
+}
+
 bool DB::find_artist_and_title_by_id(
     int work_id,
     QString& artist_name,

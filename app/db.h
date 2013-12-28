@@ -35,6 +35,8 @@ class DB : public QObject {
         QString& artist_name,
         QString& work_title) throw(std::runtime_error);
 
+    void format_string_by_id(int work_id, QString& info) throw(std::runtime_error);
+
     QString work_table_query(const QString where_clause = QString()) throw(std::runtime_error);
 
     int work_table_column(QString id_name);

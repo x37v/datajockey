@@ -38,3 +38,10 @@ MixerPanelView::~MixerPanelView()
 {
   delete ui;
 }
+
+void MixerPanelView::playerSetWorkInfo(int player, QString info) {
+  if (player < 0 || player >= mPlayerViews.size())
+    return;
+  mPlayerViews[player]->setWorkInfo(info);
+}
+

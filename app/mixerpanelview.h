@@ -17,6 +17,8 @@ class MixerPanelView : public QWidget
   public:
     explicit MixerPanelView(QWidget *parent = 0);
     ~MixerPanelView();
+  public slots:
+    void playerSetWorkInfo(int player, QString info);
 
   signals:
     void playerValueChangedDouble(int player, QString name, double v);

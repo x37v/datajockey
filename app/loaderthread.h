@@ -12,13 +12,13 @@ namespace djaudio {
     Q_OBJECT
     public:
       LoaderThread(QObject * parent = nullptr);
-      void load(QString audio_file_location, QString annotation_file_location);
+      void load(QString audio_file_location, QString annotation_file_location, QString songinfo);
       void run();
       static void progress_callback(int percent, void *objPtr);
       void abort();
     signals:
       void loadProgress(int percent);
-      void loadComplete(AudioBufferPtr audio_buffer, BeatBufferPtr beat_buffer);
+      void loadComplete(AudioBufferPtr audio_buffer, BeatBufferPtr beat_buffer, QString songinfo);
       void loadError(QString explanation);
     protected:
       void relay_load_progress(int percent);
@@ -28,6 +28,7 @@ namespace djaudio {
 
       QString mAudioFileName;
       QString mAnnotationFileName;
+      QString mSongInfo;
 
       QMutex mMutex;
       bool mAborted;

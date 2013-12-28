@@ -31,6 +31,8 @@ void MainWindow::loader(AudioLoader * loader) {
   connect(mixer, &MixerPanelView::playerTriggered, loader, &AudioLoader::playerTrigger);
   connect(ui->allWorks, &WorksTableView::workSelected, loader, &AudioLoader::selectWork);
   ui->allWorks->setDB(mDB);
+
+  connect(loader, &AudioLoader::playerLoadedInfo, mixer, &MixerPanelView::playerSetWorkInfo);
 }
 
 MainWindow::~MainWindow()
