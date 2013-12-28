@@ -93,7 +93,7 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->boolValue["cue"] = p->out_state() == djaudio::Player::CUE;
     pstate->boolValue["mute"] = p->muted();
 
-    pstate->doubleValue["speed"] = p->play_speed();
+    pstate->doubleValue["speed"] = 1.0 + p->play_speed();
   }
 
   mConsumeThread = new ConsumeThread(mMaster->scheduler(), this);
@@ -106,7 +106,16 @@ AudioModel::~AudioModel() {
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
-      return nullptr;
+      djaudio::Command * cmd = nullptr;
+      if (pstate->doubleValue.contains(name) && pstate->doubleValue[name] == v)
+        return nullptr;
+      if (name == "speed")
+        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
+      if (cmd) {
+        pstate->doubleValue[name] = v;
+        emit(playerValueChangedDouble(player, name, v));
+      }
+      return cmd;
     });
   cout << player << " name " << qPrintable(name) << v << endl;
 }
@@ -248,9 +257,6 @@ void PlayerSetBuffersCommand::execute() {
     mOldAudioBuffer = p->audio_buffer();
     p->audio_buffer(mAudioBuffer);
     p->beat_buffer(mBeatBuffer);
-    p->play_state(djaudio::Player::PLAY);
-    p->volume(1.0);
-    p->sync(true);
   }
 }
 
