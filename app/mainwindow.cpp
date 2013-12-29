@@ -16,14 +16,22 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   ui->allWorks->setDB(db);
   MixerPanelView * mixer = ui->mixer;
   connect(mixer, &MixerPanelView::playerValueChangedDouble, audio, &AudioModel::playerSetValueDouble);
-  connect(mixer, &MixerPanelView::playerValueChangedInt, audio, &AudioModel::playerSetValueInt);
-  connect(mixer, &MixerPanelView::playerValueChangedBool, audio, &AudioModel::playerSetValueBool);
-  connect(mixer, &MixerPanelView::playerTriggered, audio, &AudioModel::playerTrigger);
+  connect(mixer, &MixerPanelView::playerValueChangedInt,    audio, &AudioModel::playerSetValueInt);
+  connect(mixer, &MixerPanelView::playerValueChangedBool,   audio, &AudioModel::playerSetValueBool);
+  connect(mixer, &MixerPanelView::playerTriggered,          audio, &AudioModel::playerTrigger);
 
   connect(mixer, &MixerPanelView::masterValueChangedDouble, audio, &AudioModel::masterSetValueDouble);
-  connect(mixer, &MixerPanelView::masterValueChangedInt, audio, &AudioModel::masterSetValueInt);
-  connect(mixer, &MixerPanelView::masterValueChangedBool, audio, &AudioModel::masterSetValueBool);
-  connect(mixer, &MixerPanelView::masterTriggered, audio, &AudioModel::masterTrigger);
+  connect(mixer, &MixerPanelView::masterValueChangedInt,    audio, &AudioModel::masterSetValueInt);
+  connect(mixer, &MixerPanelView::masterValueChangedBool,   audio, &AudioModel::masterSetValueBool);
+  connect(mixer, &MixerPanelView::masterTriggered,          audio, &AudioModel::masterTrigger);
+
+  connect(audio, &AudioModel::playerValueChangedDouble, mixer, &MixerPanelView::playerSetValueDouble);
+  connect(audio, &AudioModel::playerValueChangedInt,    mixer, &MixerPanelView::playerSetValueInt);
+  connect(audio, &AudioModel::playerValueChangedBool,   mixer, &MixerPanelView::playerSetValueBool);
+
+  connect(audio, &AudioModel::masterSetValueDouble, mixer, &MixerPanelView::masterValueChangedDouble);
+  connect(audio, &AudioModel::masterSetValueInt,    mixer, &MixerPanelView::masterValueChangedInt);
+  connect(audio, &AudioModel::masterSetValueBool,   mixer, &MixerPanelView::masterValueChangedBool);
 }
 
 void MainWindow::loader(AudioLoader * loader) {

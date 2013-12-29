@@ -41,6 +41,7 @@ class AudioModel : public QObject {
     djaudio::Master * mMaster = nullptr;
     int mNumPlayers = 2;
     ConsumeThread * mConsumeThread;
+    bool mCueOnLoad = true;
 
     //holding on to a reference so that we only dealloc in the GUI thread
     QList<djaudio::AudioBufferPtr> mAudioBuffers;

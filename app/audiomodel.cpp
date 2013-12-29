@@ -228,6 +228,11 @@ void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, dj
   if (beat_buffer)
     mBeatBuffers.push_back(beat_buffer);
 
+  if (mCueOnLoad && audio_buffer) {
+    for (int i = 0; i < mNumPlayers; i++)
+      playerSetValueBool(i, "cue", i == player);
+  }
+
   PlayerSetBuffersCommand * cmd = new PlayerSetBuffersCommand(player, audio_buffer.data(), beat_buffer.data());
   connect(cmd, &PlayerSetBuffersCommand::done,
       [this](AudioBufferPtr ab, BeatBufferPtr bb) {
