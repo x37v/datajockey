@@ -66,6 +66,12 @@ void MixerPanelView::playerSetValueDouble(int player, QString name, double value
   mPlayerViews[player]->setValueDouble(name, value);
 }
 
+void MixerPanelView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
+  if (!inRange(player))
+    return;
+  ui->waveforms->playerSetBuffers(player, audio_buffer, beat_buffer);
+}
+
 bool MixerPanelView::inRange(int player) {
   return player >= 0 && player < mPlayerViews.size();
 }

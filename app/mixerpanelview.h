@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QList>
+#include "audiobuffer.hpp"
+#include "beatbuffer.hpp"
 
 namespace Ui {
   class MixerPanelView;
@@ -22,6 +24,7 @@ class MixerPanelView : public QWidget
     void playerSetValueBool(int player, QString name, bool value);
     void playerSetValueDouble(int player, QString name, double value);
     void playerSetValueString(int player, QString name, QString value);
+    void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
 
   signals:
     void playerValueChangedDouble(int player, QString name, double v);

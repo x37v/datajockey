@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
   DB * db = new DB("QSQLITE", "/home/alex/.datajockey/database.sqlite3");
   AudioModel * audio = new AudioModel();
-  audio->run(true);
+//XXX  audio->run(true);
 
   AudioLoader * loader = new AudioLoader(db, audio);
   QObject::connect(loader, &AudioLoader::playerBuffersChanged, audio, &AudioModel::playerLoad);

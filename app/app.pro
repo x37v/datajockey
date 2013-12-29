@@ -8,7 +8,7 @@ TARGET = app
 TARGET = datajockey
 VERSION = 1.2.git
 
-QT       += core gui sql
+QT       += core gui sql opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -66,7 +66,9 @@ SOURCES += main.cpp\
     defines.cpp \
     config.cpp \
     audioloader.cpp \
-    loaderthread.cpp
+    loaderthread.cpp \
+    waveformgl.cpp \
+    mixerpanelwaveformsview.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -102,7 +104,9 @@ HEADERS  += mainwindow.h \
     defines.hpp \
     config.hpp \
     audioloader.h \
-    loaderthread.h
+    loaderthread.h \
+    waveformgl.h \
+    mixerpanelwaveformsview.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

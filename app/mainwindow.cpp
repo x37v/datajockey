@@ -42,6 +42,8 @@ void MainWindow::loader(AudioLoader * loader) {
 
   connect(loader, &AudioLoader::playerValueChangedInt, mixer, &MixerPanelView::playerSetValueInt);
   connect(loader, &AudioLoader::playerValueChangedString, mixer, &MixerPanelView::playerSetValueString);
+
+  connect(loader, &AudioLoader::playerBuffersChanged, mixer, &MixerPanelView::playerSetBuffers);
 }
 
 MainWindow::~MainWindow()
