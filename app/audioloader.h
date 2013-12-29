@@ -16,12 +16,11 @@ class AudioLoader : public QObject {
     void playerTrigger(int player, QString name);
     void selectWork(int id);
   signals:
-    void playerLoadingInfo(int player, QString songinfo);
-    void playerLoaded(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
-    void playerLoadedInfo(int player, QString songinfo);
+    void playerBuffersChanged(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
+    void playerValueChangedInt(int player, QString name, int value);
+    void playerValueChangedString(int player, QString name, QString value);
 
     void playerLoadError(int player, QString errormsg);
-    void playerLoadProgress(int player, int percent);
   private:
     QList<djaudio::LoaderThread *> mLoaders;
     DB * mDB;

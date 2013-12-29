@@ -7,7 +7,9 @@
 #include "audioio.hpp"
 
 class ConsumeThread;
+class EngineQueryCommand;
 struct PlayerState;
+struct EnginePlayerState;
 
 class AudioModel : public QObject {
   Q_OBJECT
@@ -66,6 +68,25 @@ class PlayerSetBuffersCommand : public QObject, public djaudio::PlayerCommand {
     djaudio::BeatBuffer * mBeatBuffer;
     djaudio::AudioBuffer * mOldAudioBuffer;
     djaudio::BeatBuffer * mOldBeatBuffer;
+};
+
+class EngineQueryCommand : public QObject, public djaudio::MasterCommand {
+  Q_OBJECT
+  public:
+    EngineQueryCommand(int num_players, QObject * parent = NULL);
+    virtual bool delete_after_done();
+    virtual void execute();
+    virtual void execute_done();
+    virtual bool store(djaudio::CommandIOData& /* data */) const;
+  signals:
+    void playerValueUpdateBool(int player, QString name, bool val);
+    void playerValueUpdateInt(int player, QString name, int val);
+    void playerValueUpdateDouble(int player, QString name, double val);
+    void masterValueUpdateDouble(QString name, double val);
+  private:
+    QList<EnginePlayerState *> mPlayerStates;
+    double mMasterBPM;
+    float mMasterVolume;
 };
 
 #endif // AUDIOMODEL_H

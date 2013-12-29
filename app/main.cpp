@@ -31,10 +31,11 @@ int main(int argc, char *argv[])
   audio->run(true);
 
   AudioLoader * loader = new AudioLoader(db, audio);
-  QObject::connect(loader, &AudioLoader::playerLoaded, audio, &AudioModel::playerLoad);
-  QObject::connect(loader, &AudioLoader::playerLoadingInfo,
-      [audio](int player, QString info) {
-        audio->playerClear(player);
+  QObject::connect(loader, &AudioLoader::playerBuffersChanged, audio, &AudioModel::playerLoad);
+  QObject::connect(loader, &AudioLoader::playerValueChangedString,
+      [audio](int player, QString name, QString value) {
+        if (name == "loading_work")
+          audio->playerClear(player);
       });
 
   MainWindow w(db, audio);

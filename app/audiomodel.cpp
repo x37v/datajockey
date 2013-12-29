@@ -29,12 +29,13 @@ namespace {
 
 class ConsumeThread : public QThread {
   private:
-    djaudio::Scheduler * mScheduler;
-    QTimer * mTimer;
-    //QueryPlayState * mQueryCmd;
+    EngineQueryCommand * mQueryCmd = nullptr;
+    djaudio::Scheduler * mScheduler = nullptr;
+    QTimer * mTimer = nullptr;
   public:
-    ConsumeThread(djaudio::Scheduler * scheduler, QObject * parent) : 
+    ConsumeThread(djaudio::Scheduler * scheduler, EngineQueryCommand * cmd, QObject * parent) : 
       QThread(parent),
+      mQueryCmd(cmd),
       mScheduler(scheduler)
   {
     mTimer = new QTimer(this);
@@ -48,8 +49,16 @@ class ConsumeThread : public QThread {
     void grabCommands() {
       mScheduler->execute_done_actions();
       while (djaudio::Command * cmd = mScheduler->pop_complete_command()) {
-        if (cmd)
+        EngineQueryCommand * query = dynamic_cast<EngineQueryCommand*>(cmd);
+        if (query) {
+          mQueryCmd = query;
+        } else if (cmd) {
           delete cmd;
+        }
+      }
+      if (mQueryCmd) {
+        mScheduler->execute(mQueryCmd);
+        mQueryCmd = nullptr;
       }
     }
 
@@ -57,14 +66,6 @@ class ConsumeThread : public QThread {
       mTimer->start();
       exec();
     }
-};
-
-struct EnginePlayerState {
-  unsigned int frame_current;
-  unsigned int frame_count;
-  double play_speed;
-  float max_sample_value;
-  bool audible;
 };
 
 struct PlayerState {
@@ -88,15 +89,58 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->intValue["eq_mid"] = 0;
     pstate->intValue["eq_low"] = 0;
 
+    pstate->intValue["frames"] = 0;
+    pstate->intValue["position_frame"] = 0;
+    pstate->intValue["sample_rate"] = 44100;
+
     pstate->boolValue["sync"] = p->syncing();
     pstate->boolValue["play"] = p->play_state() == djaudio::Player::PLAY;
     pstate->boolValue["cue"] = p->out_state() == djaudio::Player::CUE;
     pstate->boolValue["mute"] = p->muted();
+    pstate->boolValue["audible"] = false;
 
     pstate->doubleValue["speed"] = 1.0 + p->play_speed();
   }
 
-  mConsumeThread = new ConsumeThread(mMaster->scheduler(), this);
+  EngineQueryCommand * query = new EngineQueryCommand(mNumPlayers);
+  mConsumeThread = new ConsumeThread(mMaster->scheduler(), query, this);
+
+  //XXX lambdas cannot have queued connections!
+  connect(query, &EngineQueryCommand::playerValueUpdateBool,
+      [this](int player, QString name, bool value) {
+        if (!inRange(player))
+          return;
+        PlayerState * pstate = mPlayerStates[player];
+        if (pstate->boolValue.contains(name) && pstate->boolValue[name] == value)
+          return;
+        if (name == "audible")
+          emit (playerValueChangedBool(player, name, value));
+        pstate->boolValue[name] = value;
+      });
+
+  connect(query, &EngineQueryCommand::playerValueUpdateInt,
+      [this](int player, QString name, int value) {
+        if (!inRange(player))
+          return;
+        PlayerState * pstate = mPlayerStates[player];
+        if (pstate->intValue.contains(name) && pstate->intValue[name] == value)
+          return;
+        if (name == "position_frame")
+          emit (playerValueChangedInt(player, name, value));
+        pstate->intValue[name] = value;
+      });
+  connect(query, &EngineQueryCommand::playerValueUpdateDouble,
+      [this](int player, QString name, double value) {
+        if (!inRange(player))
+          return;
+        PlayerState * pstate = mPlayerStates[player];
+        if (pstate->doubleValue.contains(name) && pstate->doubleValue[name] == value)
+          return;
+        if (name == "audio_level")
+          emit (playerValueChangedDouble(player, name, value));
+        //XXX deal with speed
+        pstate->doubleValue[name] = value;
+      });
 }
 
 AudioModel::~AudioModel() {
@@ -167,8 +211,13 @@ void AudioModel::playerTrigger(int player, QString name) {
 }
 
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
+  cout << "playerLoad: " << player << endl;
   if (!inRange(player))
     return;
+
+  PlayerState * pstate = mPlayerStates[player];
+  pstate->intValue["frames"] = audio_buffer ? audio_buffer->length() : 0;
+  pstate->intValue["sample_rate"] = audio_buffer ? audio_buffer->sample_rate() : 44100;
 
   //store a copy
   if (audio_buffer)
@@ -273,3 +322,48 @@ bool PlayerSetBuffersCommand::store(djaudio::CommandIOData& data) const {
   //TODO
   return false;
 }
+
+struct EnginePlayerState {
+  unsigned int frame_current;
+  double play_speed;
+  float max_sample_value;
+  bool audible;
+};
+
+EngineQueryCommand::EngineQueryCommand(int num_players, QObject * parent) : QObject(parent), djaudio::MasterCommand()
+{
+  for (int i = 0; i < num_players; i++)
+    mPlayerStates.push_back(new EnginePlayerState);
+}
+
+bool EngineQueryCommand::delete_after_done() { return false; }
+
+void EngineQueryCommand::execute() {
+  djaudio::Master * m = master();
+  for (size_t i = 0; i < std::min(m->players().size(), (size_t)mPlayerStates.size()); i++) {
+    djaudio::Player * p = m->players().at(i);
+    EnginePlayerState * ps = mPlayerStates[i];
+
+    ps->play_speed = p->play_speed();
+    ps->max_sample_value = p->max_sample_value();
+    ps->audible = p->audible();
+    ps->frame_current = p->frame();
+
+    p->max_sample_value_reset();
+  }
+}
+
+void EngineQueryCommand::execute_done() {
+  for (int i = 0; i < mPlayerStates.size(); i++) {
+    EnginePlayerState * ps = mPlayerStates[i];
+    emit(playerValueUpdateDouble(i, "speed", (ps->play_speed - 1.0) * 100.0));
+    emit(playerValueUpdateDouble(i, "audio_level", ps->max_sample_value));
+    emit(playerValueUpdateInt(i, "position_frame", ps->frame_current));
+    emit(playerValueUpdateBool(i, "audible", ps->audible));
+  }
+  emit(masterValueUpdateDouble("bpm", mMasterBPM));
+  emit(masterValueUpdateDouble("audio_level", mMasterBPM));
+}
+
+bool EngineQueryCommand::store(djaudio::CommandIOData& /* data */) const { return false; }
+

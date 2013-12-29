@@ -39,10 +39,13 @@ MixerPanelView::~MixerPanelView()
   delete ui;
 }
 
-void MixerPanelView::playerSetWorkInfo(int player, QString info) {
+void MixerPanelView::playerSetValueString(int player, QString name, QString value) {
   if (!inRange(player))
     return;
-  mPlayerViews[player]->setWorkInfo(info);
+  if (name == "loading_work")
+    mPlayerViews[player]->setWorkInfo("loading: " + value);
+  else if (name == "work_info")
+    mPlayerViews[player]->setWorkInfo(value);
 }
 
 void MixerPanelView::playerSetValueInt(int player, QString name, int value) {

@@ -3,8 +3,12 @@
 
 using namespace djaudio;
 
-LoaderThread::LoaderThread(QObject * parent) :
+#include <iostream>
+using namespace std;
+
+LoaderThread::LoaderThread(int player_index, QObject * parent) :
   QThread(parent),
+  mPlayerIndex(player_index),
   mMutex(QMutex::Recursive)
 { 
 }
@@ -25,7 +29,7 @@ void LoaderThread::abort() {
 }
 
 void LoaderThread::relay_load_progress(int percent) {
-  emit(loadProgress(percent));
+  emit(playerValueChangedInt(mPlayerIndex, "load_percent", percent));
 }
 
 void LoaderThread::load(QString audio_file_location, QString annotation_file_location, QString songinfo) {
@@ -54,17 +58,18 @@ void LoaderThread::run() {
 
     if (!mAnnotationFileName.isEmpty()) {
       if (!mBeatBuffer->load(mAnnotationFileName)) {
-        emit(loadError("problem loading annotation file: " + mAnnotationFileName));
+        emit(playerValueChangedString(mPlayerIndex, "load_error", "problem loading annotation file: " + mAnnotationFileName));
         mBeatBuffer.reset();
       }
     }
 
-    if (mAudioBuffer->load(LoaderThread::progress_callback, this))
-      emit(loadComplete(mAudioBuffer, mBeatBuffer, mSongInfo));
-    else
-      emit(loadError("problem loading audio file: " + mAudioFileName));
+    if (mAudioBuffer->load(LoaderThread::progress_callback, this)) {
+      emit(loadComplete(mPlayerIndex, mAudioBuffer, mBeatBuffer));
+      emit(playerValueChangedString(mPlayerIndex, "work_info", mSongInfo));
+    } else
+      emit(playerValueChangedString(mPlayerIndex, "load_error", "problem loading audio file: " + mAudioFileName));
   } catch (std::exception& e) {
-    emit(loadError("problem loading audio file: " + mAudioFileName + " " + QString::fromStdString(e.what())));
+    emit(playerValueChangedString(mPlayerIndex, "load_error", "problem loading audio file: " + mAudioFileName + " " + QString::fromStdString(e.what())));
   }
 }
 
