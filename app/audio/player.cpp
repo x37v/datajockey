@@ -438,6 +438,8 @@ void Player::update_play_speed(const Transport * transport) {
 
 void Player::sync_to_transport(const Transport * transport) {
   TimePoint trans_pos = transport->position();
+  if (!mBeatBuffer)
+    return;
 
   unsigned int beat = mBeatBuffer->index_closest(mStretcher->seconds());
   if (trans_pos.pos_in_beat() > 0.5 && beat > 1)
