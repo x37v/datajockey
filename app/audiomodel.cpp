@@ -82,6 +82,9 @@ AudioModel::AudioModel(QObject *parent) :
 
   for(int i = 0; i < mNumPlayers; i++) {
     djaudio::Player * p = mMaster->add_player();
+    p->sync(true);
+    p->play_state(djaudio::Player::PLAY);
+
     PlayerState * pstate = new PlayerState;
     mPlayerStates.push_back(pstate);
     pstate->intValue["volume"] = to_int(p->volume());
