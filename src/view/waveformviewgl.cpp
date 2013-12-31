@@ -337,7 +337,6 @@ void WaveFormViewGL::paintGL(){
         glPopMatrix();
       }
 
-
       glPopMatrix();
     }
   }

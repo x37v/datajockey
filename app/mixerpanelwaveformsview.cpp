@@ -16,6 +16,7 @@ void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferP
   player *= 2;
   mWaveforms[player]->setAudioBuffer(audio_buffer);
   mWaveforms[player + 1]->setAudioBuffer(audio_buffer);
+  update();
 }
 
 void MixerPanelWaveformsView::initializeGL() {
@@ -49,7 +50,7 @@ void MixerPanelWaveformsView::paintGL() {
   glRotatef(90.0, 0.0, 0.0, 1.0);
 
   glPushMatrix();
-  //glScalef(1.0, 1.0 / mWidth, 1.0);
+  glScalef(1.0, wf->width() / 2, 1.0);
   wf->draw();
   glPushMatrix();
 
@@ -62,7 +63,7 @@ void MixerPanelWaveformsView::paintGL() {
   glEnd();
 
   glPopMatrix();
-  glFlush();
+  //glFlush();
 }
 
 void MixerPanelWaveformsView::resizeGL(int width, int height) {
