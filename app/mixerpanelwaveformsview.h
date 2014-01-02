@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QGLWidget>
 #include <QtOpenGL>
+#include <QColor>
+
 #include "audiobuffer.hpp"
 #include "beatbuffer.hpp"
 
@@ -12,8 +14,39 @@ class WaveFormGL;
 class MixerPanelWaveformsView : public QGLWidget
 {
   Q_OBJECT
+
+  Q_PROPERTY(QColor backgroudColor READ backgroudColorGet WRITE backgroudColorSet DESIGNABLE true)
+  Q_PROPERTY(QColor waveformColor READ waveformColorGet WRITE waveformColorSet DESIGNABLE true)
+  Q_PROPERTY(QColor cursorColor READ cursorColorGet WRITE cursorColorSet DESIGNABLE true)
+  Q_PROPERTY(QColor centerLineColor READ centerLineColorGet WRITE centerLineColorSet DESIGNABLE true)
+  Q_PROPERTY(QColor dividerLineColor READ dividerLineColorGet WRITE dividerLineColorSet DESIGNABLE true)
+
+  Q_PROPERTY(int fullWaveformWidth READ fullWaveformWidthGet WRITE fullWaveformWidthSet DESIGNABLE true)
+  Q_PROPERTY(int waveformPadding READ waveformPaddingGet WRITE waveformPaddingSet DESIGNABLE true)
+
   public:
     explicit MixerPanelWaveformsView(QWidget *parent = 0);
+
+    QColor backgroudColorGet() const { return backgroudColor; }
+    void backgroudColorSet(QColor v) { backgroudColor = v; }
+
+    QColor waveformColorGet() const { return waveformColor; }
+    void waveformColorSet(QColor v) { waveformColor = v; }
+
+    QColor cursorColorGet() const { return cursorColor; }
+    void cursorColorSet(QColor v) { cursorColor = v; }
+
+    QColor centerLineColorGet() const { return centerLineColor; }
+    void centerLineColorSet(QColor v) { centerLineColor = v; }
+
+    QColor dividerLineColorGet() const { return dividerLineColor; }
+    void dividerLineColorSet(QColor v) { dividerLineColor = v; }
+
+    int fullWaveformWidthGet() const { return fullWaveformWidth; }
+    void fullWaveformWidthSet(int v) { fullWaveformWidth = v; }
+
+    int waveformPaddingGet() const { return waveformPadding; }
+    void waveformPaddingSet(int v) { waveformPadding = v; }
 
   signals:
 
@@ -21,10 +54,22 @@ class MixerPanelWaveformsView : public QGLWidget
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
   private:
     QList<WaveFormGL *> mWaveforms;
+    QList<QPair<GLfloat, GLfloat> > mOffsetAndScale;
     int mNumPlayers = 2;
 
     int mWidth = 100;
     int mHeight = 400;
+
+    QColor backgroudColor;
+    QColor waveformColor;
+    QColor cursorColor;
+    QColor centerLineColor;
+    QColor dividerLineColor;
+
+    int fullWaveformWidth = 20;
+    int waveformPadding = 5;
+
+    void computeOffsetAndScale();
   protected:
     virtual void initializeGL();
     virtual void paintGL();
