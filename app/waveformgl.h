@@ -20,6 +20,10 @@ class WaveFormGL : public QObject
     void setPositionFrame(int frame);
     void setWidth(int pixels);
     void draw();
+    void zoomFull(bool v) { mZoomFull = v; }
+    bool zoomFull() const { return mZoomFull; }
+    int framesPerLine() const { return mFramesPerLine; }
+    void framesPerLine(int v) { mFramesPerLine = v; }
   private:
     struct glline_t{
       GLfloat x0; GLfloat y0;

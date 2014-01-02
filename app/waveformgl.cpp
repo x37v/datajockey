@@ -2,10 +2,13 @@
 
 WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
 {
+  mLines.resize(mWidth);
 }
 
 void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   mAudioBuffer = buffer;
+  if (mZoomFull)
+    mFramesPerLine = mAudioBuffer->length() / mWidth;
   updateLines();
 }
 
@@ -14,6 +17,7 @@ void WaveFormGL::setPositionFrame(int frame) {
 
 void WaveFormGL::setWidth(int pixels) {
   mWidth = pixels;
+  mLines.resize(mWidth);
   updateLines();
 }
 
@@ -23,12 +27,10 @@ void WaveFormGL::draw() {
 
   //draw waveform
   glPushMatrix();
-  if (mZoomFull) {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(2, GL_FLOAT, 0, &mLines.front());
-    glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
-    glDisableClientState(GL_VERTEX_ARRAY);
-  }
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(2, GL_FLOAT, 0, &mLines.front());
+  glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
+  glDisableClientState(GL_VERTEX_ARRAY);
   glPopMatrix();
 }
 
@@ -36,14 +38,10 @@ void WaveFormGL::updateLines() {
   if (!mAudioBuffer)
     return;
 
-  if (mZoomFull) {
-    mFramesPerLine = mAudioBuffer->length() / mWidth;
-    mLines.resize(mWidth);
-    for (int i = 0; i < mWidth; i++) {
-      GLfloat height = lineHeight(i);
-      GLfloat x = i;
-      mLines[i].rect(x, -height, x + 1.0, height);
-    }
+  for (int i = 0; i < mLines.size(); i++) {
+    GLfloat height = lineHeight(i);
+    GLfloat x = i;
+    mLines[i].rect(x, -height, x + 1.0, height);
   }
 }
 

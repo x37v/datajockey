@@ -18,6 +18,10 @@ MixerPanelWaveformsView::MixerPanelWaveformsView(QWidget *parent) :
     mWaveforms.push_back(new WaveFormGL);
     mOffsetAndScale.push_back(QPair<GLfloat, GLfloat>());
   }
+
+  mWaveforms[1]->zoomFull(false);
+  mWaveforms[2]->zoomFull(false);
+
   computeOffsetAndScale();
 }
 
@@ -83,17 +87,23 @@ void MixerPanelWaveformsView::paintGL() {
 
   //draw waveforms
   for (int i = 0; i < mWaveforms.size(); i++) {
+    WaveFormGL * wf = mWaveforms[i];
     glPushMatrix();
     glTranslatef(0.0, mOffsetAndScale[i].first, 0.0);
 
-    glPushMatrix();
     //draw waveform
+    glPushMatrix();
+    //if we aren't in full zoom, draw from the bottom
+    if (!wf->zoomFull()) {
+      glTranslatef(mHeight, 0.0, 0.0);
+      glRotatef(180.0, 0.0, 0.0, 1.0);
+    }
     //scale it so that the whole waveform fits in the view ["x"] and its height is set by mOffsetAndScale
-    GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(mWaveforms[i]->width());
+    GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
     glScalef(height_scale, mOffsetAndScale[i].second, 1.0);
     glLineWidth(1.0);
     qglColor(waveformColor);
-    mWaveforms[i]->draw();
+    wf->draw();
     glPopMatrix();
 
     //draw center line
@@ -102,7 +112,6 @@ void MixerPanelWaveformsView::paintGL() {
     glVertex3f(0.0, 0.0, divider_z);
     glVertex3f(mHeight, 0.0, divider_z);
     glEnd();
-
 
     glPopMatrix();
   }
