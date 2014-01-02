@@ -25,11 +25,33 @@ class WaveFormGL : public QObject
       GLfloat x0; GLfloat y0;
       GLfloat x1; GLfloat y1;
     };
+    struct gl2triangles_t{
+      GLfloat x0; GLfloat y0;
+      GLfloat x1; GLfloat y1;
+      GLfloat x2; GLfloat y2;
+      GLfloat x3; GLfloat y3;
+      GLfloat x4; GLfloat y4;
+      GLfloat x5; GLfloat y5;
+      //rect
+      void rect(GLfloat rectx0, GLfloat recty0, GLfloat rectx1, GLfloat recty1) {
+        x0 = rectx0;
+        y0 = recty0;
+
+        x1 = x4 = rectx0;
+        y1 = y4 = recty1;
+
+        x5 = rectx1;
+        y5 = recty1;
+
+        x2 = x3 = rectx1;
+        y2 = y3 = recty0;
+      }
+    };
     djaudio::AudioBufferPtr mAudioBuffer;
     int mWidth = 400;
     int mFramesPerLine = 256;
     bool mZoomFull = true;
-    QVector<glline_t> mLines;
+    QVector<gl2triangles_t> mLines;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;

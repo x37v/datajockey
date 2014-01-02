@@ -2,11 +2,8 @@
 #include "waveformgl.h"
 #include <iostream>
 
-using std::cout;
-using std::endl;
-
 namespace {
-  const GLfloat divider_z = 1.0;
+  const GLfloat divider_z = 0.5;
 }
 
 MixerPanelWaveformsView::MixerPanelWaveformsView(QWidget *parent) :
@@ -39,11 +36,6 @@ void MixerPanelWaveformsView::computeOffsetAndScale() {
 
   mOffsetAndScale[1].first = -mOffsetAndScale[2].first;
   mOffsetAndScale[0].first = -mOffsetAndScale[3].first;
-
-  cout << "offset -> scale" << endl;
-  for (auto os: mOffsetAndScale) {
-    cout << os.first << " : " << os.second << endl;
-  }
 }
 
 void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
@@ -94,6 +86,16 @@ void MixerPanelWaveformsView::paintGL() {
     glPushMatrix();
     glTranslatef(0.0, mOffsetAndScale[i].first, 0.0);
 
+    glPushMatrix();
+    //draw waveform
+    //scale it so that the whole waveform fits in the view ["x"] and its height is set by mOffsetAndScale
+    GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(mWaveforms[i]->width());
+    glScalef(height_scale, mOffsetAndScale[i].second, 1.0);
+    glLineWidth(1.0);
+    qglColor(waveformColor);
+    mWaveforms[i]->draw();
+    glPopMatrix();
+
     //draw center line
     glBegin(GL_LINES);
     qglColor(centerLineColor);
@@ -101,10 +103,6 @@ void MixerPanelWaveformsView::paintGL() {
     glVertex3f(mHeight, 0.0, divider_z);
     glEnd();
 
-    //draw waveform
-    glScalef(1.0, mOffsetAndScale[i].second, 1.0);
-    qglColor(waveformColor);
-    mWaveforms[i]->draw();
 
     glPopMatrix();
   }

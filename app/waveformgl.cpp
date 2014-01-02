@@ -23,12 +23,10 @@ void WaveFormGL::draw() {
 
   //draw waveform
   glPushMatrix();
-  glColor3f(1.0, 0.0, 0.0);
-  glLineWidth(1.0);
   if (mZoomFull) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(2, GL_FLOAT, 0, &mLines.front());
-    glDrawArrays(GL_LINES, 0, mLines.size() * 2);
+    glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
   glPopMatrix();
@@ -42,9 +40,9 @@ void WaveFormGL::updateLines() {
     mFramesPerLine = mAudioBuffer->length() / mWidth;
     mLines.resize(mWidth);
     for (int i = 0; i < mWidth; i++) {
-      mLines[i].x0 = mLines[i].x1 = static_cast<GLfloat>(i);
-      mLines[i].y0 = lineHeight(i);
-      mLines[i].y1 = -mLines[i].y0;
+      GLfloat height = lineHeight(i);
+      GLfloat x = i;
+      mLines[i].rect(x, -height, x + 1.0, height);
     }
   }
 }
