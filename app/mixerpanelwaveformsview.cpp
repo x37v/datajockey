@@ -53,6 +53,15 @@ void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferP
   update();
 }
 
+void MixerPanelWaveformsView::playerSetValueInt(int player, QString name, int v) {
+  if (player >= mNumPlayers || player < 0 || name != "position_frame")
+    return;
+  player *= 2;
+  mWaveforms[player]->setPositionFrame(v);
+  mWaveforms[player + 1]->setPositionFrame(v);
+  update();
+}
+
 void MixerPanelWaveformsView::initializeGL() {
   qglClearColor(backgroudColor); //background color
 

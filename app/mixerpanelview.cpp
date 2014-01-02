@@ -52,6 +52,7 @@ void MixerPanelView::playerSetValueInt(int player, QString name, int value) {
   if (!inRange(player))
     return;
   mPlayerViews[player]->setValueInt(name, value);
+  ui->waveforms->playerSetValueInt(player, name, value);
 }
 
 void MixerPanelView::playerSetValueBool(int player, QString name, bool value) {

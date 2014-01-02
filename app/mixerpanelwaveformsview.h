@@ -48,10 +48,9 @@ class MixerPanelWaveformsView : public QGLWidget
     int waveformPaddingGet() const { return waveformPadding; }
     void waveformPaddingSet(int v) { waveformPadding = v; }
 
-  signals:
-
   public slots:
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
+    void playerSetValueInt(int player, QString name, int v);
   private:
     QList<WaveFormGL *> mWaveforms;
     QList<QPair<GLfloat, GLfloat> > mOffsetAndScale;
