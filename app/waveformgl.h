@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVector>
 #include <QtOpenGL>
+#include <QColor>
 
 #include "audiobuffer.hpp"
 
@@ -12,18 +13,27 @@
 //draws from 0 to width in x, -1 to 1 in y
 class WaveFormGL : public QObject
 {
+  Q_OBJECT
+  Q_PROPERTY(QColor cursorColor READ cursorColorGet WRITE cursorColorSet DESIGNABLE true)
+
   public:
     WaveFormGL(QObject * parent = nullptr);
     int width() const { return mWidth; }
-  public slots:
-    void setAudioBuffer(djaudio::AudioBufferPtr buffer);
-    void setPositionFrame(int frame);
+
+    QColor cursorColorGet() const { return cursorColor; }
+    void cursorColorSet(QColor v) { cursorColor = v; }
+
     void setWidth(int pixels);
-    void draw();
     void zoomFull(bool v) { mZoomFull = v; }
     bool zoomFull() const { return mZoomFull; }
     int framesPerLine() const { return mFramesPerLine; }
-    void framesPerLine(int v) { mFramesPerLine = v; }
+
+  public slots:
+    void setAudioBuffer(djaudio::AudioBufferPtr buffer);
+    void setPositionFrame(int frame);
+    void framesPerLine(int v);
+    void draw();
+
   private:
     struct glline_t{
       GLfloat x0; GLfloat y0;
@@ -54,8 +64,10 @@ class WaveFormGL : public QObject
     djaudio::AudioBufferPtr mAudioBuffer;
     int mWidth = 400;
     int mFramesPerLine = 256;
+    int mFramePosition = 0;
     bool mZoomFull = true;
     QVector<gl2triangles_t> mLines;
+    QColor cursorColor = Qt::white;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;

@@ -13,6 +13,7 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
 }
 
 void WaveFormGL::setPositionFrame(int frame) {
+  mFramePosition = frame;
 }
 
 void WaveFormGL::setWidth(int pixels) {
@@ -32,6 +33,21 @@ void WaveFormGL::draw() {
   glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
   glDisableClientState(GL_VERTEX_ARRAY);
   glPopMatrix();
+
+  //draw cursor
+  if (mZoomFull) {
+    int line = mFramePosition / mFramesPerLine;
+    glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
+    glBegin(GL_LINES);
+    glVertex2f(line, -1.0);
+    glVertex2f(line, 1.0);
+    glEnd();
+  }
+}
+
+void WaveFormGL::framesPerLine(int v) {
+  mFramesPerLine = v;
+  updateLines();
 }
 
 void WaveFormGL::updateLines() {
