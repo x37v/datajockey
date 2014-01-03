@@ -81,7 +81,8 @@ void WaveFormGL::updateLines() {
     int invalid = std::min(start_line - start_last, mLines.size());
     start_line = end_line - invalid;
   } else {
-    //XXX do it
+    int invalid = std::min(start_last - start_line, mLines.size());
+    end_line = start_line + invalid;
   }
 
   for (int i = start_line; i < end_line; i++) {
