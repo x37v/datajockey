@@ -175,6 +175,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         return nullptr;
       if (name == "volume")
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::VOLUME, to_double(v));
+
       if (cmd) {
         pstate->intValue[name] = v;
         emit(playerValueChangedInt(player, name, v));
@@ -210,7 +211,16 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
 }
 
 void AudioModel::playerTrigger(int player, QString name) {
-  cout << player << " name " << qPrintable(name) << endl;
+  playerSet(player, [player, &name, this](PlayerState * /*pstate*/) -> Command *
+    {
+      djaudio::Command * cmd = nullptr;
+      if (name.contains("seek_")) {
+        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, 
+          (name == "seek_fwd" ? 1 : -1));
+      }
+      return cmd;
+    });
+  //cout << player << " name " << qPrintable(name) << endl;
 }
 
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
