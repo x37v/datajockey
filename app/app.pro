@@ -34,6 +34,10 @@ unix:!macx {
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
 QMAKE_CXXFLAGS += $$DENORMAL_FLAGS -fexceptions -DDJ_VERSION=$$VERSION
 
+MOC_DIR = moc/
+OBJECTS_DIR = obj/
+UI_DIR = ui/
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     playerview.cpp \

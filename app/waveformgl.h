@@ -24,6 +24,7 @@ class WaveFormGL : public QObject
     void cursorColorSet(QColor v) { cursorColor = v; }
 
     void setWidth(int pixels);
+    void historyWidth(int pixels);
     void zoomFull(bool v) { mZoomFull = v; }
     bool zoomFull() const { return mZoomFull; }
     int framesPerLine() const { return mFramesPerLine; }
@@ -63,7 +64,8 @@ class WaveFormGL : public QObject
     };
     djaudio::AudioBufferPtr mAudioBuffer;
     int mWidth = 400;
-    int mFramesPerLine = 256;
+    int mHistoryWidth = 50;
+    int mFramesPerLine = 512;
     int mFramePosition = 0;
     bool mZoomFull = true;
     QVector<gl2triangles_t> mLines;

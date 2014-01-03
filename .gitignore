@@ -6,8 +6,10 @@ a.out
 *.o
 /datajockey
 /datajockey_importer
+/app/datajockey
 obj/
 moc/
+ui/
 Makefile
 Makefile.*
 qrc_*.cpp

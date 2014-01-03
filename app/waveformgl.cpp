@@ -14,11 +14,18 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
 
 void WaveFormGL::setPositionFrame(int frame) {
   mFramePosition = frame;
+  if (!mZoomFull)
+    updateLines();
 }
 
 void WaveFormGL::setWidth(int pixels) {
   mWidth = pixels;
   mLines.resize(mWidth);
+  updateLines();
+}
+
+void WaveFormGL::historyWidth(int pixels) {
+  mHistoryWidth = pixels;
   updateLines();
 }
 
@@ -35,14 +42,15 @@ void WaveFormGL::draw() {
   glPopMatrix();
 
   //draw cursor
-  if (mZoomFull) {
-    int line = mFramePosition / mFramesPerLine;
-    glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
-    glBegin(GL_LINES);
-    glVertex2f(line, -1.0);
-    glVertex2f(line, 1.0);
-    glEnd();
-  }
+  GLfloat cursor = mHistoryWidth;
+  if (mZoomFull)
+    cursor = static_cast<GLfloat>(mFramePosition) / static_cast<GLfloat>(mFramesPerLine);
+
+  glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
+  glBegin(GL_LINES);
+  glVertex2f(cursor, -1.0);
+  glVertex2f(cursor, 1.0);
+  glEnd();
 }
 
 void WaveFormGL::framesPerLine(int v) {
@@ -54,8 +62,13 @@ void WaveFormGL::updateLines() {
   if (!mAudioBuffer)
     return;
 
+  //XXX can we see what we've computed and just compute new lines?
+  //maybe use x != i, circular buffer style, and keep the index of the last front?
+  int start_line = 0;
+  if (!mZoomFull)
+    start_line = (mFramePosition / mFramesPerLine) - mHistoryWidth;
   for (int i = 0; i < mLines.size(); i++) {
-    GLfloat height = lineHeight(i);
+    GLfloat height = lineHeight(i + start_line);
     GLfloat x = i;
     mLines[i].rect(x, -height, x + 1.0, height);
   }
