@@ -35,6 +35,8 @@ void WaveFormGL::draw() {
 
   //draw waveform
   glPushMatrix();
+  if (!mZoomFull)
+    glTranslatef(-((mFramePosition / mFramesPerLine) - mHistoryWidth), 0.0, 0.0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(2, GL_FLOAT, 0, &mLines.front());
   glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
@@ -62,14 +64,12 @@ void WaveFormGL::updateLines() {
   if (!mAudioBuffer)
     return;
 
-  //XXX can we see what we've computed and just compute new lines?
-  //maybe use x != i, circular buffer style, and keep the index of the last front?
   int start_line = 0;
   if (!mZoomFull)
     start_line = (mFramePosition / mFramesPerLine) - mHistoryWidth;
   for (int i = 0; i < mLines.size(); i++) {
     GLfloat height = lineHeight(i + start_line);
-    GLfloat x = i;
+    GLfloat x = i + start_line;
     mLines[i].rect(x, -height, x + 1.0, height);
   }
 }
