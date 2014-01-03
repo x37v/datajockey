@@ -67,6 +67,9 @@
          <property name="text">
           <string>&gt;&gt;</string>
          </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="2">
@@ -86,6 +89,9 @@
         <widget class="QToolButton" name="seekBack">
          <property name="text">
           <string>&lt;&lt;</string>
+         </property>
+         <property name="autoRepeat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
