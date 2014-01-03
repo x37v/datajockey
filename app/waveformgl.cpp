@@ -1,14 +1,17 @@
 #include "waveformgl.h"
+#include <limits>
 
 WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
 {
   mLines.resize(mWidth);
+  mXStartLast = -mLines.size();
 }
 
 void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   mAudioBuffer = buffer;
   if (mZoomFull)
     mFramesPerLine = mAudioBuffer->length() / mWidth;
+  mXStartLast = -mLines.size();
   updateLines();
 }
 
@@ -21,11 +24,13 @@ void WaveFormGL::setPositionFrame(int frame) {
 void WaveFormGL::setWidth(int pixels) {
   mWidth = pixels;
   mLines.resize(mWidth);
+  mXStartLast = -mLines.size();
   updateLines();
 }
 
 void WaveFormGL::historyWidth(int pixels) {
   mHistoryWidth = pixels;
+  mXStartLast = -mLines.size();
   updateLines();
 }
 
@@ -65,12 +70,24 @@ void WaveFormGL::updateLines() {
     return;
 
   int start_line = 0;
+  int start_last = mXStartLast;
   if (!mZoomFull)
-    start_line = (mFramePosition / mFramesPerLine) - mHistoryWidth;
-  for (int i = 0; i < mLines.size(); i++) {
-    GLfloat height = lineHeight(i + start_line);
-    GLfloat x = i + start_line;
-    mLines[i].rect(x, -height, x + 1.0, height);
+    start_line = std::max((mFramePosition / mFramesPerLine) - mHistoryWidth, 0);
+  mXStartLast = start_line;
+  int end_line = start_line + mLines.size();
+
+  //figure out whats we need to fill in
+  if (start_line > start_last) {
+    int invalid = std::min(start_line - start_last, mLines.size());
+    start_line = end_line - invalid;
+  } else {
+    //XXX do it
+  }
+
+  for (int i = start_line; i < end_line; i++) {
+    GLfloat height = lineHeight(i);
+    GLfloat x = i;
+    mLines[i % mLines.size()].rect(x, -height, x + 1.0, height);
   }
 }
 

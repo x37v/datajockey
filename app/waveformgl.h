@@ -67,6 +67,8 @@ class WaveFormGL : public QObject
     int mHistoryWidth = 50;
     int mFramesPerLine = 512;
     int mFramePosition = 0;
+    int mXStartLast;
+
     bool mZoomFull = true;
     QVector<gl2triangles_t> mLines;
     QColor cursorColor = Qt::white;
