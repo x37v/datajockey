@@ -2,6 +2,9 @@
 #include "waveformgl.h"
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 namespace {
   const GLfloat divider_z = 0.5;
 }
@@ -136,3 +139,54 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
   qglClearColor(backgroudColor); //background color
 }
 
+void MixerPanelWaveformsView::mouseMoveEvent(QMouseEvent * event) {
+  int frame;
+  int waveform = waveformFrame(frame, event->localPos());
+  //int diff = event->y() - mLastMousePos;
+  //mLastMousePos = event->y();
+  //int frames = mFramesPerLine * diff;
+  //emit(seek_relative(frames));
+}
+
+void MixerPanelWaveformsView::mousePressEvent(QMouseEvent * event) {
+  int frame;
+  int waveform = waveformFrame(frame, event->localPos());
+  if (waveform < 0)
+    return;
+  int player = waveform / 2;
+  if (mWaveforms[waveform]->zoomFull())
+    emit(playerValueChangedInt(player, "seek_frame", frame));
+
+  //mLastMousePos = event->y();
+  //emit(mouse_down(true));
+  //emit(frame_clicked(mFramesPerLine * mLastMousePos));
+}
+
+void MixerPanelWaveformsView::mouseReleaseEvent(QMouseEvent * event) {
+  int frame;
+  int waveform = waveformFrame(frame, event->localPos());
+  //emit(mouse_down(false));
+}
+
+int MixerPanelWaveformsView::waveformFrame(int& frame, const QPointF& mousePosition) const {
+  GLfloat x = mousePosition.x() - (mWidth / 2);
+  GLfloat y = mousePosition.y();
+  frame = 0;
+
+  for (int i = 0; i < mOffsetAndScale.size(); i++) {
+    GLfloat center = mOffsetAndScale[i].first;
+    GLfloat range[2] = {center - mOffsetAndScale[i].second, center + mOffsetAndScale[i].second};
+    if (x < range[1] && x > range[0]) {
+      WaveFormGL * wf = mWaveforms[i];
+      //non full view starts at bottom
+      if (!wf->zoomFull())
+        y = mHeight - y;
+      //scale to waveform size
+      y = (y * static_cast<GLfloat>(wf->width())) / static_cast<GLfloat>(mHeight);
+      frame = wf->frameAtX(y);
+      return i;
+    }
+  }
+
+  return -1;
+}

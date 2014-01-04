@@ -29,6 +29,8 @@ class WaveFormGL : public QObject
     bool zoomFull() const { return mZoomFull; }
     int framesPerLine() const { return mFramesPerLine; }
 
+    int frameAtX(GLfloat x) const;
+
   public slots:
     void setAudioBuffer(djaudio::AudioBufferPtr buffer);
     void setPositionFrame(int frame);

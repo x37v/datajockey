@@ -783,7 +783,6 @@ void PlayerSetBeatBufferCommand::buffer(BeatBuffer * buffer) {
 
 PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, position_t target, long value) : 
   PlayerCommand(idx),
-  mTarget(target),
   mValue(value)
 { }
 

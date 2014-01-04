@@ -32,6 +32,11 @@ MixerPanelView::MixerPanelView(QWidget *parent) :
   connect(ui->tempoBox, 
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       [this] (double value) { emit(masterValueChangedDouble("bpm", value)); });
+
+  connect(ui->waveforms, &MixerPanelWaveformsView::playerValueChangedBool,
+      this, &MixerPanelView::playerValueChangedBool);
+  connect(ui->waveforms, &MixerPanelWaveformsView::playerValueChangedInt,
+      this, &MixerPanelView::playerValueChangedInt);
 }
 
 MixerPanelView::~MixerPanelView()

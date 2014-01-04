@@ -244,6 +244,7 @@ namespace djaudio {
       };
       PlayerPositionCommand(unsigned int idx, position_t target, long value);
       virtual void execute();
+      virtual void execute_done();
       virtual bool store(CommandIOData& data) const;
     private:
       position_t mTarget;

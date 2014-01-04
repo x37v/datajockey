@@ -173,8 +173,19 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
       djaudio::Command * cmd = nullptr;
       if (pstate->intValue.contains(name) && pstate->intValue[name] == v)
         return nullptr;
-      if (name == "volume")
+      
+      //just return when we don't want to report
+      if (name == "volume") {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::VOLUME, to_double(v));
+      } else if (name == "seek_frame") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY, v < 0 ? 0 : v);
+      } else if (name == "seek_beat") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT, v < 0 ? 0 : v);
+      } else if (name == "seek_frame_relative") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_RELATIVE, v);
+      } else if (name == "seek_beat_relative") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
+      }
 
       if (cmd) {
         pstate->intValue[name] = v;

@@ -7,6 +7,12 @@ WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
   mXStartLast = -mLines.size();
 }
 
+int WaveFormGL::frameAtX(GLfloat x) const {
+  if (!mZoomFull)
+    x += (mFramePosition - mHistoryWidth);
+  return static_cast<int>(std::roundf(x * mFramesPerLine));
+}
+
 void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   mAudioBuffer = buffer;
   if (mZoomFull)

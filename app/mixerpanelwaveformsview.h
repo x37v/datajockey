@@ -51,6 +51,9 @@ class MixerPanelWaveformsView : public QGLWidget
   public slots:
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
     void playerSetValueInt(int player, QString name, int v);
+  signals:
+    void playerValueChangedInt(int player, QString name, int v);
+    void playerValueChangedBool(int player, QString name, bool v);
   private:
     QList<WaveFormGL *> mWaveforms;
     QList<QPair<GLfloat, GLfloat> > mOffsetAndScale;
@@ -69,10 +72,19 @@ class MixerPanelWaveformsView : public QGLWidget
     int waveformPadding = 5;
 
     void computeOffsetAndScale();
+
+    //returns waveform index
+    //or -1 for out of range
+    //fills in frame with the frame touched
+    int waveformFrame(int& frame, const QPointF& mousePosition) const;
   protected:
     virtual void initializeGL();
     virtual void paintGL();
     virtual void resizeGL(int width, int height);
+
+    virtual void mouseMoveEvent(QMouseEvent * event);
+    virtual void mousePressEvent(QMouseEvent * event);
+    virtual void mouseReleaseEvent(QMouseEvent * event);
 };
 
 #endif // MIXERPANELWAVEFORMSVIEW_H
