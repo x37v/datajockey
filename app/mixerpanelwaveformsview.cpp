@@ -63,14 +63,6 @@ void MixerPanelWaveformsView::playerSetValueInt(int player, QString name, int v)
 }
 
 void MixerPanelWaveformsView::initializeGL() {
-  qglClearColor(backgroudColor); //background color
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0, mWidth, mHeight, 0, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
-  glEnable(GL_MULTISAMPLE);
-  glDisable(GL_DEPTH_TEST);
 }
 
 void MixerPanelWaveformsView::paintGL() {
@@ -141,5 +133,6 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
 
   glViewport(0, 0, mWidth, mHeight);
   computeOffsetAndScale();
+  qglClearColor(backgroudColor); //background color
 }
 
