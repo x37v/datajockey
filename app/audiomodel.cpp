@@ -211,6 +211,14 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::SYNC : djaudio::PlayerStateCommand::NO_SYNC);
       else if (name == "mute")
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
+      else if (name == "seeking") {
+        pstate->boolValue["seeking"] = v;
+        emit(playerValueChangedBool(player, name, v));
+        //if we are already paused, don't do anything
+        if (!pstate->boolValue["play"])
+          return nullptr;
+        return new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PAUSE : djaudio::PlayerStateCommand::PLAY);
+      }
 
       if (cmd) {
         pstate->boolValue[name] = v;

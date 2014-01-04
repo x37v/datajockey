@@ -58,6 +58,8 @@ class MixerPanelWaveformsView : public QGLWidget
     QList<WaveFormGL *> mWaveforms;
     QList<QPair<GLfloat, GLfloat> > mOffsetAndScale;
     int mNumPlayers = 2;
+    int mSeekingWaveform = -1;
+    GLfloat mSeekingPosLast = 0;
 
     int mWidth = 100;
     int mHeight = 400;
@@ -77,6 +79,8 @@ class MixerPanelWaveformsView : public QGLWidget
     //or -1 for out of range
     //fills in frame with the frame touched
     int waveformFrame(int& frame, const QPointF& mousePosition) const;
+    int frameAtPosition(int waveform, const QPointF& mousePosition) const;
+    GLfloat mouseToWaveformPosition(int waveform, const QPointF& mousePosition) const;
   protected:
     virtual void initializeGL();
     virtual void paintGL();

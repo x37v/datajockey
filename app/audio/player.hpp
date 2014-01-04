@@ -242,13 +242,12 @@ namespace djaudio {
         PLAY_BEAT, PLAY_BEAT_RELATIVE,
         LOOP_START, LOOP_END
       };
-      PlayerPositionCommand(unsigned int idx, position_t target, long value);
+      PlayerPositionCommand(unsigned int idx, position_t target, int value);
       virtual void execute();
-      virtual void execute_done();
       virtual bool store(CommandIOData& data) const;
     private:
       position_t mTarget;
-      long mValue;
+      int mValue;
   };
 
   class PlayerLoopCommand : public PlayerCommand {

@@ -140,12 +140,13 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
 }
 
 void MixerPanelWaveformsView::mouseMoveEvent(QMouseEvent * event) {
-  int frame;
-  int waveform = waveformFrame(frame, event->localPos());
-  //int diff = event->y() - mLastMousePos;
-  //mLastMousePos = event->y();
-  //int frames = mFramesPerLine * diff;
-  //emit(seek_relative(frames));
+  if (mSeekingWaveform < 0)
+    return;
+
+  //we don't care which waveform we are on, since we are seeking..
+  GLfloat pos = mouseToWaveformPosition(mSeekingWaveform, event->localPos());
+  emit(playerValueChangedInt(mSeekingWaveform / 2, "seek_frame_relative", static_cast<int>((mSeekingPosLast - pos) * static_cast<GLfloat>(mWaveforms[mSeekingWaveform]->framesPerLine()))));
+  mSeekingPosLast = pos;
 }
 
 void MixerPanelWaveformsView::mousePressEvent(QMouseEvent * event) {
@@ -156,37 +157,47 @@ void MixerPanelWaveformsView::mousePressEvent(QMouseEvent * event) {
   int player = waveform / 2;
   if (mWaveforms[waveform]->zoomFull())
     emit(playerValueChangedInt(player, "seek_frame", frame));
-
-  //mLastMousePos = event->y();
-  //emit(mouse_down(true));
-  //emit(frame_clicked(mFramesPerLine * mLastMousePos));
+  else {
+    mSeekingWaveform = waveform;
+    mSeekingPosLast = mouseToWaveformPosition(waveform, event->localPos());
+    emit(playerValueChangedBool(mSeekingWaveform / 2, "seeking", true));
+  }
 }
 
 void MixerPanelWaveformsView::mouseReleaseEvent(QMouseEvent * event) {
-  int frame;
-  int waveform = waveformFrame(frame, event->localPos());
-  //emit(mouse_down(false));
+  if (mSeekingWaveform < 0)
+    return;
+  emit(playerValueChangedBool(mSeekingWaveform / 2, "seeking", false));
+  mSeekingWaveform = -1;
 }
 
 int MixerPanelWaveformsView::waveformFrame(int& frame, const QPointF& mousePosition) const {
   GLfloat x = mousePosition.x() - (mWidth / 2);
-  GLfloat y = mousePosition.y();
   frame = 0;
 
   for (int i = 0; i < mOffsetAndScale.size(); i++) {
     GLfloat center = mOffsetAndScale[i].first;
     GLfloat range[2] = {center - mOffsetAndScale[i].second, center + mOffsetAndScale[i].second};
     if (x < range[1] && x > range[0]) {
-      WaveFormGL * wf = mWaveforms[i];
-      //non full view starts at bottom
-      if (!wf->zoomFull())
-        y = mHeight - y;
-      //scale to waveform size
-      y = (y * static_cast<GLfloat>(wf->width())) / static_cast<GLfloat>(mHeight);
-      frame = wf->frameAtX(y);
+      frame = frameAtPosition(i, mousePosition);
       return i;
     }
   }
 
   return -1;
 }
+
+int MixerPanelWaveformsView::frameAtPosition(int waveform, const QPointF& mousePosition) const {
+  return static_cast<int>(std::roundf(mWaveforms[waveform]->frameAtX(mouseToWaveformPosition(waveform, mousePosition))));
+}
+
+GLfloat MixerPanelWaveformsView::mouseToWaveformPosition(int waveform, const QPointF& mousePosition) const {
+  GLfloat y = mousePosition.y();
+  WaveFormGL * wf = mWaveforms[waveform];
+  //non full view starts at bottom
+  if (!wf->zoomFull())
+    y = mHeight - y;
+  //scale to waveform size
+  return (y * static_cast<GLfloat>(wf->width())) / static_cast<GLfloat>(mHeight);
+}
+
