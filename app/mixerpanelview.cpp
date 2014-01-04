@@ -47,9 +47,10 @@ MixerPanelView::~MixerPanelView()
 void MixerPanelView::playerSetValueString(int player, QString name, QString value) {
   if (!inRange(player))
     return;
-  if (name == "loading_work")
+  if (name == "loading_work") {
     mPlayerViews[player]->setWorkInfo("loading: " + value);
-  else if (name == "work_info")
+    ui->waveforms->playerSetBuffers(player, djaudio::AudioBufferPtr(), djaudio::BeatBufferPtr());
+  } else if (name == "work_info")
     mPlayerViews[player]->setWorkInfo(value);
 }
 

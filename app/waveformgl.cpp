@@ -15,6 +15,9 @@ int WaveFormGL::frameAtX(GLfloat x) const {
 
 void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   mAudioBuffer = buffer;
+  if (!buffer)
+    return;
+
   if (mZoomFull)
     mFramesPerLine = mAudioBuffer->length() / mWidth;
   mXStartLast = -mLines.size();
