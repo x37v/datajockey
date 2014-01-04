@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QStyleFactory>
+#include <QThread>
+
 #include "db.h"
 #include "audiomodel.h"
 #include "audioloader.h"
@@ -40,6 +42,11 @@ int main(int argc, char *argv[])
 
   MainWindow w(db, audio);
   w.loader(loader);
+
+  QObject::connect(&a, &QApplication::aboutToQuit, [&audio] {
+    audio->run(false);
+    QThread::msleep(200);
+  });
   w.show();
 
   return a.exec();
