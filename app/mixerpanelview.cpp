@@ -73,6 +73,15 @@ void MixerPanelView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_
   ui->waveforms->playerSetBuffers(player, audio_buffer, beat_buffer);
 }
 
+void MixerPanelView::masterSetValueInt(QString name, int value) {
+}
+
+void MixerPanelView::masterSetValueBool(QString name, bool value) {
+}
+
+void MixerPanelView::masterSetValueDouble(QString name, double value) {
+}
+
 bool MixerPanelView::inRange(int player) {
   return player >= 0 && player < mPlayerViews.size();
 }

@@ -29,9 +29,9 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(audio, &AudioModel::playerValueChangedInt,    mixer, &MixerPanelView::playerSetValueInt);
   connect(audio, &AudioModel::playerValueChangedBool,   mixer, &MixerPanelView::playerSetValueBool);
 
-  connect(audio, &AudioModel::masterSetValueDouble, mixer, &MixerPanelView::masterValueChangedDouble);
-  connect(audio, &AudioModel::masterSetValueInt,    mixer, &MixerPanelView::masterValueChangedInt);
-  connect(audio, &AudioModel::masterSetValueBool,   mixer, &MixerPanelView::masterValueChangedBool);
+  connect(audio, &AudioModel::masterValueChangedDouble, mixer, &MixerPanelView::masterSetValueDouble);
+  connect(audio, &AudioModel::masterValueChangedInt,    mixer, &MixerPanelView::masterSetValueInt);
+  connect(audio, &AudioModel::masterValueChangedBool,   mixer, &MixerPanelView::masterSetValueBool);
 }
 
 void MainWindow::loader(AudioLoader * loader) {

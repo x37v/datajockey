@@ -21,6 +21,10 @@ class AudioModel : public QObject {
     void playerValueChangedInt(int player, QString name, int v);
     void playerValueChangedBool(int player, QString name, bool v);
 
+    void masterValueChangedDouble(QString name, double v);
+    void masterValueChangedInt(QString name, int v);
+    void masterValueChangedBool(QString name, bool v);
+
   public slots:
     void playerSetValueDouble(int player, QString name, double v);
     void playerSetValueInt(int player, QString name, int v);

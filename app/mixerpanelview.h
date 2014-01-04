@@ -26,6 +26,10 @@ class MixerPanelView : public QWidget
     void playerSetValueString(int player, QString name, QString value);
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
 
+    void masterSetValueInt(QString name, int value);
+    void masterSetValueBool(QString name, bool value);
+    void masterSetValueDouble(QString name, double value);
+
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
