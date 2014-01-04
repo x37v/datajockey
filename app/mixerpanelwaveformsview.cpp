@@ -72,6 +72,9 @@ void MixerPanelWaveformsView::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
+  if (mWidth <= 0 || mHeight <= 0)
+    return;
+
   glPushMatrix();
 
   //draw vertical
