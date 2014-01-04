@@ -164,7 +164,7 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
       }
       return cmd;
     });
-  cout << player << " name " << qPrintable(name) << v << endl;
+  //cout << player <<  qPrintable(name) << " " << v << endl;
 }
 
 void AudioModel::playerSetValueInt(int player, QString name, int v) {
@@ -193,7 +193,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
       }
       return cmd;
     });
-  cout << player << " name " << qPrintable(name) << v << endl;
+  //cout << player << qPrintable(name) << " " << v << endl;
 }
 
 void AudioModel::playerSetValueBool(int player, QString name, bool v) {
@@ -226,7 +226,7 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
       }
       return cmd;
     });
-  cout << player << " name " << qPrintable(name) << v << endl;
+  //cout << player << qPrintable(name) << " " << v << endl;
 }
 
 void AudioModel::playerTrigger(int player, QString name) {
@@ -239,7 +239,7 @@ void AudioModel::playerTrigger(int player, QString name) {
       }
       return cmd;
     });
-  //cout << player << " name " << qPrintable(name) << endl;
+  //cout << player << qPrintable(name) << endl;
 }
 
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {

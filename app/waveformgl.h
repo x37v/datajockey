@@ -65,8 +65,8 @@ class WaveFormGL : public QObject
       }
     };
     djaudio::AudioBufferPtr mAudioBuffer;
-    int mWidth = 400;
-    int mHistoryWidth = 50;
+    int mWidth = 800;
+    int mHistoryWidth = 100;
     int mFramesPerLine = 512;
     int mFramePosition = 0;
     int mXStartLast;
