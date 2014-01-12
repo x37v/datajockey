@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
+    <width>548</width>
     <height>621</height>
    </rect>
   </property>
@@ -27,17 +27,11 @@
       </widget>
      </item>
      <item>
-      <widget class="MixerPanelWaveformsView" name="waveforms">
+      <widget class="MixerPanelWaveformsView" name="waveforms" native="true">
        <property name="minimumSize">
         <size>
-         <width>160</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>500</width>
-         <height>16777215</height>
+         <width>200</width>
+         <height>100</height>
         </size>
        </property>
       </widget>
@@ -227,8 +221,9 @@
   </customwidget>
   <customwidget>
    <class>MixerPanelWaveformsView</class>
-   <extends>QGraphicsView</extends>
+   <extends>QWidget</extends>
    <header>mixerpanelwaveformsview.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
