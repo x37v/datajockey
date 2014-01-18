@@ -11,6 +11,17 @@
 class DB : public QObject {
   Q_OBJECT
   public:
+    enum work_column_nums {
+      WORK_ID = 0,
+      WORK_ARTIST_NAME = 1,
+      WORK_NAME = 2,
+      WORK_ALBUM_NAME = 3,
+      WORK_ALBUM_TRACK = 4,
+      WORK_TEMPO = 5,
+      WORK_SONG_LENGTH = 6,
+      WORK_SESSION_ID = 8,
+    };
+
     DB(
         QString type, 
         QString name_or_location, 
@@ -39,7 +50,7 @@ class DB : public QObject {
 
     QString work_table_query(const QString where_clause = QString()) throw(std::runtime_error);
 
-    int work_table_column(QString id_name);
+    int work_table_column(QString name);
 
     int work_create(
         const QHash<QString, QVariant>& attributes,

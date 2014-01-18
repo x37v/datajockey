@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTableView>
+#include <QSortFilterProxyModel>
 
 class DB;
 
@@ -16,9 +17,17 @@ class WorksTableView : public QTableView
     ~WorksTableView();
   signals:
     void workSelected(int workid);
-
   private:
     DB * mDB = nullptr;
+};
+
+class WorksSortFilterProxyModel : public QSortFilterProxyModel
+{
+  Q_OBJECT
+  public:
+    WorksSortFilterProxyModel(QObject * parent = nullptr);
+  protected:
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 };
 
 #endif // WORKSTABLEVIEW_H

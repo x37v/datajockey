@@ -82,10 +82,6 @@ namespace {
   QStringList work_table_selects;
   QStringList work_table_joins;
 
-  const int cWorkIdColumn = 0;
-  const int cWorkSongLengthColumn = 6;
-  const int cWorkSessionIdColumn = 8;
-
   const QString cWorkTableSelectColumns(
       " w.id, "
       "artists.name as artist, "
@@ -293,19 +289,29 @@ QString DB::work_table_query(const QString where_clause) throw(std::runtime_erro
       " LEFT JOIN audio_work_tags ON w.id = audio_work_tags.audio_work_id";
     query_string += " WHERE " + where_clause;
   }
-  
+ 
   query_string += " ORDER BY artists.name, albums.name, w.album_track, w.name";
   return query_string;
 }
 
-int DB::work_table_column(QString id_name) {
-  if (id_name == "id")
-    return cWorkIdColumn;
-  else if (id_name == "audio_file_seconds")
-    return cWorkSongLengthColumn;
-  else if (id_name == "session")
-    return cWorkSessionIdColumn;
-  return 0;
+int DB::work_table_column(QString name) {
+  if (name == "id")
+    return WORK_ID;
+  else if (name == "artist")
+    return WORK_ARTIST_NAME;
+  else if (name == "name")
+    return WORK_NAME;
+  else if (name == "album")
+    return WORK_ALBUM_NAME;
+  else if (name == "track")
+    return WORK_ALBUM_TRACK;
+  else if (name == "tempo")
+    return WORK_TEMPO;
+  else if (name == "audio_file_seconds")
+    return WORK_SONG_LENGTH;
+  else if (name == "session")
+    return WORK_SESSION_ID;
+  return -1;
 }
 
 int DB::work_create(
