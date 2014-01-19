@@ -52,9 +52,13 @@ class AudioModel : public QObject {
     QList<djaudio::BeatBufferPtr> mBeatBuffers;
     QList<PlayerState *> mPlayerStates;
 
+    QHash<QString, double> mMasterDoubleValue;
+    QHash<QString, int> mMasterIntValue;
+
     bool inRange(int player);
     void queue(djaudio::Command * cmd);
     void playerSet(int player, std::function<djaudio::Command *(PlayerState * state)> func);
+    void masterSet(std::function<djaudio::Command *(void)> func);
 };
 
 

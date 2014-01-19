@@ -276,11 +276,31 @@ void AudioModel::playerClear(int player) {
 }
 
 void AudioModel::masterSetValueDouble(QString name, double v) {
-  cout << "master name " << qPrintable(name) << v << endl;
+  auto it = mMasterDoubleValue.find(name);
+  if (it != mMasterDoubleValue.end() && *it == v)
+    return;
+  if (name == "bpm")
+    queue(new djaudio::TransportBPMCommand(mMaster->transport(), v));
+  else {
+    cout << "master name " << qPrintable(name) << v << endl;
+    return;
+  }
+  mMasterDoubleValue[name] = v;
 }
 
 void AudioModel::masterSetValueInt(QString name, int v) {
-  cout << "master name " << qPrintable(name) << v << endl;
+  auto it = mMasterIntValue.find(name);
+  if (it != mMasterIntValue.end() && *it == v)
+    return;
+  if (name == "volume")
+    queue(new djaudio::MasterDoubleCommand(djaudio::MasterDoubleCommand::MAIN_VOLUME, to_double(v)));
+  else if (name == "cue_volume")
+    queue(new djaudio::MasterDoubleCommand(djaudio::MasterDoubleCommand::CUE_VOLUME, to_double(v)));
+  else {
+    cout << "master name " << qPrintable(name) << v << endl;
+    return;
+  }
+  mMasterIntValue[name] = v;
 }
 
 void AudioModel::masterSetValueBool(QString name, bool v) {
@@ -315,6 +335,12 @@ void AudioModel::playerSet(int player, std::function<djaudio::Command *(PlayerSt
   if (!inRange(player))
     return;
   Command * cmd = func(mPlayerStates[player]);
+  if (cmd)
+    queue(cmd);
+}
+
+void AudioModel::masterSet(std::function<djaudio::Command *(void)> func) {
+  Command * cmd = func();
   if (cmd)
     queue(cmd);
 }
@@ -399,7 +425,7 @@ void EngineQueryCommand::execute_done() {
     emit(playerValueUpdateBool(i, "audible", ps->audible));
   }
   emit(masterValueUpdateDouble("bpm", mMasterBPM));
-  emit(masterValueUpdateDouble("audio_level", mMasterBPM));
+  emit(masterValueUpdateDouble("audio_level", mMasterVolume));
 }
 
 bool EngineQueryCommand::store(djaudio::CommandIOData& /* data */) const { return false; }
