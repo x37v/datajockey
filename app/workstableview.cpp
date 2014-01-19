@@ -18,7 +18,8 @@ void WorksTableView::setDB(DB * db) {
   QSqlQueryModel *model = new QSqlQueryModel(this);
   model->setQuery(db->work_table_query(), db->get());
 
-  WorksSortFilterProxyModel * sortable = new WorksSortFilterProxyModel(model);
+  //QSortFilterProxyModel * sortable = new WorksSortFilterProxyModel(model);
+  QSortFilterProxyModel * sortable = new QSortFilterProxyModel(model);
   sortable->setSourceModel(model);
   sortable->setSortCaseSensitivity(Qt::CaseInsensitive);
 
