@@ -24,6 +24,19 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   updateLines();
 }
 
+void WaveFormGL::setBeatBuffer(djaudio::BeatBufferPtr buffer) {
+  mBeats.clear();
+  if (mZoomFull || !buffer)
+    return;
+  mBeats.resize(buffer->size());
+  for (unsigned int i = 0; i < buffer->size(); i++) {
+    GLfloat x = static_cast<GLfloat>(buffer->at(i)) / mFramesPerLine;
+    mBeats[i].x0 = mBeats[i].x1 = x;
+    mBeats[i].y0 = -1;
+    mBeats[i].y1 = 1;
+  }
+}
+
 void WaveFormGL::setPositionFrame(int frame) {
   mFramePosition = frame;
   if (!mZoomFull)
@@ -49,12 +62,26 @@ void WaveFormGL::draw() {
 
   //draw waveform
   glPushMatrix();
+  glColor4d(mWaveformColor.redF(), mWaveformColor.greenF(), mWaveformColor.blueF(), mWaveformColor.alphaF());
   if (!mZoomFull)
     glTranslatef(-((mFramePosition / mFramesPerLine) - mHistoryWidth), 0.0, 0.0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(2, GL_FLOAT, 0, &mLines.front());
   glDrawArrays(GL_TRIANGLES, 0, mLines.size() * 6);
   glDisableClientState(GL_VERTEX_ARRAY);
+  
+  if (mBeats.size()) {
+    //draw beats
+    glPushMatrix();
+    glColor4d(mBeatColor.redF(), mBeatColor.greenF(), mBeatColor.blueF(), mBeatColor.alphaF());
+    glLineWidth(1.0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 0, &mBeats.front());
+    glDrawArrays(GL_LINES, 0, mBeats.size() * 2);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glPopMatrix();
+  }
+
   glPopMatrix();
 
   //draw cursor

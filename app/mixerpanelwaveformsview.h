@@ -20,6 +20,7 @@ class MixerPanelWaveformsView : public QGLWidget
   Q_PROPERTY(QColor cursorColor READ cursorColorGet WRITE cursorColorSet DESIGNABLE true)
   Q_PROPERTY(QColor centerLineColor READ centerLineColorGet WRITE centerLineColorSet DESIGNABLE true)
   Q_PROPERTY(QColor dividerLineColor READ dividerLineColorGet WRITE dividerLineColorSet DESIGNABLE true)
+  Q_PROPERTY(QColor beatsColor READ beatsColorGet WRITE beatsColorSet DESIGNABLE true)
 
   Q_PROPERTY(int fullWaveformWidth READ fullWaveformWidthGet WRITE fullWaveformWidthSet DESIGNABLE true)
   Q_PROPERTY(int waveformPadding READ waveformPaddingGet WRITE waveformPaddingSet DESIGNABLE true)
@@ -41,6 +42,9 @@ class MixerPanelWaveformsView : public QGLWidget
 
     QColor dividerLineColorGet() const { return dividerLineColor; }
     void dividerLineColorSet(QColor v) { dividerLineColor = v; }
+
+    QColor beatsColorGet() const { return beatsColor; }
+    void beatsColorSet(QColor v) { beatsColor = v; }
 
     int fullWaveformWidthGet() const { return fullWaveformWidth; }
     void fullWaveformWidthSet(int v) { fullWaveformWidth = v; }
@@ -69,6 +73,7 @@ class MixerPanelWaveformsView : public QGLWidget
     QColor cursorColor;
     QColor centerLineColor;
     QColor dividerLineColor;
+    QColor beatsColor;
 
     int fullWaveformWidth = 20;
     int waveformPadding = 5;

@@ -52,7 +52,9 @@ void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferP
   //2 waveforms per player
   player *= 2;
   mWaveforms[player]->setAudioBuffer(audio_buffer);
+  mWaveforms[player]->setBeatBuffer(beat_buffer);
   mWaveforms[player + 1]->setAudioBuffer(audio_buffer);
+  mWaveforms[player + 1]->setBeatBuffer(beat_buffer);
   update();
 }
 
@@ -109,7 +111,6 @@ void MixerPanelWaveformsView::paintGL() {
     GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
     glScalef(height_scale, mOffsetAndScale[i].second, 1.0);
     glLineWidth(1.0);
-    qglColor(waveformColor);
     wf->draw();
     glPopMatrix();
 

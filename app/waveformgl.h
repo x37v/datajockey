@@ -7,6 +7,7 @@
 #include <QColor>
 
 #include "audiobuffer.hpp"
+#include "annotation.hpp"
 
 //for drawing a waveform within a gl view
 //always draws horizontally, left to right
@@ -33,6 +34,7 @@ class WaveFormGL : public QObject
 
   public slots:
     void setAudioBuffer(djaudio::AudioBufferPtr buffer);
+    void setBeatBuffer(djaudio::BeatBufferPtr buffer);
     void setPositionFrame(int frame);
     void framesPerLine(int v);
     void draw();
@@ -73,7 +75,10 @@ class WaveFormGL : public QObject
 
     bool mZoomFull = true;
     QVector<gl2triangles_t> mLines;
+    QVector<glline_t> mBeats;
     QColor cursorColor = Qt::white;
+    QColor mWaveformColor = Qt::red;
+    QColor mBeatColor = Qt::yellow;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;

@@ -12,6 +12,7 @@ QT       += core gui sql opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
