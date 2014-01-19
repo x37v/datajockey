@@ -80,11 +80,11 @@ bool Annotation::loadFile(QString& file_path) {
       return false;
     } else {
       //XXX just using the last in the list
-      const YAML::Node& beats = (locs.Type() == YAML::NodeType::Sequence) ? locs[locs.size() - 1]["time_points"] : locs["time_points"];
+      const YAML::Node& beats = (locs.Type() == YAML::NodeType::Sequence) ? locs[locs.size() - 1]["frames"] : locs["frames"];
       for (unsigned int i = 0; i < beats.size(); i++) {
-        double beat;
-        beats[i] >> beat;
-        mBeatBuffer->push_back(beat * 44100.0); //XXX
+        int frame;
+        beats[i] >> frame;
+        mBeatBuffer->push_back(frame);
       }
     }
   } catch(...) {
