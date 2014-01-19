@@ -197,8 +197,10 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
 //actually fill the output vectors
 void Player::audio_fill_output_buffers(unsigned int numFrames,
     float ** mixBuffer, float ** cueBuffer){
-  if(!mStretcher->audio_buffer())
+  if(!mStretcher->audio_buffer()) {
+    mMaxSampleValue = std::max(mMaxSampleValue, 0.0f);
     return;
+  }
 
   //send the data out, copying to the cue buffer before volume if needed
   if(mOutState == CUE){
