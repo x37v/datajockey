@@ -1,13 +1,21 @@
 #include "annotation.hpp"
 #include "defines.hpp"
 #include "config.hpp"
-#include <yaml-cpp/yaml.h>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 
+#include <yaml-cpp/yaml.h>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <iostream>
+
 using namespace djaudio;
+namespace fs = boost::filesystem;
+
+using std::cerr;
+using std::endl;
 
 namespace {
    void recursively_add(YAML::Emitter& yaml, const QHash<QString, QVariant>& attributes) {
@@ -56,6 +64,36 @@ namespace {
    }
 }
 
+bool Annotation::loadFile(QString& file_path) {
+  //clear();
+  if (mBeatBuffer) 
+    mBeatBuffer.reset();
+  mBeatBuffer = new BeatBuffer();
+  try {
+    fs::ifstream fin(file_path.toStdWString());
+    YAML::Parser parser(fin);
+    YAML::Node doc;
+    parser.GetNextDocument(doc);
+
+    const YAML::Node& locs = doc["beat_locations"];
+    if (locs.Type() == YAML::NodeType::Sequence && locs.size() == 0) {
+      return false;
+    } else {
+      //XXX just using the last in the list
+      const YAML::Node& beats = (locs.Type() == YAML::NodeType::Sequence) ? locs[locs.size() - 1]["time_points"] : locs["time_points"];
+      for (unsigned int i = 0; i < beats.size(); i++) {
+        double beat;
+        beats[i] >> beat;
+        mBeatBuffer->push_back(beat * 44100.0); //XXX
+      }
+    }
+  } catch(...) {
+    cerr << "problem loading " << qPrintable(file_path) << endl;
+    return false;
+  }
+  return true;
+}
+
 void Annotation::update_attributes(QHash<QString, QVariant>& attributes) {
    //XXX deal with descriptors
    foreach (const QString &str, attributes.keys()) {
@@ -93,7 +131,7 @@ void Annotation::write_file(const QString& file_path) throw(std::runtime_error) 
    recursively_add(yaml, mAttrs);
 
    //add beat buffer
-   if (mBeatBuffer && mBeatBuffer->length()) {
+   if (mBeatBuffer && mBeatBuffer->size()) {
       yaml << YAML::Key << "beat_locations";
       yaml << YAML::Value << YAML::BeginMap << YAML::Key << "time_points";
       yaml << YAML::Value << YAML::BeginSeq;

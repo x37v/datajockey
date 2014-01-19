@@ -53,14 +53,14 @@ void LoaderThread::run() {
     mAudioBuffer.reset();
     mBeatBuffer.reset();
 
-    mBeatBuffer = BeatBufferPtr(new BeatBuffer);
     mAudioBuffer = AudioBufferPtr(new AudioBuffer(mAudioFileName.toStdString()));
 
     if (!mAnnotationFileName.isEmpty()) {
-      if (!mBeatBuffer->load(mAnnotationFileName)) {
+      djaudio::Annotation annotation;
+      if (!annotation.loadFile(mAnnotationFileName)) {
         emit(playerValueChangedString(mPlayerIndex, "load_error", "problem loading annotation file: " + mAnnotationFileName));
-        mBeatBuffer.reset();
       }
+      mBeatBuffer = annotation.beatBuffer();
     }
 
     if (mAudioBuffer->load(LoaderThread::progress_callback, this)) {

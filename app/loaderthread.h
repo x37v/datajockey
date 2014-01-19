@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QString>
-#include "audio/beatbuffer.hpp"
+#include "audio/annotation.hpp"
 #include "audio/audiobuffer.hpp"
 
 namespace djaudio {

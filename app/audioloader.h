@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QList>
 #include "audio/audiobuffer.hpp"
-#include "audio/beatbuffer.hpp"
 #include "loaderthread.h"
 #include "db.h"
 

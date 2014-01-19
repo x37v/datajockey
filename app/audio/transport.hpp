@@ -14,6 +14,7 @@ namespace djaudio {
       const TimePoint& position() const;
       double bpm() const;
       double seconds_per_beat() const;
+      int frames_per_beat() const;
 
       //setters
       void position(const TimePoint &pos);

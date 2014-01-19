@@ -5,7 +5,7 @@
 #include "transport.hpp"
 #include "jackaudioio.hpp"
 #include "audiobuffer.hpp"
-#include "beatbuffer.hpp"
+#include "annotation.hpp"
 #include "stretcher.hpp"
 #include "envelope.hpp"
 
@@ -140,7 +140,7 @@ namespace djaudio {
       //for updating the play speed while syncing
       void update_play_speed(const Transport * transport);
       void sync_to_transport(const Transport * transport);
-      double pos_in_beat(double pos_seconds, unsigned int pos_beat) const;
+      double pos_in_beat(int pos_frame, unsigned int pos_beat) const;
       void fill_fade_buffer(); //moves our stretcher index..
       void setup_seek_fade();
   };

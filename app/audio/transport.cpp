@@ -40,6 +40,9 @@ double Transport::seconds_till_next_beat() const {
 const TimePoint& Transport::position() const { return mPosition; }
 double Transport::bpm() const { return mBPM; }
 double Transport::seconds_per_beat() const { return 60.0 / mBPM; }
+int Transport::frames_per_beat() const {
+  return static_cast<double>(mSampleRate) * 60.0 / mBPM;
+}
 
 void Transport::position(const TimePoint &pos){
    mPosition = pos;

@@ -7,7 +7,7 @@
 #include <QColor>
 
 #include "audiobuffer.hpp"
-#include "beatbuffer.hpp"
+#include "annotation.hpp"
 
 class WaveFormGL;
 

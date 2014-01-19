@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include "audiobuffer.hpp"
-#include "beatbuffer.hpp"
+#include "annotation.hpp"
 
 namespace Ui {
   class MixerPanelView;

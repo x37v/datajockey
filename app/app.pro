@@ -60,7 +60,6 @@ SOURCES += main.cpp\
     audio/envelope.cpp \
     audio/doublelinkedlist.cpp \
     audio/command.cpp \
-    audio/beatbuffer.cpp \
     audio/audioio.cpp \
     audio/audiobuffer.cpp \
     audio/annotation.cpp \
@@ -97,7 +96,6 @@ HEADERS  += mainwindow.h \
     audio/envelope.hpp \
     audio/doublelinkedlist.hpp \
     audio/command.hpp \
-    audio/beatbuffer.hpp \
     audio/audioio.hpp \
     audio/audiobuffer.hpp \
     audio/annotation.hpp \
