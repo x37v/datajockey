@@ -1,5 +1,6 @@
 #include "playerview.h"
 #include "ui_playerview.h"
+#include "audiolevelview.h"
 #include <QDoubleSpinBox>
 #include <map>
 
@@ -58,6 +59,8 @@ void PlayerView::setWorkInfo(QString info) {
 void PlayerView::setValueDouble(QString name, double v) {
   if (name == "speed")
     ui->speedBox->setValue(v);
+  else if (name == "audio_level")
+    ui->level->setLevel(static_cast<int>(100.0 * v));
 }
 
 void PlayerView::setValueInt(QString name, int v) {

@@ -108,42 +108,11 @@ AudioModel::AudioModel(QObject *parent) :
   EngineQueryCommand * query = new EngineQueryCommand(mNumPlayers);
   mConsumeThread = new ConsumeThread(mMaster->scheduler(), query, this);
 
-  //XXX lambdas cannot have queued connections!
-  connect(query, &EngineQueryCommand::playerValueUpdateBool,
-      [this](int player, QString name, bool value) {
-        if (!inRange(player))
-          return;
-        PlayerState * pstate = mPlayerStates[player];
-        if (pstate->boolValue.contains(name) && pstate->boolValue[name] == value)
-          return;
-        if (name == "audible")
-          emit (playerValueChangedBool(player, name, value));
-        pstate->boolValue[name] = value;
-      });
+  connect(query, &EngineQueryCommand::playerValueUpdateBool, this, &AudioModel::playerSetValueBool);
+  connect(query, &EngineQueryCommand::playerValueUpdateInt, this, &AudioModel::playerSetValueInt);
+  connect(query, &EngineQueryCommand::playerValueUpdateDouble, this, &AudioModel::playerSetValueDouble);
 
-  connect(query, &EngineQueryCommand::playerValueUpdateInt,
-      [this](int player, QString name, int value) {
-        if (!inRange(player))
-          return;
-        PlayerState * pstate = mPlayerStates[player];
-        if (pstate->intValue.contains(name) && pstate->intValue[name] == value)
-          return;
-        if (name == "position_frame")
-          emit (playerValueChangedInt(player, name, value));
-        pstate->intValue[name] = value;
-      });
-  connect(query, &EngineQueryCommand::playerValueUpdateDouble,
-      [this](int player, QString name, double value) {
-        if (!inRange(player))
-          return;
-        PlayerState * pstate = mPlayerStates[player];
-        if (pstate->doubleValue.contains(name) && pstate->doubleValue[name] == value)
-          return;
-        if (name == "audio_level")
-          emit (playerValueChangedDouble(player, name, value));
-        //XXX deal with speed
-        pstate->doubleValue[name] = value;
-      });
+  connect(query, &EngineQueryCommand::masterValueUpdateDouble, this, &AudioModel::masterSetValueDouble);
 }
 
 AudioModel::~AudioModel() {
@@ -154,10 +123,23 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
       djaudio::Command * cmd = nullptr;
-      if (pstate->doubleValue.contains(name) && pstate->doubleValue[name] == v)
+      //relay from ConsumeThread
+      //we want to always relay it, no matter what the last value was
+      if (name == "audio_level") {
+        pstate->doubleValue[name] = v;
+        emit(playerValueChangedDouble(player, name, v));
+        return nullptr;
+      }
+
+      auto it = pstate->doubleValue.find(name);
+      if (it != pstate->doubleValue.end() && *it == v)
         return nullptr;
       if (name == "speed")
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
+      else if (name == "update_speed") {
+        //XXX what to do?
+        return nullptr;
+      }
       if (cmd) {
         pstate->doubleValue[name] = v;
         emit(playerValueChangedDouble(player, name, v));
@@ -171,7 +153,8 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
       djaudio::Command * cmd = nullptr;
-      if (pstate->intValue.contains(name) && pstate->intValue[name] == v)
+      auto it = pstate->intValue.find(name);
+      if (it != pstate->intValue.end() && *it == v)
         return nullptr;
       
       //just return when we don't want to report
@@ -185,6 +168,10 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_RELATIVE, v);
       } else if (name == "seek_beat_relative") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
+      } else if (name == "position_frame") {
+        emit (playerValueChangedInt(player, name, v)); //relaying from ConsumeThread
+        pstate->intValue[name] = v;
+        return nullptr;
       }
 
       if (cmd) {
@@ -200,7 +187,8 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
       djaudio::Command * cmd = nullptr;
-      if (pstate->boolValue.contains(name) && pstate->boolValue[name] == v)
+      auto it = pstate->boolValue.find(name);
+      if (it != pstate->boolValue.end() && *it == v)
         return nullptr;
 
       if (name == "cue")
@@ -218,6 +206,10 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
         if (!pstate->boolValue["play"])
           return nullptr;
         return new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PAUSE : djaudio::PlayerStateCommand::PLAY);
+      } else if (name == "audible") {
+        pstate->boolValue[name] = v; //relaying from ConsumeThread
+        emit(playerValueChangedBool(player, name, v));
+        return nullptr;
       }
 
       if (cmd) {
@@ -276,12 +268,21 @@ void AudioModel::playerClear(int player) {
 }
 
 void AudioModel::masterSetValueDouble(QString name, double v) {
+  //we always want to send the audio level along
+  if (name == "audio_level") {
+    emit(masterValueChangedDouble(name, v));
+    return;
+  }
+
   auto it = mMasterDoubleValue.find(name);
   if (it != mMasterDoubleValue.end() && *it == v)
     return;
-  if (name == "bpm")
+  if (name == "bpm") {
     queue(new djaudio::TransportBPMCommand(mMaster->transport(), v));
-  else {
+  } else if (name == "update_bpm") {
+    //XXX do nothing for now
+    return;
+  } else {
     cout << "master name " << qPrintable(name) << v << endl;
     return;
   }
@@ -408,23 +409,23 @@ void EngineQueryCommand::execute() {
     EnginePlayerState * ps = mPlayerStates[i];
 
     ps->play_speed = p->play_speed();
-    ps->max_sample_value = p->max_sample_value();
+    ps->max_sample_value = p->max_sample_value_reset();
     ps->audible = p->audible();
     ps->frame_current = p->frame();
-
-    p->max_sample_value_reset();
   }
+  mMasterVolume = m->max_sample_value_reset();
+  mMasterBPM = m->transport()->bpm();
 }
 
 void EngineQueryCommand::execute_done() {
   for (int i = 0; i < mPlayerStates.size(); i++) {
     EnginePlayerState * ps = mPlayerStates[i];
-    emit(playerValueUpdateDouble(i, "speed", (ps->play_speed - 1.0) * 100.0));
+    emit(playerValueUpdateDouble(i, "update_speed", (ps->play_speed - 1.0) * 100.0));
     emit(playerValueUpdateDouble(i, "audio_level", ps->max_sample_value));
     emit(playerValueUpdateInt(i, "position_frame", ps->frame_current));
     emit(playerValueUpdateBool(i, "audible", ps->audible));
   }
-  emit(masterValueUpdateDouble("bpm", mMasterBPM));
+  emit(masterValueUpdateDouble("update_bpm", mMasterBPM));
   emit(masterValueUpdateDouble("audio_level", mMasterVolume));
 }
 

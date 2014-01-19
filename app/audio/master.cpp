@@ -292,7 +292,11 @@ void Master::cross_fade_mixers(unsigned int left, unsigned int right){
   }
 }
 
-void Master::max_sample_value_reset() { mMaxSampleValue = 0.0; }
+float Master::max_sample_value_reset() {
+  float v = mMaxSampleValue;
+  mMaxSampleValue = 0.0;
+  return v;
+}
 
 //commands
 

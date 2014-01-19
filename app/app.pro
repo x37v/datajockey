@@ -72,7 +72,8 @@ SOURCES += main.cpp\
     audioloader.cpp \
     loaderthread.cpp \
     waveformgl.cpp \
-    mixerpanelwaveformsview.cpp
+    mixerpanelwaveformsview.cpp \
+    audiolevelview.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -109,7 +110,8 @@ HEADERS  += mainwindow.h \
     audioloader.h \
     loaderthread.h \
     waveformgl.h \
-    mixerpanelwaveformsview.h
+    mixerpanelwaveformsview.h \
+    audiolevelview.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

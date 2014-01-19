@@ -95,7 +95,7 @@ class EngineQueryCommand : public QObject, public djaudio::MasterCommand {
   private:
     QList<EnginePlayerState *> mPlayerStates;
     double mMasterBPM;
-    float mMasterVolume;
+    double mMasterVolume;
 };
 
 #endif // AUDIOMODEL_H

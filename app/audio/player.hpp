@@ -94,7 +94,7 @@ namespace djaudio {
       void audio_buffer(AudioBuffer * buf);
       void beat_buffer(BeatBuffer * buf);
       void eq(eq_band_t band, double value);
-      void max_sample_value_reset();
+      float max_sample_value_reset();
 
       //misc
       void position_at_frame_relative(long offset);

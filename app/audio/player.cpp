@@ -414,7 +414,11 @@ void Player::eq(eq_band_t band, double value) {
   }
 }
 
-void Player::max_sample_value_reset() { mMaxSampleValue = 0.0; };
+float Player::max_sample_value_reset() {
+  float v = mMaxSampleValue;
+  mMaxSampleValue = 0.0;
+  return v;
+};
 
 void Player::position_at_frame_relative(long offset){
   if (offset < 0 && -offset > mStretcher->frame())
