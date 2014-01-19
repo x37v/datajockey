@@ -281,7 +281,7 @@ void Player::play_state(play_state_t val, Transport * transport) {
     if (mBeatBuffer) {
       //sync to transport if we should
       if (transport && mSync && mPlayState == PLAY)
-        sync_to_transport(transport);
+        update_play_speed(transport);
       else
         mBeatIndex = ::beat_index(mBeatBuffer, mStretcher->frame());
     }
@@ -310,7 +310,7 @@ void Player::sync(bool val, const Transport * transport) {
   if (val != mSync) {
     mSync = val;
     if (transport && mSync && mPlayState == PLAY)
-      sync_to_transport(transport);
+      update_play_speed(transport);
   }
 }
 
@@ -442,7 +442,7 @@ void Player::update_play_speed(const Transport * transport) {
   if (!mBeatBuffer || mBeatBuffer->size() < 3)
     return;
 
-  //XXX actually find closest index
+  //find the closest index
   int frame = mStretcher->frame();
   int beat_closest = closest_index(mBeatBuffer, frame);
 
@@ -486,7 +486,6 @@ void Player::sync_to_transport(const Transport * transport) {
     double speed = frames_in_beat / static_cast<double>(transport->frames_per_beat());
     mStretcher->speed(speed);
   }
-
 }
 
 double Player::pos_in_beat(int frame, unsigned int beat) const {
