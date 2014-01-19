@@ -22,35 +22,58 @@ $: << ".."
 require 'datajockey/base'
 require 'datajockey/db'
 require 'yaml'
+require 'shellwords'
+require 'mp3info'
 
 #connect to the database
 Datajockey::connect
 include Datajockey
 
+problems = File.open("problems.txt", "w")
+
+#ids = File.readlines("problems.txt").collect do |l|
+#  l.split(/\s/).first.to_i
+#end
+
+#AudioWork.find(ids).each do |w|
 AudioWork.all.each do |w|
   a = w.annotation_file_location
   f = w.audio_file_location
-  if f =~ /flac/
-    sr = `sndfile-info #{f} | grep "Sample Rate"`.chomp.split(" ").last.to_f
-  elsif f =~ /mp3/
-    sr = `exiftool #{f} | grep "Sample Rate"`.chomp.split(" ").last.to_f
-  end
-  if sr < 44100 or sr > 48000
-    puts "#{w.id} #{w.name} #{f} sample rate? #{sr}"
-    exit
-  end
-
-  yaml = YAML.load(File.read(File.expand_path(a)))
-  seconds = yaml['beat_locations']['time_points']
-  unless seconds and seconds.length
-    puts "skipping #{a}"
-    next
-  end
-  frames = seconds.collect do |s|
-    (s * sr).to_i
-  end
-  yaml['beat_locations'].delete('time_points')
-  yaml['beat_locations']['frames'] = frames
-  File.open(a, "w") { |f| f.puts yaml.to_yaml }
   puts a
+
+  begin
+    sr = nil
+    if f =~ /flac/
+      cmd = "sndfile-info"
+    elsif f =~ /mp3/
+      Mp3Info.open(f) do |info|
+        sr = info.samplerate
+      end
+    else
+      cmd = "exiftool"
+    end
+    unless sr
+      sr = `#{cmd} #{Shellwords.escape(f)} | grep "Sample Rate"`.chomp.split(" ").last.to_f
+    end
+    if sr == 0
+      puts "#{w.id} #{w.name} #{f} sample rate? #{sr}"
+      problems.puts "#{w.id} #{f} #{a} sample_rate=0"
+    end
+
+    yaml = YAML.load(File.read(File.expand_path(a)))
+    seconds = yaml['beat_locations']['time_points']
+    unless seconds and seconds.length
+      next
+    end
+    frames = seconds.collect do |s|
+      (s * sr).to_i
+    end
+    yaml['beat_locations'].delete('time_points')
+    yaml['beat_locations']['frames'] = frames
+    File.open(a, "w") { |f| f.puts yaml.to_yaml }
+  rescue => e
+    puts "problem #{e}"
+    problems.puts "#{w.id} #{f} #{a} #{e}"
+  end
 end
+
