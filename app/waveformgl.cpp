@@ -34,6 +34,7 @@ int WaveFormGL::frameAtX(GLfloat x) const {
 
 void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
   mAudioBuffer = buffer;
+  bzero(&mWaveformLines.front(), mWaveformLines.size() * sizeof(gl2triangles_t));
   if (!buffer)
     return;
 
@@ -44,7 +45,6 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
 }
  
 void WaveFormGL::setBeatBuffer(djaudio::BeatBufferPtr buffer) {
-  return;
   mBeatLines.clear();
   if (mZoomFull || !buffer)
     return;
