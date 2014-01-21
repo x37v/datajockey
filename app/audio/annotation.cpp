@@ -64,6 +64,28 @@ namespace {
    }
 }
 
+
+int djaudio::median(const std::deque<int>& values) {
+  if (values.size() == 0)
+    return 0;
+  if (values.size() == 1)
+    return values.at(0);
+
+  std::deque<int> sorted = values;
+  std::sort(sorted.begin(), sorted.end());
+  int mid = sorted.size() / 2;
+  if (sorted.size() % 2 == 1)
+    return sorted[mid];
+  return static_cast<int>(static_cast<double>(sorted[mid] + sorted[mid + 1]) / 2.0);
+}
+
+std::deque<int> BeatBuffer::distances() const {
+  std::deque<int> v;
+  for (unsigned int i = 1; i < size(); i++)
+    v.push_back(at(i) - at(i - 1));
+  return v;
+}
+
 bool Annotation::loadFile(QString& file_path) {
   //clear();
   if (mBeatBuffer) 

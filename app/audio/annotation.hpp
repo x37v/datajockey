@@ -10,7 +10,13 @@
 #include <QExplicitlySharedDataPointer>
 
 namespace djaudio {
-  class BeatBuffer : public std::deque<int>, public QSharedData { };
+  int median(const std::deque<int>& values);
+
+  class BeatBuffer : public std::deque<int>, public QSharedData {
+    public:
+      std::deque<int> distances() const;
+  };
+
   typedef QExplicitlySharedDataPointer<BeatBuffer> BeatBufferPtr;
 
   class Annotation : public QObject {
