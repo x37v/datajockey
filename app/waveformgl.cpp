@@ -1,5 +1,9 @@
 #include "waveformgl.h"
+#include "defines.hpp"
 #include <limits>
+
+#include <iostream>
+using namespace std;
 
 namespace {
   bool registered = false;
@@ -8,8 +12,12 @@ namespace {
 WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
 {
   mWaveformLines.resize(mWidth);
+  mWaveformColors.resize(mWidth);
+
+  for (int i = 0; i < mWaveformColors.size(); i++)
+    mWaveformColors[i].set(mWaveformColor);
   mXStartLast = -mWaveformLines.size();
-  mWaveformCalculator = new WaveformLineCalculator();
+  mWaveformCalculator = new WavedataCalculator();
   mCalculateThread = new QThread(this);
   mWaveformCalculator->moveToThread(mCalculateThread);
 
@@ -18,10 +26,10 @@ WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
     registered = true;
   }
 
-  connect(mWaveformCalculator, SIGNAL(lineChanged(int, gl2triangles_t)),
-      this, SLOT(setWaveformLine(int, gl2triangles_t)));
-  connect(this, SIGNAL(waveformLinesRequested(djaudio::AudioBufferPtr, int, int, int)),
-      mWaveformCalculator, SLOT(compute(djaudio::AudioBufferPtr, int, int, int)));
+  connect(mWaveformCalculator, &WavedataCalculator::lineChanged, this, &WaveFormGL::setWaveformLine);
+  connect(this, &WaveFormGL::waveformLinesRequested, mWaveformCalculator, &WavedataCalculator::compute);
+  connect(mWaveformCalculator, &WavedataCalculator::colorChanged, this, &WaveFormGL::setColor);
+  connect(this, &WaveFormGL::colorsRequested, mWaveformCalculator, &WavedataCalculator::computeColors);
 
   mCalculateThread->start();
 }
@@ -46,15 +54,21 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
  
 void WaveFormGL::setBeatBuffer(djaudio::BeatBufferPtr buffer) {
   mBeatLines.clear();
-  if (mZoomFull || !buffer)
+  if (!buffer)
     return;
 
-  mBeatLines.resize(buffer->size());
-  for (unsigned int i = 0; i < buffer->size(); i++) {
-    GLfloat x = static_cast<GLfloat>(buffer->at(i)) / mFramesPerLine;
-    mBeatLines[i].x0 = mBeatLines[i].x1 = x;
-    mBeatLines[i].y0 = -1;
-    mBeatLines[i].y1 = 1;
+  if (mZoomFull) {
+    for (int i = 0; i < mWaveformColors.size(); i++)
+      mWaveformColors[i].set(mWaveformColor);
+    emit(colorsRequested(buffer, mWaveformColors.size(), mFramesPerLine));
+  } else {
+    mBeatLines.resize(buffer->size());
+    for (unsigned int i = 0; i < buffer->size(); i++) {
+      GLfloat x = static_cast<GLfloat>(buffer->at(i)) / mFramesPerLine;
+      mBeatLines[i].x0 = mBeatLines[i].x1 = x;
+      mBeatLines[i].y0 = -1;
+      mBeatLines[i].y1 = 1;
+    }
   }
 }
 
@@ -67,6 +81,7 @@ void WaveFormGL::setPositionFrame(int frame) {
 void WaveFormGL::setWidth(int pixels) {
   mWidth = pixels;
   mWaveformLines.resize(mWidth);
+  mWaveformColors.resize(mWidth);
   mXStartLast = -mWaveformLines.size();
   updateLines();
 }
@@ -83,13 +98,20 @@ void WaveFormGL::draw() {
 
   //draw waveform
   glPushMatrix();
-  glColor4d(mWaveformColor.redF(), mWaveformColor.greenF(), mWaveformColor.blueF(), mWaveformColor.alphaF());
-  if (!mZoomFull)
+  if (!mZoomFull) {
+    glColor4d(mWaveformColor.redF(), mWaveformColor.greenF(), mWaveformColor.blueF(), mWaveformColor.alphaF());
     glTranslatef(-((mFramePosition / mFramesPerLine) - mHistoryWidth), 0.0, 0.0);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(2, GL_FLOAT, 0, &mWaveformLines.front());
+    glEnableClientState(GL_VERTEX_ARRAY);
+  } else {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(3, GL_FLOAT, 0, &mWaveformColors.front());
+  }
+  glVertexPointer(3, GL_FLOAT, 0, &mWaveformLines.front());
   glDrawArrays(GL_TRIANGLES, 0, mWaveformLines.size() * 6);
   glDisableClientState(GL_VERTEX_ARRAY);
+  if (mZoomFull)
+    glDisableClientState(GL_COLOR_ARRAY);
   
   if (mBeatLines.size()) {
     //draw beats
@@ -124,6 +146,12 @@ void WaveFormGL::setBeatLines(QVector<glline_t> lines) {
 void WaveFormGL::setWaveformLine(int lineIndex, gl2triangles_t value) {
   if (mWaveformLines.size())
     mWaveformLines[lineIndex % mWaveformLines.size()] = value;
+}
+
+void WaveFormGL::setColor(int lineIndex, QColor color) {
+  if (mWaveformColors.size() < lineIndex)
+    return;
+  mWaveformColors[lineIndex].set(color);
 }
 
 void WaveFormGL::framesPerLine(int v) {
@@ -189,14 +217,40 @@ namespace {
     }
     return (GLfloat)value;
   }
+  QColor color_interp(const QColor& start, const QColor& end, double dist) {
+   if (dist <= 0.0)
+    return start;
+   else if (dist >= 1.0)
+    return end;
+   QColor r;
+   double h,s,v;
+   double s_h, s_s, s_v;
+   double e_h, e_s, e_v;
+   start.getHsvF(&s_h, &s_s, &s_v);
+   end.getHsvF(&e_h, &e_s, &e_v);
+   s_h = dj::clamp(s_h, 0.0, 1.0);
+   s_s = dj::clamp(s_s, 0.0, 1.0);
+   s_v = dj::clamp(s_v, 0.0, 1.0);
+
+   e_h = dj::clamp(e_h, 0.0, 1.0);
+   e_s = dj::clamp(e_s, 0.0, 1.0);
+   e_v = dj::clamp(e_v, 0.0, 1.0);
+
+   h = dj::linear_interp(s_h, e_h, dist);
+   s = dj::linear_interp(s_s, e_s, dist);
+   v = dj::linear_interp(s_v, e_v, dist);
+
+   r.setHsvF(h, s, v);
+   return r;
+  }
 }
 
-WaveformLineCalculator::WaveformLineCalculator(QObject * parent) :
+WavedataCalculator::WavedataCalculator(QObject * parent) :
   QObject(parent)
 {
 }
 
-void WaveformLineCalculator::compute(djaudio::AudioBufferPtr buffer, int startLine, int endLine, int framesPerLine) {
+void WavedataCalculator::compute(djaudio::AudioBufferPtr buffer, int startLine, int endLine, int framesPerLine) {
   if (!buffer)
     return;
 
@@ -207,6 +261,35 @@ void WaveformLineCalculator::compute(djaudio::AudioBufferPtr buffer, int startLi
     gl2triangles_t triangle;
     triangle.rect(x, -height, x + 1.0, height);
     emit(lineChanged(i, triangle));
+  }
+}
+
+void WavedataCalculator::computeColors(djaudio::BeatBufferPtr beats, int lines, int framesPerLine) {
+  if (!beats)
+    return;
+  std::deque<int> dist = beats->distances();
+  std::deque<double> off;
+  int median = djaudio::median(dist);
+  
+  //XXX assumes sample rate
+  for (unsigned int i = 0; i < dist.size(); i++) 
+    off.push_back(dj::clamp(fabs(static_cast<double>(dist[i] - median)) / 44100.0, 0.0, 1.0));
+
+  unsigned int beat_index = 0;
+  double off_last = 1.0;
+  for (int i = 0; i < lines; i++) {
+    const int frame = i * framesPerLine;
+    double line_off = 0.0;
+    int num_beats = 0;
+    while(beat_index + 1 < beats->size() && beats->at(beat_index) < frame) {
+      line_off = std::max(off[beat_index], line_off);
+      beat_index++;
+      num_beats++;
+    }
+    if (num_beats == 0)
+      line_off = off_last;
+    emit(colorChanged(i, color_interp(mWaveformColor, mWaveformColorOff, line_off)));
+    off_last = line_off;
   }
 }
 

@@ -10,15 +10,33 @@
 #include "audiobuffer.hpp"
 #include "annotation.hpp"
 
-class WaveformLineCalculator;
+class WavedataCalculator;
+
+struct glcolor_t {
+  GLfloat red;
+  GLfloat green;
+  GLfloat blue;
+
+  glcolor_t(QColor color = Qt::yellow) { set(color); }
+  glcolor_t(const glcolor_t& other) {
+    red = other.red;
+    green = other.green;
+    blue = other.blue;
+  }
+  void set(QColor color) {
+    red = color.redF();
+    green = color.greenF();
+    blue = color.blueF();
+  }
+};
 
 struct gl2triangles_t{
-  GLfloat x0; GLfloat y0;
-  GLfloat x1; GLfloat y1;
-  GLfloat x2; GLfloat y2;
-  GLfloat x3; GLfloat y3;
-  GLfloat x4; GLfloat y4;
-  GLfloat x5; GLfloat y5;
+  GLfloat x0; GLfloat y0; GLfloat z0;
+  GLfloat x1; GLfloat y1; GLfloat z1;
+  GLfloat x2; GLfloat y2; GLfloat z2;
+  GLfloat x3; GLfloat y3; GLfloat z3;
+  GLfloat x4; GLfloat y4; GLfloat z4;
+  GLfloat x5; GLfloat y5; GLfloat z5;
   //rect
   void rect(GLfloat rectx0, GLfloat recty0, GLfloat rectx1, GLfloat recty1) {
     x0 = rectx0;
@@ -32,8 +50,22 @@ struct gl2triangles_t{
 
     x2 = x3 = rectx1;
     y2 = y3 = recty0;
+
+    z0 = z1 = z2 = z3 = z4 = z5 = 0;
+  }
+
+  void set(glcolor_t color) {
+    x0 = x1 = x2 = x3 = x4 = x5 = color.red;
+    y0 = y1 = y2 = y3 = y4 = y5 = color.green;
+    z0 = z1 = z2 = z3 = z4 = z5 = color.blue;
+  }
+
+  void set(QColor color) {
+    glcolor_t c(color);
+    set(c);
   }
 };
+
 Q_DECLARE_METATYPE(gl2triangles_t)
 
 //for drawing a waveform within a gl view
@@ -72,9 +104,11 @@ class WaveFormGL : public QObject
     void draw();
   signals:
     void waveformLinesRequested(djaudio::AudioBufferPtr buffer, int startLine, int endLine, int framesPerLine);
+    void colorsRequested(djaudio::BeatBufferPtr buffer, int lines, int framesPerLine);
   protected slots:
     void setBeatLines(QVector<glline_t> lines);
     void setWaveformLine(int lineIndex, gl2triangles_t value);
+    void setColor(int lineIndex, QColor color);
 
   private:
     djaudio::AudioBufferPtr mAudioBuffer;
@@ -85,28 +119,35 @@ class WaveFormGL : public QObject
     int mXStartLast;
 
     QThread * mCalculateThread;
-    WaveformLineCalculator * mWaveformCalculator;
+    WavedataCalculator * mWaveformCalculator;
 
     bool mZoomFull = true;
     QVector<gl2triangles_t> mWaveformLines;
+    QVector<gl2triangles_t> mWaveformColors;
     QVector<glline_t> mBeatLines;
     QColor cursorColor = Qt::white;
-    QColor mWaveformColor = Qt::red;
+    QColor mWaveformColor = Qt::darkRed;
     QColor mBeatColor = Qt::yellow;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;
 };
 
-class WaveformLineCalculator : public QObject {
+class WavedataCalculator : public QObject {
   Q_OBJECT
   public:
-    WaveformLineCalculator(QObject * parent = nullptr);
-    virtual ~WaveformLineCalculator() {}
+    WavedataCalculator(QObject * parent = nullptr);
+    virtual ~WavedataCalculator() {}
   public slots:
     void compute(djaudio::AudioBufferPtr buffer, int startLine, int endLine, int framesPerLine);
+    void computeColors(djaudio::BeatBufferPtr beats, int lines, int framesPerLine);
   signals:
     void lineChanged(int lineIndex, gl2triangles_t line);
+    void colorChanged(int lineIndex, QColor color);
+
+  private:
+    QColor mWaveformColor = Qt::darkRed;
+    QColor mWaveformColorOff = Qt::blue;
 };
 
 #endif // WAVEFORMGL_H

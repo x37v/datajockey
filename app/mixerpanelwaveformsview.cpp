@@ -5,6 +5,10 @@
 using std::cout;
 using std::endl;
 
+#ifndef GL_MULTISAMPLE
+#define GL_MULTISAMPLE  0x809D
+#endif
+
 namespace {
   const GLfloat divider_z = 0.5;
 }
@@ -71,8 +75,8 @@ void MixerPanelWaveformsView::initializeGL() {
 }
 
 void MixerPanelWaveformsView::paintGL() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   if (mWidth <= 0 || mHeight <= 0)
     return;
@@ -136,6 +140,7 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
   glLoadIdentity();
   glOrtho(0, mWidth, mHeight, 0, 0, 1);
   glMatrixMode(GL_MODELVIEW);
+  glEnable(GL_MULTISAMPLE);
   glDisable(GL_DEPTH_TEST);
 
   glViewport(0, 0, mWidth, mHeight);
