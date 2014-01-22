@@ -1,12 +1,14 @@
 #include "waveformgl.h"
 #include "defines.hpp"
 #include <limits>
+#include <cmath>
 
 #include <iostream>
 using namespace std;
 
 namespace {
   bool registered = false;
+  const double pi_over_2 = 1.5707963267948966;
 }
 
 WaveFormGL::WaveFormGL(QObject * parent) : QObject(parent)
@@ -222,6 +224,8 @@ namespace {
     return start;
    else if (dist >= 1.0)
     return end;
+
+   /*
    QColor r;
    double h,s,v;
    double s_h, s_s, s_v;
@@ -239,10 +243,32 @@ namespace {
    h = dj::linear_interp(s_h, e_h, dist);
    s = dj::linear_interp(s_s, e_s, dist);
    v = dj::linear_interp(s_v, e_v, dist);
+   */
 
-   r.setHsvF(h, s, v);
+   QColor r;
+   double h;
+   double s_h = start.hueF();
+   double e_h = end.hueF();
+
+   s_h = dj::clamp(s_h, 0.0, 1.0);
+   e_h = dj::clamp(e_h, 0.0, 1.0);
+
+   if (fabs(s_h - e_h) <= 0.5) {
+     h = dj::linear_interp(s_h, e_h, dist);
+   } else {
+     if (s_h > e_h)
+       e_h += 1.0;
+     else
+       s_h += 1.0;
+     h = dj::linear_interp(s_h, e_h, dist);
+     if (h > 1.0)
+       h -= 1.0;
+   }
+
+   r.setHsvF(h, 1.0, 1.0);
    return r;
   }
+
 }
 
 WavedataCalculator::WavedataCalculator(QObject * parent) :
@@ -272,8 +298,12 @@ void WavedataCalculator::computeColors(djaudio::BeatBufferPtr beats, int lines, 
   int median = djaudio::median(dist);
   
   //XXX assumes sample rate
-  for (unsigned int i = 0; i < dist.size(); i++) 
-    off.push_back(dj::clamp(fabs(static_cast<double>(dist[i] - median)) / 44100.0, 0.0, 1.0));
+  for (unsigned int i = 0; i < dist.size(); i++) {
+    double v = 20.0 * dj::clamp(static_cast<double>(dist[i] - median) / 44100.0, -1.0, 1.0);
+    //tend to more quickly go away from zero
+    v = dj::clamp(sin(v * pi_over_2), -1.0, 1.0);
+    off.push_back(v);
+  }
 
   unsigned int beat_index = 0;
   double off_last = 1.0;
@@ -282,13 +312,14 @@ void WavedataCalculator::computeColors(djaudio::BeatBufferPtr beats, int lines, 
     double line_off = 0.0;
     int num_beats = 0;
     while(beat_index + 1 < beats->size() && beats->at(beat_index) < frame) {
-      line_off = std::max(off[beat_index], line_off);
+      if (fabs(off[beat_index]) > fabs(line_off))
+        line_off = off[beat_index];
       beat_index++;
       num_beats++;
     }
     if (num_beats == 0)
       line_off = off_last;
-    emit(colorChanged(i, color_interp(mWaveformColor, mWaveformColorOff, line_off)));
+    emit(colorChanged(i, color_interp(mWaveformColorOffSlow, mWaveformColorOffFast, (line_off / 2.0) + 0.5)));
     off_last = line_off;
   }
 }

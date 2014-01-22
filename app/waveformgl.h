@@ -147,7 +147,8 @@ class WavedataCalculator : public QObject {
 
   private:
     QColor mWaveformColor = Qt::darkRed;
-    QColor mWaveformColorOff = Qt::blue;
+    QColor mWaveformColorOffSlow = Qt::yellow;
+    QColor mWaveformColorOffFast = Qt::magenta;
 };
 
 #endif // WAVEFORMGL_H
