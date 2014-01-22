@@ -4,7 +4,7 @@
 #include <cmath>
 
 namespace {
-  const int draw_timeout_ms = 100;
+  const int draw_timeout_ms = 200;
   const int color_timeout_ms = 600;
 }
 
@@ -34,14 +34,14 @@ void AudioLevelView::setLevel(int percent) {
 
   if (percent > mPercent) {
     mPercent = percent;
+    mDrawTimeout.start(draw_timeout_ms);
     update();
   }
-  mDrawTimeout.start(draw_timeout_ms);
 }
 
 void AudioLevelView::fadeOut() {
   if (mPercentLast > 0) {
-    mPercentLast -= 10;
+    mPercentLast -= 5;
     if (mPercentLast < 0)
       mPercentLast = 0;
     mPercent = mPercentLast;
