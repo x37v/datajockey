@@ -13,6 +13,7 @@ namespace dj {
       class Annotation : public QObject {
          Q_OBJECT
          public:
+            virtual ~Annotation();
             //TODO
             //void load_from_file(QString& file_path);
             

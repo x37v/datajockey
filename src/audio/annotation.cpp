@@ -57,6 +57,9 @@ namespace {
    }
 }
 
+Annotation::~Annotation() {
+}
+
 void Annotation::update_attributes(QHash<QString, QVariant>& attributes) {
    //XXX deal with descriptors
    foreach (const QString &str, attributes.keys()) {
