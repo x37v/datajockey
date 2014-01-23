@@ -37,6 +37,7 @@ s.playlists.each do |pl|
 
   puts "#{class_name}:#{tag_name}"
   s.playlist(pl["id"])["entry"].each do |e|
+    next unless e.is_a?(Hash)
     f = File.join(MUSIC_BASE, e["path"])
     w = AudioWork.where(:audio_file_location => f).first
     unless w
