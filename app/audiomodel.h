@@ -6,7 +6,7 @@
 #include <functional>
 #include "audioio.hpp"
 
-class ConsumeThread;
+class Consumer;
 class EngineQueryCommand;
 struct PlayerState;
 struct EnginePlayerState;
@@ -44,7 +44,8 @@ class AudioModel : public QObject {
     djaudio::AudioIO * mAudioIO = nullptr;
     djaudio::Master * mMaster = nullptr;
     int mNumPlayers = 2;
-    ConsumeThread * mConsumeThread;
+    QThread * mConsumeThread;
+    Consumer * mConsumer;
     bool mCueOnLoad = true;
 
     //holding on to a reference so that we only dealloc in the GUI thread
@@ -96,6 +97,18 @@ class EngineQueryCommand : public QObject, public djaudio::MasterCommand {
     QList<EnginePlayerState *> mPlayerStates;
     double mMasterBPM;
     double mMasterVolume;
+};
+
+class MasterSyncToPlayerCommand : public QObject, public djaudio::MasterIntCommand {
+  Q_OBJECT
+  public:
+    MasterSyncToPlayerCommand(int value);
+    virtual void execute();
+    virtual void execute_done();
+  signals:
+    void master_value_update(QString name, double value);
+  private:
+    double mBPM;
 };
 
 #endif // AUDIOMODEL_H

@@ -27,24 +27,15 @@ namespace {
   }
 }
 
-class ConsumeThread : public QThread {
+class Consumer : public QObject {
   private:
     EngineQueryCommand * mQueryCmd = nullptr;
     djaudio::Scheduler * mScheduler = nullptr;
-    QTimer * mTimer = nullptr;
   public:
-    ConsumeThread(djaudio::Scheduler * scheduler, EngineQueryCommand * cmd, QObject * parent) : 
-      QThread(parent),
+    Consumer(djaudio::Scheduler * scheduler, EngineQueryCommand * cmd, QObject * parent = nullptr) : 
+      QObject(parent),
       mQueryCmd(cmd),
-      mScheduler(scheduler)
-  {
-    mTimer = new QTimer(this);
-    //XXX if the UI becomes unresponsive, increase this value
-    mTimer->setInterval(15);
-
-    connect(mTimer, &QTimer::timeout, this, &ConsumeThread::grabCommands);
-    connect(this, &QThread::finished, mTimer, &QTimer::stop);
-  }
+      mScheduler(scheduler) { }
 
     void grabCommands() {
       mScheduler->execute_done_actions();
@@ -60,11 +51,6 @@ class ConsumeThread : public QThread {
         mScheduler->execute(mQueryCmd);
         mQueryCmd = nullptr;
       }
-    }
-
-    void run() {
-      mTimer->start();
-      exec();
     }
 };
 
@@ -106,7 +92,17 @@ AudioModel::AudioModel(QObject *parent) :
   }
 
   EngineQueryCommand * query = new EngineQueryCommand(mNumPlayers);
-  mConsumeThread = new ConsumeThread(mMaster->scheduler(), query, this);
+  mConsumeThread = new QThread(this);
+  mConsumer = new Consumer(mMaster->scheduler(), query);
+  mConsumer->moveToThread(mConsumeThread);
+
+  QTimer * consumetimer = new QTimer(this);
+  //XXX if the UI becomes unresponsive, increase this value
+  consumetimer->setInterval(15);
+
+  connect(consumetimer, &QTimer::timeout, mConsumer, &Consumer::grabCommands);
+  connect(mConsumeThread, &QThread::started, consumetimer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
+  connect(mConsumeThread, &QThread::finished, consumetimer, &QTimer::stop);
 
   connect(query, &EngineQueryCommand::playerValueUpdateBool, this, &AudioModel::playerSetValueBool);
   connect(query, &EngineQueryCommand::playerValueUpdateInt, this, &AudioModel::playerSetValueInt);
@@ -123,7 +119,7 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
       djaudio::Command * cmd = nullptr;
-      //relay from ConsumeThread
+      //relay from Consumer
       //we want to always relay it, no matter what the last value was
       if (name == "audio_level") {
         pstate->doubleValue[name] = v;
@@ -169,7 +165,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
       } else if (name == "seek_beat_relative") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
       } else if (name == "position_frame") {
-        emit (playerValueChangedInt(player, name, v)); //relaying from ConsumeThread
+        emit (playerValueChangedInt(player, name, v)); //relaying from Consumer
         pstate->intValue[name] = v;
         return nullptr;
       }
@@ -207,7 +203,7 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
           return nullptr;
         return new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PAUSE : djaudio::PlayerStateCommand::PLAY);
       } else if (name == "audible") {
-        pstate->boolValue[name] = v; //relaying from ConsumeThread
+        pstate->boolValue[name] = v; //relaying from Consumer
         emit(playerValueChangedBool(player, name, v));
         return nullptr;
       }
@@ -290,14 +286,26 @@ void AudioModel::masterSetValueDouble(QString name, double v) {
 }
 
 void AudioModel::masterSetValueInt(QString name, int v) {
+  if (name == "sync_to_player") {
+    MasterSyncToPlayerCommand * cmd = new MasterSyncToPlayerCommand(v);
+    queue(cmd);
+    /*
+    QObject::connect(
+        cmd, SIGNAL(master_value_update(QString, double)),
+        SLOT(relay_master_value_changed(QString, double)),
+        Qt::QueuedConnection);
+        */
+    return;
+  }
+
   auto it = mMasterIntValue.find(name);
   if (it != mMasterIntValue.end() && *it == v)
     return;
-  if (name == "volume")
+  if (name == "volume") {
     queue(new djaudio::MasterDoubleCommand(djaudio::MasterDoubleCommand::MAIN_VOLUME, to_double(v)));
-  else if (name == "cue_volume")
+  } else if (name == "cue_volume") {
     queue(new djaudio::MasterDoubleCommand(djaudio::MasterDoubleCommand::CUE_VOLUME, to_double(v)));
-  else {
+  } else {
     cout << "master name " << qPrintable(name) << v << endl;
     return;
   }
@@ -309,6 +317,18 @@ void AudioModel::masterSetValueBool(QString name, bool v) {
 }
 
 void AudioModel::masterTrigger(QString name) {
+  if (name.contains("sync_to_player")) {
+    int player = name.remove("sync_to_player").toInt();
+    if (!inRange(player))
+      return;
+    masterSetValueInt("sync_to_player", player);
+    PlayerState * pstate = mPlayerStates[player];
+    if (!pstate->boolValue["sync"]) {
+      pstate->boolValue["sync"] = true;
+      emit(playerValueChangedBool(player, "sync", true));
+    }
+    return;
+  }
   cout << "master name " << qPrintable(name) << endl;
 }
 
@@ -431,3 +451,17 @@ void EngineQueryCommand::execute_done() {
 
 bool EngineQueryCommand::store(djaudio::CommandIOData& /* data */) const { return false; }
 
+MasterSyncToPlayerCommand::MasterSyncToPlayerCommand(int value) :
+  QObject(NULL),
+  djaudio::MasterIntCommand(djaudio::MasterIntCommand::SYNC_TO_PLAYER, value), mBPM(0.0) {
+  }
+
+void MasterSyncToPlayerCommand::execute() {
+  //execute the normal command then grab the bpm
+  djaudio::MasterIntCommand::execute();
+  mBPM = master()->transport()->bpm();
+}
+
+void MasterSyncToPlayerCommand::execute_done() {
+  emit(master_value_update("bpm", mBPM));
+}

@@ -27,6 +27,9 @@ MixerPanelView::MixerPanelView(QWidget *parent) :
         [this, i] (QString name) { emit(playerTriggered(i, name)); });
   }
 
+  connect(ui->syncToPlayer0, &QPushButton::clicked, [this] { emit(masterTriggered("sync_to_player0")); });
+  connect(ui->syncToPlayer1, &QPushButton::clicked, [this] { emit(masterTriggered("sync_to_player1")); });
+
   connect(ui->volume, &QSlider::valueChanged,
       [this] (int value) { emit(masterValueChangedInt("volume", value)); });
   connect(ui->tempoBox, 
