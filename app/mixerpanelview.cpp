@@ -91,6 +91,8 @@ void MixerPanelView::masterSetValueBool(QString name, bool value) {
 void MixerPanelView::masterSetValueDouble(QString name, double value) {
   if (name == "audio_level")
     ui->level->setLevel(static_cast<int>(value * 100.0));
+  else if (name == "bpm")
+    ui->tempoBox->setValue(value);
 }
 
 bool MixerPanelView::inRange(int player) {

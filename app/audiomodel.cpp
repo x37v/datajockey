@@ -276,12 +276,15 @@ void AudioModel::masterSetValueDouble(QString name, double v) {
   if (name == "bpm") {
     queue(new djaudio::TransportBPMCommand(mMaster->transport(), v));
   } else if (name == "update_bpm") {
-    //XXX do nothing for now
+    if (mMasterDoubleValue["bpm"] != v) {
+      mMasterDoubleValue["bpm"] = v;
+      emit(masterValueChangedDouble("bpm", v));
+    }
     return;
   } else {
-    cout << "master name " << qPrintable(name) << v << endl;
     return;
   }
+  cout << "master name " << qPrintable(name) << v << endl;
   mMasterDoubleValue[name] = v;
 }
 
@@ -289,12 +292,9 @@ void AudioModel::masterSetValueInt(QString name, int v) {
   if (name == "sync_to_player") {
     MasterSyncToPlayerCommand * cmd = new MasterSyncToPlayerCommand(v);
     queue(cmd);
-    /*
     QObject::connect(
-        cmd, SIGNAL(master_value_update(QString, double)),
-        SLOT(relay_master_value_changed(QString, double)),
-        Qt::QueuedConnection);
-        */
+        cmd, &MasterSyncToPlayerCommand::masterValueUpdateDouble,
+        this, &AudioModel::masterSetValueDouble);
     return;
   }
 
@@ -445,7 +445,7 @@ void EngineQueryCommand::execute_done() {
     emit(playerValueUpdateInt(i, "position_frame", ps->frame_current));
     emit(playerValueUpdateBool(i, "audible", ps->audible));
   }
-  emit(masterValueUpdateDouble("update_bpm", mMasterBPM));
+  //emit(masterValueUpdateDouble("update_bpm", mMasterBPM));
   emit(masterValueUpdateDouble("audio_level", mMasterVolume));
 }
 
@@ -463,5 +463,5 @@ void MasterSyncToPlayerCommand::execute() {
 }
 
 void MasterSyncToPlayerCommand::execute_done() {
-  emit(master_value_update("bpm", mBPM));
+  emit(masterValueUpdateDouble("update_bpm", mBPM));
 }

@@ -106,7 +106,7 @@ class MasterSyncToPlayerCommand : public QObject, public djaudio::MasterIntComma
     virtual void execute();
     virtual void execute_done();
   signals:
-    void master_value_update(QString name, double value);
+    void masterValueUpdateDouble(QString name, double value);
   private:
     double mBPM;
 };
