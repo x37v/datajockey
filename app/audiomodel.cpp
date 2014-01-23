@@ -82,6 +82,8 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->intValue["position_frame"] = 0;
     pstate->intValue["sample_rate"] = 44100;
 
+    pstate->intValue["updates_since_sync"] = 0;
+
     pstate->boolValue["sync"] = p->syncing();
     pstate->boolValue["play"] = p->play_state() == djaudio::Player::PLAY;
     pstate->boolValue["cue"] = p->out_state() == djaudio::Player::CUE;
@@ -133,7 +135,10 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
       if (name == "speed")
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
       else if (name == "update_speed") {
-        //XXX what to do?
+        if (pstate->boolValue["sync"] && pstate->intValue["updates_since_sync"] > 2 && pstate->doubleValue["speed"] != v) {
+          emit(playerValueChangedDouble(player, "speed", v));
+          pstate->doubleValue["speed"] = v;
+        }
         return nullptr;
       }
       if (cmd) {
@@ -165,6 +170,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
       } else if (name == "seek_beat_relative") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
       } else if (name == "position_frame") {
+        pstate->intValue["updates_since_sync"] += 1;
         emit (playerValueChangedInt(player, name, v)); //relaying from Consumer
         pstate->intValue[name] = v;
         return nullptr;
@@ -191,9 +197,10 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::OUT_CUE : djaudio::PlayerStateCommand::OUT_MAIN);
       else if (name == "play")
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PLAY : djaudio::PlayerStateCommand::PAUSE);
-      else if (name == "sync")
+      else if (name == "sync") {
+        pstate->intValue["updates_since_sync"] = 0;
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::SYNC : djaudio::PlayerStateCommand::NO_SYNC);
-      else if (name == "mute")
+      } else if (name == "mute")
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
       else if (name == "seeking") {
         pstate->boolValue["seeking"] = v;
@@ -280,11 +287,11 @@ void AudioModel::masterSetValueDouble(QString name, double v) {
       mMasterDoubleValue["bpm"] = v;
       emit(masterValueChangedDouble("bpm", v));
     }
-    return;
+    return; 
   } else {
+    cout << "master name " << qPrintable(name) << v << endl;
     return;
   }
-  cout << "master name " << qPrintable(name) << v << endl;
   mMasterDoubleValue[name] = v;
 }
 

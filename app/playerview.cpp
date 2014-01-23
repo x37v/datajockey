@@ -14,6 +14,8 @@ PlayerView::PlayerView(QWidget *parent) :
       static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
       [this] (double v) { emit(valueChangedDouble("speed", v)); });
 
+  ui->speedBox->setEnabled(false);
+
   //connect up ui elements
   std::map<QAbstractSlider *, QString> sliders = {
     {ui->volume, "volume"},
@@ -81,8 +83,10 @@ void PlayerView::setValueBool(QString name, bool v) {
     ui->cue->setChecked(v);
   else if (name == "play")
     ui->playPause->setChecked(v);
-  else if (name == "sync")
+  else if (name == "sync") {
     ui->sync->setChecked(v);
+    ui->speedBox->setEnabled(!v);
+  }
 }
 
 PlayerView::~PlayerView()
