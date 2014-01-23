@@ -173,7 +173,7 @@ void MixerPanelWaveformsView::mousePressEvent(QMouseEvent * event) {
   }
 }
 
-void MixerPanelWaveformsView::mouseReleaseEvent(QMouseEvent * event) {
+void MixerPanelWaveformsView::mouseReleaseEvent(QMouseEvent * /* event */) {
   if (mSeekingWaveform < 0)
     return;
   emit(playerValueChangedBool(mSeekingWaveform / 2, "seeking", false));

@@ -32,6 +32,11 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(audio, &AudioModel::masterValueChangedDouble, mixer, &MixerPanelView::masterSetValueDouble);
   connect(audio, &AudioModel::masterValueChangedInt,    mixer, &MixerPanelView::masterSetValueInt);
   connect(audio, &AudioModel::masterValueChangedBool,   mixer, &MixerPanelView::masterSetValueBool);
+
+  ui->topSplitter->setStretchFactor(0,0);
+  ui->topSplitter->setStretchFactor(1,1);
+  ui->leftSplitter->setStretchFactor(0,1);
+  ui->leftSplitter->setStretchFactor(1,0);
 }
 
 void MainWindow::loader(AudioLoader * loader) {
