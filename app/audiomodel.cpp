@@ -132,9 +132,10 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
       auto it = pstate->doubleValue.find(name);
       if (it != pstate->doubleValue.end() && *it == v)
         return nullptr;
-      if (name == "speed")
-        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
-      else if (name == "update_speed") {
+      if (name == "speed") {
+        if (!pstate->boolValue["sync"])
+          cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
+      } else if (name == "update_speed") {
         if (pstate->boolValue["sync"] && pstate->intValue["updates_since_sync"] > 2 && pstate->doubleValue["speed"] != v) {
           emit(playerValueChangedDouble(player, "speed", v));
           pstate->doubleValue["speed"] = v;
