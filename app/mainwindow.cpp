@@ -11,6 +11,7 @@
 #include <QSqlQueryModel>
 #include <QToolButton>
 #include <QSettings>
+#include <QTimer>
 
 MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QMainWindow(parent),
@@ -71,6 +72,7 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
       return;
     ui->workViews->removeTab(index);
   });
+  QTimer::singleShot(0, this, SLOT(readSettings()));
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -88,11 +90,48 @@ void MainWindow::loader(AudioLoader * loader) {
 
 void MainWindow::readSettings() {
   QSettings settings;
-  settings.setValue("geometry", saveGeometry());
+  settings.beginGroup("WorkFilterModelCollection");
+  const int count = settings.beginReadArray("filters");
+  for (int i = 0; i < count; i++) {
+    settings.setArrayIndex(i);
+    QString label("filtered");
+    if (settings.contains("label"))
+      label = settings.value("label").toString();
+    addFilterTab(settings.value("expression").toString(), label);
+  }
+  settings.endArray();
+  settings.endGroup();
 }
 
 void MainWindow::writeSettings() {
   ui->allWorks->writeSettings();
+
+  QSettings settings;
+
+  //settings.setValue("geometry", saveGeometry());
+
+  settings.beginGroup("WorkFilterModelCollection");
+
+  int valid_index = 0;
+  settings.beginWriteArray("filters");
+  for (int i = 1; i < ui->workViews->count(); i++) {
+    //make sure it is not the all view and the expression isn't empty
+    QWidget * widget = ui->workViews->widget(i);
+    WorkFilterView * view = dynamic_cast<WorkFilterView *>(widget);
+    if (!view)
+      continue;
+    QString expression = view->filterExpression();
+    if (expression.isEmpty())
+      continue;
+
+    settings.setArrayIndex(valid_index);
+    valid_index++;
+    settings.setValue("expression", expression);
+    settings.setValue("label", ui->workViews->tabText(ui->workViews->indexOf(view)));
+  }
+  settings.endArray();
+
+  settings.endGroup();
 }
 
 void MainWindow::addFilterTab(QString filterExpression, QString title) {

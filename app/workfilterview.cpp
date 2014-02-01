@@ -34,7 +34,6 @@ void WorkFilterView::setModel(WorkFilterModel * model) {
   });
 }
 
-WorkFilterView::~WorkFilterView()
-{
-  delete ui;
-}
+QString WorkFilterView::filterExpression() const { return ui->filterEdit->toPlainText(); }
+WorkFilterView::~WorkFilterView() { delete ui; }
+

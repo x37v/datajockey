@@ -18,6 +18,7 @@ class WorkFilterView : public QWidget
     explicit WorkFilterView(QWidget *parent = 0);
     ~WorkFilterView();
     void setModel(WorkFilterModel * model);
+    QString filterExpression() const;
   signals:
     void workSelected(int workid);
 
