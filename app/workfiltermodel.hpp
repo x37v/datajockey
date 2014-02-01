@@ -14,6 +14,8 @@ class WorkFilterModel : public QSortFilterProxyModel {
     WorkFilterModel(DB * db, QObject * parent = NULL);
     virtual ~WorkFilterModel();
 
+    QString filterExpression() const { return mFilterExpression; }
+
   public slots:
     void setFilterExpression(QString expression);
     void setCurrentBPM(double bpm);
@@ -27,7 +29,7 @@ class WorkFilterModel : public QSortFilterProxyModel {
     void filterExpressionError(QString expression);
     void sqlChanged(QString sql_expression);
     void applied();
-
+ 
   private:
     void applyFilterExpression(QString expression) throw(std::runtime_error);
     QString mFilterExpression;

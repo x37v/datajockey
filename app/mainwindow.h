@@ -10,6 +10,7 @@ namespace Ui {
 class DB;
 class AudioModel;
 class AudioLoader;
+class WorkFilterModelCollection;
 
 class MainWindow : public QMainWindow
 {
@@ -23,8 +24,10 @@ class MainWindow : public QMainWindow
     void workSelected(int workid);
 
   private:
+    void addFilterTab(QString filterExpression = QString(), QString title = "filtered");
     Ui::MainWindow *ui;
     DB * mDB;
+    WorkFilterModelCollection * mFilterCollection;
 };
 
 #endif // MAINWINDOW_H

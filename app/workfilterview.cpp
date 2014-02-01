@@ -17,6 +17,8 @@ WorkFilterView::WorkFilterView(QWidget *parent) :
 
 void WorkFilterView::setModel(WorkFilterModel * model) {
   ui->worksTable->setModel(model);
+  ui->filterEdit->setPlainText(model->filterExpression());
+
   connect(ui->applyButton, &QPushButton::clicked, [this, model]() {
     model->setFilterExpression(ui->filterEdit->toPlainText());
   });
@@ -25,6 +27,10 @@ void WorkFilterView::setModel(WorkFilterModel * model) {
     QMessageBox::warning(this,
         "invalid filter",
         "invalid filter expression: " + message);
+  });
+
+  connect(model, &WorkFilterModel::filterExpressionChanged, [this] (QString expression) {
+    ui->filterEdit->setPlainText(expression);
   });
 }
 

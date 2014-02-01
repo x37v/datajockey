@@ -56,16 +56,12 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   newTabButton->setText("+");
   ui->workViews->setCornerWidget(newTabButton);
 
-  WorkFilterModelCollection * filterCollection = new WorkFilterModelCollection(db, this);
-  connect(audio, &AudioModel::masterValueChangedDouble, filterCollection, &WorkFilterModelCollection::masterSetValueDouble);
+  mFilterCollection = new WorkFilterModelCollection(db, this);
+  connect(audio, &AudioModel::masterValueChangedDouble, mFilterCollection, &WorkFilterModelCollection::masterSetValueDouble);
   //XXX do history
 
-  connect(newTabButton, &QToolButton::clicked, [this, filterCollection]() {
-    WorkFilterView * view = new WorkFilterView(this);
-    WorkFilterModel * model = filterCollection->newFilterModel(view);
-    view->setModel(model);
-    ui->workViews->addTab(view, "filtered");
-    connect(view, &WorkFilterView::workSelected, this, &MainWindow::workSelected);
+  connect(newTabButton, &QToolButton::clicked, [this]() {
+    addFilterTab();
   });
 
   connect(ui->workViews, &QTabWidget::tabCloseRequested, [this] (int index) {
@@ -89,4 +85,13 @@ void MainWindow::loader(AudioLoader * loader) {
 MainWindow::~MainWindow()
 {
   delete ui;
+}
+
+void MainWindow::addFilterTab(QString filterExpression, QString title) {
+  WorkFilterView * view = new WorkFilterView(this);
+  WorkFilterModel * model = mFilterCollection->newFilterModel(view);
+  model->setFilterExpression(filterExpression);
+  view->setModel(model);
+  ui->workViews->addTab(view, title);
+  connect(view, &WorkFilterView::workSelected, this, &MainWindow::workSelected);
 }
