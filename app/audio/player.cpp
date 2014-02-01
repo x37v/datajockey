@@ -446,7 +446,7 @@ void Player::update_play_speed(const Transport * transport) {
   int frame = mStretcher->frame();
   int beat_closest = closest_index(mBeatBuffer, frame);
 
-  if (beat_closest + 2 >= mBeatBuffer->size()) {
+  if (beat_closest + 2 >= static_cast<int>(mBeatBuffer->size())) {
     beat_closest = mBeatBuffer->size() - 3;
     frame = mBeatBuffer->at(beat_closest);
   }

@@ -1,5 +1,5 @@
-#ifndef RENAMEABLE_TAB_BAR_HPP
-#define RENAMEABLE_TAB_BAR_HPP
+#ifndef RENAMEABLE_TAB_WIDGET_H
+#define RENAMEABLE_TAB_WIDGET_H
 
 #include <QTabBar>
 #include <QTabWidget>
@@ -8,8 +8,6 @@ class RenameableTabWidget : public QTabWidget {
   Q_OBJECT
   public:
     RenameableTabWidget(QWidget * parent = NULL);
-  public slots:
-    void close_tab(int index);
 };
 
 class RenameableTabBar : public QTabBar {

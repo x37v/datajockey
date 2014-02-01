@@ -75,7 +75,8 @@ SOURCES += main.cpp\
     mixerpanelwaveformsview.cpp \
     audiolevelview.cpp \
     workfiltermodel.cpp \
-    workfiltermodelcollection.cpp
+    workfiltermodelcollection.cpp \
+    renameabletabwidget.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -115,7 +116,8 @@ HEADERS  += mainwindow.h \
     mixerpanelwaveformsview.h \
     audiolevelview.h \
     workfiltermodel.hpp \
-    workfiltermodelcollection.hpp
+    workfiltermodelcollection.hpp \
+    renameabletabwidget.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

@@ -66,7 +66,7 @@
         </property>
        </widget>
       </widget>
-      <widget class="QTabWidget" name="workViews">
+      <widget class="RenameableTabWidget" name="workViews">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -146,6 +146,12 @@
    <class>WorksTableView</class>
    <extends>QTableView</extends>
    <header>workstableview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RenameableTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>renameabletabwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

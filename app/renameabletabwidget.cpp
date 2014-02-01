@@ -1,4 +1,4 @@
-#include "renameabletabbar.hpp"
+#include "renameabletabwidget.h"
 
 #include <QInputDialog>
 #include <QMouseEvent>
@@ -8,12 +8,6 @@ RenameableTabWidget::RenameableTabWidget(QWidget * parent) :
 {
   RenameableTabBar * bar = new RenameableTabBar(this);
   setTabBar(bar);
-}
-
-
-void RenameableTabWidget::close_tab(int index) {
-  if (tabsClosable())
-    tabBar()->removeTab(index);
 }
 
 RenameableTabBar::RenameableTabBar(QWidget *parent) :
