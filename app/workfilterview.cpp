@@ -2,6 +2,7 @@
 #include "ui_workfilterview.h"
 #include "db.h"
 #include "workstableview.h"
+#include <QMessageBox>
 
 WorkFilterView::WorkFilterView(QWidget *parent) :
   QWidget(parent),
@@ -15,6 +16,12 @@ void WorkFilterView::setModel(WorkFilterModel * model) {
   ui->worksTable->setModel(model);
   connect(ui->applyButton, &QPushButton::clicked, [this, model]() {
     model->setFilterExpression(ui->filterEdit->toPlainText());
+  });
+
+  connect(model, &WorkFilterModel::filterExpressionError, [this] (QString message) {
+    QMessageBox::warning(this,
+        "invalid filter",
+        "invalid filter expression: " + message);
   });
 }
 
