@@ -8,10 +8,11 @@ WorkFilterView::WorkFilterView(QWidget *parent) :
   ui(new Ui::WorkFilterView)
 {
   ui->setupUi(this);
+  connect(ui->worksTable, &WorksTableView::workSelected, this, &WorkFilterView::workSelected);
 }
 
-void WorkFilterView::setDB(DB * db) {
-  ui->worksTable->setDB(db);
+void WorkFilterView::setModel(QAbstractItemModel * model) {
+  ui->worksTable->setModel(model);
 }
 
 WorkFilterView::~WorkFilterView()

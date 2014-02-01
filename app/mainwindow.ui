@@ -92,11 +92,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="workfilter">
-        <attribute name="title">
-         <string>works</string>
-        </attribute>
-       </widget>
       </widget>
      </widget>
     </item>

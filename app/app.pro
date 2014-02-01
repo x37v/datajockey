@@ -73,7 +73,9 @@ SOURCES += main.cpp\
     loaderthread.cpp \
     waveformgl.cpp \
     mixerpanelwaveformsview.cpp \
-    audiolevelview.cpp
+    audiolevelview.cpp \
+    workfiltermodel.cpp \
+    workfiltermodelcollection.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -111,7 +113,9 @@ HEADERS  += mainwindow.h \
     loaderthread.h \
     waveformgl.h \
     mixerpanelwaveformsview.h \
-    audiolevelview.h
+    audiolevelview.h \
+    workfiltermodel.hpp \
+    workfiltermodelcollection.hpp
 
 FORMS    += mainwindow.ui \
     playerview.ui \

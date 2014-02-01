@@ -12,18 +12,8 @@ WorksTableView::WorksTableView(QWidget *parent) :
 {
 }
 
-void WorksTableView::setDB(DB * db) {
-  mDB = db;
-
-  QSqlQueryModel *model = new QSqlQueryModel(this);
-  model->setQuery(db->work_table_query(), db->get());
-
-  //QSortFilterProxyModel * sortable = new WorksSortFilterProxyModel(model);
-  QSortFilterProxyModel * sortable = new QSortFilterProxyModel(model);
-  sortable->setSourceModel(model);
-  sortable->setSortCaseSensitivity(Qt::CaseInsensitive);
-
-  setModel(sortable);
+void WorksTableView::setModel(QAbstractItemModel * model) {
+  QTableView::setModel(model);
 
   //hide the id
   setColumnHidden(0, true);

@@ -1,5 +1,5 @@
 #include "workfiltermodel.hpp"
-#include "db.hpp"
+#include "db.h"
 #include <stdexcept>
 #include <QRegExp>
 #include <QStringList>
@@ -11,8 +11,6 @@
 using std::cout;
 using std::cerr;
 using std::endl;
-
-using namespace dj::model;
 
 namespace {
   //remove leading & trailing whitespace, and surrounding quotes
@@ -187,7 +185,7 @@ namespace {
   }
 }
 
-WorkFilterModel::WorkFilterModel(dj::model::DB * db, QObject * parent) :
+WorkFilterModel::WorkFilterModel(DB * db, QObject * parent) :
   QSortFilterProxyModel(parent),
   mCurrentBPM(120.0),
   mDB(db)
@@ -201,7 +199,7 @@ WorkFilterModel::WorkFilterModel(dj::model::DB * db, QObject * parent) :
 WorkFilterModel::~WorkFilterModel() {
 }
 
-void WorkFilterModel::set_filter_expression(QString expression) {
+void WorkFilterModel::setFilterExpression(QString expression) {
   //XXX just for now, should probably have some sort of 'dirty' flag if we care about
   //current_bpm and other dynamic elements
   //if (mFilterExpression == expression)
@@ -209,35 +207,35 @@ void WorkFilterModel::set_filter_expression(QString expression) {
 
   mFilterExpression = expression;
   try {
-    apply_filter_expression(expression);
-    emit(filter_expression_changed(expression));
-    emit(sql_changed(mSQLExpression));
+    applyFilterExpression(expression);
+    emit(filterExpressionChanged(expression));
+    emit(sqlChanged(mSQLExpression));
   } catch (std::runtime_error& e) {
-    emit(filter_expression_changed(expression));
+    emit(filterExpressionChanged(expression));
     mSQLExpression = QString();
-    emit(sql_changed(mSQLExpression));
-    emit(filter_expression_error(QString::fromStdString(e.what())));
+    emit(sqlChanged(mSQLExpression));
+    emit(filterExpressionError(QString::fromStdString(e.what())));
     //cerr << e.what() << endl;
   }
 }
 
-void WorkFilterModel::set_current_bpm(double bpm) {
+void WorkFilterModel::setCurrentBPM(double bpm) {
   mCurrentBPM = bpm;
   if (mFilterExpression.isEmpty() || !mFilterExpression.contains(current_bpm_presense))
     return;
 
   try {
-    apply_filter_expression(mFilterExpression);
+    applyFilterExpression(mFilterExpression);
   } catch (std::runtime_error& e) {
     //XXX
   }
 }
 
-void WorkFilterModel::update_history(int /*work_id*/, QDateTime /*played_at*/) {
+void WorkFilterModel::updateHistory(int /*work_id*/, QDateTime /*played_at*/) {
   if (mFilterExpression.isEmpty())
     return;
   try {
-    apply_filter_expression(mFilterExpression);
+    applyFilterExpression(mFilterExpression);
     //XXX QSqlQueryModel is read only, we can subclass it, make it read write, the we can update it
     //mQueryModel->query();
   } catch (std::runtime_error& e) {
@@ -245,12 +243,12 @@ void WorkFilterModel::update_history(int /*work_id*/, QDateTime /*played_at*/) {
   }
 }
 
-bool WorkFilterModel::valid_filter_expression(QString /* expression */) {
+bool WorkFilterModel::validFilterExpression(QString /* expression */) {
   //XXX implement!!
   return true;
 }
 
-void WorkFilterModel::apply_filter_expression(QString expression) throw(std::runtime_error) {
+void WorkFilterModel::applyFilterExpression(QString expression) throw(std::runtime_error) {
   QString sql_expr = filter_to_sql(mDB, expression, mCurrentBPM);
   mSQLExpression = sql_expr;
 

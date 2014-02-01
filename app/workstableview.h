@@ -13,12 +13,10 @@ class WorksTableView : public QTableView
 
   public:
     explicit WorksTableView(QWidget *parent = 0);
-    void setDB(DB * db);
+    void setModel(QAbstractItemModel * model);
     ~WorksTableView();
   signals:
     void workSelected(int workid);
-  private:
-    DB * mDB = nullptr;
 };
 
 class WorksSortFilterProxyModel : public QSortFilterProxyModel
