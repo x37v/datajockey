@@ -2,7 +2,7 @@
 #define WORKFILTERVIEW_H
 
 #include <QWidget>
-#include <QAbstractItemModel>
+#include "workfiltermodel.hpp"
 
 namespace Ui {
   class WorkFilterView;
@@ -17,7 +17,7 @@ class WorkFilterView : public QWidget
   public:
     explicit WorkFilterView(QWidget *parent = 0);
     ~WorkFilterView();
-    void setModel(QAbstractItemModel * model);
+    void setModel(WorkFilterModel * model);
   signals:
     void workSelected(int workid);
 

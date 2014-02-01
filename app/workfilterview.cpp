@@ -11,8 +11,11 @@ WorkFilterView::WorkFilterView(QWidget *parent) :
   connect(ui->worksTable, &WorksTableView::workSelected, this, &WorkFilterView::workSelected);
 }
 
-void WorkFilterView::setModel(QAbstractItemModel * model) {
+void WorkFilterView::setModel(WorkFilterModel * model) {
   ui->worksTable->setModel(model);
+  connect(ui->applyButton, &QPushButton::clicked, [this, model]() {
+    model->setFilterExpression(ui->filterEdit->toPlainText());
+  });
 }
 
 WorkFilterView::~WorkFilterView()
