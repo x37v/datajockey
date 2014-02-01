@@ -3,6 +3,8 @@
 #include <QSqlQueryModel>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+#include <QSettings>
+#include <QTimer>
 
 #include <iostream>
 using namespace std;
@@ -10,6 +12,8 @@ using namespace std;
 WorksTableView::WorksTableView(QWidget *parent) :
   QTableView(parent)
 {
+  //schedule the settings reading to happen after view construction
+  QTimer::singleShot(0, this, SLOT(readSettings()));
 }
 
 void WorksTableView::setModel(QAbstractItemModel * model) {
@@ -33,6 +37,21 @@ void WorksTableView::setModel(QAbstractItemModel * model) {
 }
 
 WorksTableView::~WorksTableView() { }
+
+void WorksTableView::readSettings() {
+  QSettings settings;
+  settings.beginGroup("WorksTableView");
+  if (settings.contains("headerState"))
+    horizontalHeader()->restoreState(settings.value("headerState").toByteArray()); 
+  settings.endGroup();
+}
+
+void WorksTableView::writeSettings() {
+  QSettings settings;
+  settings.beginGroup("WorksTableView");
+  settings.setValue("headerState", horizontalHeader()->saveState());
+  settings.endGroup();
+}
 
 WorksSortFilterProxyModel::WorksSortFilterProxyModel(QObject * parent) : QSortFilterProxyModel(parent)
 {

@@ -6,11 +6,20 @@
 #include "db.h"
 #include "audiomodel.h"
 #include "audioloader.h"
+#include "defines.hpp"
 
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
   QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+  a.setApplicationVersion(dj::version_string);
+  a.setApplicationName("Data Jockey " + a.applicationVersion());
+
+  //for global qsettings
+  a.setOrganizationName("xnor");
+  a.setOrganizationDomain("x37v.info");
+  a.setApplicationName("DataJockey");
 
   QPalette palette;
   palette.setColor(QPalette::Window, QColor(53,53,53));
@@ -43,7 +52,8 @@ int main(int argc, char *argv[])
   MainWindow w(db, audio);
   w.loader(loader);
 
-  QObject::connect(&a, &QApplication::aboutToQuit, [&audio] {
+  QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w] {
+    w.writeSettings();
     audio->run(false);
     QThread::msleep(200);
   });

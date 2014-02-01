@@ -10,6 +10,7 @@
 
 #include <QSqlQueryModel>
 #include <QToolButton>
+#include <QSettings>
 
 MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QMainWindow(parent),
@@ -72,6 +73,8 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   });
 }
 
+MainWindow::~MainWindow() { delete ui; }
+
 void MainWindow::loader(AudioLoader * loader) {
   MixerPanelView * mixer = ui->mixer;
   connect(mixer, &MixerPanelView::playerTriggered, loader, &AudioLoader::playerTrigger);
@@ -83,9 +86,13 @@ void MainWindow::loader(AudioLoader * loader) {
   connect(loader, &AudioLoader::playerBuffersChanged, mixer, &MixerPanelView::playerSetBuffers);
 }
 
-MainWindow::~MainWindow()
-{
-  delete ui;
+void MainWindow::readSettings() {
+  QSettings settings;
+  settings.setValue("geometry", saveGeometry());
+}
+
+void MainWindow::writeSettings() {
+  ui->allWorks->writeSettings();
 }
 
 void MainWindow::addFilterTab(QString filterExpression, QString title) {

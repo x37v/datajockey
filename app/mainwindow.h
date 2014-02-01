@@ -20,6 +20,9 @@ class MainWindow : public QMainWindow
     explicit MainWindow(DB* db, AudioModel * audio, QWidget *parent = 0);
     void loader(AudioLoader * loader);
     ~MainWindow();
+  public slots:
+    void readSettings();
+    void writeSettings();
   signals:
     void workSelected(int workid);
 
