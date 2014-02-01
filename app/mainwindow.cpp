@@ -52,6 +52,9 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   ui->leftSplitter->setStretchFactor(0,1);
   ui->leftSplitter->setStretchFactor(1,0);
 
+  //remove the close button for the 'all works' tab
+  ui->workViews->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
+
   QToolButton * newTabButton = new QToolButton(ui->workViews);
   newTabButton->setText("+");
   ui->workViews->setCornerWidget(newTabButton);
@@ -60,9 +63,7 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(audio, &AudioModel::masterValueChangedDouble, mFilterCollection, &WorkFilterModelCollection::masterSetValueDouble);
   //XXX do history
 
-  connect(newTabButton, &QToolButton::clicked, [this]() {
-    addFilterTab();
-  });
+  connect(newTabButton, &QToolButton::clicked, [this]() { addFilterTab(); });
 
   connect(ui->workViews, &QTabWidget::tabCloseRequested, [this] (int index) {
     if (index == 0) //don't allow the first tab to be closed
