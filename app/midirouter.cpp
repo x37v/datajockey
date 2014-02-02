@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <map>
+#include <stdexcept>
 
 namespace {
   typedef QSharedPointer<MidiMap> MidiMapPtr;
@@ -35,7 +36,7 @@ namespace {
   enum mapping_t {
     TRIGGER,
     BOOL,
-    INTEGER,
+    CONTINUOUS,
     SHIFT
   };
 
@@ -44,6 +45,8 @@ namespace {
     {"note_off", NOTE_OFF},
     {"cc", CC}
   };
+
+
 }
 
 class MidiMap {
@@ -59,6 +62,26 @@ class MidiMap {
     int player_index = -1; //< 0, non player
     QString signal_name;
 };
+
+namespace {
+  template <typename T>
+    bool find_midi(YAML::Node& node, MidiMapPtr& mmap, T map) throw (std::runtime_error) {
+      //find the trigger type and number/channel
+      for (auto kv: map) {
+        if (node[kv.first]) {
+          mmap->midi_type = kv.second;
+          YAML::Node midinode = node[kv.first];
+          if (!midinode.IsSequence())
+            throw std::runtime_error(kv.first.toStdString() + " mapping is not a sequence");
+          //example note_off: [96, 3]
+          mmap->number = midinode[0].as<int>();
+          mmap->channel = midinode[1].as<int>();
+          return true;
+        }
+      }
+      return false;
+    }
+}
 
 MidiRouter::MidiRouter(djaudio::AudioIO::midi_ringbuff_t *ringbuf, QObject *parent) :
   QObject(parent),
@@ -93,27 +116,22 @@ void MidiRouter::readFile(QString fileName) {
       if (node["trigger"]) {
         mmap->signal_name = node["trigger"].as<QString>();
         mmap->mapping_type = TRIGGER;
-        bool found = false;
-        //find the trigger type and number/channel
-        for (auto kv: yamls_trigger_map) {
-          if (node[kv.first]) {
-            mmap->midi_type = kv.second;
-            YAML::Node midinode = node[kv.first];
-            if (!midinode.IsSequence()) {
-              emit(mappingError(kv.first + " mapping is not a sequence in " + fileName));
-              return;
-            }
-            //example note_off: [96, 3]
-            mmap->number = midinode[0].as<int>();
-            mmap->channel = midinode[1].as<int>();
-            found = true;
-            break;
-          }
+        try {
+          if (!find_midi(node, mmap, yamls_trigger_map))
+            emit(mappingError("could not find trigger mapping in " + fileName));
+        } catch (std::runtime_error& e) {
+          emit(mappingError(QString::fromStdString(e.what()) + fileName));
         }
-        if (!found) {
-          emit(mappingError("could not find trigger mapping in " + fileName));
+      } else if (node["continuous"]) {
+        mmap->signal_name = node["continuous"].as<QString>();
+        mmap->mapping_type = CONTINUOUS;
+        mmap->midi_type = CC;
+        if (!(node["cc"] && node["cc"].IsSequence())) {
+          emit(mappingError("no cc sequence found in midi mapping element " + QString::number(i)));
           return;
         }
+        mmap->number = node["cc"][0].as<int>();
+        mmap->channel = node["cc"][1].as<int>();
       } else {
         emit(mappingError("no supported mapping found in midi mapping element " + QString::number(i)));
         return;
@@ -143,19 +161,31 @@ void MidiRouter::process() {
   while (mInputRingBuffer->getReadSpace()) {
     djaudio::AudioIO::midi_event_buffer_t buff;
     mInputRingBuffer->read(buff);
+
     for (auto mmap: mMappings) {
       if (mmap->matches(buff)) {
+        double value = mmap->offset + mmap->multiplier * static_cast<double>(buff.data[2]) / 127.0;
+        int intvalue = value * static_cast<double>(dj::one_scale);
         int player = mmap->player_index;
         QString signal_name = mmap->signal_name;
         switch (mmap->mapping_type) {
           case TRIGGER:
+            //only non zero CCs trigger
+            if (mmap->midi_type == CC && value <= 0)
+              continue;
             if (player < 0)
               emit(masterTriggered(signal_name));
             else
               emit(playerTriggered(player, signal_name));
             break;
+          case CONTINUOUS:
+            //check to see if we should actually emit a double
+            if (player < 0)
+              emit(masterValueChangedInt(signal_name, intvalue));
+            else
+              emit(playerValueChangedInt(player, signal_name, intvalue));
+            break;
           case BOOL:
-          case INTEGER:
           case SHIFT:
             break;
         }
