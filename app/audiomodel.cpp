@@ -249,16 +249,28 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
 }
 
 void AudioModel::playerTrigger(int player, QString name) {
-  playerSet(player, [player, &name, this](PlayerState * /*pstate*/) -> Command *
+  if (!inRange(player))
+    return;
+
+  bool triggered = false;
+  playerSet(player, [player, &name, &triggered, this](PlayerState * /*pstate*/) -> Command *
     {
       djaudio::Command * cmd = nullptr;
       if (name.contains("seek_")) {
         cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, 
           (name == "seek_fwd" ? 1 : -1));
       }
+      triggered = cmd;
       return cmd;
     });
   //cout << player << qPrintable(name) << endl;
+  
+  //if we didn't have a trigger, see if we have a bool value for it
+  if (!triggered) {
+    auto it = mPlayerStates[player]->boolValue.find(name);
+    if (it != mPlayerStates[player]->boolValue.end())
+      playerSetValueBool(player, name, !*it);
+  }
 }
 
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {

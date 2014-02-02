@@ -5,6 +5,7 @@
 #include <sstream>
 #include <QString>
 #include <QPair>
+#include <yaml-cpp/yaml.h>
 
 #define DO_STRINGIFY(X) #X
 #define STRINGIFY(X) DO_STRINGIFY(X)
@@ -42,6 +43,22 @@ namespace dj {
      }
 
    const int volume_slider_height = 50;
+}
+
+//convert to and from QString
+namespace YAML {
+  template<>
+    struct convert<QString> {
+      static Node encode(const QString& rhs) {
+        Node node(rhs.toStdString());
+        return node;
+      }
+
+      static bool decode(const Node& node, QString& rhs) {
+        rhs = QString::fromStdString(node.as<std::string>());
+        return true;
+      }
+    };
 }
 
 

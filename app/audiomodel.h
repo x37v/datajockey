@@ -40,6 +40,8 @@ class AudioModel : public QObject {
 
     //start/stop the audio processing
     void run(bool doit);
+
+    djaudio::AudioIO * audioio() const { return mAudioIO; }
   private:
     djaudio::AudioIO * mAudioIO = nullptr;
     djaudio::Master * mMaster = nullptr;

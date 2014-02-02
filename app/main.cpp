@@ -2,11 +2,14 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QThread>
+#include <QTimer>
+#include <QErrorMessage>
 
 #include "db.h"
 #include "audiomodel.h"
 #include "audioloader.h"
 #include "defines.hpp"
+#include "midirouter.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,16 +47,42 @@ int main(int argc, char *argv[])
   AudioLoader * loader = new AudioLoader(db, audio);
   QObject::connect(loader, &AudioLoader::playerBuffersChanged, audio, &AudioModel::playerLoad);
   QObject::connect(loader, &AudioLoader::playerValueChangedString,
-      [audio](int player, QString name, QString value) {
+      [audio](int player, QString name, QString /*value*/) {
         if (name == "loading_work")
           audio->playerClear(player);
       });
 
+  MidiRouter * midi = new MidiRouter(audio->audioio()->midi_input_ringbuffer());
+  QThread * midiThread = new QThread;
+  midi->moveToThread(midiThread);
+  QTimer * midiProcessTimer = new QTimer();
+  midiProcessTimer->setInterval(15);
+  QObject::connect(midiProcessTimer, &QTimer::timeout, midi, &MidiRouter::process);
+  QObject::connect(midiThread, &QThread::finished, midiProcessTimer, &QTimer::stop);
+  midiThread->start(QThread::HighPriority);
+  midiProcessTimer->start();
+
+  QObject::connect(midi, &MidiRouter::playerValueChangedDouble, audio, &AudioModel::playerSetValueDouble);
+  QObject::connect(midi, &MidiRouter::playerValueChangedInt,    audio, &AudioModel::playerSetValueInt);
+  QObject::connect(midi, &MidiRouter::playerValueChangedBool,   audio, &AudioModel::playerSetValueBool);
+  QObject::connect(midi, &MidiRouter::playerTriggered,          audio, &AudioModel::playerTrigger);
+
+  QObject::connect(midi, &MidiRouter::masterValueChangedDouble, audio, &AudioModel::masterSetValueDouble);
+  QObject::connect(midi, &MidiRouter::masterValueChangedInt,    audio, &AudioModel::masterSetValueInt);
+  QObject::connect(midi, &MidiRouter::masterValueChangedBool,   audio, &AudioModel::masterSetValueBool);
+  QObject::connect(midi, &MidiRouter::masterTriggered,          audio, &AudioModel::masterTrigger);
+
+  QErrorMessage * midiErrors = new QErrorMessage;
+  QObject::connect(midi, &MidiRouter::mappingError, midiErrors, static_cast<void (QErrorMessage::*)(const QString&)>(&QErrorMessage::showMessage));
+
+  midi->readFile("./midimapping.yaml");
+
   MainWindow w(db, audio);
   w.loader(loader);
 
-  QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w] {
+  QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.writeSettings();
+    midiThread->quit();
     audio->run(false);
     QThread::msleep(200);
   });
