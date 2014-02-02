@@ -13,6 +13,14 @@ namespace {
     "volume", "eq_high", "eq_mid", "eq_low"
   };
 
+  QList<QString> master_triggers = {
+    "sync_to_player0", "sync_to_player1"
+  };
+
+  QList<QString> master_continuous = {
+    "volume", "bpm"
+  };
+
   enum midi_t {
     NOTE,
     NOTE_ON,

@@ -402,10 +402,11 @@ void Player::beat_buffer(BeatBuffer * buf){
 }
 
 void Player::eq(eq_band_t band, double value) {
-  if (value < -70.0)
-    value = -70.0;
-  else if (value > 6.0)
-    value = 6.0;
+  value = dj::clamp(value, -1.0, 1.0);
+  if (value < 0.0)
+    value *= 70.0;
+  else
+    value *= 6.0;
   switch (band) {
     case LOW:
       mEqControl.low = value; break;
