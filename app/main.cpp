@@ -4,12 +4,14 @@
 #include <QThread>
 #include <QTimer>
 #include <QErrorMessage>
+#include <QFileInfo>
 
 #include "db.h"
 #include "audiomodel.h"
 #include "audioloader.h"
 #include "defines.hpp"
 #include "midirouter.h"
+#include "config.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +42,10 @@ int main(int argc, char *argv[])
   palette.setColor(QPalette::HighlightedText, Qt::black);
   a.setPalette(palette);
 
-  DB * db = new DB("QSQLITE", "/home/alex/.datajockey/database.sqlite3");
+  dj::Configuration * config = dj::Configuration::instance();
+  config->load_default();
+
+  DB * db = new DB(config->db_adapter(), config->db_name(), config->db_username(), config->db_password(), config->db_port(), config->db_host());
   AudioModel * audio = new AudioModel();
   audio->run(true);
 
@@ -75,7 +80,8 @@ int main(int argc, char *argv[])
   QErrorMessage * midiErrors = new QErrorMessage;
   QObject::connect(midi, &MidiRouter::mappingError, midiErrors, static_cast<void (QErrorMessage::*)(const QString&)>(&QErrorMessage::showMessage));
 
-  midi->readFile("./midimapping.yaml");
+  if (QFileInfo::exists(config->midi_mapping_file()))
+    midi->readFile(config->midi_mapping_file());
 
   MainWindow w(db, audio);
   w.loader(loader);
