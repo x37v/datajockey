@@ -132,6 +132,17 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
       auto it = pstate->doubleValue.find(name);
       if (it != pstate->doubleValue.end() && *it == v)
         return nullptr;
+
+      if (name.contains("_relative")) {
+        QString non_rel_name = name;
+        non_rel_name.remove("_relative");
+        it = pstate->doubleValue.find(non_rel_name);
+        if (it != pstate->doubleValue.end()) {
+          name = non_rel_name;
+          v += *it;
+        }
+      }
+
       if (name == "speed") {
         if (!pstate->boolValue["sync"])
           cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::PLAY_SPEED, 1.0 + v / 100.0);
@@ -154,10 +165,26 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
 void AudioModel::playerSetValueInt(int player, QString name, int v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
+      if (name == "seek_frame_relative") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_RELATIVE, v);
+      } else if (name == "seek_beat_relative") {
+        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
+      }
+
       djaudio::Command * cmd = nullptr;
       auto it = pstate->intValue.find(name);
       if (it != pstate->intValue.end() && *it == v)
         return nullptr;
+
+      if (name.contains("_relative")) {
+        QString non_rel_name = name;
+        non_rel_name.remove("_relative");
+        it = pstate->intValue.find(non_rel_name);
+        if (it != pstate->intValue.end()) {
+          name = non_rel_name;
+          v += *it;
+        }
+      }
       
       //just return when we don't want to report
       if (name == "volume") {
@@ -166,10 +193,6 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY, v < 0 ? 0 : v);
       } else if (name == "seek_beat") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT, v < 0 ? 0 : v);
-      } else if (name == "seek_frame_relative") {
-        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_RELATIVE, v);
-      } else if (name == "seek_beat_relative") {
-        return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT_RELATIVE, v);
       } else if (name == "eq_high") {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_HIGH, to_double(v));
       } else if (name == "eq_mid") {
@@ -287,6 +310,17 @@ void AudioModel::masterSetValueDouble(QString name, double v) {
   auto it = mMasterDoubleValue.find(name);
   if (it != mMasterDoubleValue.end() && *it == v)
     return;
+
+  if (name.contains("_relative")) {
+    QString non_rel_name = name;
+    non_rel_name.remove("_relative");
+    it = mMasterDoubleValue.find(non_rel_name);
+    if (it != mMasterDoubleValue.end()) {
+      name = non_rel_name;
+      v += *it;
+    }
+  }
+
   if (name == "bpm") {
     queue(new djaudio::TransportBPMCommand(mMaster->transport(), v));
   } else if (name == "update_bpm") {
@@ -315,6 +349,17 @@ void AudioModel::masterSetValueInt(QString name, int v) {
   auto it = mMasterIntValue.find(name);
   if (it != mMasterIntValue.end() && *it == v)
     return;
+
+  if (name.contains("_relative")) {
+    QString non_rel_name = name;
+    non_rel_name.remove("_relative");
+    it = mMasterIntValue.find(non_rel_name);
+    if (it != mMasterIntValue.end()) {
+      name = non_rel_name;
+      v += *it;
+    }
+  }
+
   if (name == "volume") {
     queue(new djaudio::MasterDoubleCommand(djaudio::MasterDoubleCommand::MAIN_VOLUME, to_double(v)));
   } else if (name == "cue_volume") {
