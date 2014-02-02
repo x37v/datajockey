@@ -19,8 +19,8 @@
  */
 
 #include "config.hpp"
-#include <fstream>
 #include <QFileInfo>
+#include <QFile>
 #include <QDir>
 #include <QString>
 #include <QRegExp>
@@ -87,10 +87,11 @@ void Configuration::load_default() {
 void Configuration::load_file(const QString& path) throw(std::runtime_error) {
   restore_defaults();
   try {
-    std::ifstream fin(path.toStdString().c_str());
-    YAML::Parser p(fin);
-    YAML::Node root;
-    p.GetNextDocument(root);
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+      return; //XXX error
+    QTextStream in(&file);
+    YAML::Node root = YAML::Load(in.readAll().toStdString());
     mValidFile = true;
     mFile = path;
 
@@ -112,13 +113,12 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
     try {
       const YAML::Node& osc = root["osc"];
       try {
-        osc["in_port"] >> mOscInPort;
+        mOscInPort = osc["in_port"].as<int>();
       } catch (...) { /* do nothing */ }
 
       const YAML::Node& scripts = root["script"];
       try {
-        std::string s;
-        scripts["post_startup"] >> s;
+        std::string s = scripts["post_startup"].as<std::string>();
         mPostStartScript = QString::fromStdString(s);
       } catch (...) { /* do nothing */ }
 
@@ -126,18 +126,14 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
       //the destinations could be a list or a map
       try {
         //first try map
-        std::string address;
-        int port;
-        osc_out["address"] >> address;
-        osc_out["port"] >> port;
+        std::string address = osc_out["address"].as<std::string>();
+        int port = osc_out["port"].as<int>();
         mOscDestinations << dj::OscNetAddr(QString::fromStdString(address), port);
       } catch(...) {
         try {
           for (unsigned int i = 0; i < osc_out.size(); i++) {
-            std::string address;
-            int port;
-            osc_out[i]["address"] >> address;
-            osc_out[i]["port"] >> port;
+            std::string address = osc_out[i]["address"].as<std::string>();
+            int port = osc_out[i]["port"].as<int>();
             mOscDestinations << dj::OscNetAddr(QString::fromStdString(address), port);
           }
         } catch (...) { /* do nothing */ }
@@ -146,31 +142,26 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
     } catch (...) { /* do nothing */ }
 
     try {
-      std::string dir_name;
-      root["annotation"]["files"] >> dir_name;
+      std::string dir_name = root["annotation"]["files"].as<std::string>();
       QString qdir = QString::fromStdString(dir_name).trimmed();
       QDir dir(qdir.replace(QRegExp("^~"), QDir::homePath()));
       mAnnotationDir = dir.absolutePath();
     } catch (...) { /* do nothing */ }
 
     try {
-      std::string file_name;
-      root["midi_map"]["file"] >> file_name;
+      std::string file_name = root["midi_map"]["file"].as<std::string>();
       mMIDIMapFile = 
         QString::fromStdString(file_name).trimmed().replace(QRegExp("^~"), QDir::homePath());
     } catch (...) { /* do nothing */ }
 
     try {
-      root["midi_map"]["autosave"] >> mMIDIMapAutoSave;
+      mMIDIMapAutoSave = root["midi_map"]["autosave"].as<bool>();
     } catch (...) { /* do nothing */ }
 
     //check out the import settings
     try {
-      for (YAML::Iterator it = root["import"]["ignore"].begin(); it != root["import"]["ignore"].end(); it++) {
-        std::string v;
-        *it >> v;
-        mImportIgnores << QString::fromStdString(v);
-      }
+      for (auto it = root["import"]["ignore"].begin(); it != root["import"]["ignore"].end(); it++)
+        mImportIgnores << QString::fromStdString(it->as<std::string>());
     } catch (...) { /* do nothing */ }
 
 
@@ -196,10 +187,8 @@ bool Configuration::valid_file(){
 bool Configuration::db_get(YAML::Node& doc, QString element, QString &result) {
   try {
     const YAML::Node& db = doc["database"];
-    if(const YAML::Node *n = db.FindValue(element.toStdString())) {
-      std::string r;
-      *n >> r;
-      result = QString::fromStdString(r);
+    if (db[element.toStdString()]) {
+      result = QString::fromStdString(db[element.toStdString()].as<std::string>());
       return true;
     }
   } catch (...) { /* do nothing */ }

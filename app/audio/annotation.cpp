@@ -7,12 +7,9 @@
 #include <QDir>
 
 #include <yaml-cpp/yaml.h>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <iostream>
 
 using namespace djaudio;
-namespace fs = boost::filesystem;
 
 using std::cerr;
 using std::endl;
@@ -92,10 +89,11 @@ bool Annotation::loadFile(QString& file_path) {
     mBeatBuffer.reset();
   mBeatBuffer = new BeatBuffer();
   try {
-    fs::ifstream fin(file_path.toStdWString());
-    YAML::Parser parser(fin);
-    YAML::Node doc;
-    parser.GetNextDocument(doc);
+    QFile file(file_path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+      return false; //XXX error
+    QTextStream in(&file);
+    YAML::Node doc = YAML::Load(in.readAll().toStdString());
 
     const YAML::Node& locs = doc["beat_locations"];
     if (locs.Type() == YAML::NodeType::Sequence && locs.size() == 0) {
@@ -103,11 +101,8 @@ bool Annotation::loadFile(QString& file_path) {
     } else {
       //XXX just using the last in the list
       const YAML::Node& beats = (locs.Type() == YAML::NodeType::Sequence) ? locs[locs.size() - 1]["frames"] : locs["frames"];
-      for (unsigned int i = 0; i < beats.size(); i++) {
-        int frame;
-        beats[i] >> frame;
-        mBeatBuffer->push_back(frame);
-      }
+      for (unsigned int i = 0; i < beats.size(); i++)
+        mBeatBuffer->push_back(beats[i].as<int>());
     }
   } catch(...) {
     cerr << "problem loading " << qPrintable(file_path) << endl;

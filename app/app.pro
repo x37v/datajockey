@@ -15,10 +15,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
-PKGCONFIG += sndfile vorbisfile mad yaml-cpp taglib
-LIBS += -loscpack
+PKGCONFIG += sndfile vorbisfile mad taglib
+LIBS += -loscpack ../ext/yaml-cpp-0.5.1/build/libyaml-cpp.a
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
-LIBS += -lboost_program_options -lboost_filesystem -lboost_regex -lboost_system
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
@@ -76,7 +75,8 @@ SOURCES += main.cpp\
     audiolevelview.cpp \
     workfiltermodel.cpp \
     workfiltermodelcollection.cpp \
-    renameabletabwidget.cpp
+    renameabletabwidget.cpp \
+    midirouter.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -117,7 +117,8 @@ HEADERS  += mainwindow.h \
     audiolevelview.h \
     workfiltermodel.hpp \
     workfiltermodelcollection.hpp \
-    renameabletabwidget.h
+    renameabletabwidget.h \
+    midirouter.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
@@ -128,4 +129,6 @@ FORMS    += mainwindow.ui \
 
 INCLUDEPATH += . \
 	audio \
-	../ext/jackcpp/include/
+	../ext/jackcpp/include/ \
+  ../ext/yaml-cpp-0.5.1/include/
+

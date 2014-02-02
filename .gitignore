@@ -16,3 +16,4 @@ qrc_*.cpp
 /*.app
 build-*
 *.pro.user
+*.txt.user
