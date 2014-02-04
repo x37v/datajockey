@@ -102,7 +102,7 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->boolValue["mute"] = p->muted();
     pstate->boolValue["audible"] = false;
 
-    pstate->doubleValue["speed"] = 1.0 + p->play_speed();
+    pstate->doubleValue["speed"] = p->play_speed() - 1.0;
   }
 
   mMasterDoubleValue["bpm"] = mMaster->transport()->bpm();
