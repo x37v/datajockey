@@ -9,6 +9,8 @@ player0:
     trigger: seek_fwd
   - cc: [104, 3]
     trigger: cue
+  - cc: [106, 3]
+    trigger: load
   - cc: [67, 3]
     mult: 0.1
     twos_complement: speed_relative
@@ -40,6 +42,8 @@ player1:
     trigger: seek_fwd
   - cc: [105, 3]
     trigger: cue
+  - cc: [107, 3]
+    trigger: load
 
   - cc: [75, 3]
     mult: 0.1
@@ -65,3 +69,6 @@ master:
   - cc: [99, 3]
     twos_complement: bpm_relative
     mult: 0.25
+  - cc: [96, 3]
+    twos_complement: select_work_relative
+
