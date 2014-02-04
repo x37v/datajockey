@@ -105,6 +105,10 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->doubleValue["speed"] = 1.0 + p->play_speed();
   }
 
+  mMasterDoubleValue["bpm"] = mMaster->transport()->bpm();
+  mMasterIntValue["volume"] = to_int(mMaster->master_volume());
+  mMasterIntValue["cue_volume"] = to_int(mMaster->cue_volume());
+
   EngineQueryCommand * query = new EngineQueryCommand(mNumPlayers);
   mConsumeThread = new QThread(this);
   mConsumer = new Consumer(mMaster->scheduler(), query);
@@ -331,6 +335,7 @@ void AudioModel::masterSetValueDouble(QString name, double v) {
     return;
   }
   mMasterDoubleValue[name] = v;
+  emit(masterValueChangedDouble(name, v));
 }
 
 void AudioModel::masterSetValueInt(QString name, int v) {
@@ -357,6 +362,7 @@ void AudioModel::masterSetValueInt(QString name, int v) {
     return;
   }
   mMasterIntValue[name] = v;
+  emit(masterValueChangedInt(name, v));
 }
 
 void AudioModel::masterSetValueBool(QString name, bool v) {

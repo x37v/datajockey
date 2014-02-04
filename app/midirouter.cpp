@@ -26,6 +26,10 @@ namespace {
     "volume", "bpm"
   };
 
+  bool double_signal(QString name) {
+    return name.contains("bpm") || name.contains("speed");
+  }
+
   enum midi_t {
     NOTE,
     NOTE_ON,
@@ -37,10 +41,17 @@ namespace {
     TRIGGER,
     BOOL,
     CONTINUOUS,
+    TWOS_COMPLEMENT,
     SHIFT
   };
 
   const std::map<QString, midi_t> yamls_trigger_map = {
+    {"note_on", NOTE_ON},
+    {"note_off", NOTE_OFF},
+    {"cc", CC}
+  };
+
+  const std::map<QString, midi_t> yamls_cc_map = {
     {"note_on", NOTE_ON},
     {"note_off", NOTE_OFF},
     {"cc", CC}
@@ -125,13 +136,21 @@ void MidiRouter::readFile(QString fileName) {
       } else if (node["continuous"]) {
         mmap->signal_name = node["continuous"].as<QString>();
         mmap->mapping_type = CONTINUOUS;
-        mmap->midi_type = CC;
-        if (!(node["cc"] && node["cc"].IsSequence())) {
-          emit(mappingError("no cc sequence found in midi mapping element " + QString::number(i)));
-          return;
+        try {
+          if (!find_midi(node, mmap, yamls_cc_map))
+            emit(mappingError("could not find trigger mapping in " + fileName));
+        } catch (std::runtime_error& e) {
+          emit(mappingError(QString::fromStdString(e.what()) + fileName));
         }
-        mmap->number = node["cc"][0].as<int>();
-        mmap->channel = node["cc"][1].as<int>();
+      } else if (node["twos_complement"]) {
+        mmap->signal_name = node["twos_complement"].as<QString>();
+        mmap->mapping_type = TWOS_COMPLEMENT;
+        try {
+          if (!find_midi(node, mmap, yamls_cc_map))
+            emit(mappingError("could not find trigger mapping in " + fileName));
+        } catch (std::runtime_error& e) {
+          emit(mappingError(QString::fromStdString(e.what()) + fileName));
+        }
       } else {
         emit(mappingError("no supported mapping found in midi mapping element " + QString::number(i)));
         return;
@@ -178,12 +197,23 @@ void MidiRouter::process() {
             else
               emit(playerTriggered(player, signal_name));
             break;
+          case TWOS_COMPLEMENT:
+            //if the top bit is set it is negative, we don't scale 2s complement by 127
+            value = mmap->offset + mmap->multiplier * static_cast<double>((buff.data[2] & 0x40) ? (buff.data[2] - 128) : buff.data[2]);
+            intvalue = value * static_cast<double>(dj::one_scale);
+            //intentional fall through
           case CONTINUOUS:
-            //check to see if we should actually emit a double
-            if (player < 0)
-              emit(masterValueChangedInt(signal_name, intvalue));
-            else
-              emit(playerValueChangedInt(player, signal_name, intvalue));
+            if (double_signal(signal_name)) {
+              if (player < 0)
+                emit(masterValueChangedDouble(signal_name, value));
+              else
+                emit(playerValueChangedDouble(player, signal_name, value));
+            } else {
+              if (player < 0)
+                emit(masterValueChangedInt(signal_name, intvalue));
+              else
+                emit(playerValueChangedInt(player, signal_name, intvalue));
+            }
             break;
           case BOOL:
           case SHIFT:
