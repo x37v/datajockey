@@ -114,61 +114,72 @@ void MidiRouter::readFile(QString fileName) {
   }
   QTextStream in(&file);
   YAML::Node root = YAML::Load(in.readAll().toStdString());
-  if (!root.IsSequence()) {
-    emit(mappingError("mapping is not a sequence in " + fileName));
+  if (!root.IsMap()) {
+    emit(mappingError("mapping is not a map in " + fileName));
     return;
   }
-  for (unsigned int i = 0; i < root.size(); i++) {
-    YAML::Node node = root[i];
-    MidiMapPtr mmap = QSharedPointer<MidiMap>::create();
-    try {
-      if (node["player"])
-        mmap->player_index = node["player"].as<int>();
-      if (node["trigger"]) {
-        mmap->signal_name = node["trigger"].as<QString>();
-        mmap->mapping_type = TRIGGER;
-        try {
-          if (!find_midi(node, mmap, yamls_trigger_map))
-            emit(mappingError("could not find trigger mapping in " + fileName));
-        } catch (std::runtime_error& e) {
-          emit(mappingError(QString::fromStdString(e.what()) + fileName));
+
+  for (auto kv: std::map<QString, int>({{"master", -1}, {"player0", 0}, {"player1", 1}})) {
+    const QString key = kv.first;
+    const int player = kv.second;
+
+    if (!root[key])
+      continue;
+    YAML::Node parent = root[key];
+    if (!parent.IsSequence())
+      emit(mappingError(key + " is not a sequence in " + fileName));
+
+    for (unsigned int i = 0; i < parent.size(); i++) {
+      YAML::Node node = parent[i];
+      MidiMapPtr mmap = QSharedPointer<MidiMap>::create();
+      mmap->player_index = player;
+      try {
+        if (node["trigger"]) {
+          mmap->signal_name = node["trigger"].as<QString>();
+          mmap->mapping_type = TRIGGER;
+          try {
+            if (!find_midi(node, mmap, yamls_trigger_map))
+              emit(mappingError(key + " could not find trigger mapping in element " + QString::number(i)));
+          } catch (std::runtime_error& e) {
+            emit(mappingError(key + QString::fromStdString(e.what()) + " in element " + QString::number(i)));
+          }
+        } else if (node["continuous"]) {
+          mmap->signal_name = node["continuous"].as<QString>();
+          mmap->mapping_type = CONTINUOUS;
+          try {
+            if (!find_midi(node, mmap, yamls_cc_map))
+              emit(mappingError(key + " could not find cc mapping in element " + QString::number(i)));
+          } catch (std::runtime_error& e) {
+            emit(mappingError(key + QString::fromStdString(e.what()) + " in element " + QString::number(i)));
+          }
+        } else if (node["twos_complement"]) {
+          mmap->signal_name = node["twos_complement"].as<QString>();
+          mmap->mapping_type = TWOS_COMPLEMENT;
+          try {
+            if (!find_midi(node, mmap, yamls_cc_map))
+              emit(mappingError(key + " could not find trigger mapping in element " + QString::number(i)));
+          } catch (std::runtime_error& e) {
+            emit(mappingError(key + QString::fromStdString(e.what()) + " in element " + QString::number(i)));
+          }
+        } else {
+          emit(mappingError(key + " no supported mapping found in midi mapping element " + QString::number(i)));
+          return;
         }
-      } else if (node["continuous"]) {
-        mmap->signal_name = node["continuous"].as<QString>();
-        mmap->mapping_type = CONTINUOUS;
-        try {
-          if (!find_midi(node, mmap, yamls_cc_map))
-            emit(mappingError("could not find trigger mapping in " + fileName));
-        } catch (std::runtime_error& e) {
-          emit(mappingError(QString::fromStdString(e.what()) + fileName));
-        }
-      } else if (node["twos_complement"]) {
-        mmap->signal_name = node["twos_complement"].as<QString>();
-        mmap->mapping_type = TWOS_COMPLEMENT;
-        try {
-          if (!find_midi(node, mmap, yamls_cc_map))
-            emit(mappingError("could not find trigger mapping in " + fileName));
-        } catch (std::runtime_error& e) {
-          emit(mappingError(QString::fromStdString(e.what()) + fileName));
-        }
-      } else {
-        emit(mappingError("no supported mapping found in midi mapping element " + QString::number(i)));
+
+        if (node["mult"])
+          mmap->multiplier = node["mult"].as<double>();
+        if (node["offset"])
+          mmap->offset = node["offset"].as<double>();
+
+        //XXX search for conflicting maps and warn
+        mMappings.push_back(mmap);
+      } catch (YAML::Exception& e) {
+        emit(mappingError(key + " exception processing midi mapping element " + QString::number(i) + " " + QString(e.what())));
+        return;
+      } catch(...) {
+        emit(mappingError(key + " exception processing midi mapping element " + QString::number(i)));
         return;
       }
-
-      if (node["mult"])
-        mmap->multiplier = node["mult"].as<double>();
-      if (node["offset"])
-        mmap->offset = node["offset"].as<double>();
-
-      //XXX search for conflicting maps and warn
-      mMappings.push_back(mmap);
-    } catch (YAML::Exception& e) {
-      emit(mappingError("exception processing midi mapping element " + QString::number(i) + " " + QString(e.what())));
-      return;
-    } catch(...) {
-      emit(mappingError("exception processing midi mapping element " + QString::number(i)));
-      return;
     }
   }
 }
