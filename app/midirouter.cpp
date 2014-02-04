@@ -212,6 +212,8 @@ void MidiRouter::process() {
             //if the top bit is set it is negative, we don't scale 2s complement by 127
             value = mmap->offset + mmap->multiplier * static_cast<double>((buff.data[2] & 0x40) ? (buff.data[2] - 128) : buff.data[2]);
             intvalue = value * static_cast<double>(dj::one_scale);
+            if (signal_name.contains("select_work"))
+              intvalue = value;
             //intentional fall through
           case CONTINUOUS:
             if (double_signal(signal_name)) {

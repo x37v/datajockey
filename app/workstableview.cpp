@@ -1,5 +1,6 @@
 #include "workstableview.h"
 #include "db.h"
+#include "defines.hpp"
 #include <QSqlQueryModel>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
@@ -29,14 +30,19 @@ void WorksTableView::setModel(QAbstractItemModel * model) {
   setSelectionMode(QAbstractItemView::SingleSelection);
   //XXX actually do something with editing at some point
   //setEditTriggers(QAbstractItemView::DoubleClicked);
-  
-  connect(this, &QAbstractItemView::clicked, [this](const QModelIndex& index) {
-      int workid = index.sibling(index.row(), 0).data().toInt();
-      emit(workSelected(workid));
-      });
 }
 
 WorksTableView::~WorksTableView() { }
+
+void WorksTableView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+  QTableView::selectionChanged(selected, deselected);
+  auto indexes = selected.indexes();
+  if (indexes.size() == 0)
+    return;
+  QModelIndex index = indexes.front();
+  int workid = index.sibling(index.row(), 0).data().toInt();
+  emit(workSelected(workid));
+}
 
 void WorksTableView::readSettings() {
   QSettings settings;
@@ -51,6 +57,23 @@ void WorksTableView::writeSettings() {
   settings.beginGroup("WorksTableView");
   settings.setValue("headerState", horizontalHeader()->saveState());
   settings.endGroup();
+}
+
+void WorksTableView::selectWorkRelative(int rows) {
+  int row = 0;
+  auto indexes = selectedIndexes();
+  if (indexes.size() > 0)
+    row = dj::clamp(indexes.front().row() + rows, 0, model()->rowCount() - 1);
+  selectRow(row);
+}
+
+void WorksTableView::emitSelected() {
+  auto indexes = selectedIndexes();
+  if (indexes.size() == 0)
+    return;
+  QModelIndex index = indexes.front();
+  int workid = index.sibling(index.row(), 0).data().toInt();
+  emit(workSelected(workid));
 }
 
 WorksSortFilterProxyModel::WorksSortFilterProxyModel(QObject * parent) : QSortFilterProxyModel(parent)

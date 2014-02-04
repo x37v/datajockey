@@ -68,9 +68,23 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(newTabButton, &QToolButton::clicked, [this]() { addFilterTab(); });
 
   connect(ui->workViews, &QTabWidget::tabCloseRequested, [this] (int index) {
-    if (index == 0) //don't allow the first tab to be closed
-      return;
     ui->workViews->removeTab(index);
+  });
+
+  //we always want the visible selection to be what gets loaded if we hit load
+  connect(ui->workViews, &QTabWidget::currentChanged, [this] (int index) {
+    QWidget * tab = ui->workViews->widget(index);
+    if (!tab)
+      return;
+    if (tab == ui->allWorksTab) {
+      ui->allWorks->emitSelected();
+      return;
+    } 
+    WorkFilterView * fv = dynamic_cast<WorkFilterView *>(tab);
+    if (fv) {
+      fv->emitSelected();
+      return;
+    }
   });
   QTimer::singleShot(0, this, SLOT(readSettings()));
 }
@@ -114,7 +128,7 @@ void MainWindow::writeSettings() {
 
   int valid_index = 0;
   settings.beginWriteArray("filters");
-  for (int i = 1; i < ui->workViews->count(); i++) {
+  for (int i = 0; i < ui->workViews->count(); i++) {
     //make sure it is not the all view and the expression isn't empty
     QWidget * widget = ui->workViews->widget(i);
     WorkFilterView * view = dynamic_cast<WorkFilterView *>(widget);
@@ -132,6 +146,23 @@ void MainWindow::writeSettings() {
   settings.endArray();
 
   settings.endGroup();
+}
+
+void MainWindow::masterSetValueInt(QString name, int v) {
+  if (name == "select_work_relative") {
+    QWidget * tab = ui->workViews->currentWidget();
+    if (!tab)
+      return;
+    if (tab == ui->allWorksTab) {
+      ui->allWorks->selectWorkRelative(v);
+      return;
+    } 
+    WorkFilterView * fv = dynamic_cast<WorkFilterView *>(tab);
+    if (fv) {
+      fv->selectWorkRelative(v);
+      return;
+    }
+  }
 }
 
 void MainWindow::addFilterTab(QString filterExpression, QString title) {

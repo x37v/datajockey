@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
   QObject::connect(midi, &MidiRouter::masterValueChangedInt,    audio, &AudioModel::masterSetValueInt);
   QObject::connect(midi, &MidiRouter::masterValueChangedBool,   audio, &AudioModel::masterSetValueBool);
   QObject::connect(midi, &MidiRouter::masterTriggered,          audio, &AudioModel::masterTrigger);
+  QObject::connect(midi, &MidiRouter::playerTriggered, loader, &AudioLoader::playerTrigger);
 
   QErrorMessage * midiErrors = new QErrorMessage;
   QObject::connect(midi, &MidiRouter::mappingError, midiErrors, static_cast<void (QErrorMessage::*)(const QString&)>(&QErrorMessage::showMessage));
@@ -85,6 +86,8 @@ int main(int argc, char *argv[])
 
   MainWindow w(db, audio);
   w.loader(loader);
+
+  QObject::connect(midi, &MidiRouter::masterValueChangedInt,    &w, &MainWindow::masterSetValueInt);
 
   QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.writeSettings();

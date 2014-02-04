@@ -19,6 +19,9 @@ class WorkFilterView : public QWidget
     ~WorkFilterView();
     void setModel(WorkFilterModel * model);
     QString filterExpression() const;
+  public slots:
+    void selectWorkRelative(int rows);
+    void emitSelected();
   signals:
     void workSelected(int workid);
 

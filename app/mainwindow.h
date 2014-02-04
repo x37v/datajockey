@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
   public slots:
     void readSettings();
     void writeSettings();
+    void masterSetValueInt(QString name, int v);
   signals:
     void workSelected(int workid);
 

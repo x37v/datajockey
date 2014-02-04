@@ -15,9 +15,13 @@ class WorksTableView : public QTableView
     explicit WorksTableView(QWidget *parent = 0);
     void setModel(QAbstractItemModel * model);
     ~WorksTableView();
+  protected:
+    virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
   public slots:
     void readSettings();
     void writeSettings();
+    void selectWorkRelative(int rows);
+    void emitSelected();
   signals:
     void workSelected(int workid);
 };
