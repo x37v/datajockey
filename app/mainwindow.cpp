@@ -22,6 +22,8 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QSqlQueryModel *model = new QSqlQueryModel(this);
   model->setQuery(db->work_table_query(), db->get());
 
+  ui->workDetail->setDB(db);
+
   //QSortFilterProxyModel * sortable = new WorksSortFilterProxyModel(model);
   QSortFilterProxyModel * sortable = new QSortFilterProxyModel(model);
   sortable->setSourceModel(model);
@@ -47,7 +49,7 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(audio, &AudioModel::masterValueChangedInt,    mixer, &MixerPanelView::masterSetValueInt);
   connect(audio, &AudioModel::masterValueChangedBool,   mixer, &MixerPanelView::masterSetValueBool);
 
-  connect(ui->allWorks, &WorksTableView::workSelected, this, &MainWindow::workSelected);
+  connect(ui->allWorks, &WorksTableView::workSelected, this, &MainWindow::selectWork);
 
   ui->topSplitter->setStretchFactor(0,0);
   ui->topSplitter->setStretchFactor(1,1);
@@ -165,11 +167,16 @@ void MainWindow::masterSetValueInt(QString name, int v) {
   }
 }
 
+void MainWindow::selectWork(int id) {
+  ui->workDetail->selectWork(id);
+  emit(workSelected(id));
+}
+
 void MainWindow::addFilterTab(QString filterExpression, QString title) {
   WorkFilterView * view = new WorkFilterView(this);
   WorkFilterModel * model = mFilterCollection->newFilterModel(view);
   model->setFilterExpression(filterExpression);
   view->setModel(model);
   ui->workViews->addTab(view, title);
-  connect(view, &WorkFilterView::workSelected, this, &MainWindow::workSelected);
+  connect(view, &WorkFilterView::workSelected, this, &MainWindow::selectWork);
 }

@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QLabel" name="name">
+     <widget class="QLabel" name="details">
       <property name="minimumSize">
        <size>
         <width>150</width>

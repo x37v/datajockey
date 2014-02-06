@@ -33,10 +33,12 @@ namespace {
 
   const QString cWorkInfoQuery(
       "SELECT audio_works.name title,\n"
-      "\tartists.name artist \n"
+      "\tartists.name artist, \n"
+      "\talbums.name album \n"
       "FROM `audio_works`\n"
       "\tINNER JOIN `artists` ON `artists`.`id` = `audio_works`.`artist_id`\n"
-      "WHERE audio_works.id = :id");
+   "\tLEFT JOIN albums ON `albums`.`id` = `audio_works`.`album_id`\n"
+      "\tWHERE audio_works.id = :id");
 
   const QString cWorkInsert(
       "INSERT INTO audio_works\n"
@@ -241,9 +243,9 @@ void DB::format_string_by_id(int work_id, QString& info) throw(std::runtime_erro
     return;
 
   QSqlRecord rec = query.record();
-  info.replace("$artist", query.value(rec.indexOf("title")).toString());
-  info.replace("$title", query.value(rec.indexOf("artist")).toString());
-  //XXX do album etc
+  info.replace("$artist", query.value(rec.indexOf("artist")).toString());
+  info.replace("$title", query.value(rec.indexOf("title")).toString());
+  info.replace("$album", query.value(rec.indexOf("album")).toString());
 }
 
 bool DB::find_artist_and_title_by_id(

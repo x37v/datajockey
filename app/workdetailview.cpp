@@ -8,6 +8,17 @@ WorkDetailView::WorkDetailView(QWidget *parent) :
     ui->setupUi(this);
 }
 
+void WorkDetailView::setDB(DB* db) {
+  mDB = db;
+}
+
+void WorkDetailView::selectWork(int workid) {
+  mWorkID = workid;
+  QString songinfo("t:$title\na:$artist\nA:$album");
+  mDB->format_string_by_id(mWorkID, songinfo);
+  ui->details->setText(songinfo);
+}
+
 WorkDetailView::~WorkDetailView()
 {
     delete ui;

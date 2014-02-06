@@ -51,7 +51,7 @@
          </attribute>
         </widget>
        </widget>
-       <widget class="WorkDetailView" name="widget" native="true">
+       <widget class="WorkDetailView" name="workDetail" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
           <horstretch>0</horstretch>
