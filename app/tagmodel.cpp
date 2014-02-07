@@ -36,23 +36,32 @@ void TagModel::showAllTags(bool doit) {
 }
 
 QModelIndex TagModel::index(int row, int column, const QModelIndex & parent) const {
-  if (!parent.isValid()) {
-    return createIndex(row, column, mTagRoot);
-  } else {
-    Tag * tag = static_cast<Tag *>(parent.internalPointer());
-    if (row == tag->children().size())
-      return createIndex(row, column, tag->children().at(row));
-  }
+  if (!hasIndex(row, column, parent) || column != 0)
+    return QModelIndex();
+
+  Tag * parentTag = nullptr;
+  if (!parent.isValid())
+    parentTag = mTagRoot;
+  else
+    parentTag = static_cast<Tag *>(parent.internalPointer());
+
+  Tag * child = parentTag->child(row);
+  if (child)
+    return createIndex(row, column, child);
 
   return QModelIndex();
 }
 
 QModelIndex TagModel::parent(const QModelIndex & index) const {
+  if (!index.isValid())
+    return QModelIndex();
+
   Tag * tag = static_cast<Tag *>(index.internalPointer());
-  int row = 0;
-  if (tag->parent())
-    row = tag->parent()->childIndex(tag);
-  return createIndex(row, 0, tag);
+  if (tag->parent() == mTagRoot || tag->parent() == nullptr)
+    return QModelIndex();
+
+  int row = tag->parent()->childIndex(tag);
+  return createIndex(row, 0, tag->parent());
 }
 
 int TagModel::rowCount(const QModelIndex & parent) const {
@@ -66,16 +75,12 @@ int TagModel::rowCount(const QModelIndex & parent) const {
 }
 
 int TagModel::columnCount(const QModelIndex& parent) const {
-  if (!parent.isValid()) {
-    return 1;
-  }
-  Tag * tag = static_cast<Tag *>(parent.internalPointer());
-  if (tag->children().size())
-    return 1;
-  return 0;
+  return 1;
 }
 
-QVariant TagModel::data(const QModelIndex & index, int /*role*/) const {
+QVariant TagModel::data(const QModelIndex & index, int role) const {
+  if (!index.isValid() || role != Qt::DisplayRole)
+    return QVariant();
   Tag * tag = static_cast<Tag *>(index.internalPointer());
   return tag->name();
 }
