@@ -9,21 +9,32 @@
 #include <QList>
 #include <stdexcept>
 
-class Tag : public QObject {
-  Q_OBJECT
+class Tag {
   public:
-    Tag(QObject * parent = nullptr);
-    Tag(int id, QString name, QObject * parent = nullptr);
+    Tag(int id = 0, QString name = "");
+    ~Tag();
+
     void id(int v) { mID = v; }
     int id() const { return mID; }
+
     void name(QString v) { mName = v; }
     QString name() const { return mName; }
+
     QList<Tag *> children() const { return mChilden; }
-    void append_child(Tag * tag);
+    int childIndex(Tag * tag) const;
+
+    void appendChild(Tag * tag);
+    void removeChild(Tag * tag);
+    Tag * removeChildAt(int index);
+    Tag * child(int index);
+
+    Tag * parent() const { return mParent; }
+    void parent(Tag * v) { mParent = v; }
   private:
     int mID = 0;
     QString mName;
     QList<Tag *> mChilden;
+    Tag * mParent = nullptr;
 };
 
 class DB : public QObject {

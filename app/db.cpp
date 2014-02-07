@@ -142,20 +142,52 @@ namespace {
   */
 }
 
-Tag::Tag(QObject * parent) :
-  QObject(parent)
-{
-}
-
-Tag::Tag(int id, QString name, QObject * parent) :
-  QObject(parent),
+Tag::Tag(int id, QString name) :
   mID(id),
   mName(name)
 {
 }
 
-void Tag::append_child(Tag * tag) {
+Tag::~Tag() {
+  if (mParent)
+    mParent->removeChild(this);
+  while (mChilden.size()) {
+    Tag * child = mChilden.first();
+    mChilden.removeAt(0);
+    delete child;
+  }
+}
+
+int Tag::childIndex(Tag * tag) const {
+  return mChilden.indexOf(tag);
+}
+
+void Tag::appendChild(Tag * tag) {
+  tag->parent(this);
   mChilden.append(tag);
+}
+
+void Tag::removeChild(Tag * tag) {
+  int index = childIndex(tag);
+  if (index >= 0) {
+    mChilden[index]->parent(nullptr);
+    mChilden.removeAt(index);
+  }
+}
+
+Tag * Tag::removeChildAt(int index) {
+  if (index >= mChilden.size())
+    return nullptr;
+  Tag * child = mChilden[index];
+  child->parent(nullptr);
+  mChilden.removeAt(index);
+  return child;
+}
+
+Tag * Tag::child(int index) {
+  if (mChilden.size() < index)
+    return mChilden[index];
+  return nullptr;
 }
 
 DB::DB(
@@ -624,7 +656,7 @@ QList<Tag*> DB::tags(int work_id) {
     } else {
       tag_class = top_tags[class_id];
     }
-    tag_class->append_child(tag);
+    tag_class->appendChild(tag);
   }
 
   return top_tags.values();

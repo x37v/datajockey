@@ -8,6 +8,7 @@ class TagModel : public QAbstractItemModel {
   Q_OBJECT
   public:
     explicit TagModel(DB * db, QObject *parent = 0);
+    virtual ~TagModel();
     void showAllTags(bool doit);
 
     virtual QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
@@ -23,8 +24,7 @@ class TagModel : public QAbstractItemModel {
     DB * mDB;
     int mWorkID = 0; //zero means no work
     bool mShowAllTags = false;
-    QList<Tag *> mTags;
-    QHash<Tag *, Tag *> mTagParents;
+    Tag * mTagRoot = nullptr;
 };
 
 #endif // TAGMODEL_H

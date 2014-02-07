@@ -4,33 +4,43 @@ TagModel::TagModel(DB *db, QObject *parent) :
   QAbstractItemModel(parent),
   mDB(db)
 {
+  mTagRoot = new Tag();
+}
+
+TagModel::~TagModel() {
+  if (mTagRoot)
+    delete mTagRoot;
 }
 
 void TagModel::showAllTags(bool doit) {
   beginResetModel();
   mShowAllTags = doit;
-  if (mShowAllTags)
-    mTags = mDB->tags();
-  else if (mWorkID)
-    mTags = mDB->tags(mWorkID);
-  else
-    mTags.clear();
-  mTagParents.clear();
-  for (auto t: mTags.toStdList()) {
-    for (auto c: t->children().toStdList()) {
-      mTagParents[c] = t;
-    }
+  Tag * c = mTagRoot->removeChildAt(0);
+  while (c != nullptr) {
+    delete c;
+    c = mTagRoot->removeChildAt(0);
   }
+
+  QList<Tag *> tags;
+  if (mShowAllTags)
+    tags = mDB->tags();
+  else if (mWorkID)
+    tags = mDB->tags(mWorkID);
+
+  if (tags.length()) {
+    for (int i = 0; i < tags.length(); i++)
+      mTagRoot->appendChild(tags[i]);
+  }
+
   endResetModel();
 }
 
 QModelIndex TagModel::index(int row, int column, const QModelIndex & parent) const {
   if (!parent.isValid()) {
-    if (row < mTags.size() && column == 0)
-      return createIndex(row, column, mTags[row]);
+    return createIndex(row, column, mTagRoot);
   } else {
     Tag * tag = static_cast<Tag *>(parent.internalPointer());
-    if (row < tag->children().size())
+    if (row == tag->children().size())
       return createIndex(row, column, tag->children().at(row));
   }
 
@@ -39,28 +49,28 @@ QModelIndex TagModel::index(int row, int column, const QModelIndex & parent) con
 
 QModelIndex TagModel::parent(const QModelIndex & index) const {
   Tag * tag = static_cast<Tag *>(index.internalPointer());
-  auto it = mTagParents.find(tag);
-  if (it == mTagParents.end())
-    return QModelIndex();
-
-  Tag * parent = *it;
-  int parent_row = mTags.indexOf(parent);
-  return createIndex(parent_row, 0, parent);
+  int row = 0;
+  if (tag->parent())
+    row = tag->parent()->childIndex(tag);
+  return createIndex(row, 0, tag);
 }
 
-//currently only 2 levels deep
 int TagModel::rowCount(const QModelIndex & parent) const {
+  if (parent.column() > 0)
+    return 0;
+
   if (!parent.isValid())
-    return mTags.length();
-  else if (parent.row() < mTags.length())
-    return mTags[parent.row()]->children().length();
-  return 0;
+    return mTagRoot->children().size();
+  Tag * tag = static_cast<Tag *>(parent.internalPointer());
+  return tag->children().size();
 }
 
 int TagModel::columnCount(const QModelIndex& parent) const {
-  if (!parent.isValid())
+  if (!parent.isValid()) {
     return 1;
-  else if (parent.parent().isValid())
+  }
+  Tag * tag = static_cast<Tag *>(parent.internalPointer());
+  if (tag->children().size())
     return 1;
   return 0;
 }
@@ -73,15 +83,16 @@ QVariant TagModel::data(const QModelIndex & index, int /*role*/) const {
 void TagModel::setWork(int id) {
   beginResetModel();
   mWorkID = id;
-  if (mWorkID)
-    mTags = mDB->tags(mWorkID);
-  else
-    mTags.clear();
-  mTagParents.clear();
-  for (auto t: mTags) {
-    for (auto c: t->children()) {
-      mTagParents[c] = t;
-    }
+  Tag * c = mTagRoot->removeChildAt(0);
+  while (c != nullptr) {
+    delete c;
+    c = mTagRoot->removeChildAt(0);
+  }
+  if (mWorkID) {
+    QList<Tag *> tags;
+    tags = mDB->tags(mWorkID);
+    for (int i = 0; i < tags.length(); i++)
+      mTagRoot->appendChild(tags[i]);
   }
   endResetModel();
 }
