@@ -8,6 +8,7 @@ namespace Ui {
   class WorkDetailView;
 }
 
+class TagModel;
 class WorkDetailView : public QWidget
 {
   Q_OBJECT
@@ -23,6 +24,7 @@ class WorkDetailView : public QWidget
     Ui::WorkDetailView *ui;
     DB * mDB;
     int mWorkID = 0;
+    TagModel * mModel = nullptr;
 };
 
 #endif // WORKDETAILVIEW_H

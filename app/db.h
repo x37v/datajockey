@@ -6,7 +6,25 @@
 #include <QString>
 #include <QHash>
 #include <QVariant>
+#include <QList>
 #include <stdexcept>
+
+class Tag : public QObject {
+  Q_OBJECT
+  public:
+    Tag(QObject * parent = nullptr);
+    Tag(int id, QString name, QObject * parent = nullptr);
+    void id(int v) { mID = v; }
+    int id() const { return mID; }
+    void name(QString v) { mName = v; }
+    QString name() const { return mName; }
+    QList<Tag *> children() const { return mChilden; }
+    void append_child(Tag * tag);
+  private:
+    int mID = 0;
+    QString mName;
+    QList<Tag *> mChilden;
+};
 
 class DB : public QObject {
   Q_OBJECT
@@ -76,6 +94,9 @@ class DB : public QObject {
 
     int tag_find_class(const QString& name) throw(std::runtime_error);
     int tag_find(const QString& name, int tag_class_id = -1) throw(std::runtime_error);
+
+    //0 means all tags
+    QList<Tag*> tags(int work_id = 0);
 
     int artist_find(const QString& name, bool create = false) throw(std::runtime_error);
 

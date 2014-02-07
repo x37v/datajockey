@@ -12,3 +12,8 @@ TagsView::~TagsView()
 {
     delete ui;
 }
+
+void TagsView::setModel(QAbstractItemModel * model) {
+  ui->tree->setModel(model);
+  ui->tree->reset();
+}

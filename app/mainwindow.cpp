@@ -7,6 +7,8 @@
 #include "workfiltermodelcollection.hpp"
 #include "workfiltermodel.hpp"
 #include "workfilterview.h"
+#include "tagmodel.h"
+#include "tagsview.h"
 
 #include <QSqlQueryModel>
 #include <QToolButton>
@@ -89,6 +91,11 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
     }
   });
   QTimer::singleShot(0, this, SLOT(readSettings()));
+
+
+  TagModel * tagmodel = new TagModel(mDB, this);
+  tagmodel->showAllTags(true);
+  ui->tags->setModel(tagmodel);
 }
 
 MainWindow::~MainWindow() { delete ui; }

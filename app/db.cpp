@@ -142,6 +142,22 @@ namespace {
   */
 }
 
+Tag::Tag(QObject * parent) :
+  QObject(parent)
+{
+}
+
+Tag::Tag(int id, QString name, QObject * parent) :
+  QObject(parent),
+  mID(id),
+  mName(name)
+{
+}
+
+void Tag::append_child(Tag * tag) {
+  mChilden.append(tag);
+}
+
 DB::DB(
     QString type, 
     QString name_or_loc, 
@@ -578,6 +594,40 @@ int DB::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error
   if (query.first())
     return query.value(0).toInt();
   throw std::runtime_error("cannot find tag with name " + name.toStdString());
+}
+
+QList<Tag*> DB::tags(int work_id) {
+  QString queryString = "SELECT tags.name, tags.id, tag_classes.name, tag_classes.id"
+    " FROM tags "
+    " JOIN tag_classes on tags.tag_class_id = tag_classes.id";
+  if (work_id) {
+    queryString += " JOIN audio_work_tags on tags.id = audio_work_tags.tag_id";
+    queryString += " WHERE audio_work_tags.id = " + QString::number(work_id);
+  }
+
+  QMutexLocker lock(&mMutex);
+  MySqlQuery query(get());
+  query.prepare(queryString);
+  query.exec();
+
+  QHash<int, Tag *> top_tags;
+  while(query.next()) {
+    QString tag_name = query.value(0).toString();
+    int tag_id = query.value(1).toInt();
+    QString class_name = query.value(2).toString();
+    int class_id = query.value(3).toInt();
+    Tag * tag = new Tag(tag_id, tag_name);
+    Tag * tag_class;
+    if (!top_tags.contains(class_id)) {
+      tag_class = new Tag(class_id, class_name);
+      top_tags[class_id] = tag_class;
+    } else {
+      tag_class = top_tags[class_id];
+    }
+    tag_class->append_child(tag);
+  }
+
+  return top_tags.values();
 }
 
 int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) {

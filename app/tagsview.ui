@@ -15,22 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTreeWidget" name="treeWidget">
-     <property name="dragEnabled">
-      <bool>true</bool>
-     </property>
-     <property name="dragDropMode">
-      <enum>QAbstractItemView::DragDrop</enum>
-     </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <column>
-      <property name="text">
-       <string>tags</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QTreeView" name="tree"/>
    </item>
    <item>
     <widget class="QPushButton" name="pushButton">
