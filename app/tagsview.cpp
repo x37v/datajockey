@@ -8,6 +8,7 @@ TagsView::TagsView(QWidget *parent) :
   ui->setupUi(this);
   ui->tree->setHeaderHidden(true);
   ui->tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  ui->tree->setDragEnabled(true);
 }
 
 TagsView::~TagsView()

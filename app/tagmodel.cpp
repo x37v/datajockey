@@ -102,3 +102,61 @@ void TagModel::setWork(int id) {
   endResetModel();
 }
 
+Qt::ItemFlags TagModel::flags(const QModelIndex &index) const {
+  Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  if (!index.isValid())
+    return 0;
+  //if it isn't a tag class then it can be dragged
+  if(index.parent().isValid())
+    return Qt::ItemIsDragEnabled | defaultFlags;
+  else
+    return defaultFlags;
+}
+
+Qt::DropActions TagModel::supportedDropActions() const {
+  return Qt::CopyAction;
+}
+
+QStringList TagModel::mimeTypes() const {
+  QStringList types;
+  types << "application/tag-id-list";
+  return types;
+}
+
+QMimeData * TagModel::mimeData(const QModelIndexList & indexes) const {
+  TagModelItemMimeData * data = new TagModelItemMimeData;
+  foreach(QModelIndex index, indexes){
+    Tag * tag = static_cast<Tag *>(index.internalPointer());
+    data->addItem(tag->id());
+  }
+  return data;
+}
+
+TagModelItemMimeData::TagModelItemMimeData(){
+}
+
+QStringList TagModelItemMimeData::formats() const {
+  QStringList types;
+  types << format();
+  return types;
+}
+
+bool TagModelItemMimeData::hasFormat(const QString & mimeType) const {
+  if(mimeType == format())
+    return true;
+  else
+    return false;
+}
+
+QVariant TagModelItemMimeData::retrieveData(const QString & mimeType, QVariant::Type type) const {
+  if(mimeType == format() && type == QVariant::List){
+    QList<QVariant> intList;
+    for(int i = 0; i < mData.size(); i++)
+      intList.push_back(mData[i]);
+    return QVariant::fromValue(intList);
+  } else 
+    return QVariant();
+}
+
+void TagModelItemMimeData::addItem(int id){ mData.push_back(id); }
+QString TagModelItemMimeData::format() { return "application/tag-id-list"; }

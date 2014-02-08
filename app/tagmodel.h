@@ -2,6 +2,7 @@
 #define TAGMODEL_H
 
 #include <QAbstractItemModel>
+#include <QMimeData>
 #include "db.h"
 
 class TagModel : public QAbstractItemModel {
@@ -16,6 +17,10 @@ class TagModel : public QAbstractItemModel {
     virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+    virtual Qt::DropActions supportedDropActions() const;
+    virtual QStringList mimeTypes() const;
+    virtual QMimeData * mimeData(const QModelIndexList & indexes) const;
   signals:
 
   public slots:
@@ -25,6 +30,20 @@ class TagModel : public QAbstractItemModel {
     int mWorkID = 0; //zero means no work
     bool mShowAllTags = false;
     Tag * mTagRoot = nullptr;
+};
+
+//our own mime type for ids
+class TagModelItemMimeData : public QMimeData {
+  Q_OBJECT
+  public:
+    TagModelItemMimeData();
+    static QString format();
+    virtual QStringList formats() const;
+    virtual bool hasFormat(const QString & mimeType) const;
+    virtual QVariant retrieveData ( const QString & mimeType, QVariant::Type type ) const;
+    void addItem(int id);
+  private:
+    QList<int> mData;
 };
 
 #endif // TAGMODEL_H

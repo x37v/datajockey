@@ -1,13 +1,18 @@
 #include "workdetailview.h"
 #include "ui_workdetailview.h"
 #include "tagmodel.h"
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 WorkDetailView::WorkDetailView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WorkDetailView)
 {
   ui->setupUi(this);
+  setAcceptDrops(true);
 }
+
+WorkDetailView::~WorkDetailView() { delete ui; }
 
 void WorkDetailView::setDB(DB* db) {
   mDB = db;
@@ -26,7 +31,13 @@ void WorkDetailView::selectWork(int workid) {
   ui->tagsView->expandAll();
 }
 
-WorkDetailView::~WorkDetailView()
-{
-    delete ui;
+void WorkDetailView::dragEnterEvent(QDragEnterEvent *event) {
+  if (event->mimeData()->hasFormat(TagModelItemMimeData::format()))
+    event->acceptProposedAction();
 }
+
+void WorkDetailView::dropEvent(QDropEvent *event) {
+  if (event->mimeData()->hasFormat(TagModelItemMimeData::format())) {
+  }
+}
+

@@ -17,6 +17,8 @@ class WorkDetailView : public QWidget
     explicit WorkDetailView(QWidget *parent = 0);
     void setDB(DB* db);
     ~WorkDetailView();
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dropEvent(QDropEvent *event);
   public slots:
     void selectWork(int workid);
 
