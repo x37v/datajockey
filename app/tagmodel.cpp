@@ -4,7 +4,7 @@ TagModel::TagModel(DB *db, QObject *parent) :
   QAbstractItemModel(parent),
   mDB(db)
 {
-  mTagRoot = new Tag();
+  mTagRoot = new Tag(0, "tags");
 }
 
 TagModel::~TagModel() {

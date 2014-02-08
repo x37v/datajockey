@@ -10,14 +10,13 @@ class TagsView;
 
 class TagsView : public QWidget
 {
-    Q_OBJECT
-    
-public:
+  Q_OBJECT
+  public:
     explicit TagsView(QWidget *parent = 0);
     ~TagsView();
     void setModel(QAbstractItemModel * model);
-    
-private:
+
+  private:
     Ui::TagsView *ui;
 };
 

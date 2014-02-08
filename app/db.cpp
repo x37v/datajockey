@@ -185,7 +185,7 @@ Tag * Tag::removeChildAt(int index) {
 }
 
 Tag * Tag::child(int index) {
-  if (mChilden.size() < index)
+  if (index < mChilden.size())
     return mChilden[index];
   return nullptr;
 }

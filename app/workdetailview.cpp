@@ -13,6 +13,7 @@ void WorkDetailView::setDB(DB* db) {
   mDB = db;
   mModel = new TagModel(db, this);
   mModel->showAllTags(false);
+  ui->tagsView->setModel(mModel);
 }
 
 void WorkDetailView::selectWork(int workid) {

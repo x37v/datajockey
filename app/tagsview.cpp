@@ -14,7 +14,6 @@ TagsView::~TagsView()
 }
 
 void TagsView::setModel(QAbstractItemModel * model) {
-  connect(model, &QAbstractItemModel::modelReset, ui->tree, &QTreeView::reset);
   ui->tree->setModel(model);
   ui->tree->reset();
 }
