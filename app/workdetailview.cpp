@@ -23,6 +23,7 @@ void WorkDetailView::selectWork(int workid) {
   ui->details->setText(songinfo);
   if (mModel)
     mModel->setWork(workid);
+  ui->tagsView->expandAll();
 }
 
 WorkDetailView::~WorkDetailView()

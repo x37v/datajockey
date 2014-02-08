@@ -5,12 +5,13 @@ TagsView::TagsView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TagsView)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
+  ui->tree->setHeaderHidden(true);
 }
 
 TagsView::~TagsView()
 {
-    delete ui;
+  delete ui;
 }
 
 void TagsView::setModel(QAbstractItemModel * model) {

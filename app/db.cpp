@@ -634,7 +634,7 @@ QList<Tag*> DB::tags(int work_id) {
     " JOIN tag_classes on tags.tag_class_id = tag_classes.id";
   if (work_id) {
     queryString += " JOIN audio_work_tags on tags.id = audio_work_tags.tag_id";
-    queryString += " WHERE audio_work_tags.id = " + QString::number(work_id);
+    queryString += " WHERE audio_work_tags.audio_work_id = " + QString::number(work_id);
   }
 
   QMutexLocker lock(&mMutex);
