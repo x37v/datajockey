@@ -32,7 +32,8 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
 
     virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const {
       QModelIndex session_index = index.sibling(index.row(), mSessionColumn);
-      if (session_index.data().toInt() == mCurrentSessionId) {
+      QVariant data = session_index.data();
+      if (!data.isNull() && data.toInt() == mCurrentSessionId) {
         painter->setBrush(QBrush(mStyle.backgroundColorGet()));
         painter->drawRect(option.rect);
       }
