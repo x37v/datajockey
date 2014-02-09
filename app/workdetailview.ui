@@ -38,7 +38,7 @@
      </widget>
      <widget class="QTreeView" name="tagsView">
       <attribute name="headerVisible">
-       <bool>true</bool>
+       <bool>false</bool>
       </attribute>
      </widget>
     </widget>
