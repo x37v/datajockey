@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDateTime>
 
 namespace Ui {
   class MainWindow;
@@ -24,7 +25,7 @@ class MainWindow : public QMainWindow
     void readSettings();
     void writeSettings();
     void masterSetValueInt(QString name, int v);
-    void workUpdateHistory(int work_id);
+    void workUpdateHistory(int work_id, QDateTime played_at);
   protected slots:
     void selectWork(int id);
   signals:

@@ -93,11 +93,8 @@ int main(int argc, char *argv[])
 
   MainWindow w(db, audio);
   w.loader(loader);
-  QObject::connect(history, &HistoryManager::workHistoryChanged, [&w](int work_id, QDateTime /*time*/) {
-      w.workUpdateHistory(work_id);
-      });
-
-  QObject::connect(midi, &MidiRouter::masterValueChangedInt,    &w, &MainWindow::masterSetValueInt);
+  QObject::connect(history, &HistoryManager::workHistoryChanged, &w, &MainWindow::workUpdateHistory);
+  QObject::connect(midi, &MidiRouter::masterValueChangedInt,     &w, &MainWindow::masterSetValueInt);
 
   QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.writeSettings();

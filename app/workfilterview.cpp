@@ -40,4 +40,4 @@ WorkFilterView::~WorkFilterView() { delete ui; }
 void WorkFilterView::setSessionNumber(int session) { ui->worksTable->setSessionNumber(session); }
 void WorkFilterView::selectWorkRelative(int rows) { ui->worksTable->selectWorkRelative(rows); }
 void WorkFilterView::emitSelected() { ui->worksTable->emitSelected(); }
-
+void WorkFilterView::workUpdateHistory(int work_id, QDateTime played_at) { ui->worksTable->workUpdateHistory(work_id, played_at); }

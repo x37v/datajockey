@@ -136,6 +136,10 @@ void WorksTableView::setSessionNumber(int session) {
   mSessionNumber = session;
 }
 
+void WorksTableView::workUpdateHistory(int work_id, QDateTime played_at) {
+  //XXX do it!
+}
+
 WorksSortFilterProxyModel::WorksSortFilterProxyModel(QObject * parent) : QSortFilterProxyModel(parent)
 {
 }

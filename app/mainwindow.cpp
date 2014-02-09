@@ -175,8 +175,8 @@ void MainWindow::masterSetValueInt(QString name, int v) {
   }
 }
 
-void MainWindow::workUpdateHistory(int work_id) {
-  //XXX use it!
+void MainWindow::workUpdateHistory(int work_id, QDateTime played_at) {
+  mFilterCollection->updateHistory(work_id, played_at);
 }
 
 void MainWindow::selectWork(int id) {

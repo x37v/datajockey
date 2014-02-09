@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTableView>
 #include <QSortFilterProxyModel>
+#include <QDateTime>
 
 class DB;
 
@@ -23,6 +24,7 @@ class WorksTableView : public QTableView
     void selectWorkRelative(int rows);
     void emitSelected();
     void setSessionNumber(int session);
+    void workUpdateHistory(int work_id, QDateTime played_at);
   signals:
     void workSelected(int workid);
   private:

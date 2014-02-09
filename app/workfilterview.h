@@ -23,6 +23,7 @@ class WorkFilterView : public QWidget
     void setSessionNumber(int session);
     void selectWorkRelative(int rows);
     void emitSelected();
+    void workUpdateHistory(int work_id, QDateTime played_at);
   signals:
     void workSelected(int workid);
 
