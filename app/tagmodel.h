@@ -40,7 +40,7 @@ class TagModelItemMimeData : public QMimeData {
     static QString format();
     virtual QStringList formats() const;
     virtual bool hasFormat(const QString & mimeType) const;
-    virtual QVariant retrieveData ( const QString & mimeType, QVariant::Type type ) const;
+    virtual QVariant retrieveData(const QString & mimeType, QVariant::Type type) const;
     void addItem(int id);
   private:
     QList<int> mData;

@@ -556,6 +556,22 @@ void DB::work_tag(
   query.exec();
 }
 
+void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
+  MySqlQuery query(get());
+
+  query.prepare(cWorkTagFind);
+  query.bindValue(":tag_id", tag_id);
+  query.bindValue(":audio_work_id", work_id);
+  query.exec();
+  if (query.first())
+    return;  //the work already has this tag
+
+  query.prepare(cWorkTagCreate);
+  query.bindValue(":tag_id", tag_id);
+  query.bindValue(":audio_work_id", work_id);
+  query.exec();
+}
+
 void DB::work_set_played(int work_id, QDateTime time) {
   QMutexLocker lock(&mMutex);
   MySqlQuery query(get());

@@ -32,12 +32,28 @@ void WorkDetailView::selectWork(int workid) {
 }
 
 void WorkDetailView::dragEnterEvent(QDragEnterEvent *event) {
+  if (mWorkID == 0)
+    return;
   if (event->mimeData()->hasFormat(TagModelItemMimeData::format()))
     event->acceptProposedAction();
 }
 
 void WorkDetailView::dropEvent(QDropEvent *event) {
+  if (mWorkID == 0)
+    return;
   if (event->mimeData()->hasFormat(TagModelItemMimeData::format())) {
+    const TagModelItemMimeData * data = static_cast<const  TagModelItemMimeData *>(event->mimeData());
+    QList<QVariant> ids = data->retrieveData(TagModelItemMimeData::format(), QVariant::List).toList();
+    try {
+      foreach(QVariant id, ids)
+        mDB->work_tag(mWorkID, id.toInt());
+      if (mModel) {
+        mModel->setWork(mWorkID);
+        ui->tagsView->expandAll();
+      }
+    } catch (std::runtime_error& e) {
+      qWarning("problem creating work tag association: %s", e.what());
+    }
   }
 }
 
