@@ -48,6 +48,7 @@ class DB : public QObject {
       WORK_ALBUM_TRACK = 4,
       WORK_TEMPO = 5,
       WORK_SONG_LENGTH = 6,
+      WORK_LAST_PLAYED = 7,
       WORK_SESSION_ID = 8,
     };
 

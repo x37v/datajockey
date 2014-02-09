@@ -137,7 +137,17 @@ void WorksTableView::setSessionNumber(int session) {
 }
 
 void WorksTableView::workUpdateHistory(int work_id, QDateTime played_at) {
-  //XXX do it!
+  //find the work if we have it
+  QAbstractItemModel * model = this->model();
+  QModelIndex startIndex = model->index(0, DB::work_table_column("id"));
+  QModelIndexList list = model->match(startIndex, Qt::DisplayRole, work_id, 1, Qt::MatchExactly);
+  if (list.length()) {
+    QModelIndex index = list.front();
+    QModelIndex session_index = index.sibling(index.row(), DB::work_table_column("session"));
+    QModelIndex played_index = index.sibling(index.row(), DB::work_table_column("last_played_at"));
+    model->setData(session_index, mSessionNumber, Qt::DisplayRole);
+    model->setData(played_index, played_at, Qt::DisplayRole);
+  }
 }
 
 WorksSortFilterProxyModel::WorksSortFilterProxyModel(QObject * parent) : QSortFilterProxyModel(parent)

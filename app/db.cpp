@@ -360,6 +360,8 @@ int DB::work_table_column(QString name) {
     return WORK_TEMPO;
   else if (name == "audio_file_seconds")
     return WORK_SONG_LENGTH;
+  else if (name == "last_played_at")
+    return WORK_LAST_PLAYED;
   else if (name == "session")
     return WORK_SESSION_ID;
   return -1;
