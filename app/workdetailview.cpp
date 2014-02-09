@@ -3,6 +3,7 @@
 #include "tagmodel.h"
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QKeyEvent>
 
 WorkDetailView::WorkDetailView(QWidget *parent) :
     QWidget(parent),
@@ -19,6 +20,7 @@ void WorkDetailView::setDB(DB* db) {
   mModel = new TagModel(db, this);
   mModel->showAllTags(false);
   ui->tagsView->setModel(mModel);
+  ui->tagsView->setColumnHidden(TagModel::idColumn(), true);
 }
 
 void WorkDetailView::selectWork(int workid) {
@@ -47,13 +49,36 @@ void WorkDetailView::dropEvent(QDropEvent *event) {
     try {
       foreach(QVariant id, ids)
         mDB->work_tag(mWorkID, id.toInt());
-      if (mModel) {
-        mModel->setWork(mWorkID);
-        ui->tagsView->expandAll();
-      }
+      rereadTags();
     } catch (std::runtime_error& e) {
       qWarning("problem creating work tag association: %s", e.what());
     }
   }
 }
 
+void WorkDetailView::keyPressEvent(QKeyEvent * event) {
+	if (event->matches(QKeySequence::Delete) || event->key() == Qt::Key_Backspace) {
+    if (mWorkID == 0)
+      return;
+    QModelIndex index = ui->tagsView->currentIndex();
+    if (!(index.isValid() && mModel->canDelete(index)))
+      return;
+    try {
+      Tag * tag = static_cast<Tag *>(index.internalPointer());
+      if (!tag)
+        return;
+      mDB->work_tag_remove(mWorkID, tag->id());
+      rereadTags();
+    } catch (std::runtime_error& e) {
+      qWarning("problem removing work tag association: %s", e.what());
+    }
+  } else
+    QWidget::keyPressEvent(event);
+}
+
+void WorkDetailView::rereadTags() {
+  if (!mModel)
+    return;
+  mModel->setWork(mWorkID);
+  ui->tagsView->expandAll();
+}

@@ -1,5 +1,6 @@
 #include "tagsview.h"
 #include "ui_tagsview.h"
+#include "tagmodel.h"
 
 TagsView::TagsView(QWidget *parent) :
     QWidget(parent),
@@ -18,5 +19,6 @@ TagsView::~TagsView()
 
 void TagsView::setModel(QAbstractItemModel * model) {
   ui->tree->setModel(model);
+  ui->tree->setColumnHidden(TagModel::idColumn(), true);
   ui->tree->reset();
 }

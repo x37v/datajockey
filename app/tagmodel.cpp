@@ -1,5 +1,7 @@
 #include "tagmodel.h"
 
+#define COUNT_COL 2
+
 TagModel::TagModel(DB *db, QObject *parent) :
   QAbstractItemModel(parent),
   mDB(db)
@@ -65,7 +67,7 @@ QModelIndex TagModel::parent(const QModelIndex & index) const {
 }
 
 int TagModel::rowCount(const QModelIndex & parent) const {
-  if (parent.column() > 0)
+  if (parent.column() >= COUNT_COL)
     return 0;
 
   if (!parent.isValid())
@@ -75,14 +77,17 @@ int TagModel::rowCount(const QModelIndex & parent) const {
 }
 
 int TagModel::columnCount(const QModelIndex& parent) const {
-  return 1;
+  return COUNT_COL;
 }
 
 QVariant TagModel::data(const QModelIndex & index, int role) const {
   if (!index.isValid() || role != Qt::DisplayRole)
     return QVariant();
   Tag * tag = static_cast<Tag *>(index.internalPointer());
-  return tag->name();
+  if (index.column() == 0)
+    return tag->name();
+  else
+    return tag->id();
 }
 
 void TagModel::setWork(int id) {
@@ -107,10 +112,14 @@ Qt::ItemFlags TagModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
   //if it isn't a tag class then it can be dragged
-  if(index.parent().isValid())
+  if (index.parent().isValid())
     return Qt::ItemIsDragEnabled | defaultFlags;
   else
     return defaultFlags;
+}
+
+bool TagModel::canDelete(const QModelIndex& index) const {
+  return (index.parent().isValid());
 }
 
 Qt::DropActions TagModel::supportedDropActions() const {

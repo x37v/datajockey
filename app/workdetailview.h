@@ -19,10 +19,12 @@ class WorkDetailView : public QWidget
     ~WorkDetailView();
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dropEvent(QDropEvent *event);
+    virtual void keyPressEvent(QKeyEvent * event);
   public slots:
     void selectWork(int workid);
 
   private:
+    void rereadTags();
     Ui::WorkDetailView *ui;
     DB * mDB;
     int mWorkID = 0;

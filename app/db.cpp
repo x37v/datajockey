@@ -80,7 +80,7 @@ namespace {
 
   const QString cWorkTagFind("SELECT id FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
   const QString cWorkTagCreate("INSERT INTO audio_work_tags (tag_id, audio_work_id) VALUES (:tag_id, :audio_work_id)");
-  const QString cWorkTagRemove("DELETE FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id)");
+  const QString cWorkTagRemove("DELETE FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
 
   QStringList work_table_selects;
   QStringList work_table_joins;
