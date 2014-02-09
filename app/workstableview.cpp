@@ -81,6 +81,10 @@ void WorksTableView::setModel(QAbstractItemModel * model) {
   TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
   if (seconds_column >= 0)
     setItemDelegateForColumn(seconds_column, time_delegate);
+
+  SessionDisplayDelegate * session_delegate =
+    new SessionDisplayDelegate(mSessionNumber, DB::work_table_column("session"), this);
+  setItemDelegate(session_delegate);
 }
 
 WorksTableView::~WorksTableView() { }
@@ -125,6 +129,10 @@ void WorksTableView::emitSelected() {
   QModelIndex index = indexes.front();
   int workid = index.sibling(index.row(), 0).data().toInt();
   emit(workSelected(workid));
+}
+
+void WorksTableView::setSessionNumber(int session) {
+  mSessionNumber = session;
 }
 
 WorksSortFilterProxyModel::WorksSortFilterProxyModel(QObject * parent) : QSortFilterProxyModel(parent)

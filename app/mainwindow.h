@@ -24,6 +24,7 @@ class MainWindow : public QMainWindow
     void readSettings();
     void writeSettings();
     void masterSetValueInt(QString name, int v);
+    void workUpdateHistory(int work_id);
   protected slots:
     void selectWork(int id);
   signals:

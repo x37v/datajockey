@@ -20,6 +20,7 @@ class WorkFilterView : public QWidget
     void setModel(WorkFilterModel * model);
     QString filterExpression() const;
   public slots:
+    void setSessionNumber(int session);
     void selectWorkRelative(int rows);
     void emitSelected();
   signals:

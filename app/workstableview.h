@@ -22,8 +22,11 @@ class WorksTableView : public QTableView
     void writeSettings();
     void selectWorkRelative(int rows);
     void emitSelected();
+    void setSessionNumber(int session);
   signals:
     void workSelected(int workid);
+  private:
+    int mSessionNumber = 0;
 };
 
 class WorksSortFilterProxyModel : public QSortFilterProxyModel

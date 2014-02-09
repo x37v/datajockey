@@ -77,7 +77,8 @@ SOURCES += main.cpp\
     workfiltermodelcollection.cpp \
     renameabletabwidget.cpp \
     midirouter.cpp \
-    tagmodel.cpp
+    tagmodel.cpp \
+    historymanager.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -120,7 +121,8 @@ HEADERS  += mainwindow.h \
     workfiltermodelcollection.hpp \
     renameabletabwidget.h \
     midirouter.h \
-    tagmodel.h
+    tagmodel.h \
+    historymanager.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

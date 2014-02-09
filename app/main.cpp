@@ -12,6 +12,7 @@
 #include "defines.hpp"
 #include "midirouter.h"
 #include "config.hpp"
+#include "historymanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -57,6 +58,12 @@ int main(int argc, char *argv[])
           audio->playerClear(player);
       });
 
+  //set up the session history logging
+  HistoryManager * history = new HistoryManager(audio->playerCount(), audio);
+  QObject::connect(loader, &AudioLoader::playerValueChangedInt, history, &HistoryManager::playerSetValueInt);
+  QObject::connect(audio, &AudioModel::playerValueChangedBool, history, &HistoryManager::playerSetValueBool);
+  QObject::connect(history, &HistoryManager::workHistoryChanged, db, &DB::work_set_played);
+
   MidiRouter * midi = new MidiRouter(audio->audioio()->midi_input_ringbuffer());
   QThread * midiThread = new QThread;
   midi->moveToThread(midiThread);
@@ -86,6 +93,9 @@ int main(int argc, char *argv[])
 
   MainWindow w(db, audio);
   w.loader(loader);
+  QObject::connect(history, &HistoryManager::workHistoryChanged, [&w](int work_id, QDateTime /*time*/) {
+      w.workUpdateHistory(work_id);
+      });
 
   QObject::connect(midi, &MidiRouter::masterValueChangedInt,    &w, &MainWindow::masterSetValueInt);
 

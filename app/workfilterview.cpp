@@ -37,5 +37,7 @@ void WorkFilterView::setModel(WorkFilterModel * model) {
 QString WorkFilterView::filterExpression() const { return ui->filterEdit->toPlainText(); }
 WorkFilterView::~WorkFilterView() { delete ui; }
 
+void WorkFilterView::setSessionNumber(int session) { ui->worksTable->setSessionNumber(session); }
 void WorkFilterView::selectWorkRelative(int rows) { ui->worksTable->selectWorkRelative(rows); }
 void WorkFilterView::emitSelected() { ui->worksTable->emitSelected(); }
+

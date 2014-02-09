@@ -36,6 +36,7 @@ void AudioLoader::playerTrigger(int player, QString name) {
       QString songinfo("$title\n$artist");
       mDB->format_string_by_id(mWorkID, songinfo);
       emit(playerValueChangedString(player, "loading_work", songinfo));
+      emit(playerValueChangedInt(player, "loading_work", mWorkID));
       mLoaders[player]->load(audio_file_location, annotation_file_location, songinfo);
     }
   } catch (std::exception& e) {

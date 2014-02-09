@@ -30,6 +30,7 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QSortFilterProxyModel * sortable = new QSortFilterProxyModel(model);
   sortable->setSourceModel(model);
   sortable->setSortCaseSensitivity(Qt::CaseInsensitive);
+  ui->allWorks->setSessionNumber(db->current_session());
   ui->allWorks->setModel(sortable);
 
   MixerPanelView * mixer = ui->mixer;
@@ -174,6 +175,10 @@ void MainWindow::masterSetValueInt(QString name, int v) {
   }
 }
 
+void MainWindow::workUpdateHistory(int work_id) {
+  //XXX use it!
+}
+
 void MainWindow::selectWork(int id) {
   ui->workDetail->selectWork(id);
   emit(workSelected(id));
@@ -183,6 +188,7 @@ void MainWindow::addFilterTab(QString filterExpression, QString title) {
   WorkFilterView * view = new WorkFilterView(this);
   WorkFilterModel * model = mFilterCollection->newFilterModel(view);
   model->setFilterExpression(filterExpression);
+  view->setSessionNumber(mDB->current_session());
   view->setModel(model);
   ui->workViews->addTab(view, title);
   connect(view, &WorkFilterView::workSelected, this, &MainWindow::selectWork);

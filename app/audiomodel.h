@@ -16,6 +16,7 @@ class AudioModel : public QObject {
   public:
     explicit AudioModel(QObject *parent = 0);
     ~AudioModel();
+    int playerCount() const { return mNumPlayers; }
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
