@@ -76,7 +76,7 @@ int TagModel::rowCount(const QModelIndex & parent) const {
   return tag->children().size();
 }
 
-int TagModel::columnCount(const QModelIndex& parent) const {
+int TagModel::columnCount(const QModelIndex& /*parent*/) const {
   return COUNT_COL;
 }
 

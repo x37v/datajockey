@@ -35,4 +35,16 @@ class WorksSortFilterProxyModel : public QSortFilterProxyModel
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 };
 
+class SessionDisplayStyle : public QWidget {
+  Q_OBJECT
+  Q_PROPERTY(QColor backgroundColor READ backgroundColorGet WRITE backgroundColorSet DESIGNABLE true)
+  public:
+    SessionDisplayStyle() : backgroundColor(Qt::red) { }
+
+    QColor backgroundColorGet() const { return backgroundColor; }
+    void backgroundColorSet(QColor color) { backgroundColor = color; }
+  private:
+    QColor backgroundColor;
+};
+
 #endif // WORKSTABLEVIEW_H

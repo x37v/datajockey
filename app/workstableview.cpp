@@ -6,9 +6,54 @@
 #include <QSortFilterProxyModel>
 #include <QSettings>
 #include <QTimer>
+#include <QStyledItemDelegate>
+#include <QTableWidgetItem>
+#include <QPainter>
 
-#include <iostream>
-using namespace std;
+class TimeDisplayDelegate : public QStyledItemDelegate {
+  public:
+    TimeDisplayDelegate(QObject *parent) : QStyledItemDelegate(parent) { }
+    virtual ~TimeDisplayDelegate() { }
+
+    virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
+      int sec = value.toInt();
+      int min = sec / 60;
+      sec = sec % 60;
+      return QString("%1:%2").arg(min).arg(sec, 2, 10, QChar('0'));
+    }
+};
+
+class SessionDisplayDelegate : public QStyledItemDelegate {
+  public:
+    SessionDisplayDelegate(int current_session, int session_column, QObject *parent) :
+      QStyledItemDelegate(parent), mCurrentSessionId(current_session), mSessionColumn(session_column) {
+      }
+    virtual ~SessionDisplayDelegate() { }
+
+    virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const {
+      QModelIndex session_index = index.sibling(index.row(), mSessionColumn);
+      if (session_index.data().toInt() == mCurrentSessionId) {
+        painter->setBrush(QBrush(mStyle.backgroundColorGet()));
+        painter->drawRect(option.rect);
+      }
+
+      QStyledItemDelegate::paint(painter, option, index);
+    }
+
+#if 0
+    virtual QString displayText(const QVariant& value, const QLocale& /* locale */) const {
+      int session_id = value.toInt();
+      if (session_id == mCurrentSessionId)
+        return QString("XX");
+      else
+        return QString("");
+    }
+#endif
+  private:
+    int mCurrentSessionId;
+    int mSessionColumn;
+    SessionDisplayStyle mStyle;
+};
 
 WorksTableView::WorksTableView(QWidget *parent) :
   QTableView(parent)
@@ -18,6 +63,8 @@ WorksTableView::WorksTableView(QWidget *parent) :
 }
 
 void WorksTableView::setModel(QAbstractItemModel * model) {
+  int seconds_column = DB::work_table_column("audio_file_seconds");
+  model->setHeaderData(seconds_column, Qt::Horizontal, "time");
   QTableView::setModel(model);
 
   //hide the id
@@ -30,6 +77,10 @@ void WorksTableView::setModel(QAbstractItemModel * model) {
   setSelectionMode(QAbstractItemView::SingleSelection);
   //XXX actually do something with editing at some point
   //setEditTriggers(QAbstractItemView::DoubleClicked);
+
+  TimeDisplayDelegate * time_delegate = new TimeDisplayDelegate(this);
+  if (seconds_column >= 0)
+    setItemDelegateForColumn(seconds_column, time_delegate);
 }
 
 WorksTableView::~WorksTableView() { }

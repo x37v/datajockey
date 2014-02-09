@@ -79,7 +79,7 @@ class DB : public QObject {
 
     QString work_table_query(const QString where_clause = QString()) throw(std::runtime_error);
 
-    int work_table_column(QString name);
+    static int work_table_column(QString name);
 
     int work_create(
         const QHash<QString, QVariant>& attributes,
