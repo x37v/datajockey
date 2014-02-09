@@ -38,7 +38,7 @@ void TagModel::showAllTags(bool doit) {
 }
 
 QModelIndex TagModel::index(int row, int column, const QModelIndex & parent) const {
-  if (!hasIndex(row, column, parent) || column != 0)
+  if (!hasIndex(row, column, parent) || column >= COUNT_COL)
     return QModelIndex();
 
   Tag * parentTag = nullptr;
@@ -87,7 +87,7 @@ QVariant TagModel::data(const QModelIndex & index, int role) const {
   if (index.column() == 0)
     return tag->name();
   else
-    return tag->id();
+    return QString::number(tag->id());
 }
 
 void TagModel::setWork(int id) {

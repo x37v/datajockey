@@ -7,9 +7,6 @@ TagsView::TagsView(QWidget *parent) :
     ui(new Ui::TagsView)
 {
   ui->setupUi(this);
-  ui->tree->setHeaderHidden(true);
-  ui->tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  ui->tree->setDragEnabled(true);
 }
 
 TagsView::~TagsView()
@@ -19,6 +16,9 @@ TagsView::~TagsView()
 
 void TagsView::setModel(QAbstractItemModel * model) {
   ui->tree->setModel(model);
+  ui->tree->setHeaderHidden(true);
   ui->tree->setColumnHidden(TagModel::idColumn(), true);
-  ui->tree->reset();
+  ui->tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  ui->tree->setDragEnabled(true);
 }
+
