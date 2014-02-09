@@ -100,6 +100,7 @@ class DB : public QObject {
         const QString& tag_class,
         const QString& tag_value) throw(std::runtime_error);
     void work_tag(int work_id, int tag_id) throw(std::runtime_error);
+    void work_tag_remove(int work_id, int tag_id) throw(std::runtime_error);
     void work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
 
     int current_session();

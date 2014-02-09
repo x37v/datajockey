@@ -80,6 +80,7 @@ namespace {
 
   const QString cWorkTagFind("SELECT id FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
   const QString cWorkTagCreate("INSERT INTO audio_work_tags (tag_id, audio_work_id) VALUES (:tag_id, :audio_work_id)");
+  const QString cWorkTagRemove("DELETE FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id)");
 
   QStringList work_table_selects;
   QStringList work_table_joins;
@@ -557,6 +558,7 @@ void DB::work_tag(
 }
 
 void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
+  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   query.prepare(cWorkTagFind);
@@ -567,6 +569,15 @@ void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
     return;  //the work already has this tag
 
   query.prepare(cWorkTagCreate);
+  query.bindValue(":tag_id", tag_id);
+  query.bindValue(":audio_work_id", work_id);
+  query.exec();
+}
+
+void DB::work_tag_remove(int work_id, int tag_id) throw(std::runtime_error) {
+  QMutexLocker lock(&mMutex);
+  MySqlQuery query(get());
+  query.prepare(cWorkTagRemove);
   query.bindValue(":tag_id", tag_id);
   query.bindValue(":audio_work_id", work_id);
   query.exec();
