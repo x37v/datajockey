@@ -21,11 +21,12 @@ void WorkDetailView::setDB(DB* db) {
   mModel->showAllTags(false);
   ui->tagsView->setModel(mModel);
   ui->tagsView->setColumnHidden(TagModel::idColumn(), true);
+  ui->details->setTextFormat(Qt::RichText);
 }
 
 void WorkDetailView::selectWork(int workid) {
   mWorkID = workid;
-  QString songinfo("t:$title\na:$artist\nA:$album");
+  QString songinfo("<div><b>Title:</b> $title</div> <div><b>Artist:</b> $artist</div> <div><b>Album:</b> $album</div>");
   mDB->format_string_by_id(mWorkID, songinfo);
   ui->details->setText(songinfo);
   if (mModel)
