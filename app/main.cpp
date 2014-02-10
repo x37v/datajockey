@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
   HistoryManager * history = new HistoryManager(audio->playerCount(), audio);
   QObject::connect(loader, &AudioLoader::playerValueChangedInt, history, &HistoryManager::playerSetValueInt);
   QObject::connect(audio, &AudioModel::playerValueChangedBool, history, &HistoryManager::playerSetValueBool);
+  //XXX can we move this insert into the background in order to ditch the pause we get in the GUI?
   QObject::connect(history, &HistoryManager::workHistoryChanged, db, &DB::work_set_played);
 
   MidiRouter * midi = new MidiRouter(audio->audioio()->midi_input_ringbuffer());
