@@ -12,8 +12,6 @@
 #include <QStringList>
 #include <QSqlTableModel>
 #include <QDebug>
-#include <QMutex>
-#include <QMutexLocker>
 #include <QDateTime>
 #include <QRegExp>
 #include <iostream>
@@ -23,7 +21,6 @@ using std::cerr;
 using std::endl;
 
 namespace {
-  QMutex mMutex(QMutex::Recursive);
   bool has_transactions = false;
 
   const QString cFileQuery(
@@ -121,7 +118,6 @@ namespace {
 
   /*
   void update_temp_work_table(const QString& table_name, const QString& where_clause = QString()) throw(std::runtime_error) {
-    QMutexLocker lock(&mMutex);
     MySqlQuery query(mDB);
 
     //delete everything from the table
@@ -200,8 +196,6 @@ DB::DB(
     QString /* host */,
     QObject * parent
     ) throw(std::runtime_error) : QObject(parent) { 
-  QMutexLocker lock(&mMutex);
-
   //create an empty sqlite db if it doesn't already exist at name_or_loc
   if (type == "QSQLITE") {
     QFileInfo file_info(name_or_loc);
@@ -259,8 +253,6 @@ bool DB::find_locations_by_id(
     int work_id,
     QString& audio_file_loc,
     QString& annotation_file_loc) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   //build up query
   MySqlQuery query(get());
   query.prepare(cFileQuery);
@@ -280,8 +272,6 @@ bool DB::find_locations_by_id(
 }
 
 void DB::format_string_by_id(int work_id, QString& info) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   //build up query
   MySqlQuery query(get());
   query.prepare(cWorkInfoQuery);
@@ -301,8 +291,6 @@ bool DB::find_artist_and_title_by_id(
     int work_id,
     QString& artist_name,
     QString& work_title) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   //build up query
   MySqlQuery query(get());
   query.prepare(cWorkInfoQuery);
@@ -371,8 +359,6 @@ int DB::work_create(
     const QHash<QString, QVariant>& attributes,
     const QString& audio_file_location
     ) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   int work_id = 0;
   QSqlDriver * db_driver = get().driver();
 
@@ -461,8 +447,6 @@ int DB::work_create(
 
 int DB::work_find_by_audio_file_location(
     const QString& audio_file_location) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   MySqlQuery query(get());
   query.prepare(cWorkIDFromLocation);
   query.bindValue(":audio_file_location", audio_file_location);
@@ -477,8 +461,6 @@ void DB::work_update_attribute(
     int work_id,
     const QString& name,
     const QVariant& value) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
-
   MySqlQuery query(get());
 
   QString update_string = QString("UPDATE audio_works SET %1=:value WHERE audio_works.id = :id").arg(name);
@@ -509,7 +491,6 @@ void DB::work_tag(
     int work_id,
     const QString& tag_class,
     const QString& tag_value) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //find the tag class named
@@ -560,7 +541,6 @@ void DB::work_tag(
 }
 
 void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   query.prepare(cWorkTagFind);
@@ -577,7 +557,6 @@ void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
 }
 
 void DB::work_tag_remove(int work_id, int tag_id) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
   query.prepare(cWorkTagRemove);
   query.bindValue(":tag_id", tag_id);
@@ -586,7 +565,6 @@ void DB::work_tag_remove(int work_id, int tag_id) throw(std::runtime_error) {
 }
 
 void DB::work_set_played(int work_id, QDateTime time) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   try {
@@ -613,7 +591,6 @@ void DB::work_set_played(int work_id, QDateTime time) {
 int DB::current_session() { return cCurrentSession; }
 
 void DB::work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   query.prepare(cWorkUpdateAlbum);
@@ -625,7 +602,6 @@ void DB::work_set_album(int work_id, int album_id, int track_num)  throw(std::ru
 
 
 int DB::tag_find_class(const QString& name) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //find the tag class named
@@ -639,7 +615,6 @@ int DB::tag_find_class(const QString& name) throw(std::runtime_error) {
 }
 
 int DB::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //if the tag_class_id is >= 0 we include the class in the search
@@ -666,7 +641,6 @@ QList<Tag*> DB::tags(int work_id) {
     queryString += " WHERE audio_work_tags.audio_work_id = " + QString::number(work_id);
   }
 
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
   query.prepare(queryString);
   query.exec();
@@ -692,7 +666,6 @@ QList<Tag*> DB::tags(int work_id) {
 }
 
 int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //try to find an artist by the same name
@@ -716,7 +689,6 @@ int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) 
 }
 
 int DB::album_find(const QString& name, bool create)  throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //try to find an album by the same name
@@ -740,7 +712,6 @@ int DB::album_find(const QString& name, bool create)  throw(std::runtime_error) 
 }
 
 int DB::file_type_find(const QString& name, bool create) throw(std::runtime_error) {
-  QMutexLocker lock(&mMutex);
   MySqlQuery query(get());
 
   //try to find an album by the same name
