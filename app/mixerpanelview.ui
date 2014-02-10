@@ -108,16 +108,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="midiLearn">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Midi Learn</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="syncToPlayer0">
          <property name="text">
           <string>Sync To 1</string>
