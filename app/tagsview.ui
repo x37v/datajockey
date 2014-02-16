@@ -13,16 +13,19 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QTreeView" name="tree"/>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QLineEdit" name="tagName"/>
    </item>
-   <item>
-    <widget class="QPushButton" name="pushButton">
+   <item row="2" column="0">
+    <widget class="QPushButton" name="createButton">
      <property name="text">
       <string>Create Tag</string>
      </property>
     </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QTreeView" name="tree"/>
    </item>
   </layout>
  </widget>

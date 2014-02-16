@@ -10,6 +10,7 @@ class TagModel : public QAbstractItemModel {
   public:
     explicit TagModel(DB * db, QObject *parent = 0);
     virtual ~TagModel();
+
     void showAllTags(bool doit);
 
     virtual QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
@@ -25,6 +26,10 @@ class TagModel : public QAbstractItemModel {
     static int idColumn() { return 1; }
   public slots:
     void setWork(int id);
+    void createTag(QString name, QModelIndex parent);
+  signals:
+    void errorCreatingTag(QString errorString);
+
   private:
     DB * mDB;
     int mWorkID = 0; //zero means no work

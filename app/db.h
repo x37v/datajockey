@@ -111,6 +111,9 @@ class DB : public QObject {
 
     //0 means all tags
     QList<Tag*> tags(int work_id = 0);
+    bool tag_exists(QString name, Tag * parent = nullptr);
+    //creates a new tag, which you're responsible for destroying
+    Tag * tag_create(QString name, Tag * parent = nullptr);
 
     int artist_find(const QString& name, bool create = false) throw(std::runtime_error);
 

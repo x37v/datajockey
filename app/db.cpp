@@ -665,6 +665,43 @@ QList<Tag*> DB::tags(int work_id) {
   return top_tags.values();
 }
 
+bool DB::tag_exists(QString name, Tag * parent) {
+  MySqlQuery query(get());
+  QString queryString;
+  if (!parent) {
+    queryString = "SELECT id FROM tag_classes WHERE name = :name";
+    query.prepare(queryString);
+  } else {
+    queryString = "SELECT id FROM tags WHERE name = :name AND tag_class_id = :class_id";
+    query.prepare(queryString);
+    query.bindValue(":class_id", parent->id());
+  }
+  query.bindValue(":name", name);
+  query.exec();
+  return query.first();
+}
+
+Tag * DB::tag_create(QString name, Tag * parent) {
+  MySqlQuery query(get());
+  QString queryString;
+  if (!parent || parent->id() == 0) {
+    queryString = "INSERT INTO tag_classes (name) VALUES (:name)";
+    query.prepare(queryString);
+  } else {
+    queryString = "INSERT INTO tags (name, tag_class_id) VALUES (:name, :class_id)";
+    query.prepare(queryString);
+    query.bindValue(":class_id", parent->id());
+  }
+  query.bindValue(":name", name);
+  query.exec();
+
+  int id = query.lastInsertId().toInt();
+  Tag * tag = new Tag(id, name);
+  if (parent)
+    parent->appendChild(tag);
+  return tag;
+}
+
 int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) {
   MySqlQuery query(get());
 

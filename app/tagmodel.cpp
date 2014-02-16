@@ -107,6 +107,33 @@ void TagModel::setWork(int id) {
   endResetModel();
 }
 
+void TagModel::createTag(QString tagName, QModelIndex parent) {
+  Tag * parentTag = nullptr;
+  //get the parent if there is one
+  if (parent.isValid()) {
+    //XXX for now, we just allow 1 level of tag depth
+    if (parent.parent().isValid())
+      parent = parent.parent();
+    parentTag = static_cast<Tag *>(parent.internalPointer());
+  } else
+    parentTag = mTagRoot;
+
+  if (mDB->tag_exists(tagName, parentTag)) {
+    QString warning = "Tag with name '" + tagName + "'";
+    if (parentTag)
+      warning += " and parent '" + parentTag->name() + "'";
+    warning += " already exists";
+    emit(errorCreatingTag(warning));
+    return;
+  }
+
+  int row = rowCount(parent);
+  beginInsertRows(parent, row, row);
+  /*Tag * tag =*/ mDB->tag_create(tagName, parentTag);
+  //parent now has tag as a child, I think we don't have to do anything else..
+  endInsertRows();
+}
+
 Qt::ItemFlags TagModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
   if (!index.isValid())

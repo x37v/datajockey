@@ -14,6 +14,7 @@
 #include <QToolButton>
 #include <QSettings>
 #include <QTimer>
+#include <QMessageBox>
 
 MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QMainWindow(parent),
@@ -93,10 +94,13 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   });
   QTimer::singleShot(0, this, SLOT(readSettings()));
 
-
   TagModel * tagmodel = new TagModel(mDB, this);
   tagmodel->showAllTags(true);
   ui->tags->setModel(tagmodel);
+  connect(ui->tags, &TagsView::newTagRequested, tagmodel, &TagModel::createTag);
+  connect(tagmodel, &TagModel::errorCreatingTag, [this](QString errorString) {
+    QMessageBox::warning(this, "Error Creating Tag", errorString);
+  });
 }
 
 MainWindow::~MainWindow() { delete ui; }
