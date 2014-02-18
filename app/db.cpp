@@ -670,6 +670,7 @@ bool DB::tag_exists(QString name, Tag * parent) {
 Tag * DB::tag_create(QString name, Tag * parent) {
   MySqlQuery query(get());
   QString queryString = "INSERT INTO tags (name, parent_id) VALUES (:name, :parent_id)";
+  query.prepare(queryString);
   query.bindValue(":name", name);
   query.bindValue(":parent_id", parent ? parent->id() : 0);
   query.exec();
