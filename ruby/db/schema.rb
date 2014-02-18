@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 25) do
+ActiveRecord::Schema.define(:version => 26) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -75,12 +75,8 @@ ActiveRecord::Schema.define(:version => 25) do
     t.integer  "album_track"
   end
 
-  create_table "tag_classes", :force => true do |t|
-    t.string "name"
-  end
-
   create_table "tags", :force => true do |t|
-    t.integer "tag_class_id"
+    t.integer "parent_id"
     t.string  "name"
   end
 
