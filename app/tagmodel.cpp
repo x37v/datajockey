@@ -134,6 +134,14 @@ void TagModel::createTag(QString tagName, QModelIndex parent) {
   endInsertRows();
 }
 
+void TagModel::deleteTags(QModelIndexList tags) {
+  foreach (QModelIndex index, tags) {
+    if (!canDelete(index))
+      continue;
+    //XXX wait until we have hierarchical tagging
+  }
+}
+
 Qt::ItemFlags TagModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
   if (!index.isValid())
@@ -196,3 +204,4 @@ QVariant TagModelItemMimeData::retrieveData(const QString & mimeType, QVariant::
 
 void TagModelItemMimeData::addItem(int id){ mData.push_back(id); }
 QString TagModelItemMimeData::format() { return "application/tag-id-list"; }
+

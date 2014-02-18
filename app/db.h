@@ -96,24 +96,30 @@ class DB : public QObject {
         int work_id,
         QString descriptor_type_name,
         double value) throw(std::runtime_error);
+
+    /*
     void work_tag(
         int work_id,
         const QString& tag_class,
         const QString& tag_value) throw(std::runtime_error);
+        */
+
     void work_tag(int work_id, int tag_id) throw(std::runtime_error);
     void work_tag_remove(int work_id, int tag_id) throw(std::runtime_error);
     void work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
 
     int current_session();
 
-    int tag_find_class(const QString& name) throw(std::runtime_error);
-    int tag_find(const QString& name, int tag_class_id = -1) throw(std::runtime_error);
+    int tag_find(const QString& name, int parent_id = 0) throw(std::runtime_error);
 
     //0 means all tags
     QList<Tag*> tags(int work_id = 0);
     bool tag_exists(QString name, Tag * parent = nullptr);
     //creates a new tag, which you're responsible for destroying
     Tag * tag_create(QString name, Tag * parent = nullptr);
+
+    //frees as well
+    void tag_destroy(Tag * tag);
 
     int artist_find(const QString& name, bool create = false) throw(std::runtime_error);
 

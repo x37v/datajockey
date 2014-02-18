@@ -27,6 +27,7 @@ class TagModel : public QAbstractItemModel {
   public slots:
     void setWork(int id);
     void createTag(QString name, QModelIndex parent);
+    void deleteTags(QModelIndexList tags);
   signals:
     void errorCreatingTag(QString errorString);
 

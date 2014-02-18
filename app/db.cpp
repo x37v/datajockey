@@ -68,12 +68,9 @@ namespace {
   const QString cFileTypeFind("SELECT id FROM audio_file_types where name = :name");
   const QString cFileTypeInsert("INSERT INTO audio_file_types (name) values (:name)");
 
-  const QString cTagClassFind("SELECT id FROM tag_classes WHERE name = :name");
-  const QString cTagClassCreate("INSERT INTO tag_classes (name) VALUES (:name)");
-
-  const QString cTagFind("SELECT id FROM tags WHERE name = :name AND tag_class_id = :tag_class_id");
-  const QString cTagFindNoClass("SELECT id FROM tags WHERE name = :name");
-  const QString cTagCreate("INSERT INTO tags (name, tag_class_id) VALUES (:name, :tag_class_id)");
+  const QString cTagFind("SELECT id FROM tags WHERE name = :name AND parent_id = :parent_id");
+  const QString cTagFindNoParent("SELECT id FROM tags WHERE name = :name");
+  const QString cTagCreate("INSERT INTO tags (name, parent_id) VALUES (:name, :parent_id)");
 
   const QString cWorkTagFind("SELECT id FROM audio_work_tags WHERE tag_id = :tag_id AND audio_work_id = :audio_work_id");
   const QString cWorkTagCreate("INSERT INTO audio_work_tags (tag_id, audio_work_id) VALUES (:tag_id, :audio_work_id)");
@@ -487,6 +484,7 @@ void DB::work_descriptor_create_or_update(
   work_update_attribute(work_id, column_name, value);
 }
 
+/*
 void DB::work_tag(
     int work_id,
     const QString& tag_class,
@@ -539,6 +537,7 @@ void DB::work_tag(
   query.bindValue(":audio_work_id", work_id);
   query.exec();
 }
+*/
 
 void DB::work_tag(int work_id, int tag_id) throw(std::runtime_error) {
   MySqlQuery query(get());
@@ -600,29 +599,15 @@ void DB::work_set_album(int work_id, int album_id, int track_num)  throw(std::ru
   query.exec();
 }
 
-
-int DB::tag_find_class(const QString& name) throw(std::runtime_error) {
+int DB::tag_find(const QString& name, int parent_id) throw(std::runtime_error) {
   MySqlQuery query(get());
 
-  //find the tag class named
-  query.prepare(cTagClassFind);
-  query.bindValue(":name", name);
-  query.exec();
-
-  if (query.first())
-    return query.value(0).toInt();
-  throw std::runtime_error("cannot find tag class with name " + name.toStdString());
-}
-
-int DB::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error) {
-  MySqlQuery query(get());
-
-  //if the tag_class_id is >= 0 we include the class in the search
-  if (tag_class_id >= 0) {
+  //if the parent_id is > 0 we include it in the search
+  if (parent_id > 0) {
     query.prepare(cTagFind);
-    query.bindValue(":tag_class_id", tag_class_id);
+    query.bindValue(":parent_id", parent_id);
   } else {
-    query.prepare(cTagFindNoClass);
+    query.prepare(cTagFindNoParent);
   }
 
   query.bindValue(":name", name);
@@ -633,13 +618,14 @@ int DB::tag_find(const QString& name, int tag_class_id) throw(std::runtime_error
 }
 
 QList<Tag*> DB::tags(int work_id) {
-  QString queryString = "SELECT tags.name, tags.id, tag_classes.name, tag_classes.id"
+  QString queryString = "SELECT tags.name, tags.id, tags.parent_id, tparent.name"
     " FROM tags "
-    " JOIN tag_classes on tags.tag_class_id = tag_classes.id";
+    " LEFT OUTER JOIN tags AS tparent ON tparent.id = tags.parent_id";
   if (work_id) {
     queryString += " JOIN audio_work_tags on tags.id = audio_work_tags.tag_id";
     queryString += " WHERE audio_work_tags.audio_work_id = " + QString::number(work_id);
   }
+  queryString += " ORDER BY tags.parent_id";
 
   MySqlQuery query(get());
   query.prepare(queryString);
@@ -649,17 +635,23 @@ QList<Tag*> DB::tags(int work_id) {
   while(query.next()) {
     QString tag_name = query.value(0).toString();
     int tag_id = query.value(1).toInt();
-    QString class_name = query.value(2).toString();
-    int class_id = query.value(3).toInt();
+
     Tag * tag = new Tag(tag_id, tag_name);
-    Tag * tag_class;
-    if (!top_tags.contains(class_id)) {
-      tag_class = new Tag(class_id, class_name);
-      top_tags[class_id] = tag_class;
+
+    int parent_id = query.value(2).toInt();
+    if (parent_id) {
+      Tag * tag_parent;
+      if (!top_tags.contains(parent_id)) {
+        QString parent_name = query.value(3).toString();
+        tag_parent = new Tag(parent_id, parent_name);
+        top_tags[parent_id] = tag_parent;
+      } else {
+        tag_parent = top_tags[parent_id];
+      }
+      tag_parent->appendChild(tag);
     } else {
-      tag_class = top_tags[class_id];
+      top_tags[tag->id()] = tag;
     }
-    tag_class->appendChild(tag);
   }
 
   return top_tags.values();
@@ -667,15 +659,9 @@ QList<Tag*> DB::tags(int work_id) {
 
 bool DB::tag_exists(QString name, Tag * parent) {
   MySqlQuery query(get());
-  QString queryString;
-  if (!parent) {
-    queryString = "SELECT id FROM tag_classes WHERE name = :name";
-    query.prepare(queryString);
-  } else {
-    queryString = "SELECT id FROM tags WHERE name = :name AND tag_class_id = :class_id";
-    query.prepare(queryString);
-    query.bindValue(":class_id", parent->id());
-  }
+  QString queryString = "SELECT id FROM tags WHERE name = :name AND parent_id = :parent_id";
+  query.prepare(queryString);
+  query.bindValue(":parent_id", parent ? parent->id() : 0);
   query.bindValue(":name", name);
   query.exec();
   return query.first();
@@ -683,16 +669,9 @@ bool DB::tag_exists(QString name, Tag * parent) {
 
 Tag * DB::tag_create(QString name, Tag * parent) {
   MySqlQuery query(get());
-  QString queryString;
-  if (!parent || parent->id() == 0) {
-    queryString = "INSERT INTO tag_classes (name) VALUES (:name)";
-    query.prepare(queryString);
-  } else {
-    queryString = "INSERT INTO tags (name, tag_class_id) VALUES (:name, :class_id)";
-    query.prepare(queryString);
-    query.bindValue(":class_id", parent->id());
-  }
+  QString queryString = "INSERT INTO tags (name, parent_id) VALUES (:name, :parent_id)";
   query.bindValue(":name", name);
+  query.bindValue(":parent_id", parent ? parent->id() : 0);
   query.exec();
 
   int id = query.lastInsertId().toInt();
@@ -700,6 +679,19 @@ Tag * DB::tag_create(QString name, Tag * parent) {
   if (parent)
     parent->appendChild(tag);
   return tag;
+}
+
+void DB::tag_destroy(Tag * tag) {
+  while (tag->children().size()) {
+    tag_destroy(tag);
+  }
+
+  if (tag->parent() && tag->parent()->id() != 0) {
+  }
+
+  if (tag->parent())
+    tag->removeChild(tag);
+  delete tag;
 }
 
 int DB::artist_find(const QString& name, bool create) throw(std::runtime_error) {

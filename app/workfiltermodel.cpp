@@ -44,7 +44,7 @@ namespace {
       QStringList tag_ids;
       foreach (QString tag_expr, tag_expressions) {
         QString tag_name;
-        int tag_class_id = -1;
+        int tag_parent_id = 0;
 
         //two formats name, or class:name
         QStringList sub_expr = tag_expr.split(":");
@@ -54,12 +54,12 @@ namespace {
             break;
           case 2:
             {
-              QString tag_class = cleanup_string(sub_expr[0]);
+              QString tag_parent = cleanup_string(sub_expr[0]);
               tag_name = cleanup_string(sub_expr[1]);
               try {
-                tag_class_id = db->tag_find_class(tag_class);
+                tag_parent_id = db->tag_find(tag_parent);
               } catch (std::runtime_error& e) {
-                throw std::runtime_error("cannot find tag class: " + tag_class.toStdString() + " for expression: " + tag_expr.toStdString());
+                throw std::runtime_error("cannot find tag parent: " + tag_parent.toStdString() + " for expression: " + tag_expr.toStdString());
               }
             }
             break;
@@ -69,7 +69,7 @@ namespace {
 
         QString tag_id;
         try {
-          tag_id.setNum(db->tag_find(tag_name, tag_class_id));
+          tag_id.setNum(db->tag_find(tag_name, tag_parent_id));
         } catch (std::runtime_error& e) {
           throw (std::runtime_error("cannot find tag that matches expression: " + tag_expr.toStdString()));
         }
