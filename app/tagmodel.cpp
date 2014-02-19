@@ -135,10 +135,29 @@ void TagModel::createTag(QString tagName, QModelIndex parent) {
 }
 
 void TagModel::deleteTags(QModelIndexList tags) {
-  foreach (QModelIndex index, tags) {
-    if (!canDelete(index))
-      continue;
-    //XXX wait until we have hierarchical tagging
+  //make sure that if we delete a parent, we don't delete its child after cuz that won't exist
+  for (int i = 0; i < tags.size(); i++) {
+    Tag * parent = static_cast<Tag *>(tags[i].internalPointer());
+    if (parent->id() == 0) {
+      tags.removeAt(i);
+    } else {
+      //figure out which tags we should ditch
+      QList<int> toRemove;
+      for (int j = 0; j < tags.size(); j++) {
+        Tag * child = static_cast<Tag *>(tags[j].internalPointer());
+        if (parent->id() == child->id())
+          continue;
+        if (parent->hasChild(child, true))
+          toRemove.push_back(j);
+      }
+      //ditch them
+      for (int j = tags.size() - 1; j >= 0; j--)
+        tags.removeAt(toRemove[j]);
+    }
+  }
+  for (int i = 0; i < tags.size(); i++) {
+    Tag * tag = static_cast<Tag *>(tags[i].internalPointer());
+    mDB->tag_destroy(tag);
   }
 }
 

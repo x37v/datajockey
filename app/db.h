@@ -30,6 +30,8 @@ class Tag {
 
     Tag * parent() const { return mParent; }
     void parent(Tag * v) { mParent = v; }
+
+    bool hasChild(Tag * child, bool recurse = true);
   private:
     int mID = 0;
     QString mName;

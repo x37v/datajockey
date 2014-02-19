@@ -184,6 +184,17 @@ Tag * Tag::child(int index) {
   return nullptr;
 }
 
+bool Tag::hasChild(Tag * child, bool recurse) {
+  for (int i = 0; i < mChilden.size(); i++) {
+    Tag * c = mChilden[i];
+    if (c->id() == child->id())
+      return true;
+    if (recurse && c->hasChild(child, true))
+      return true;
+  }
+  return false;
+}
+
 DB::DB(
     QString type, 
     QString name_or_loc, 
@@ -683,15 +694,23 @@ Tag * DB::tag_create(QString name, Tag * parent) {
 }
 
 void DB::tag_destroy(Tag * tag) {
-  while (tag->children().size()) {
+  while (tag->children().size())
     tag_destroy(tag);
-  }
-
-  if (tag->parent() && tag->parent()->id() != 0) {
-  }
 
   if (tag->parent())
     tag->removeChild(tag);
+
+  MySqlQuery query(get());
+  QString queryString = "DELETE FROM audio_work_tags WHERE tag_id = :tag_id";
+  query.prepare(queryString);
+  query.bindValue(":tag_id", tag->id());
+  query.exec();
+
+  queryString = "DELETE FROM tags WHERE id = :tag_id";
+  query.prepare(queryString);
+  query.bindValue(":id", tag->id());
+  query.exec();
+
   delete tag;
 }
 
