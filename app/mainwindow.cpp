@@ -101,6 +101,8 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(tagmodel, &TagModel::errorCreatingTag, [this](QString errorString) {
     QMessageBox::warning(this, "Error Creating Tag", errorString);
   });
+
+  connect(ui->tags, &TagsView::tagDeleteRequested, tagmodel, &TagModel::deleteTags);
 }
 
 MainWindow::~MainWindow() { delete ui; }

@@ -694,11 +694,13 @@ Tag * DB::tag_create(QString name, Tag * parent) {
 }
 
 void DB::tag_destroy(Tag * tag) {
-  while (tag->children().size())
-    tag_destroy(tag);
+  while (tag->children().size()) {
+    Tag * child = tag->child(0);
+    tag_destroy(child);
+  }
 
   if (tag->parent())
-    tag->removeChild(tag);
+    tag->parent()->removeChild(tag);
 
   MySqlQuery query(get());
   QString queryString = "DELETE FROM audio_work_tags WHERE tag_id = :tag_id";

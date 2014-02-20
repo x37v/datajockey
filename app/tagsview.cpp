@@ -3,6 +3,7 @@
 #include "tagmodel.h"
 #include "db.h"
 #include <QMessageBox>
+#include <QKeyEvent>
 
 TagsView::TagsView(QWidget *parent) :
     QWidget(parent),
@@ -15,6 +16,16 @@ TagsView::TagsView(QWidget *parent) :
 TagsView::~TagsView()
 {
   delete ui;
+}
+
+void TagsView::keyPressEvent(QKeyEvent * event) {
+	if (event->matches(QKeySequence::Delete) || event->key() == Qt::Key_Backspace) {
+    auto indexes = ui->tree->selectionModel()->selectedIndexes();
+    if (indexes.size() > 0) {
+      emit(tagDeleteRequested(indexes));
+    }
+  } else
+    QWidget::keyPressEvent(event);
 }
 
 void TagsView::setModel(QAbstractItemModel * model) {

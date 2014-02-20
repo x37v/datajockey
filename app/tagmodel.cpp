@@ -137,6 +137,11 @@ void TagModel::createTag(QString tagName, QModelIndex parent) {
 void TagModel::deleteTags(QModelIndexList tags) {
   //make sure that if we delete a parent, we don't delete its child after cuz that won't exist
   for (int i = 0; i < tags.size(); i++) {
+    //only delete 0 indicies
+    if (tags[i].column() != 0) {
+      tags.removeAt(i);
+      continue;
+    }
     Tag * parent = static_cast<Tag *>(tags[i].internalPointer());
     if (parent->id() == 0) {
       tags.removeAt(i);
@@ -151,14 +156,19 @@ void TagModel::deleteTags(QModelIndexList tags) {
           toRemove.push_back(j);
       }
       //ditch them
-      for (int j = tags.size() - 1; j >= 0; j--)
+      for (int j = toRemove.size() - 1; j >= 0; j--) {
         tags.removeAt(toRemove[j]);
+      }
     }
   }
+
   for (int i = 0; i < tags.size(); i++) {
+    beginRemoveRows(tags[i].parent(), tags[i].row(), tags[i].row());
     Tag * tag = static_cast<Tag *>(tags[i].internalPointer());
     mDB->tag_destroy(tag);
+    endRemoveRows();
   }
+
 }
 
 Qt::ItemFlags TagModel::flags(const QModelIndex &index) const {
