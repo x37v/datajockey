@@ -710,7 +710,7 @@ void DB::tag_destroy(Tag * tag) {
 
   queryString = "DELETE FROM tags WHERE id = :tag_id";
   query.prepare(queryString);
-  query.bindValue(":id", tag->id());
+  query.bindValue(":tag_id", tag->id());
   query.exec();
 
   delete tag;
