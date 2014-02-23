@@ -136,8 +136,11 @@ void TagModel::createTag(QString tagName, QModelIndex parent) {
 
 void TagModel::deleteTags(QModelIndexList tags) {
   //make sure that if we delete a parent, we don't delete its child after cuz that won't exist
-  for (int i = 0; i < tags.size(); i++) {
-    //only delete 0 indicies
+  for (int i = 0; i < tags.size(); /* happens internally */) {
+    //when we remove at the top level, we don't need to increment because i
+    //will now refer to the next value
+    
+    //only delete 0 indices
     if (tags[i].column() != 0) {
       tags.removeAt(i);
       continue;
@@ -145,6 +148,7 @@ void TagModel::deleteTags(QModelIndexList tags) {
     Tag * parent = static_cast<Tag *>(tags[i].internalPointer());
     if (parent->id() == 0) {
       tags.removeAt(i);
+      continue;
     } else {
       //figure out which tags we should ditch
       QList<int> toRemove;
@@ -159,6 +163,8 @@ void TagModel::deleteTags(QModelIndexList tags) {
       for (int j = toRemove.size() - 1; j >= 0; j--) {
         tags.removeAt(toRemove[j]);
       }
+      //increment
+      i++;
     }
   }
 
