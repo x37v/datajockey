@@ -78,7 +78,10 @@ SOURCES += main.cpp\
     renameabletabwidget.cpp \
     midirouter.cpp \
     tagmodel.cpp \
-    historymanager.cpp
+    historymanager.cpp \
+    audiofiletag.cpp \
+    beatextractor.cpp \
+    audiofileinfoextractor.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -122,7 +125,10 @@ HEADERS  += mainwindow.h \
     renameabletabwidget.h \
     midirouter.h \
     tagmodel.h \
-    historymanager.h
+    historymanager.h \
+    audiofiletag.h \
+    beatextractor.h \
+    audiofileinfoextractor.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

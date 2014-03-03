@@ -48,7 +48,7 @@ namespace {
 
 //open the soundfile
 SoundFile::SoundFile(QString location) : 
-  mFile(location),
+  mFile(QFile::encodeName(location)),
   mType(UNSUPPORTED),
   mPCMData(NULL),
   mSampleRate(0),

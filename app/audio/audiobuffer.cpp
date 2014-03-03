@@ -10,9 +10,9 @@ Type linear_interp(Type v0, Type v1, double dist){
 
 using namespace djaudio;
 
-AudioBuffer::AudioBuffer(std::string soundfileLocation)
+AudioBuffer::AudioBuffer(QString soundfileLocation)
   throw(std::runtime_error) :
-    mSoundFile(soundfileLocation.c_str()),
+    mSoundFile(soundfileLocation),
     mLoaded(false),
     mAbort(false),
     mNumChannels(0),
@@ -23,7 +23,7 @@ AudioBuffer::AudioBuffer(std::string soundfileLocation)
   //check to make sure soundfile exists
   if(!mSoundFile.valid()){
     std::string str("cannot open soundfile: ");
-    str.append(soundfileLocation);
+    str.append(soundfileLocation.toStdString());
     throw std::runtime_error(str);
   }
 

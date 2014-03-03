@@ -14,7 +14,7 @@ namespace djaudio {
       typedef std::vector<float > data_buffer_t; 
       typedef void (* progress_callback_t)(int percent, void * user_data);
 
-      AudioBuffer(std::string soundfileLocation) throw(std::runtime_error);
+      AudioBuffer(QString soundfileLocation) throw(std::runtime_error);
       virtual ~AudioBuffer();
       //returns true if completely loaded
       bool load(progress_callback_t progress_callback = NULL, void * user_data = NULL);

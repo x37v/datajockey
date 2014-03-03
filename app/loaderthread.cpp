@@ -53,7 +53,7 @@ void LoaderThread::run() {
     mAudioBuffer.reset();
     mBeatBuffer.reset();
 
-    mAudioBuffer = AudioBufferPtr(new AudioBuffer(mAudioFileName.toStdString()));
+    mAudioBuffer = AudioBufferPtr(new AudioBuffer(mAudioFileName));
 
     if (!mAnnotationFileName.isEmpty()) {
       djaudio::Annotation annotation;

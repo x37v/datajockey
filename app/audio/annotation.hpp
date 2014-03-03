@@ -8,6 +8,7 @@
 #include <QVariant>
 #include <deque>
 #include <QExplicitlySharedDataPointer>
+#include <QFileDevice>
 
 namespace djaudio {
   int median(const std::deque<int>& values);
@@ -28,6 +29,7 @@ namespace djaudio {
       void update_attributes(QHash<QString, QVariant>& attributes);
       void beat_buffer(BeatBufferPtr buffer);
       void write_file(const QString& file_path) throw(std::runtime_error);
+      void write(QFileDevice& file) throw(std::runtime_error);
       QString default_file_location(int work_id);
       BeatBufferPtr beatBuffer() const { return mBeatBuffer; }
     private:

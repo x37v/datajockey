@@ -1,11 +1,9 @@
-#include "beatextractor.hpp"
+#include "beatextractor.h"
 #include "audiobuffer.hpp"
 #include <vamp-hostsdk/PluginInputDomainAdapter.h>
 #include <vamp-hostsdk/PluginLoader.h>
 #include <QMutex>
 #include <QMutexLocker>
-
-using namespace dj::util;
 
 namespace {
   QMutex loaderMutex;
@@ -25,10 +23,6 @@ namespace {
     }
     return vampLoader->loadPlugin(pluginKey, sample_rate, vampPluginAdapterFlags);
   }
-
-  inline double vamp_realtime_to_seconds(const Vamp::RealTime& rt) {
-    return (double)rt.sec + (double)rt.usec() / 1000000.0;
-  }
 }
 
 BeatExtractor::BeatExtractor() : QObject(),
@@ -44,8 +38,7 @@ BeatExtractor::~BeatExtractor() {
     delete mPlugin;
 }
 
-  bool BeatExtractor::process(const audio::AudioBufferPtr audio_buffer, audio::BeatBufferPtr beat_buffer)
-throw(std::runtime_error)
+bool BeatExtractor::process(const djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) throw(std::runtime_error)
 {
   //make sure we have a valid plugin and that its rate is correct
   if (mPlugin == NULL) {
@@ -73,7 +66,7 @@ throw(std::runtime_error)
     const float * bufptr = &mAnalBuffer.front();
     features = mPlugin->process(&bufptr, Vamp::RealTime::frame2RealTime(i, mSampleRate));
     for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
-      beat_buffer->insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
+      beat_buffer->push_back(Vamp::RealTime::realTime2Frame(features[beat_output_index][f].timestamp, audio_buffer->sample_rate()));
 
     //TODO make this based on block size and a modulus for less math?
     if ((i - progress_last) >= progress_report) {
@@ -84,14 +77,13 @@ throw(std::runtime_error)
 
   features = mPlugin->getRemainingFeatures();
   for (unsigned int f = 0; f < features[beat_output_index].size(); f++)
-    beat_buffer->insert_beat(vamp_realtime_to_seconds(features[beat_output_index][f].timestamp));
+    beat_buffer->push_back(Vamp::RealTime::realTime2Frame(features[beat_output_index][f].timestamp, audio_buffer->sample_rate()));
 
   emit(progress(100));
   return true;
 }
 
-  void BeatExtractor::allocate_plugin(int sample_rate)
-throw(std::runtime_error)
+void BeatExtractor::allocate_plugin(int sample_rate) throw(std::runtime_error)
 {
   mSampleRate = sample_rate;
   mPlugin = load_plugin(mSampleRate);
@@ -111,3 +103,4 @@ throw(std::runtime_error)
 
   mAnalBuffer.resize(mBlockSize);
 }
+
