@@ -31,6 +31,11 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
     audio_buffer->load();
     mBeatExtractor->process(audio_buffer, beat_buffer);
 
+    std::deque<int> dist = beat_buffer->distances();
+    int median = djaudio::median(dist);
+    float bpm = (60.0 * audio_buffer->sample_rate()) / median;
+    tag_data["tempo_median"] = bpm;
+
     //create the annotation temp file
     djaudio::Annotation annotation;
     annotation.update_attributes(tag_data);
