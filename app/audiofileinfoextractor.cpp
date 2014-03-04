@@ -44,7 +44,7 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
     QTemporaryFile temp_file(QDir::tempPath() + "/datajockey-XXXXXX.yaml");
     temp_file.setAutoRemove(false);
     annotation.write(temp_file);
-    emit(fileCreated(audioFileName, temp_file.fileName()));
+    emit(fileCreated(audioFileName, temp_file.fileName(), tag_data));
   } catch (std::runtime_error& e) {
     emit(error(audioFileName, QString::fromStdString(e.what())));
   }

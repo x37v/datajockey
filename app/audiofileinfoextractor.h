@@ -2,6 +2,9 @@
 #define AUDIOFILEINFOEXTRACTOR_H
 
 #include <QObject>
+#include <QHash>
+#include <QString>
+#include <QVariant>
 
 class BeatExtractor;
 
@@ -12,7 +15,7 @@ class AudioFileInfoExtractor : public QObject {
     virtual ~AudioFileInfoExtractor();
 
   signals:
-    void fileCreated(QString audioFilePath, QString annotationFilePath);
+    void fileCreated(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData);
     void error(QString audioFilePath, QString errorMessage);
 
   public slots:
