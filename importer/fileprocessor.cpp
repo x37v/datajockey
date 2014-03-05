@@ -35,14 +35,15 @@ void FileProcessor::addFiles(QStringList files) {
 }
 
 void FileProcessor::process() {
-
-  for(int i = 0; i < mFiles.size(); i++) {
-    QString file = mFiles[i];
+  QStringList files = mFiles;
+  mFiles.clear();
+  for(int i = 0; i < files.size(); i++) {
+    QString file = files[i];
     QDir dir(file);
     if (dir.exists()) {
       QStringList entries = dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
       foreach (QString e, entries)
-        mFiles.append(dir.absoluteFilePath(e));
+        files.append(dir.absoluteFilePath(e));
       continue;
     } else if (QFile::exists(file)) {
       ProcessTask * task = new ProcessTask(file, this);
