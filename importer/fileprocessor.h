@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QHash>
 #include <QVariant>
+#include <QThreadPool>
 
 class FileProcessor : public QObject
 {
@@ -21,6 +22,7 @@ class FileProcessor : public QObject
     void process();
   private:
     QStringList mFiles;
+    QThreadPool * mThreadPool;
 };
 
 #endif // FILEPROCESSOR_H

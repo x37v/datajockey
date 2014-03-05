@@ -2,10 +2,32 @@
 #include "audiofileinfoextractor.h"
 #include <QDir>
 #include <QtDebug>
+#include <QRunnable>
+
+class ProcessTask : public QRunnable {
+  public:
+    ProcessTask(QString filePath, FileProcessor * parent) : mFile(filePath) {
+      mExtractor = new AudioFileInfoExtractor(nullptr);
+      QObject::connect(mExtractor, &AudioFileInfoExtractor::fileCreated, parent, &FileProcessor::fileCreated);
+    }
+
+    virtual ~ProcessTask() {
+      delete mExtractor;
+    }
+
+    virtual void run() {
+      mExtractor->processAudioFile(mFile);
+    }
+  private:
+    QString mFile;
+    AudioFileInfoExtractor * mExtractor;
+};
+
 
 FileProcessor::FileProcessor(QObject *parent) :
   QObject(parent)
 {
+  mThreadPool = new QThreadPool(this);
 }
 
 void FileProcessor::addFiles(QStringList files) {
@@ -13,8 +35,6 @@ void FileProcessor::addFiles(QStringList files) {
 }
 
 void FileProcessor::process() {
-  AudioFileInfoExtractor * extractor = new AudioFileInfoExtractor(this);
-  connect(extractor, &AudioFileInfoExtractor::fileCreated, this, &FileProcessor::fileCreated);
 
   for(int i = 0; i < mFiles.size(); i++) {
     QString file = mFiles[i];
@@ -25,12 +45,13 @@ void FileProcessor::process() {
         mFiles.append(dir.absoluteFilePath(e));
       continue;
     } else if (QFile::exists(file)) {
-      extractor->processAudioFile(file);
+      ProcessTask * task = new ProcessTask(file, this);
+      mThreadPool->start(task);
     } else {
       qDebug() << "doesn't exist " << file << endl;
     }
   }
-  extractor->deleteLater();
+  mThreadPool->waitForDone();
   emit(complete());
 }
 
