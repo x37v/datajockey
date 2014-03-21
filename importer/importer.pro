@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
+QT       += core sql
 
 QT       -= gui
 
@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     ../app/audio/annotation.cpp \
     ../app/audio/audiobuffer.cpp \
     ../app/audio/soundfile.cpp \
-    fileprocessor.cpp
+    fileprocessor.cpp \
+    ../app/db.cpp
 
 HEADERS += \
     ../app/audiofileinfoextractor.h \
@@ -57,7 +58,8 @@ HEADERS += \
     ../app/audio/annotation.hpp \
     ../app/audio/audiobuffer.hpp \
     ../app/audio/soundfile.hpp \
-    fileprocessor.h
+    fileprocessor.h \
+    ../app/db.h
 
 INCLUDEPATH += . \
   ../app/ \

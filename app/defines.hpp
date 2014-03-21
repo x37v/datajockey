@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <QString>
+#include <QStringList>
 #include <QPair>
 #include <yaml-cpp/yaml.h>
 
@@ -43,6 +44,8 @@ namespace dj {
      }
 
    const int volume_slider_height = 50;
+
+   const QStringList audio_file_extensions = (QStringList() << "flac" << "mp3" << "ogg");
 }
 
 //convert to and from QString

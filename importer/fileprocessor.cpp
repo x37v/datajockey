@@ -41,10 +41,7 @@ void FileProcessor::process() {
     QString file = files[i];
     QDir dir(file);
     if (dir.exists()) {
-      QStringList entries = dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-      foreach (QString e, entries)
-        files.append(dir.absoluteFilePath(e));
-      continue;
+      qDebug() << "is a directory " << file << endl;
     } else if (QFile::exists(file)) {
       ProcessTask * task = new ProcessTask(file, this);
       mThreadPool->start(task);

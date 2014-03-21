@@ -1,5 +1,6 @@
 #include "db.h"
 //#include "defines.hpp"
+#include "config.hpp"
 #include <stdexcept>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -134,6 +135,42 @@ namespace {
     query.exec();
   }
   */
+
+  QString fmt_string(const QString& input) {
+    QString ret = input.toLower();
+    ret = ret.replace(QRegExp("\\s\\s*"), "_");
+    ret = ret.replace('\\', '_');
+    ret = ret.replace('/', '_');
+    ret = ret.replace('~', '_');
+    ret = ret.replace(QRegExp("\\.+"), "_");
+    return QDir::cleanPath(ret);
+  }
+
+  QString default_file_location(int work_id, QHash<QString, QVariant> tag_data) {
+    QDir dir(dj::Configuration::instance()->annotation_dir());
+    QString file_name;
+    file_name.setNum(work_id);
+
+    QHash<QString, QVariant>::const_iterator i;
+    i = tag_data.find("artist");
+    if (i != tag_data.end())
+      file_name.append("-" + fmt_string(i->toString()));
+
+    i = tag_data.find("album");
+    if (i != tag_data.end()) {
+      QHash<QString, QVariant> album = i->toHash();
+      QHash<QString, QVariant>::const_iterator j = album.find("name");
+      if (j != album.end())
+        file_name.append("-" + fmt_string(j->toString()));
+    }
+
+    i = tag_data.find("name");
+    if (i != tag_data.end())
+      file_name.append("-" + fmt_string(i->toString()));
+
+    file_name.append(".yaml");
+    return dir.filePath(file_name);
+  }
 }
 
 Tag::Tag(int id, QString name) :
@@ -595,6 +632,28 @@ void DB::work_set_played(int work_id, QDateTime time) {
     query.exec();
   } catch (std::runtime_error e) {
     cerr << "failed to update audio works table: " << e.what() << endl;
+  }
+}
+
+void DB::import(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData) {
+  try {
+    //import file
+    throw std::runtime_error("tag data has heirarchical album info, need to flatten it or for work_create");
+    int id = work_create(tagData, audioFilePath);
+
+    //move the annotation
+    QString movedAnnotation = default_file_location(id, tagData);
+    QDir dir;
+    if (!dir.mkpath(movedAnnotation))
+      throw std::runtime_error("couldn't create path to annotation file: " + movedAnnotation.toStdString());
+    if (!QFile::rename(annotationFilePath, movedAnnotation))
+      throw std::runtime_error("couldn't move to annotation file to: " + movedAnnotation.toStdString());
+
+    //add the annotation
+    work_update_attribute(id, "annotation_file_location", movedAnnotation);
+
+  } catch (std::runtime_error& e) {
+    emit(importError(audioFilePath, QString::fromStdString(e.what())));
   }
 }
 
