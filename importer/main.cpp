@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     processor->addFiles(filesToProcess);
 
     QObject::connect(processor, &FileProcessor::fileCreated, db, &DB::import);
-    QObject::connect(processor, &FileProcessor::complete, &a, QCoreApplication::quit);
+    //QObject::connect(processor, &FileProcessor::complete, &a, QCoreApplication::quit);
     QTimer::singleShot(0, processor, SLOT(process()));
   }
 
