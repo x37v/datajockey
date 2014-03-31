@@ -136,6 +136,7 @@ class DB : public QObject {
 
   signals:
     void importError(QString audioFilePath, QString errorMessage);
+    void importSuccess(QString audioFilePath);
 
   private:
     QSqlDatabase mDB;

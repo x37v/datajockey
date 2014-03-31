@@ -11,6 +11,11 @@
 #include <QSet>
 #include <QtDebug>
 
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
 //grabbed from stack overflow
 //http://stackoverflow.com/questions/8052460/recursive-scanning-of-directories
 void scanDir(QDir dir, QSet<QString>& files) {
@@ -89,10 +94,26 @@ int main(int argc, char *argv[])
         filesToProcess.push_back(file);
     }
 
+    int import_counter = filesToProcess.size();
+    if (import_counter == 0) {
+      cout << "no files to import, exiting" << endl;
+      exit(0);
+    }
     processor->addFiles(filesToProcess);
 
+    cout << "importing " << import_counter << " files...." << endl;
     QObject::connect(processor, &FileProcessor::fileCreated, db, &DB::import);
-    //QObject::connect(processor, &FileProcessor::complete, &a, QCoreApplication::quit);
+    QObject::connect(db, &DB::importError, [&import_counter, &a] (QString audioFilePath, QString errorMessage) {
+      cout << "error importing: " << qPrintable(audioFilePath) << endl;
+      cout << "\t" << qPrintable(errorMessage) << endl;
+      if (--import_counter == 0)
+        a.quit();
+    });
+    QObject::connect(db, &DB::importSuccess, [&import_counter, &a] (QString audioFilePath) {
+      cout << "success: " << qPrintable(audioFilePath) << endl;
+      if (--import_counter == 0)
+        a.quit();
+    });
     QTimer::singleShot(0, processor, SLOT(process()));
   }
 

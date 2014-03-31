@@ -664,11 +664,15 @@ void DB::import(QString audioFilePath, QString annotationFilePath, QHash<QString
     //add the annotation
     work_update_attribute(id, "annotation_file_location", movedAnnotation);
 
-    cout << "imported: " << qPrintable(audioFilePath) << " " << qPrintable(movedAnnotation) << endl;
+    //add the median tempo
+    auto it = tagData.find("tempo_median");
+    if (it != tagData.end())
+      work_descriptor_create_or_update(id, "tempo_median", it.value().toDouble());
   } catch (std::runtime_error& e) {
-    cout << "failed: " << e.what() << " " << qPrintable(audioFilePath) << " " << qPrintable(annotationFilePath) << endl;
     emit(importError(audioFilePath, QString::fromStdString(e.what())));
+    return;
   }
+  emit(importSuccess(audioFilePath));
 }
 
 int DB::current_session() { return cCurrentSession; }
