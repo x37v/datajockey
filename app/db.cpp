@@ -1,5 +1,6 @@
 #include "db.h"
 //#include "defines.hpp"
+#include "config.hpp"
 #include <stdexcept>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -134,6 +135,42 @@ namespace {
     query.exec();
   }
   */
+
+  QString fmt_string(const QString& input) {
+    QString ret = input.toLower();
+    ret = ret.replace(QRegExp("\\s\\s*"), "_");
+    ret = ret.replace('\\', '_');
+    ret = ret.replace('/', '_');
+    ret = ret.replace('~', '_');
+    ret = ret.replace(QRegExp("\\.+"), "_");
+    return QDir::cleanPath(ret);
+  }
+
+  QString default_file_location(int work_id, QHash<QString, QVariant> tag_data) {
+    QDir dir(dj::Configuration::instance()->annotation_dir());
+    QString file_name;
+    file_name.setNum(work_id);
+
+    QHash<QString, QVariant>::const_iterator i;
+    i = tag_data.find("artist");
+    if (i != tag_data.end())
+      file_name.append("-" + fmt_string(i->toString()));
+
+    i = tag_data.find("album");
+    if (i != tag_data.end()) {
+      QHash<QString, QVariant> album = i->toHash();
+      QHash<QString, QVariant>::const_iterator j = album.find("name");
+      if (j != album.end())
+        file_name.append("-" + fmt_string(j->toString()));
+    }
+
+    i = tag_data.find("name");
+    if (i != tag_data.end())
+      file_name.append("-" + fmt_string(i->toString()));
+
+    file_name.append(".yaml");
+    return dir.filePath(file_name);
+  }
 }
 
 Tag::Tag(int id, QString name) :
@@ -371,7 +408,6 @@ int DB::work_create(
   QSqlDriver * db_driver = get().driver();
 
   try {
-    int album_id = 0;
     QHash<QString, QVariant>::const_iterator i;
 
     if (has_transactions)
@@ -435,9 +471,22 @@ int DB::work_create(
 
     i = attributes.find("album");
     if (i != attributes.end()) {
-      album_id = album_find(i.value().toString(), true);
-      i = attributes.find("track");
-      int track_num = (i != attributes.end()) ? i.value().toInt() : 0;
+      int track_num = 0;
+      int album_id = 0;
+      //hash or flat style
+      if (i.value().canConvert(QMetaType::QVariantHash)) {
+        QHash<QString, QVariant> ahash = i.value().toHash();
+        i = ahash.find("name");
+        if (i != ahash.end())
+          album_id = album_find(i.value().toString(), true);
+        i = ahash.find("track");
+        track_num = (i != attributes.end()) ? i.value().toInt() : 0;
+      } else { 
+        if (i != attributes.end())
+          album_id = album_find(i.value().toString(), true);
+        i = attributes.find("track");
+        track_num = (i != attributes.end()) ? i.value().toInt() : 0;
+      }
       DB::work_set_album(work_id, album_id, track_num);
     }
     if (has_transactions) {
@@ -596,6 +645,34 @@ void DB::work_set_played(int work_id, QDateTime time) {
   } catch (std::runtime_error e) {
     cerr << "failed to update audio works table: " << e.what() << endl;
   }
+}
+
+void DB::import(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData) {
+  try {
+    //import file
+    int id = work_create(tagData, audioFilePath);
+
+    //move the annotation
+    QString movedAnnotation = default_file_location(id, tagData);
+    QFileInfo movedInfo(movedAnnotation);
+    QDir dir = movedInfo.dir();
+    if (!dir.mkpath(dir.path()))
+      throw std::runtime_error("couldn't create path to annotation file: " + movedAnnotation.toStdString());
+    if (!QFile::rename(annotationFilePath, movedAnnotation))
+      throw std::runtime_error("couldn't move to annotation file to: " + movedAnnotation.toStdString());
+
+    //add the annotation
+    work_update_attribute(id, "annotation_file_location", movedAnnotation);
+
+    //add the median tempo
+    auto it = tagData.find("tempo_median");
+    if (it != tagData.end())
+      work_descriptor_create_or_update(id, "tempo_median", it.value().toDouble());
+  } catch (std::runtime_error& e) {
+    emit(importError(audioFilePath, QString::fromStdString(e.what())));
+    return;
+  }
+  emit(importSuccess(audioFilePath));
 }
 
 int DB::current_session() { return cCurrentSession; }

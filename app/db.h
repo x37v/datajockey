@@ -132,6 +132,11 @@ class DB : public QObject {
   public slots:
     //indicate that this work has been played in this session, at time given
     void work_set_played(int work_id, QDateTime time);
+    void import(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData);
+
+  signals:
+    void importError(QString audioFilePath, QString errorMessage);
+    void importSuccess(QString audioFilePath);
 
   private:
     QSqlDatabase mDB;
