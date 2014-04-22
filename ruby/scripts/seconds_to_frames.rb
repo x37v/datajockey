@@ -22,8 +22,6 @@ $: << ".."
 require 'datajockey/base'
 require 'datajockey/db'
 require 'yaml'
-require 'shellwords'
-require 'mp3info'
 
 #connect to the database
 Datajockey::connect
@@ -42,19 +40,7 @@ AudioWork.all.each do |w|
   puts a
 
   begin
-    sr = nil
-    if f =~ /flac/
-      cmd = "sndfile-info"
-    elsif f =~ /mp3/
-      Mp3Info.open(f) do |info|
-        sr = info.samplerate
-      end
-    else
-      cmd = "exiftool"
-    end
-    unless sr
-      sr = `#{cmd} #{Shellwords.escape(f)} | grep "Sample Rate"`.chomp.split(" ").last.to_f
-    end
+    sr = getsamplerate(f)
     if sr == 0
       puts "#{w.id} #{w.name} #{f} sample rate? #{sr}"
       problems.puts "#{w.id} #{f} #{a} sample_rate=0"

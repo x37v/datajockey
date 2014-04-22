@@ -22,6 +22,7 @@ $: << ".."
 require 'datajockey/base'
 require 'datajockey/db'
 require 'yaml'
+require_relative 'getsamplerate'
 
 #connect to the database
 Datajockey::connect
@@ -29,10 +30,31 @@ Datajockey::connect
 include Datajockey
 
 AudioWork.where('descriptor_tempo_median IS NULL AND annotation_file_location IS NOT NULL').each do |w|
+  sr = getsamplerate(w.audio_file_location)
+  if sr == 0
+    puts "skipping #{w.name}"
+    next
+  end
+
   annotation = YAML.load(File.read(w.annotation_file_location))
   beats = annotation["beat_locations"]
   next unless beats
   beats = beats["frames"]
   next unless beats and beats.size > 1
-  #XXX actually do it!
+  dist = beats[0..-2].zip(beats[1..-1]).collect { |t0, t1| t1 - t0 }.sort
+  median = dist[dist.size / 2]
+  if dist.size % 2 == 0
+    median = (median + dist[dist.size / 2 + 1]).to_f / 2
+  end
+  #mean = dist.inject(0) { |x, y| x + y }.to_f / dist.size
+
+  median = 60.0 * sr / median
+  #mean = 60.0 * sr / mean
+
+  w.update_attribute(:descriptor_tempo_median, median)
+  #w.update_attribute(:descriptor_tempo_mean, mean)
+  w.save
+  puts "#{median} #{w.name}"
 end
+
+puts "DONE!"
