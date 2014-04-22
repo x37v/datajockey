@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QtDebug>
 #include <QRunnable>
+#include <QTimer>
 
 class ProcessTask : public QRunnable {
   public:
@@ -49,7 +50,16 @@ void FileProcessor::process() {
       qDebug() << "doesn't exist " << file << endl;
     }
   }
-  mThreadPool->waitForDone();
-  emit(complete());
+
+  //poll for done state
+  QTimer * done_timer = new QTimer(this);
+  done_timer->setInterval(100);
+  connect(done_timer, &QTimer::timeout, [this, done_timer] () {
+    if (mThreadPool->waitForDone(1)) {
+      emit(complete());
+      done_timer->stop();
+    }
+  });
+  done_timer->start(10);
 }
 
