@@ -55,6 +55,11 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
     djaudio::AudioBufferPtr audio_buffer(new djaudio::AudioBuffer(audioFileName));
     djaudio::BeatBufferPtr beat_buffer(new djaudio::BeatBuffer);
 
+    if (audio_buffer->channels() != 2) {
+      QString msg = QString("only stereo files are currently supported, this file has %1 channel(s)").arg(audio_buffer->channels());
+      emit(error(audioFileName, msg));
+      return;
+    }
     //XXX use progress callbacks
     audio_buffer->load();
     mBeatExtractor->process(audio_buffer, beat_buffer);
