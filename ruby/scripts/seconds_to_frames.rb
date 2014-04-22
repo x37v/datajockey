@@ -22,6 +22,7 @@ $: << ".."
 require 'datajockey/base'
 require 'datajockey/db'
 require 'yaml'
+require_relative 'samplerate'
 
 #connect to the database
 Datajockey::connect
