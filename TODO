@@ -1,3 +1,7 @@
+importer:
+	allow for recomputing annotation file and overwriting an existing one
+		this way we can fix files we screwed up while developing
+
 EQ:
 	calf 5 band seems to work nicely:
     http://calf.sourceforge.net/plugins/Equalizer5Band
