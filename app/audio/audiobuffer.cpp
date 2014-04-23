@@ -1,5 +1,6 @@
 #include "audiobuffer.hpp"
 #include <algorithm>
+#include <iostream>
 
 #define READ_FRAME_SIZE 32768
 
@@ -124,40 +125,55 @@ bool AudioBuffer::load(progress_callback_t progress_callback, void * user_data) 
   if (progress_callback)
     progress_callback(0, user_data);
 
-  while(!mAbort && (frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
-    for(unsigned int i = 0; i < frames_read; i++){
-      for(unsigned int j = 0; j < chans; j++){
-        float v = inbuf[i * chans + j];
-        mAudioData.push_back(v);
-        //find the max sample for normalization
-        mMaxSample = std::max(v, mMaxSample);
+  try {
+    while(!mAbort && (frames_read = mSoundFile.readf(inbuf, READ_FRAME_SIZE)) != 0){
+      for(unsigned int i = 0; i < frames_read; i++){
+        for(unsigned int j = 0; j < chans; j++){
+          float v = inbuf[i * chans + j];
+          mAudioData.push_back(v);
+          //find the max sample for normalization
+          mMaxSample = std::max(v, mMaxSample);
+        }
+      }
+
+      //report progress
+      if (progress_callback && num_frames != 0) {
+        total_read += frames_read;
+        unsigned int new_percent = (double)(100 * total_read) / num_frames;
+        if (new_percent != percent_last) {
+          percent_last = new_percent;
+          progress_callback(percent_last, user_data);
+        }
       }
     }
+    delete [] inbuf;
 
-    //report progress
-    if (progress_callback && num_frames != 0) {
-      total_read += frames_read;
-      unsigned int new_percent = (double)(100 * total_read) / num_frames;
-      if (new_percent != percent_last) {
-        percent_last = new_percent;
-        progress_callback(percent_last, user_data);
+    if (!mAbort) {
+      if (mNormalize && mMaxSample > 0.0 && mMaxSample < 1.0) {
+        float mul = 1.0 / mMaxSample;
+        for (unsigned int i = 0; i < mAudioData.size(); i++)
+          mAudioData[i] *= mul;
       }
-    }
-  }
-  delete [] inbuf;
-  if (!mAbort) {
-    if (mNormalize && mMaxSample > 0.0 && mMaxSample < 1.0) {
-      float mul = 1.0 / mMaxSample;
-      for (unsigned int i = 0; i < mAudioData.size(); i++)
-        mAudioData[i] *= mul;
-    }
 
-    mLoaded = true;
-    if (progress_callback)
-      progress_callback(100, user_data);
-    return true;
+      mLoaded = true;
+      if (progress_callback)
+        progress_callback(100, user_data);
+      return true;
+    }
+    return false;
+  } catch (std::bad_alloc& ba) {
+    std::cerr << "bad_alloc caught: " << ba.what() << std::endl;
+    std::cerr << "file name: " << qPrintable(mSoundFile.location()) << std::endl;
+    return false;
+  } catch (std::runtime_error& e) {
+    std::cerr << "exception caught: " << e.what() << std::endl;
+    std::cerr << "file name: " << qPrintable(mSoundFile.location()) << std::endl;
+    return false;
+  } catch (...) {
+    std::cerr << "unknown exception caught" << std::endl;
+    std::cerr << "file name: " << qPrintable(mSoundFile.location()) << std::endl;
+    return false;
   }
-  return false;
 }
 
 void AudioBuffer::abort_load(){ mAbort = true; }

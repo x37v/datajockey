@@ -61,7 +61,11 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
       return;
     }
     //XXX use progress callbacks
-    audio_buffer->load();
+    if (!audio_buffer->load()) {
+      QString msg = QString("unknown error loading soundfile %1").arg(audioFileName);
+      emit(error(audioFileName, msg));
+      return;
+    }
     mBeatExtractor->process(audio_buffer, beat_buffer);
 
     std::deque<int> dist = beat_buffer->distances();

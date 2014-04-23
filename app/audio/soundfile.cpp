@@ -310,7 +310,6 @@ void SoundFile::synthMadFrame(){
   size_t inputRemaining = 0;
 
   do {
-
     //fill up the input buffer
     if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN){
       //copy the unprocessed data to the start of our buffer..
