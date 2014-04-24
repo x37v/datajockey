@@ -60,6 +60,8 @@ class SoundFile {
     short * mPCMData;
 
     void synthMadFrame();
+    size_t fillMadBuffer();
+
     int mSampleRate;
     unsigned int mChannels;
     QString mLocation;
