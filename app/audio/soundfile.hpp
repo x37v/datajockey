@@ -42,6 +42,10 @@ class SoundFile {
       unsigned long inBufLength;
       std::ifstream inputFile;
 
+      signed long frameCount;
+
+      size_t fileSize;
+
       bool endOfFile;
 
       //this is a count of unread frames remaining in synth.pcm
@@ -61,6 +65,7 @@ class SoundFile {
 
     void synthMadFrame();
     size_t fillMadBuffer();
+    signed long getMadDuration();
 
     int mSampleRate;
     unsigned int mChannels;

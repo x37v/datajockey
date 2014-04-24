@@ -47,7 +47,8 @@ SOURCES += main.cpp \
     ../app/audio/audiobuffer.cpp \
     ../app/audio/soundfile.cpp \
     fileprocessor.cpp \
-    ../app/db.cpp
+    ../app/db.cpp \
+    ../app/audio/xing.c
 
 HEADERS += \
     ../app/audiofileinfoextractor.h \
@@ -59,7 +60,8 @@ HEADERS += \
     ../app/audio/audiobuffer.hpp \
     ../app/audio/soundfile.hpp \
     fileprocessor.h \
-    ../app/db.h
+    ../app/db.h \
+    ../app/audio/xing.h
 
 INCLUDEPATH += . \
   ../app/ \

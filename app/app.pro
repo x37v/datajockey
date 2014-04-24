@@ -81,7 +81,8 @@ SOURCES += main.cpp\
     historymanager.cpp \
     audiofiletag.cpp \
     beatextractor.cpp \
-    audiofileinfoextractor.cpp
+    audiofileinfoextractor.cpp \
+    audio/xing.c
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -128,7 +129,8 @@ HEADERS  += mainwindow.h \
     historymanager.h \
     audiofiletag.h \
     beatextractor.h \
-    audiofileinfoextractor.h
+    audiofileinfoextractor.h \
+    audio/xing.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \

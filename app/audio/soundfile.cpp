@@ -29,6 +29,7 @@
  */
 
 #include "soundfile.hpp"
+#include "xing.h"
 #include <QFileInfo>
 
 #include <stdint.h>
@@ -37,6 +38,8 @@
 #endif
 
 #define MAX_BUF_LEN 2048
+
+#include <iostream>
 
 //forward declarations
 static inline signed int madScale(mad_fixed_t sample);
@@ -91,6 +94,9 @@ SoundFile::SoundFile(QString location) :
 
       //if libsoundfile couldn't open.. see if we can open it as an mp3
       mMP3Data.inputFile.open(QFile::encodeName(location));
+      mMP3Data.inputFile.seekg(0, std::ios::end);
+      mMP3Data.fileSize = mMP3Data.inputFile.tellg();
+      mMP3Data.inputFile.seekg(0, std::ios::beg);
 
       mMP3Data.inputBuffer = new unsigned char[MAX_BUF_LEN + MAD_BUFFER_GUARD];
 
@@ -101,11 +107,24 @@ SoundFile::SoundFile(QString location) :
       mad_frame_init(&mMP3Data.frame);
       mad_synth_init(&mMP3Data.synth);
 
+      //get the duration, might cause a seek so seek back to the start of the file after
+      auto lengthSeconds = getMadDuration();
+      mad_frame_mute(&mMP3Data.frame);
+      mMP3Data.stream.next_frame = NULL;
+      mMP3Data.stream.sync = 0;
+      mMP3Data.stream.error = MAD_ERROR_NONE;
+      mMP3Data.inputFile.seekg(0, std::ios::beg);
+
       //synth our first frame so that we can get the sample rate
       //mMP3Data.stream.error = MAD_ERROR_BUFLEN;
       synthMadFrame();
       mSampleRate = mMP3Data.synth.pcm.samplerate;
       mChannels = mMP3Data.synth.pcm.channels;
+
+      /*
+      mMP3Data.frameCount = mSampleRate * lengthSeconds;
+      std::cout << "mp3 frame count: " << mMP3Data.frameCount << std::endl;
+      */
     }
   }
   mPCMData = new short[1024 * channels()];
@@ -310,7 +329,7 @@ size_t SoundFile::fillMadBuffer() {
   size_t readCount = 0;
   size_t inputRemaining = 0;
   //fill up the input buffer
-  if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN){
+  if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
     //copy the unprocessed data to the start of our buffer..
     if(mMP3Data.stream.next_frame != NULL){
       inputRemaining = mMP3Data.stream.bufend - mMP3Data.stream.next_frame;
@@ -373,12 +392,125 @@ void SoundFile::synthMadFrame(){
   } while(true);
 }
 
+signed long SoundFile::getMadDuration() {
+	struct xing xing;
+	unsigned long bitrate = 0;
+	int has_xing = 0;
+	int is_vbr = 0;
+	int num_frames = 0;
+	mad_timer_t duration = mad_timer_zero;
+	struct mad_header header;
+	int good_header = 0; /* Have we decoded any header? */
+
+	mad_header_init (&header);
+	xing_init (&xing);
+
+	/* There are three ways of calculating the length of an mp3:
+	  1) Constant bitrate: One frame can provide the information
+		 needed: # of frames and duration. Just see how long it
+		 is and do the division.
+	  2) Variable bitrate: Xing tag. It provides the number of 
+		 frames. Each frame has the same number of samples, so
+		 just use that.
+	  3) All: Count up the frames and duration of each frames
+		 by decoding each one. We do this if we've no other
+		 choice, i.e. if it's a VBR file with no Xing tag.
+	*/
+
+	while (1) {
+		/* Fill the input buffer if needed */
+    if (mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
+			if (!fillMadBuffer())
+				break;
+		}
+
+		if (mad_header_decode(&header, &mMP3Data.stream) == -1) {
+			if (MAD_RECOVERABLE(mMP3Data.stream.error))
+				continue;
+			else if (mMP3Data.stream.error == MAD_ERROR_BUFLEN)
+				continue;
+			else {
+				//debug ("Can't decode header: %s", mad_stream_errorstr( &data->stream));
+				break;
+			}
+		}
+
+		good_header = 1;
+
+		/* Limit xing testing to the first frame header */
+		if (!num_frames++) {
+			if (xing_parse(&xing, mMP3Data.stream.anc_ptr, mMP3Data.stream.anc_bitlen) != -1) {
+				is_vbr = 1;
+				//debug ("Has XING header");
+				
+				if (xing.flags & XING_FRAMES) {
+					has_xing = 1;
+					num_frames = xing.frames;
+					break;
+				}
+				//debug ("XING header doesn't contain number of " "frames.");
+			}
+		}				
+
+		/* Test the first n frames to see if this is a VBR file */
+		if (!is_vbr && !(num_frames > 20)) {
+			if (bitrate && header.bitrate != bitrate) {
+				//debug ("Detected VBR after %d frames", num_frames);
+				is_vbr = 1;
+			} else
+				bitrate = header.bitrate;
+		}
+		
+		/* We have to assume it's not a VBR file if it hasn't already
+		 * been marked as one and we've checked n frames for different
+		 * bitrates */
+		else if (!is_vbr) {
+			//debug ("Fixed rate MP3");
+			break;
+		}
+			
+		mad_timer_add (&duration, header.duration);
+	}
+
+	if (!good_header)
+		return -1;
+
+	if (!is_vbr) {
+		/* time in seconds */
+		double time = (mMP3Data.fileSize * 8.0) / (header.bitrate);
+		double timefrac = (double)time - ((long)(time));
+
+		/* samples per frame */
+		long nsamples = 32 * MAD_NSBSAMPLES(&header);
+		/* samplerate is a constant */
+		num_frames = (long) (time * header.samplerate / nsamples);
+		mad_timer_set(&duration, (long)time, (long)(timefrac*100), 100);
+	} else if (has_xing) {
+		mad_timer_multiply (&header.duration, num_frames);
+		duration = header.duration;
+	}
+	else {
+		/* the durations have been added up, and the number of frames
+		   counted. We do nothing here. */
+		//debug ("Counted duration by counting frames durations in "
+				//"VBR file.");
+	}
+
+	mad_header_finish(&header);
+	//debug ("MP3 time: %ld", mad_timer_count (duration, MAD_UNITS_SECONDS));
+
+	return mad_timer_count(duration, MAD_UNITS_SECONDS);
+}
+
 unsigned int SoundFile::frames() {
   switch(mType) {
     case SNDFILE:
       return (unsigned int)mSndFile.frames();
-    case OGG:
     case MP3:
+      if (mMP3Data.frameCount < 0)
+        return 0;
+      return (unsigned int)mMP3Data.frameCount;
+    case OGG:
       //TODO
     default:
     case UNSUPPORTED:
