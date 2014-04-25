@@ -170,25 +170,6 @@ unsigned int SoundFile::readFloatFrame(float *ptr, unsigned int frames){
   return frames - toRead;
 }
 
-unsigned int SoundFile::oggReadShortFrame(short *ptr, unsigned int frames){
-  long ret;
-  //we loop so that if there is a recoverable error, we still read frames
-  do {
-    ret = ov_read(&mOggFile, (char *)ptr, sizeof(short) * frames * mChannels, 
-        0, 2, 1, &mOggIndex);
-    if (ret < 0) {
-      //XXX deal with errors
-    }
-  } while(ret < 0);
-  if (ret == 0) {
-    return 0;
-  } else {
-    //XXX deal with sample rate changes
-    //ret is in bytes, convert it to frames
-    return ret / (sizeof(short) * mChannels);
-  }
-}
-
 unsigned int SoundFile::mp3ReadShortFrame(short *ptr, unsigned int frames){
   unsigned int framesRead = 0;
   do {
