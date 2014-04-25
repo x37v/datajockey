@@ -112,19 +112,16 @@ SoundFile::SoundFile(QString location) :
       mad_frame_mute(&mMP3Data.frame);
       mMP3Data.stream.next_frame = NULL;
       mMP3Data.stream.sync = 0;
-      mMP3Data.stream.error = MAD_ERROR_NONE;
+      //mMP3Data.stream.error = MAD_ERROR_NONE;
+      mMP3Data.stream.error = MAD_ERROR_BUFLEN; //force a buffer read
       mMP3Data.inputFile.seekg(0, std::ios::beg);
 
       //synth our first frame so that we can get the sample rate
-      //mMP3Data.stream.error = MAD_ERROR_BUFLEN;
       synthMadFrame();
       mSampleRate = mMP3Data.synth.pcm.samplerate;
       mChannels = mMP3Data.synth.pcm.channels;
 
-      /*
       mMP3Data.frameCount = mSampleRate * lengthSeconds;
-      std::cout << "mp3 frame count: " << mMP3Data.frameCount << std::endl;
-      */
     }
   }
   mPCMData = new short[1024 * channels()];
@@ -328,43 +325,41 @@ bool SoundFile::valid() const {
 size_t SoundFile::fillMadBuffer() {
   size_t readCount = 0;
   size_t inputRemaining = 0;
-  //fill up the input buffer
-  if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
-    //copy the unprocessed data to the start of our buffer..
-    if(mMP3Data.stream.next_frame != NULL){
-      inputRemaining = mMP3Data.stream.bufend - mMP3Data.stream.next_frame;
-      memmove(mMP3Data.inputBuffer, mMP3Data.stream.next_frame, inputRemaining);
-    }
-
-    mMP3Data.inBufLength = 0;
-
-    //grab input data
-    for(unsigned int i = inputRemaining; i < MAX_BUF_LEN; i++){
-      //read in the data
-      int ch;
-      ch = mMP3Data.inputFile.get();
-      if(EOF == ch){
-        //if we're at the end zero out the rest of the input buffer
-        memset(mMP3Data.inputBuffer + i, 0, sizeof(unsigned char) * (MAD_BUFFER_GUARD + MAX_BUF_LEN - i));
-        mMP3Data.endOfFile = true;
-        //we need to have some zeros to be able to decode the last frame
-        mMP3Data.inBufLength += MAD_BUFFER_GUARD;
-        break;
-      }
-      mMP3Data.inBufLength = i + 1;
-      mMP3Data.inputBuffer[i] = (unsigned char)ch;
-      readCount++;
-    }
-    //decode our data
-    mad_stream_buffer(&mMP3Data.stream, mMP3Data.inputBuffer, mMP3Data.inBufLength);
-    mMP3Data.stream.error = (mad_error)0;
+  //copy the unprocessed data to the start of our buffer..
+  if(mMP3Data.stream.next_frame != NULL){
+    inputRemaining = mMP3Data.stream.bufend - mMP3Data.stream.next_frame;
+    memmove(mMP3Data.inputBuffer, mMP3Data.stream.next_frame, inputRemaining);
   }
+
+  mMP3Data.inBufLength = 0;
+
+  //grab input data
+  for(unsigned int i = inputRemaining; i < MAX_BUF_LEN; i++){
+    //read in the data
+    int ch;
+    ch = mMP3Data.inputFile.get();
+    if(EOF == ch){
+      //if we're at the end zero out the rest of the input buffer
+      memset(mMP3Data.inputBuffer + i, 0, sizeof(unsigned char) * (MAD_BUFFER_GUARD + MAX_BUF_LEN - i));
+      mMP3Data.endOfFile = true;
+      //we need to have some zeros to be able to decode the last frame
+      mMP3Data.inBufLength += MAD_BUFFER_GUARD;
+      break;
+    }
+    mMP3Data.inBufLength = i + 1;
+    mMP3Data.inputBuffer[i] = (unsigned char)ch;
+    readCount++;
+  }
+  //decode our data
+  mad_stream_buffer(&mMP3Data.stream, mMP3Data.inputBuffer, mMP3Data.inBufLength);
+  mMP3Data.stream.error = (mad_error)0;
   return readCount;
 }
 
 void SoundFile::synthMadFrame(){
   do {
-    fillMadBuffer();
+    if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN)
+      fillMadBuffer();
     if(mad_frame_decode(&mMP3Data.frame,&mMP3Data.stream)) {
       if(MAD_RECOVERABLE(mMP3Data.stream.error)){
         if(mMP3Data.endOfFile)
