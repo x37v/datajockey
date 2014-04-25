@@ -333,6 +333,23 @@ void SoundFile::synthMadFrame(){
   } while(true);
 }
 
+//grabbed from moc and modified 2014
+
+/*
+ * MOC - music on console
+ * Copyright (C) 2002 - 2006 Damian Pietras <daper@daper.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ */
+
+/* This code was writen od the basis of madlld.c (C) by Bertrand Petit 
+ * including code from xmms-mad (C) by Sam Clegg and winamp plugin for madlib
+ * (C) by Robert Leslie.
+ */
 signed long SoundFile::getMadDuration() {
 	struct xing xing;
 	unsigned long bitrate = 0;
@@ -472,34 +489,3 @@ static inline signed int madScale(mad_fixed_t sample) {
   return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-/*
-
-#include <iostream>
-using std::cout;
-using std::endl;
-
-int main(){
-short frame[1024 * 2];
-for(unsigned int i = 0; i < 2048; i++)
-frame[i] = 0;
-//SoundFile f("/mp3/adolescents/adolescents/01-i_hate_children.mp3");
-SoundFile f("/home/alex/music/new/chrome/anthology_1979-1983_2004/01-chrome-anthology_1979-1983-chromosome_damage.mp3");
-//SoundFile f("/mp3/woody_guthrie/dust_bowl_ballads/01-the_great_dust_storm_dust_storm_disaster.ogg");
-//SoundFile f("/tmp/asdf12345");
-if(f){
-cout << "sample rate: " << f.samplerate() << endl;
-SndfileHandle sndFile("/tmp/test.wav",
-SFM_WRITE, 
-SF_FORMAT_WAV | SF_FORMAT_PCM_16, 
-2, 44100);
-unsigned int samples;
-while(0 < (samples = f.readf(frame,1024))){
-sndFile.writef(frame,samples);
-}
-return 0;
-} else {
-cout << "NOPE" << endl;
-return -1;
-}
-}
-*/
