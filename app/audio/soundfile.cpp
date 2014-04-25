@@ -45,7 +45,6 @@
 static inline signed int madScale(mad_fixed_t sample);
 
 namespace {
-  const QString ogg_extension("ogg");
   const QString mp3_extension("mp3");
 }
 
@@ -74,22 +73,7 @@ SoundFile::SoundFile(QString location) :
     mFile.close();
     QFileInfo file_info(location);
     QString extension = file_info.completeSuffix().toLower();
-    //see if we have the correct suffix
-    //ogg vorbis
-    if(extension == ogg_extension) {
-      //try to open the file. if file cannot be opened then this file isn't supported
-      if(ov_fopen(QFile::encodeName(location), &mOggFile) < 0) {
-        mType = UNSUPPORTED;
-        return;
-      }
-      mType = OGG;
-      //grab the ogg info and store the sample rate plus the number of
-      //channels in the file
-      vorbis_info *vi=ov_info(&mOggFile,-1);
-      mSampleRate = vi->rate;
-      mChannels = vi->channels;
-      //mp3
-    } else if(extension == mp3_extension) {
+    if(extension == mp3_extension) {
       mType = MP3;
 
       //if libsoundfile couldn't open.. see if we can open it as an mp3
@@ -133,9 +117,6 @@ SoundFile::~SoundFile(){
     case SNDFILE:
       mFile.close();
       break;
-    case OGG:
-      ov_clear(&mOggFile);
-      break;
     case MP3: 
       mMP3Data.inputFile.close();
       mad_stream_finish(&mMP3Data.stream);
@@ -168,17 +149,10 @@ unsigned int SoundFile::readFloatFrame(float *ptr, unsigned int frames){
   }
 
   while(toRead > 0){
-    if (mType == OGG){
-      if(toRead > 1024)
-        framesRead = oggReadShortFrame(mPCMData, 1024);
-      else
-        framesRead = oggReadShortFrame(mPCMData, toRead);
-    } else {
-      if(toRead > 1024)
-        framesRead = mp3ReadShortFrame(mPCMData, 1024);
-      else
-        framesRead = mp3ReadShortFrame(mPCMData, toRead);
-    }
+    if(toRead > 1024)
+      framesRead = mp3ReadShortFrame(mPCMData, 1024);
+    else
+      framesRead = mp3ReadShortFrame(mPCMData, toRead);
     //if we didn't read anything then we're at the end of the file..
     if (framesRead == 0) {
       break;
@@ -270,8 +244,6 @@ unsigned int SoundFile::readf(float *ptr, unsigned int frames){
   switch(mType){
     case SNDFILE:
       return mSndFile.readf(ptr, frames);
-    case OGG:
-      return readFloatFrame(ptr,frames);
     case MP3:
       return readFloatFrame(ptr,frames);
     default:
@@ -288,8 +260,6 @@ unsigned int SoundFile::readf(short *ptr, unsigned int frames){
   switch(mType){
     case SNDFILE:
       return mSndFile.readf(ptr, frames);
-    case OGG:
-      return oggReadShortFrame(ptr,frames);
     case MP3:
       return mp3ReadShortFrame(ptr,frames);
     default:
@@ -308,11 +278,6 @@ bool SoundFile::valid() const {
     case SNDFILE:
       return true;
     case MP3: 
-      if(mSampleRate == 0)
-        return false;
-      else
-        return true;
-    case OGG:
       if(mSampleRate == 0)
         return false;
       else
@@ -505,8 +470,6 @@ unsigned int SoundFile::frames() {
       if (mMP3Data.frameCount < 0)
         return 0;
       return (unsigned int)mMP3Data.frameCount;
-    case OGG:
-      //TODO
     default:
     case UNSUPPORTED:
       return 0;
