@@ -95,39 +95,51 @@ int main(int argc, char *argv[])
     }
 
     int import_countdown = filesToProcess.size();
-    int import_success = 0;
-    int import_fails = 0;
+    QStringList import_success;
+    QHash<QString, QString> import_fails;
     if (import_countdown == 0) {
       cout << "no files to import, exiting" << endl;
       exit(0);
     }
+    cout << "importing " << import_countdown << " files...." << endl;
     processor->addFiles(filesToProcess);
 
-    auto exit_func = [&a, &import_success, &import_fails]() {
-      cout << endl << endl;
-      cout << "imported files: " << import_success << endl;
-      cout << "failed files:   " << import_fails << endl;
-      a.quit();
+    auto exit_func = [&a, &import_success, &import_fails, &import_countdown]() {
+      if (--import_countdown == 0) {
+        if (import_success.size()) {
+          cout << "successful files: "<< endl;
+          for (QString file: import_success)
+            cout << qPrintable(file) << endl;
+          cout << endl;
+        }
+
+        if (import_fails.size()) {
+          cout << "fails files: "<< endl;
+          for (auto it = import_fails.begin(); it != import_fails.end(); it++) {
+            cout << qPrintable(it.key()) << endl;
+            cout << "\t" << qPrintable(it.value()) << endl;
+          }
+          cout << endl;
+        }
+        cout << "imported files: " << import_success.size() << endl;
+        cout << "failed files:   " << import_fails.size() << endl;
+        a.quit();
+      } else
+        cout << "unprocessed: " << import_countdown << endl;
     };
 
-    cout << "importing " << import_countdown << " files...." << endl;
     auto err_func = 
-      [&import_countdown, &import_fails, &exit_func] (QString audioFilePath, QString errorMessage) {
-        cout << "error importing: " << qPrintable(audioFilePath) << endl;
-        cout << "\t" << qPrintable(errorMessage) << endl;
-        import_fails++;
-        if (--import_countdown == 0)
-          exit_func();
+      [&import_fails, &exit_func] (QString audioFilePath, QString errorMessage) {
+        import_fails[audioFilePath] = errorMessage;
+        exit_func();
       };
     QObject::connect(processor, &FileProcessor::fileCreated, db, &DB::import);
     QObject::connect(processor, &FileProcessor::fileFailed, err_func);
     QObject::connect(db, &DB::importError, err_func);
 
-    QObject::connect(db, &DB::importSuccess, [&import_countdown, &import_success, &exit_func] (QString audioFilePath) {
-      cout << "success: " << qPrintable(audioFilePath) << endl;
-      import_success++;
-      if (--import_countdown == 0)
-        exit_func();
+    QObject::connect(db, &DB::importSuccess, [&import_success, &exit_func] (QString audioFilePath) {
+      import_success << audioFilePath;
+      exit_func();
     });
     QTimer::singleShot(0, processor, SLOT(process()));
   }
