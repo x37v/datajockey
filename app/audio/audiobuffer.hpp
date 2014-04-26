@@ -24,6 +24,8 @@ namespace djaudio {
       unsigned int sample_rate() const;
       unsigned int channels() const;
       unsigned int length() const;
+      double seconds() const;
+
       bool loaded() const;
       //grab a sample
       float sample(unsigned int channel, unsigned int index) const;

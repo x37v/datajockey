@@ -45,10 +45,21 @@ unsigned int AudioBuffer::channels() const {
 }
 
 unsigned int AudioBuffer::length() const{
+  if (!mLoaded)
+    return mSoundFile.frames();
   unsigned int chans = channels();
   if (chans)
     return mAudioData.size() / chans;
   return 0;
+}
+
+double AudioBuffer::seconds() const {
+  if (!mLoaded)
+    return mSoundFile.seconds();
+  unsigned int frames = length();
+  if (frames || mSampleRate == 0)
+    return 0;
+  return static_cast<double>(frames) / static_cast<double>(mSampleRate);
 }
 
 bool AudioBuffer::loaded() const { return mLoaded; }
