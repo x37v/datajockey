@@ -278,7 +278,6 @@ void AudioModel::playerTrigger(int player, QString name) {
 }
 
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
-  cout << "playerLoad: " << player << endl;
   if (!inRange(player))
     return;
 
