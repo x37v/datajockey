@@ -460,18 +460,27 @@ signed long SoundFile::getMadDuration() {
 	return mad_timer_count(duration, MAD_UNITS_SECONDS);
 }
 
-unsigned int SoundFile::frames() {
+unsigned int SoundFile::frames() const {
   switch(mType) {
     case SNDFILE:
-      return (unsigned int)mSndFile.frames();
+      return static_cast<unsigned int>(mSndFile.frames());
     case MP3:
       if (mMP3Data.frameCount < 0)
         return 0;
-      return (unsigned int)mMP3Data.frameCount;
+      if (mMP3Data.frameCount >= std::numeric_limits<unsigned int>::max())
+        return std::numeric_limits<unsigned int>::max();
+      return static_cast<unsigned int>(mMP3Data.frameCount);
     default:
     case UNSUPPORTED:
       return 0;
   }
+}
+
+double SoundFile::seconds() const {
+  unsigned int f = frames();
+  if (f == 0 || mSampleRate == 0)
+    return 0;
+  return static_cast<double>(f) / static_cast<double>(mSampleRate);
 }
 
 //MAD stuff

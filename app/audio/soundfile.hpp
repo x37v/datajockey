@@ -24,8 +24,6 @@
 #include <sndfile.hh>
 #include <QString>
 #include <QFile>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
 #include <mad.h>
 #include <fstream>
 #include <vector>
@@ -52,13 +50,11 @@ class SoundFile {
       unsigned int remaining;
     } MP3FileData;
   private:
-    enum filetype {UNSUPPORTED, SNDFILE, OGG, MP3};
+    enum filetype {UNSUPPORTED, SNDFILE, MP3};
 
     QFile mFile;
     SndfileHandle mSndFile;
     filetype mType;
-    OggVorbis_File mOggFile;
-    int mOggIndex;
     MP3FileData mMP3Data;
 
     short * mPCMData;
@@ -71,10 +67,9 @@ class SoundFile {
     unsigned int mChannels;
     QString mLocation;
 
-    //private member functions for reading ogg/mp3 shorts
-    unsigned int oggReadShortFrame (short *ptr, unsigned int frames);
+    //private member functions for reading mp3 shorts
     unsigned int mp3ReadShortFrame (short *ptr, unsigned int frames);
-    //this will read either mp3 or ogg float frames
+    //this will read mp3 float frames
     unsigned int readFloatFrame (float *ptr, unsigned int frames);
   public:
     SoundFile(QString location);
@@ -86,7 +81,8 @@ class SoundFile {
     QString location() const;
     operator bool () const ;
     bool valid() const;
-    unsigned int frames();
+    unsigned int frames() const;
+    double seconds() const;
 };
 
 #endif
