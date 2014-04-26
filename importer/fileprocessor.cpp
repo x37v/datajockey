@@ -9,7 +9,8 @@ class ProcessTask : public QRunnable {
   public:
     ProcessTask(QString filePath, FileProcessor * parent) : mFile(filePath) {
       mExtractor = new AudioFileInfoExtractor(nullptr);
-      QObject::connect(mExtractor, &AudioFileInfoExtractor::fileCreated, parent, &FileProcessor::fileCreated);
+      QObject::connect(mExtractor, &AudioFileInfoExtractor::fileCreated, parent, &FileProcessor::reportFileCreated);
+      QObject::connect(mExtractor, &AudioFileInfoExtractor::error, parent, &FileProcessor::reportFileFailed);
     }
 
     virtual ~ProcessTask() {
@@ -61,5 +62,13 @@ void FileProcessor::process() {
     }
   });
   done_timer->start(10);
+}
+
+void FileProcessor::reportFileCreated(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData) {
+  emit(fileCreated(audioFilePath, annotationFilePath, tagData));
+}
+
+void FileProcessor::reportFileFailed(QString audioFilePath, QString message) {
+  emit(fileFailed(audioFilePath, message));
 }
 

@@ -68,6 +68,7 @@ namespace dj {
       bool midi_mapping_auto_save();
 
       const QStringList& import_ignores() const;
+      double import_max_seconds() const;
     private:
       bool db_get(YAML::Node& doc, QString entry, QString &result);
       QString mFile;
@@ -90,6 +91,8 @@ namespace dj {
       bool mMIDIMapAutoSave;
 
       QStringList mImportIgnores;
+
+      double mImportMaxSeconds = 60.0 * 20.0;
 
     protected:
       Configuration();

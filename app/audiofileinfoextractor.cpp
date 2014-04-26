@@ -3,6 +3,7 @@
 #include "audiobuffer.hpp"
 #include "annotation.hpp"
 #include "beatextractor.h"
+#include "config.hpp"
 #include <QTemporaryFile>
 #include <QDir>
 #include <QtDebug>
@@ -47,9 +48,14 @@ AudioFileInfoExtractor::~AudioFileInfoExtractor() {
 
 void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
   QHash<QString, QVariant> tag_data;
+  double max_seconds = dj::Configuration::instance()->import_max_seconds();
   try {
     //extract the tags
     audiofiletag::extract(audioFileName, tag_data);
+    if (tag_data.find("name") == tag_data.end()) {
+      emit(error(audioFileName, "tag data has no name entry"));
+      return;
+    }
 
     //extract the beats
     djaudio::AudioBufferPtr audio_buffer(new djaudio::AudioBuffer(audioFileName));
@@ -60,6 +66,16 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
       emit(error(audioFileName, msg));
       return;
     }
+
+    double seconds = audio_buffer->seconds();
+    if (seconds == 0) {
+      emit(error(audioFileName, QString("cannot find length of audio file")));
+      return;
+    } else if (seconds > max_seconds) {
+      emit(error(audioFileName, QString("file exceeds maximum length allowed")));
+      return;
+    }
+
     //XXX use progress callbacks
     if (!audio_buffer->load()) {
       QString msg = QString("unknown error loading soundfile %1").arg(audioFileName);

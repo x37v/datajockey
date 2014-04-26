@@ -217,6 +217,10 @@ const QStringList& Configuration::import_ignores() const {
   return mImportIgnores;
 }
 
+double Configuration::import_max_seconds() const {
+  return mImportMaxSeconds;
+}
+
 void Configuration::restore_defaults() {
   mDBUserName = "user";
   mDBPassword = "";

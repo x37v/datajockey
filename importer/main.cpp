@@ -94,25 +94,40 @@ int main(int argc, char *argv[])
         filesToProcess.push_back(file);
     }
 
-    int import_counter = filesToProcess.size();
-    if (import_counter == 0) {
+    int import_countdown = filesToProcess.size();
+    int import_success = 0;
+    int import_fails = 0;
+    if (import_countdown == 0) {
       cout << "no files to import, exiting" << endl;
       exit(0);
     }
     processor->addFiles(filesToProcess);
 
-    cout << "importing " << import_counter << " files...." << endl;
+    auto exit_func = [&a, &import_success, &import_fails]() {
+      cout << endl << endl;
+      cout << "imported files: " << import_success << endl;
+      cout << "failed files:   " << import_fails << endl;
+      a.quit();
+    };
+
+    cout << "importing " << import_countdown << " files...." << endl;
+    auto err_func = 
+      [&import_countdown, &import_fails, &exit_func] (QString audioFilePath, QString errorMessage) {
+        cout << "error importing: " << qPrintable(audioFilePath) << endl;
+        cout << "\t" << qPrintable(errorMessage) << endl;
+        import_fails++;
+        if (--import_countdown == 0)
+          exit_func();
+      };
     QObject::connect(processor, &FileProcessor::fileCreated, db, &DB::import);
-    QObject::connect(db, &DB::importError, [&import_counter, &a] (QString audioFilePath, QString errorMessage) {
-      cout << "error importing: " << qPrintable(audioFilePath) << endl;
-      cout << "\t" << qPrintable(errorMessage) << endl;
-      if (--import_counter == 0)
-        a.quit();
-    });
-    QObject::connect(db, &DB::importSuccess, [&import_counter, &a] (QString audioFilePath) {
+    QObject::connect(processor, &FileProcessor::fileFailed, err_func);
+    QObject::connect(db, &DB::importError, err_func);
+
+    QObject::connect(db, &DB::importSuccess, [&import_countdown, &import_success, &exit_func] (QString audioFilePath) {
       cout << "success: " << qPrintable(audioFilePath) << endl;
-      if (--import_counter == 0)
-        a.quit();
+      import_success++;
+      if (--import_countdown == 0)
+        exit_func();
     });
     QTimer::singleShot(0, processor, SLOT(process()));
   }

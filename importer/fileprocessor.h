@@ -16,10 +16,14 @@ class FileProcessor : public QObject
   signals:
     void complete();
     void fileCreated(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData);
+    void fileFailed(QString audioFilePath, QString message);
 
   public slots:
     void addFiles(QStringList files);
     void process();
+
+    void reportFileCreated(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData);
+    void reportFileFailed(QString audioFilePath, QString message);
   private:
     QStringList mFiles;
     QThreadPool * mThreadPool;
