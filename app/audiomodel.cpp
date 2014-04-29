@@ -66,6 +66,18 @@ class Consumer : public QObject {
     }
 };
 
+struct JumpPoint {
+  enum type_t { JUMP, LOOP };
+  enum loop_length_t { BEATS, FRAMES };
+
+  type_t type = JUMP;
+  unsigned int frame;
+
+  //only used for loops
+  loop_length_t length_type = BEATS;
+  double length;
+};
+
 struct PlayerState {
   QHash<QString, bool> boolValue;
   QHash<QString, int> intValue;

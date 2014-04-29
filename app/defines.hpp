@@ -46,6 +46,8 @@ namespace dj {
    const int volume_slider_height = 50;
 
    const QStringList audio_file_extensions = (QStringList() << "flac" << "mp3" << "ogg");
+
+   enum loop_and_jump_type_t { JUMP, LOOP };
 }
 
 //convert to and from QString
