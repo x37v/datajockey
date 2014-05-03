@@ -127,12 +127,10 @@ void WaveFormGL::draw() {
     glPopMatrix();
   }
 
-  glPopMatrix();
-
   if (mMarkers.size()) {
     glPushMatrix();
     glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
-    glLineWidth(1.0);
+    glLineWidth(mZoomFull ? 1.0 : 2.0);
     glBegin(GL_LINES);
     //XXX draw label
     for (marker_t m: mMarkers.values()) {
@@ -144,12 +142,15 @@ void WaveFormGL::draw() {
     glPopMatrix();
   }
 
+  glPopMatrix();
+
   //draw cursor
   GLfloat cursor = mHistoryWidth;
   if (mZoomFull)
     cursor = static_cast<GLfloat>(mFramePosition) / static_cast<GLfloat>(mFramesPerLine);
 
   glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
+  glLineWidth(1.0);
   glBegin(GL_LINES);
   glVertex2f(cursor, -1.0);
   glVertex2f(cursor, 1.0);
