@@ -12,6 +12,8 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
   connect(ui->deleteJumpButton, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this](bool checked) {
       if (checked)
         emit(triggered("jump_clear_next"));
+      else
+        emit(triggered("jump_clear_next_abort"));
   });
 
   for (int i = 0; i < 8; i++) {
