@@ -109,6 +109,7 @@ class WaveFormGL : public QObject
     void setPositionFrame(int frame);
     void framesPerLine(int v);
     void draw();
+    void drawText(QPainter * painter, float width_scale);
 
     void updateMarker(dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end);
     void clearMarker(int entry);

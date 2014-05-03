@@ -93,7 +93,8 @@ class MixerPanelWaveformsView : public QGLWidget
     GLfloat mouseToWaveformPosition(int waveform, const QPointF& mousePosition) const;
   protected:
     virtual void initializeGL();
-    virtual void paintGL();
+    //virtual void paintGL();
+    virtual void paintEvent(QPaintEvent * event);
     virtual void resizeGL(int width, int height);
 
     virtual void mouseMoveEvent(QMouseEvent * event);

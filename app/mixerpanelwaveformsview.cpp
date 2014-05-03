@@ -101,7 +101,12 @@ void MixerPanelWaveformsView::clearAllMarkers(int player) {
 void MixerPanelWaveformsView::initializeGL() {
 }
 
-void MixerPanelWaveformsView::paintGL() {
+//void MixerPanelWaveformsView::paintGL() {
+void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
+  QPainter painter(this);
+  painter.setBackgroundMode(Qt::OpaqueMode);
+  painter.setBackground(QBrush(Qt::black));
+
   glLoadIdentity();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -157,6 +162,35 @@ void MixerPanelWaveformsView::paintGL() {
 
   glPopMatrix();
   //glFlush();
+  
+  painter.resetTransform();
+  painter.translate(QPointF(mWidth / 2, 0.0));
+  for (int i = 0; i < mWaveforms.size(); i++) {
+    WaveFormGL * wf = mWaveforms[i];
+    painter.save();
+    painter.translate(QPointF(mOffsetAndScale[i].first - mOffsetAndScale[i].second, 0.0));
+
+    //GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
+    //painter.scale(height_scale, mOffsetAndScale[i].second);
+    
+    if (!wf->zoomFull()) {
+      painter.translate(QPointF(mHeight, 0.0));
+      painter.rotate(180.0);
+    }
+
+    GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
+    //painter.scale(height_scale, mOffsetAndScale[i].second);
+
+    mWaveforms[i]->drawText(&painter, height_scale);
+    painter.restore();
+  }
+  
+  /*
+  painter.setRenderHint(QPainter::TextAntialiasing);
+  painter.setPen(Qt::white);
+  painter.drawText(0, 0, 100, 100, Qt::AlignLeft | Qt::TextWordWrap, "TEST");
+  painter.end();
+  */
 }
 
 void MixerPanelWaveformsView::resizeGL(int width, int height) {
