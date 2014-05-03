@@ -86,18 +86,21 @@ void MixerPanelView::jumpUpdate(int player, dj::loop_and_jump_type_t type, int e
   if (!inRange(player))
     return;
   mPlayerViews[player]->jumpUpdate(type, entry_index, frame_start, frame_end);
+  ui->waveforms->updateMarker(player, type, entry_index, frame_start, frame_end);
 }
 
 void MixerPanelView::jumpsClear(int player) {
   if (!inRange(player))
     return;
   mPlayerViews[player]->jumpsClear();
+  ui->waveforms->clearAllMarkers(player);
 }
 
 void MixerPanelView::jumpClear(int player, int entry_index) {
   if (!inRange(player))
     return;
   mPlayerViews[player]->jumpClear(entry_index);
+  ui->waveforms->clearMarker(player, entry_index);
 }
 
 void MixerPanelView::masterSetValueInt(QString name, int value) {

@@ -9,6 +9,7 @@
 
 #include "audiobuffer.hpp"
 #include "annotation.hpp"
+#include "defines.hpp"
 
 class WavedataCalculator;
 
@@ -96,12 +97,22 @@ class WaveFormGL : public QObject
       GLfloat x1; GLfloat y1;
     };
 
+    struct marker_t {
+      int frame_start;
+      int frame_end;
+      QString label;
+    };
+
   public slots:
     void setAudioBuffer(djaudio::AudioBufferPtr buffer);
     void setBeatBuffer(djaudio::BeatBufferPtr buffer);
     void setPositionFrame(int frame);
     void framesPerLine(int v);
     void draw();
+
+    void updateMarker(dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end);
+    void clearMarker(int entry);
+    void clearAllMarkers();
   signals:
     void waveformLinesRequested(djaudio::AudioBufferPtr buffer, int startLine, int endLine, int framesPerLine);
     void colorsRequested(djaudio::BeatBufferPtr buffer, int lines, int framesPerLine);
@@ -125,9 +136,11 @@ class WaveFormGL : public QObject
     QVector<gl2triangles_t> mWaveformLines;
     QVector<gl2triangles_t> mWaveformColors;
     QVector<glline_t> mBeatLines;
+    QHash<int, marker_t> mMarkers;
     QColor cursorColor = Qt::white;
     QColor mWaveformColor = Qt::darkRed;
     QColor mBeatColor = Qt::yellow;
+    QColor mMarkerColorJump = Qt::cyan;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;

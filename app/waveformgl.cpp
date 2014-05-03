@@ -129,6 +129,21 @@ void WaveFormGL::draw() {
 
   glPopMatrix();
 
+  if (mMarkers.size()) {
+    glPushMatrix();
+    glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
+    glLineWidth(1.0);
+    glBegin(GL_LINES);
+    //XXX draw label
+    for (marker_t m: mMarkers.values()) {
+      GLfloat x = static_cast<GLfloat>(m.frame_start) / static_cast<GLfloat>(mFramesPerLine);
+      glVertex2f(x, -1.0);
+      glVertex2f(x, 1.0);
+    }
+    glEnd();
+    glPopMatrix();
+  }
+
   //draw cursor
   GLfloat cursor = mHistoryWidth;
   if (mZoomFull)
@@ -139,6 +154,29 @@ void WaveFormGL::draw() {
   glVertex2f(cursor, -1.0);
   glVertex2f(cursor, 1.0);
   glEnd();
+}
+
+void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end) {
+  if (entry < 0)
+    return;
+
+  marker_t marker;
+  marker.frame_start = frame_start;
+  marker.frame_end = frame_end;
+
+  marker.label = QString::number(entry);
+
+  mMarkers[entry] = marker;
+}
+
+void WaveFormGL::clearMarker(int entry) {
+  auto it = mMarkers.find(entry);
+  if (it != mMarkers.end())
+    mMarkers.erase(it);
+}
+
+void WaveFormGL::clearAllMarkers() {
+  mMarkers.clear();
 }
 
 void WaveFormGL::setBeatLines(QVector<glline_t> lines) {

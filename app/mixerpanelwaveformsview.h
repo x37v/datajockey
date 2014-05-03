@@ -8,6 +8,7 @@
 
 #include "audiobuffer.hpp"
 #include "annotation.hpp"
+#include "defines.hpp"
 
 class WaveFormGL;
 
@@ -55,6 +56,10 @@ class MixerPanelWaveformsView : public QGLWidget
   public slots:
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
     void playerSetValueInt(int player, QString name, int v);
+
+    void updateMarker(int player, dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end);
+    void clearMarker(int player, int entry);
+    void clearAllMarkers(int player);
   signals:
     void playerValueChangedInt(int player, QString name, int v);
     void playerValueChangedBool(int player, QString name, bool v);

@@ -16,6 +16,7 @@ class LoopAndJumpManager : public QObject {
     void playerTrigger(int player, QString name);
     void playerSetValueInt(int player, QString name, int v);
     void playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
+
   signals:
     //player, type [loop or jump], entry is a slot number, might overwrite an existing one
     void entryUpdated(int player_index, dj::loop_and_jump_type_t type, int entry_index, int frame_start, int frame_end);
