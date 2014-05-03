@@ -60,6 +60,8 @@ PlayerView::PlayerView(QWidget *parent) :
   connect(ui->loopAndJumpControl, &LoopAndJumpControlView::buttonTriggered, [this](int index) {
       emit(valueChangedInt("jump", index));
   });
+
+  connect(ui->loopAndJumpControl, &LoopAndJumpControlView::triggered, this, &PlayerView::triggered);
 }
 
 void PlayerView::setWorkInfo(QString info) {

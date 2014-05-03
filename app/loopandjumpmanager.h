@@ -24,6 +24,7 @@ class LoopAndJumpManager : public QObject {
 
     void playerValueChangedInt(int player, QString name, int value);
   private:
+    void clearEntry(int player, int entry_index);
     QList<LoopAndJumpPlayerData *> mPlayerData;
 };
 

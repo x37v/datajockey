@@ -8,6 +8,12 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
 {
   ui->setupUi(this);
 
+  ui->deleteJumpButton->setCheckable(true);
+  connect(ui->deleteJumpButton, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this](bool checked) {
+      if (checked)
+        emit(triggered("jump_clear_next"));
+  });
+
   for (int i = 0; i < 8; i++) {
     QPushButton * btn = new QPushButton(QString::number(i + 1), this);
     mJumpButtons.push_back(btn);
@@ -79,6 +85,8 @@ void LoopAndJumpControlView::clearEntry(int entry) {
   btn->style()->unpolish(btn);
   btn->style()->polish(btn);
   btn->update();
+
+  ui->deleteJumpButton->setChecked(false);
 }
 
 void LoopAndJumpControlView::clearAll() {

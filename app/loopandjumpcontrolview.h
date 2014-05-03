@@ -21,6 +21,7 @@ class LoopAndJumpControlView : public QWidget {
     void clearAll();
   signals:
     void buttonTriggered(int index);
+    void triggered(QString name);
   private:
     Ui::LoopAndJumpControlView *ui;
     QList<QPushButton *> mJumpButtons;
