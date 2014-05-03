@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
   QApplication a(argc, argv);
   QApplication::setStyle(QStyleFactory::create("Fusion"));
 
+  qRegisterMetaType<dj::loop_and_jump_type_t>("dj::loop_and_jump_type_t");
+
   a.setApplicationVersion(dj::version_string);
   a.setApplicationName("Data Jockey " + a.applicationVersion());
 
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 
   AudioLoader * loader = new AudioLoader(db, audio);
   QObject::connect(loader, &AudioLoader::playerBuffersChanged, audio, &AudioModel::playerLoad);
+  QObject::connect(loader, &AudioLoader::playerValueChangedInt, audio, &AudioModel::playerSetValueInt);
   QObject::connect(loader, &AudioLoader::playerValueChangedString,
       [audio](int player, QString name, QString /*value*/) {
         if (name == "loading_work")

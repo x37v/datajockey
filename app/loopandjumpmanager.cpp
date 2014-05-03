@@ -86,5 +86,6 @@ void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr /* audio
   mPlayerData[player]->beats = beat_buffer;
   mPlayerData[player]->data.clear();
   mPlayerData[player]->frame = 0;
+  emit(entriesCleared(player));
 }
 

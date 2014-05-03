@@ -27,6 +27,10 @@ class AudioModel : public QObject {
     void masterValueChangedInt(QString name, int v);
     void masterValueChangedBool(QString name, bool v);
 
+    void jumpUpdated(int player_index, dj::loop_and_jump_type_t type, int entry_index, int frame_start, int frame_end);
+    void jumpsCleared(int player_index);
+    void jumpCleared(int player_index, int entry_index);
+
   public slots:
     void playerSetValueDouble(int player, QString name, double v);
     void playerSetValueInt(int player, QString name, int v);

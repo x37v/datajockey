@@ -15,6 +15,8 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     connect(btn, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this, i](bool /*checked*/) {
         emit(buttonTriggered(i));
     });
+    btn->setProperty("jump_type", "none");
+    btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: yellow; color: black; }");
   }
 
   QButtonGroup * loopGroup = new QButtonGroup(this);
@@ -48,11 +50,43 @@ LoopAndJumpControlView::~LoopAndJumpControlView() {
 }
 
 void LoopAndJumpControlView::updateEntry(dj::loop_and_jump_type_t type, int entry) {
+  if (entry < 0 || entry >= mJumpButtons.size())
+    return;
+  QPushButton * btn = mJumpButtons[entry];
+  switch (type) {
+    case dj::LOOP:
+      btn->setProperty("jump_type", "loop");
+      break;
+    case dj::JUMP:
+      btn->setProperty("jump_type", "jump");
+      break;
+    default:
+      break;
+  }
+
+  //apply the styling
+  //http://qt-project.org/wiki/DynamicPropertiesAndStylesheets
+  btn->style()->unpolish(btn);
+  btn->style()->polish(btn);
+  btn->update();
 }
 
+#include <iostream>
+using namespace std;
+
 void LoopAndJumpControlView::clearEntry(int entry) {
+  if (entry < 0 || entry >= mJumpButtons.size())
+    return;
+  QPushButton * btn = mJumpButtons[entry];
+  btn->setProperty("jump_type", "none");
+  btn->style()->unpolish(btn);
+  btn->style()->polish(btn);
+  btn->update();
+  cout << "clear: " << entry << endl;
 }
 
 void LoopAndJumpControlView::clearAll() {
+  for (int i = 0; i < mJumpButtons.size(); i++)
+    clearEntry(i);
 }
 

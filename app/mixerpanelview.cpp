@@ -82,6 +82,24 @@ void MixerPanelView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_
   ui->waveforms->playerSetBuffers(player, audio_buffer, beat_buffer);
 }
 
+void MixerPanelView::jumpUpdate(int player, dj::loop_and_jump_type_t type, int entry_index, int frame_start, int frame_end) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->jumpUpdate(type, entry_index, frame_start, frame_end);
+}
+
+void MixerPanelView::jumpsClear(int player) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->jumpsClear();
+}
+
+void MixerPanelView::jumpClear(int player, int entry_index) {
+  if (!inRange(player))
+    return;
+  mPlayerViews[player]->jumpClear(entry_index);
+}
+
 void MixerPanelView::masterSetValueInt(QString name, int value) {
 }
 

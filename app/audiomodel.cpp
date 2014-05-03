@@ -97,6 +97,10 @@ AudioModel::AudioModel(QObject *parent) :
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SIGNAL(playerValueChangedInt(int, QString, int))); 
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SLOT(playerSetValueInt(int, QString, int))); 
 
+  connect(mLoopAndJumpManager, &LoopAndJumpManager::entryUpdated, this, &AudioModel::jumpUpdated);
+  connect(mLoopAndJumpManager, &LoopAndJumpManager::entriesCleared, this, &AudioModel::jumpsCleared);
+  connect(mLoopAndJumpManager, &LoopAndJumpManager::entryCleared, this, &AudioModel::jumpCleared);
+
   for(int i = 0; i < mNumPlayers; i++) {
     djaudio::Player * p = mMaster->add_player();
     p->sync(true);

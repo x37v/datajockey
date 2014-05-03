@@ -94,6 +94,18 @@ void PlayerView::setValueBool(QString name, bool v) {
   }
 }
 
+void PlayerView::jumpUpdate(dj::loop_and_jump_type_t type, int entry_index, int /*frame_start*/, int /*frame_end*/) {
+  ui->loopAndJumpControl->updateEntry(type, entry_index);
+}
+
+void PlayerView::jumpsClear() {
+  ui->loopAndJumpControl->clearAll();
+}
+
+void PlayerView::jumpClear(int entry_index) {
+  ui->loopAndJumpControl->clearEntry(entry_index);
+}
+
 PlayerView::~PlayerView()
 {
   delete ui;

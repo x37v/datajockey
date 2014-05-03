@@ -53,6 +53,10 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   connect(audio, &AudioModel::masterValueChangedInt,    mixer, &MixerPanelView::masterSetValueInt);
   connect(audio, &AudioModel::masterValueChangedBool,   mixer, &MixerPanelView::masterSetValueBool);
 
+  connect(audio, &AudioModel::jumpUpdated, mixer, &MixerPanelView::jumpUpdate);
+  connect(audio, &AudioModel::jumpsCleared, mixer, &MixerPanelView::jumpsClear);
+  connect(audio, &AudioModel::jumpCleared, mixer, &MixerPanelView::jumpClear);
+
   connect(ui->allWorks, &WorksTableView::workSelected, this, &MainWindow::selectWork);
 
   ui->topSplitter->setStretchFactor(0,0);

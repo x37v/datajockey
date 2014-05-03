@@ -5,6 +5,7 @@
 #include <QList>
 #include "audiobuffer.hpp"
 #include "annotation.hpp"
+#include "defines.hpp"
 
 namespace Ui {
   class MixerPanelView;
@@ -25,6 +26,10 @@ class MixerPanelView : public QWidget
     void playerSetValueDouble(int player, QString name, double value);
     void playerSetValueString(int player, QString name, QString value);
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
+
+    void jumpUpdate(int player_index, dj::loop_and_jump_type_t type, int entry_index, int frame_start, int frame_end);
+    void jumpsClear(int player_index);
+    void jumpClear(int player_index, int entry_index);
 
     void masterSetValueInt(QString name, int value);
     void masterSetValueBool(QString name, bool value);
