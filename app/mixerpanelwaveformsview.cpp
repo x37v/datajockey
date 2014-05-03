@@ -168,16 +168,12 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
   for (int i = 0; i < mWaveforms.size(); i++) {
     WaveFormGL * wf = mWaveforms[i];
     painter.save();
+    //draw at the left of the waveform
     painter.translate(QPointF(mOffsetAndScale[i].first - mOffsetAndScale[i].second, 0.0));
 
     //GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
     //painter.scale(height_scale, mOffsetAndScale[i].second);
     
-    if (!wf->zoomFull()) {
-      painter.translate(QPointF(mHeight, 0.0));
-      painter.rotate(180.0);
-    }
-
     GLfloat height_scale = static_cast<GLfloat>(mHeight) / static_cast<GLfloat>(wf->width());
     //painter.scale(height_scale, mOffsetAndScale[i].second);
 

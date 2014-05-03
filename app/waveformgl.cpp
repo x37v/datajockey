@@ -161,12 +161,17 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
   if (mMarkers.size() == 0)
     return;
 
-  if (!mZoomFull)
-    painter->translate(QPointF(width_scale * -((mFramePosition / mFramesPerLine) - mHistoryWidth), 0.0));
-
-  for (marker_t m: mMarkers.values()) {
-    painter->drawText(0.0, width_scale * static_cast<float>(m.frame_start) / static_cast<float>(mFramesPerLine), 40, 40,
-        Qt::AlignLeft | Qt::TextWordWrap, m.label);
+  if (!mZoomFull) {
+    for (marker_t m: mMarkers.values()) {
+      painter->drawText(0.0,
+          width_scale * (mWidth - mHistoryWidth - (static_cast<float>(m.frame_start - mFramePosition) / static_cast<float>(mFramesPerLine))), 40, 40,
+          Qt::AlignLeft | Qt::TextWordWrap, m.label);
+    }
+  } else {
+    for (marker_t m: mMarkers.values()) {
+      painter->drawText(0.0, width_scale * static_cast<float>(m.frame_start) / static_cast<float>(mFramesPerLine), 40, 40,
+          Qt::AlignLeft | Qt::TextWordWrap, m.label);
+    }
   }
 }
 
