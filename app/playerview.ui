@@ -101,6 +101,20 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QToolButton" name="jump_up">
+         <property name="text">
+          <string>cup</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" colspan="2">
+        <widget class="QToolButton" name="jump">
+         <property name="text">
+          <string>cue</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

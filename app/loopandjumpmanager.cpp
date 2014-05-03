@@ -14,6 +14,7 @@ struct JumpOrLoopData {
 struct LoopAndJumpPlayerData {
   int work_id = 0;
   int frame = 0;
+  int jump_last = 0;
   QHash<int, JumpOrLoopData> data;
   djaudio::BeatBufferPtr beats;
 };
@@ -30,6 +31,8 @@ LoopAndJumpManager::LoopAndJumpManager(QObject * parent) :
 void LoopAndJumpManager::playerTrigger(int player, QString name) {
   if (player >= mPlayerData.size() || player < 0)
     return;
+  if (name == "jump")
+    playerSetValueInt(player, "jump", mPlayerData[player]->jump_last);
 }
 
 void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
@@ -41,10 +44,12 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     pdata->beats = nullptr;
     pdata->data.clear();
     pdata->work_id = v;
+    pdata->jump_last = 0;
     emit(entriesCleared(player));
   } else if (name == "position_frame") {
     pdata->frame = v;
   } else if (name == "jump") {
+    pdata->jump_last = v;
     auto it = pdata->data.find(v);
     if (it != pdata->data.end()) {
       emit(playerValueChangedInt(player, "seek_frame", it->frame));
@@ -86,6 +91,7 @@ void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr /* audio
   mPlayerData[player]->beats = beat_buffer;
   mPlayerData[player]->data.clear();
   mPlayerData[player]->frame = 0;
+  mPlayerData[player]->jump_last = 0;
   emit(entriesCleared(player));
 }
 

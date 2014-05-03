@@ -71,9 +71,6 @@ void LoopAndJumpControlView::updateEntry(dj::loop_and_jump_type_t type, int entr
   btn->update();
 }
 
-#include <iostream>
-using namespace std;
-
 void LoopAndJumpControlView::clearEntry(int entry) {
   if (entry < 0 || entry >= mJumpButtons.size())
     return;
@@ -82,7 +79,6 @@ void LoopAndJumpControlView::clearEntry(int entry) {
   btn->style()->unpolish(btn);
   btn->style()->polish(btn);
   btn->update();
-  cout << "clear: " << entry << endl;
 }
 
 void LoopAndJumpControlView::clearAll() {

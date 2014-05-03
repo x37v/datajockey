@@ -46,13 +46,16 @@ PlayerView::PlayerView(QWidget *parent) :
     {ui->seekFwd, "seek_fwd"},
     {ui->seekBack, "seek_back"},
     {ui->bumpFwd, "bump_fwd"},
-    {ui->bumpBack, "bump_back"}
+    {ui->bumpBack, "bump_back"},
+    {ui->jump, "jump"}
   };
+
   for (auto kv: nonCheckableBtns) {
     QString name = kv.second;
     connect(kv.first, &QToolButton::clicked,
         [this, name] () { emit(triggered(name)); });
   }
+  connect(ui->jump_up, &QToolButton::released, [this] () { emit(triggered("jump")); });
 
   connect(ui->loopAndJumpControl, &LoopAndJumpControlView::buttonTriggered, [this](int index) {
       emit(valueChangedInt("jump", index));
