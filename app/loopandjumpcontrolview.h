@@ -19,6 +19,8 @@ class LoopAndJumpControlView : public QWidget {
     void updateEntry(dj::loop_and_jump_type_t type, int entry);
     void clearEntry(int entry);
     void clearAll();
+  signals:
+    void buttonTriggered(int index);
   private:
     Ui::LoopAndJumpControlView *ui;
     QList<QPushButton *> mJumpButtons;

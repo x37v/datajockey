@@ -2,6 +2,7 @@
 #include "defines.hpp"
 #include "player.hpp"
 #include "command.hpp"
+#include "loopandjumpmanager.h"
 #include <QThread>
 #include <QTimer>
 #include <QHash>
@@ -89,6 +90,12 @@ AudioModel::AudioModel(QObject *parent) :
 {
   mAudioIO = djaudio::AudioIO::instance();
   mMaster  = djaudio::Master::instance();
+
+  mLoopAndJumpManager = new LoopAndJumpManager(this);
+
+  //broadcast the manager's updates, and hook it into us
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SIGNAL(playerValueChangedInt(int, QString, int))); 
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SLOT(playerSetValueInt(int, QString, int))); 
 
   for(int i = 0; i < mNumPlayers; i++) {
     djaudio::Player * p = mMaster->add_player();
@@ -182,6 +189,7 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
 }
 
 void AudioModel::playerSetValueInt(int player, QString name, int v) {
+  mLoopAndJumpManager->playerSetValueInt(player, name, v);
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
       if (name == "seek_frame_relative") {
@@ -267,6 +275,7 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
 void AudioModel::playerTrigger(int player, QString name) {
   if (!inRange(player))
     return;
+  mLoopAndJumpManager->playerTrigger(player, name);
 
   bool triggered = false;
   playerSet(player, [player, &name, &triggered, this](PlayerState * /*pstate*/) -> Command *
@@ -292,6 +301,7 @@ void AudioModel::playerTrigger(int player, QString name) {
 void AudioModel::playerLoad(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
   if (!inRange(player))
     return;
+  mLoopAndJumpManager->playerLoad(player, audio_buffer, beat_buffer);
 
   PlayerState * pstate = mPlayerStates[player];
   pstate->intValue["frames"] = audio_buffer ? audio_buffer->length() : 0;

@@ -10,6 +10,7 @@ class Consumer;
 class EngineQueryCommand;
 struct PlayerState;
 struct EnginePlayerState;
+class LoopAndJumpManager;
 
 class AudioModel : public QObject {
   Q_OBJECT
@@ -55,6 +56,8 @@ class AudioModel : public QObject {
     QList<djaudio::AudioBufferPtr> mAudioBuffers;
     QList<djaudio::BeatBufferPtr> mBeatBuffers;
     QList<PlayerState *> mPlayerStates;
+
+    LoopAndJumpManager * mLoopAndJumpManager;
 
     QHash<QString, double> mMasterDoubleValue;
     QHash<QString, int> mMasterIntValue;

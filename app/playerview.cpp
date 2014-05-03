@@ -1,6 +1,7 @@
 #include "playerview.h"
 #include "ui_playerview.h"
 #include "audiolevelview.h"
+#include "loopandjumpcontrolview.h"
 #include <QDoubleSpinBox>
 #include <map>
 
@@ -52,6 +53,10 @@ PlayerView::PlayerView(QWidget *parent) :
     connect(kv.first, &QToolButton::clicked,
         [this, name] () { emit(triggered(name)); });
   }
+
+  connect(ui->loopAndJumpControl, &LoopAndJumpControlView::buttonTriggered, [this](int index) {
+      emit(valueChangedInt("jump", index));
+  });
 }
 
 void PlayerView::setWorkInfo(QString info) {

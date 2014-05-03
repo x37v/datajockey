@@ -12,6 +12,9 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     QPushButton * btn = new QPushButton(QString::number(i + 1), this);
     mJumpButtons.push_back(btn);
     ui->jumpButtonLayout->addWidget(btn);
+    connect(btn, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this, i](bool /*checked*/) {
+        emit(buttonTriggered(i));
+    });
   }
 
   QButtonGroup * loopGroup = new QButtonGroup(this);
