@@ -24,7 +24,7 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
         emit(buttonTriggered(i));
     });
     btn->setProperty("jump_type", "none");
-    btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: yellow; color: black; }");
+    btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: cyan; color: black; }");
   }
 
   QButtonGroup * loopGroup = new QButtonGroup(this);
