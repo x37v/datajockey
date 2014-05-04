@@ -4,11 +4,18 @@
 #
 #-------------------------------------------------
 
-TARGET = app
 TARGET = datajockey
 VERSION = 1.2.git
 
 QT       += core gui sql opengl
+
+isEmpty(PREFIX) {
+ PREFIX = /usr/local
+}
+
+#target.path = $$(PREFIX)/bin/
+target.path = /usr/local/bin/
+INSTALLS += target 
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
