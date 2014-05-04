@@ -18,6 +18,7 @@ namespace djaudio {
     public:
       static AudioIO * instance();
       Master * master();
+      void createClient(std::string name);
       void run(bool doit);
       struct midi_event_buffer_t { uint8_t data[3]; };
       typedef JackCpp::RingBuffer<midi_event_buffer_t> midi_ringbuff_t;

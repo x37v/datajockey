@@ -18,6 +18,7 @@ class AudioModel : public QObject {
   public:
     explicit AudioModel(QObject *parent = 0);
     ~AudioModel();
+    void createClient(QString name);
     int playerCount() const { return mNumPlayers; }
     void setDB(DB * db);
     void prepareToQuit();

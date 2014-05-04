@@ -16,7 +16,7 @@ CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad taglib
-LIBS += -loscpack ../ext/yaml-cpp-0.5.1/build/libyaml-cpp.a
+LIBS += -loscpack ../ext/yaml-cpp-0.5.1/build/libyaml-cpp.a -llo
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 
 macx {
@@ -147,5 +147,6 @@ FORMS    += mainwindow.ui \
 INCLUDEPATH += . \
 	audio \
 	../ext/jackcpp/include/ \
-  ../ext/yaml-cpp-0.5.1/include/
+  ../ext/yaml-cpp-0.5.1/include/ \
+  ../ext
 

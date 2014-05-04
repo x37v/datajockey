@@ -156,6 +156,10 @@ AudioModel::~AudioModel() {
   prepareToQuit();
 }
 
+void AudioModel::createClient(QString name){
+  mAudioIO->createClient(name.toStdString());
+}
+
 void AudioModel::setDB(DB * db) {
   mLoopAndJumpManager->setDB(db);
 }
@@ -423,6 +427,7 @@ void AudioModel::run(bool doit) {
   mAudioIO->run(doit);
   if (doit) {
     mConsumeThread->start();
+#if 0
     //XXX make this configurable
     try {
       mAudioIO->connectToPhysical(0,0);
@@ -430,6 +435,7 @@ void AudioModel::run(bool doit) {
     } catch (...) {
       cerr << "couldn't connect to physical jack audio ports" << endl;
     }
+#endif
   } else {
     mConsumeThread->quit();
   }

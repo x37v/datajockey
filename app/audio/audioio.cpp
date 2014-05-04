@@ -28,15 +28,9 @@ using JackCpp::MIDIPort;
 AudioIO * AudioIO::cInstance = NULL;
 
 AudioIO::AudioIO() : 
-  JackCpp::AudioIO("datajockey", 0, 0),
+  JackCpp::AudioIO(),
   mMIDIEventFromAudio(256) //TODO whats a good value for this?
 {
-  addOutPort("output0");
-  addOutPort("output1");
-  addOutPort("cue0");
-  addOutPort("cue1");
-  mMaster = Master::instance();
-  mMIDIIn.init(this, "midi_in");
 }
 
 AudioIO::~AudioIO(){
@@ -50,6 +44,16 @@ AudioIO * AudioIO::instance(){
 
 Master * AudioIO::master(){
   return mMaster;
+}
+
+void AudioIO::createClient(std::string name) {
+  JackCpp::AudioIO::createClient(name, 0, 0);
+  addOutPort("output0");
+  addOutPort("output1");
+  addOutPort("cue0");
+  addOutPort("cue1");
+  mMaster = Master::instance();
+  mMIDIIn.init(this, "midi_in");
 }
 
 void AudioIO::run(bool doit){

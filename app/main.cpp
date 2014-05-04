@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QErrorMessage>
 #include <QFileInfo>
+#include <iostream>
 
 #include "db.h"
 #include "audiomodel.h"
@@ -13,6 +14,17 @@
 #include "midirouter.h"
 #include "config.hpp"
 #include "historymanager.h"
+#include "nsm.h"
+
+#include <signal.h>
+
+static int nsm_open_cb(const char *name, const char *display_name, const char *client_id, char **out_msg, void *userdata);
+static int nsm_save_cb(char **out_msg, void *userdata);
+static void signalHanlder(int sigNum);
+static int startApp(QApplication * app, QString jackClientName, nsm_client_t * nsm_client);
+
+bool start_app = false;
+QString clientName("datajockey");
 
 int main(int argc, char *argv[])
 {
@@ -45,12 +57,43 @@ int main(int argc, char *argv[])
   palette.setColor(QPalette::HighlightedText, Qt::black);
   a.setPalette(palette);
 
+  //setup NSM, if we can, wait for nsm to create the client
+  nsm_client_t* nsm = 0;
+  //non session manager uses this to quit
+  signal(SIGTERM, signalHanlder);
+  //try to attach to nsm
+  const char *nsm_url = getenv( "NSM_URL" );
+  if (nsm_url) {
+    nsm = nsm_new();
+    nsm_set_open_callback(nsm, nsm_open_cb, &a);
+    nsm_set_save_callback(nsm, nsm_save_cb, nullptr);
+    if (nsm_init(nsm, nsm_url) == 0) {
+      nsm_send_announce(nsm, "datajockey", "", argv[0]);
+    } else {
+      nsm_free(nsm);
+      nsm = 0;
+    }
+  }
+  if (!nsm)
+    return startApp(&a, "datajockey", nullptr);
+
+  while (1) {
+    sleep(1);
+    nsm_check_nowait(nsm);
+    if (start_app)
+      return startApp(&a, clientName, nsm);
+  }
+  return 0;
+}
+
+static int startApp(QApplication * app, QString jackClientName, nsm_client_t * nsm_client) {
   dj::Configuration * config = dj::Configuration::instance();
   config->load_default();
 
   DB * db = new DB(config->db_adapter(), config->db_name(), config->db_username(), config->db_password(), config->db_port(), config->db_host());
   AudioModel * audio = new AudioModel();
   audio->setDB(db);
+  audio->createClient(jackClientName);
   audio->run(true);
 
   AudioLoader * loader = new AudioLoader(db, audio);
@@ -96,12 +139,13 @@ int main(int argc, char *argv[])
   if (QFileInfo::exists(config->midi_mapping_file()))
     midi->readFile(config->midi_mapping_file());
 
+
   MainWindow w(db, audio);
   w.loader(loader);
   QObject::connect(history, &HistoryManager::workHistoryChanged, &w, &MainWindow::workUpdateHistory);
   QObject::connect(midi, &MidiRouter::masterValueChangedInt,     &w, &MainWindow::masterSetValueInt);
 
-  QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
+  QObject::connect(app, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.writeSettings();
     midiThread->quit();
     audio->prepareToQuit();
@@ -109,5 +153,40 @@ int main(int argc, char *argv[])
   });
   w.show();
 
-  return a.exec();
+  if (nsm_client) {
+    QTimer * nsmTimer = new QTimer();
+    QObject::connect(nsmTimer, &QTimer::timeout, [&nsm_client]() {
+        std::cout << "check nsm" << std::endl;
+        nsm_check_nowait(nsm_client);
+    });
+    QObject::connect(app, &QApplication::aboutToQuit, nsmTimer, &QTimer::stop);
+
+    nsmTimer->setSingleShot(false);
+    nsmTimer->setInterval(1000);
+    nsmTimer->start(1000);
+  }
+
+  return app->exec();
 }
+
+static int nsm_open_cb(const char *name,
+    const char *display_name,
+    const char *client_id,
+    char **out_msg,
+    void *userdata)
+{
+  clientName = QString(client_id);
+  start_app = true;
+  return ERR_OK;
+}
+
+static int nsm_save_cb(char **out_msg, void *userdata) {
+  return 0; //doesn't do anything
+}
+
+void signalHanlder(int sigNum) {
+  if (sigNum == SIGTERM) {
+    qApp->quit();
+  }
+}
+
