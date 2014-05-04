@@ -17,8 +17,7 @@
 
 class CreateJumpTable < ActiveRecord::Migration
   def self.up
-    create_table :audio_work_jump_data do |t|
-      t.column :audio_work_id, :integer
+    create_table :audio_work_jump_data, :primary_key => :audio_work_id do |t|
       t.column :data, :text
     end
   end

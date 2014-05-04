@@ -51,9 +51,8 @@ ActiveRecord::Schema.define(:version => 27) do
     t.datetime "played_at"
   end
 
-  create_table "audio_work_jump_data", :force => true do |t|
-    t.integer "audio_work_id"
-    t.text    "data"
+  create_table "audio_work_jump_data", :primary_key => "audio_work_id", :force => true do |t|
+    t.text "data"
   end
 
   create_table "audio_work_tags", :force => true do |t|
