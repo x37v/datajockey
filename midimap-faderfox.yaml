@@ -11,6 +11,8 @@ player0:
     trigger: jump
   - note_off: [91, 3] #cup
     trigger: jump
+  - note_off: [99, 3] #cup+shift
+    trigger: jump_new
   - cc: [104, 3]
     trigger: cue
   - cc: [106, 3]
@@ -52,6 +54,8 @@ player1:
     trigger: jump
   - note_off: [95, 3] #cup
     trigger: jump
+  - note_off: [103, 3] #cup+shift
+    trigger: jump_new
 
   - cc: [75, 3]
     mult: 0.1
