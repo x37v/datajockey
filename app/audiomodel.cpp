@@ -153,11 +153,16 @@ AudioModel::AudioModel(QObject *parent) :
 }
 
 AudioModel::~AudioModel() {
-  run(false);
+  prepareToQuit();
 }
 
 void AudioModel::setDB(DB * db) {
   mLoopAndJumpManager->setDB(db);
+}
+
+void AudioModel::prepareToQuit() {
+  mLoopAndJumpManager->saveData();
+  run(false);
 }
 
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {

@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
   QObject::connect(&a, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.writeSettings();
     midiThread->quit();
-    audio->run(false);
+    audio->prepareToQuit();
     QThread::msleep(200);
   });
   w.show();

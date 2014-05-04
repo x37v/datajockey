@@ -14,6 +14,7 @@ class LoopAndJumpManager : public QObject {
   public:
     LoopAndJumpManager(QObject * parent = nullptr);
     void setDB(DB * db);
+    void saveData();
   public slots:
     void playerTrigger(int player, QString name);
     void playerSetValueInt(int player, QString name, int v);

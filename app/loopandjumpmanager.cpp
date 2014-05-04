@@ -38,6 +38,11 @@ void LoopAndJumpManager::setDB(DB * db) {
   mDB = db;
 }
 
+void LoopAndJumpManager::saveData() {
+  for (int i = 0; i < mPlayerData.size(); i++)
+    saveData(i);
+}
+
 void LoopAndJumpManager::playerTrigger(int player, QString name) {
   if (player >= mPlayerData.size() || player < 0)
     return;

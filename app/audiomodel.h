@@ -20,6 +20,7 @@ class AudioModel : public QObject {
     ~AudioModel();
     int playerCount() const { return mNumPlayers; }
     void setDB(DB * db);
+    void prepareToQuit();
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
