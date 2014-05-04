@@ -159,7 +159,6 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   if (nsm_client) {
     QTimer * nsmTimer = new QTimer();
     QObject::connect(nsmTimer, &QTimer::timeout, [&nsm_client]() {
-        std::cout << "check nsm" << std::endl;
         nsm_check_nowait(nsm_client);
     });
     QObject::connect(app, &QApplication::aboutToQuit, nsmTimer, &QTimer::stop);
