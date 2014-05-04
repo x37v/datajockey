@@ -18,6 +18,9 @@
 
 #include <signal.h>
 
+//nsm code taken [and edited] from Harry van Haaren's article:
+// http://www.openavproductions.com/articles/nsm/
+
 static int nsm_open_cb(const char *name, const char *display_name, const char *client_id, char **out_msg, void *userdata);
 static int nsm_save_cb(char **out_msg, void *userdata);
 static void signalHanlder(int sigNum);
