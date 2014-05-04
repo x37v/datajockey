@@ -1,10 +1,15 @@
 #include "loopandjumpmanager.h"
+#include <yaml-cpp/yaml.h>
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 struct JumpOrLoopData {
   enum loop_length_t { BEATS, FRAMES };
 
   dj::loop_and_jump_type_t type = dj::loop_and_jump_type_t::JUMP;
-  int frame = 0;
+  int frame_start = 0;
+  int frame_end = 0; //XXX deal with it
 
   //only used for loops
   loop_length_t length_type = BEATS;
@@ -29,6 +34,10 @@ LoopAndJumpManager::LoopAndJumpManager(QObject * parent) :
   }
 }
 
+void LoopAndJumpManager::setDB(DB * db) {
+  mDB = db;
+}
+
 void LoopAndJumpManager::playerTrigger(int player, QString name) {
   if (player >= mPlayerData.size() || player < 0)
     return;
@@ -50,6 +59,7 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
   LoopAndJumpPlayerData * pdata = mPlayerData[player];
   
   if (name == "loading_work") {
+    saveData(player);
     pdata->beats = nullptr;
     pdata->data.clear();
     pdata->work_id = v;
@@ -72,7 +82,7 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     } else {
       auto it = pdata->data.find(v);
       if (it != pdata->data.end()) {
-        emit(playerValueChangedInt(player, "seek_frame", it->frame));
+        emit(playerValueChangedInt(player, "seek_frame", it->frame_start));
       } else {
         int frame = pdata->frame;
         //find the closest beat
@@ -98,23 +108,28 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
           }
         }
         JumpOrLoopData data;
-        data.frame = frame;
+        data.frame_start = frame;
+        data.frame_end = frame;
+        data.type = dj::loop_and_jump_type_t::JUMP;
         pdata->data[v] = data;
-        emit(entryUpdated(player, dj::loop_and_jump_type_t::JUMP, v, frame, frame));
+        emit(entryUpdated(player, data.type, v, data.frame_start, data.frame_end));
       }
     }
   }
 }
 
-void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr /* audio_buffer */, djaudio::BeatBufferPtr beat_buffer) {
+void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr  audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
   if (player >= mPlayerData.size() || player < 0)
     return;
   mPlayerData[player]->beats = beat_buffer;
-  mPlayerData[player]->data.clear();
-  mPlayerData[player]->frame = 0;
-  mPlayerData[player]->jump_next = 0;
-  mPlayerData[player]->clear_next = false;
-  emit(entriesCleared(player));
+  if (beat_buffer || audio_buffer) {
+    mPlayerData[player]->data.clear();
+    mPlayerData[player]->frame = 0;
+    mPlayerData[player]->jump_next = 0;
+    mPlayerData[player]->clear_next = false;
+    emit(entriesCleared(player));
+    loadData(player);
+  }
 }
 
 void LoopAndJumpManager::clearEntry(int player, int entry_index) {
@@ -123,5 +138,57 @@ void LoopAndJumpManager::clearEntry(int player, int entry_index) {
   if (it != pdata->data.end())
     pdata->data.erase(it);
   emit(entryCleared(player, entry_index));
+}
+
+void LoopAndJumpManager::saveData(int player) {
+  if (!mDB || mPlayerData[player]->work_id == 0)
+    return;
+  mDB->work_jump_data(mPlayerData[player]->work_id, yamlData(player));
+}
+
+void LoopAndJumpManager::loadData(int player) {
+  if (!mDB || mPlayerData[player]->work_id == 0)
+    return;
+  try {
+    LoopAndJumpPlayerData * pdata = mPlayerData[player];
+    QString data = mDB->work_jump_data(mPlayerData[player]->work_id);
+    if (data.size()) {
+      YAML::Node root = YAML::Load(data.toStdString());
+      for (unsigned int i = 0; i < root.size(); i++) {
+        YAML::Node entry = root[i];
+
+        int index = entry["index"].as<int>();
+        JumpOrLoopData data;
+        data.frame_start = entry["frame_start"].as<int>();
+        data.frame_end = entry["frame_end"].as<int>();
+        data.type = entry["type"].as<std::string>() == "jump" ? dj::JUMP : dj::LOOP;
+        pdata->data[index] = data;
+        emit(entryUpdated(player, data.type, index, data.frame_start, data.frame_end));
+      }
+    }
+  } catch (YAML::Exception& e) {
+    cerr << "exception parsing yaml data: " << e.what() << endl;
+  } catch (std::runtime_error& e) {
+    cerr << "exception querying work jump data: " << e.what() << endl;
+  }
+}
+
+QString LoopAndJumpManager::yamlData(int player) {
+  LoopAndJumpPlayerData * pdata = mPlayerData[player];
+  if (pdata->data.size() == 0)
+    return QString();
+
+  YAML::Node root;
+  for (QHash<int, JumpOrLoopData>::iterator it = pdata->data.begin(); it != pdata->data.end(); it++) {
+    YAML::Node entry;
+
+    JumpOrLoopData * data = &it.value();
+    entry["index"] = it.key();
+    entry["type"] = data->type == dj::JUMP ? "jump" : "loop";
+    entry["frame_start"] = data->frame_start;
+    entry["frame_end"] = data->frame_end;
+    root.push_back(entry);
+  }
+  return QString::fromStdString(YAML::Dump(root));
 }
 

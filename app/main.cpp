@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 
   DB * db = new DB(config->db_adapter(), config->db_name(), config->db_username(), config->db_password(), config->db_port(), config->db_host());
   AudioModel * audio = new AudioModel();
+  audio->setDB(db);
   audio->run(true);
 
   AudioLoader * loader = new AudioLoader(db, audio);

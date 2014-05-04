@@ -5,6 +5,7 @@
 #include "annotation.hpp"
 #include "audio/audiobuffer.hpp"
 #include "defines.hpp"
+#include "db.h"
 
 struct LoopAndJumpPlayerData;
 
@@ -12,6 +13,7 @@ class LoopAndJumpManager : public QObject {
   Q_OBJECT
   public:
     LoopAndJumpManager(QObject * parent = nullptr);
+    void setDB(DB * db);
   public slots:
     void playerTrigger(int player, QString name);
     void playerSetValueInt(int player, QString name, int v);
@@ -27,6 +29,10 @@ class LoopAndJumpManager : public QObject {
   private:
     void clearEntry(int player, int entry_index);
     QList<LoopAndJumpPlayerData *> mPlayerData;
+    DB * mDB = nullptr;
+    void saveData(int player);
+    void loadData(int player);
+    QString yamlData(int player);
 };
 
 #endif

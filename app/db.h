@@ -110,6 +110,10 @@ class DB : public QObject {
     void work_tag_remove(int work_id, int tag_id) throw(std::runtime_error);
     void work_set_album(int work_id, int album_id, int track_num)  throw(std::runtime_error);
 
+    //expects the string to be yaml formatted
+    QString work_jump_data(int work_id);
+    void work_jump_data(int work_id, QString data);
+
     int current_session();
 
     int tag_find(const QString& name, int parent_id = 0) throw(std::runtime_error);

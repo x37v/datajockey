@@ -156,6 +156,10 @@ AudioModel::~AudioModel() {
   run(false);
 }
 
+void AudioModel::setDB(DB * db) {
+  mLoopAndJumpManager->setDB(db);
+}
+
 void AudioModel::playerSetValueDouble(int player, QString name, double v) {
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {

@@ -5,6 +5,7 @@
 #include <QList>
 #include <functional>
 #include "audioio.hpp"
+#include "db.h"
 
 class Consumer;
 class EngineQueryCommand;
@@ -18,6 +19,7 @@ class AudioModel : public QObject {
     explicit AudioModel(QObject *parent = 0);
     ~AudioModel();
     int playerCount() const { return mNumPlayers; }
+    void setDB(DB * db);
   signals:
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
