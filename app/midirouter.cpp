@@ -11,7 +11,7 @@ namespace {
   typedef QSharedPointer<MidiMap> MidiMapPtr;
 
   QList<QString> player_triggers = {
-    "cue", "play", "sync", "load", "seek_fwd", "seek_back", "bump_fwd", "bump_back", "jump", "jump_clear_next"
+    "cue", "play", "sync", "load", "seek_fwd", "seek_back", "bump_fwd", "bump_back", "jump", "jump_clear_next", "jump_new"
   };
 
   QList<QString> player_continuous = {

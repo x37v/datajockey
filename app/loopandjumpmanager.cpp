@@ -38,6 +38,10 @@ void LoopAndJumpManager::playerTrigger(int player, QString name) {
     mPlayerData[player]->clear_next = true;
   else if (name == "jump_clear_next_abort")
     mPlayerData[player]->clear_next = false;
+  else if (name == "jump_new") { //use the 'next' but reset it
+    clearEntry(player, mPlayerData[player]->jump_next);
+    playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
+  }
 }
 
 void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
