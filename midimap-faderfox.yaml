@@ -7,6 +7,10 @@ player0:
     trigger: seek_back
   - note_on: [73, 3]
     trigger: seek_fwd
+  - note_on: [90, 3] #cue
+    trigger: jump
+  - note_off: [91, 3] #cup
+    trigger: jump
   - cc: [104, 3]
     trigger: cue
   - cc: [106, 3]
@@ -44,6 +48,10 @@ player1:
     trigger: cue
   - cc: [107, 3]
     trigger: load
+  - note_on: [94, 3] #cue
+    trigger: jump
+  - note_off: [95, 3] #cup
+    trigger: jump
 
   - cc: [75, 3]
     mult: 0.1
