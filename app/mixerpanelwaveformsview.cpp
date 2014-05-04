@@ -30,6 +30,8 @@ MixerPanelWaveformsView::MixerPanelWaveformsView(QWidget *parent) :
   mWaveforms[2]->zoomFull(false);
 
   computeOffsetAndScale();
+
+  setAutoFillBackground(false);
 }
 
 //full - pad - zoomed - pad pad - zoomed - pad - full
@@ -104,6 +106,7 @@ void MixerPanelWaveformsView::initializeGL() {
 //void MixerPanelWaveformsView::paintGL() {
 void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
   QPainter painter(this);
+
   painter.setBackgroundMode(Qt::OpaqueMode);
   painter.setBackground(QBrush(Qt::black));
 
