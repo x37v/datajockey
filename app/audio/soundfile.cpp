@@ -362,112 +362,112 @@ void SoundFile::synthMadFrame(){
  * (C) by Robert Leslie.
  */
 signed long SoundFile::getMadDuration() {
-	struct xing xing;
-	unsigned long bitrate = 0;
-	int has_xing = 0;
-	int is_vbr = 0;
-	int num_frames = 0;
-	mad_timer_t duration = mad_timer_zero;
-	struct mad_header header;
-	int good_header = 0; /* Have we decoded any header? */
+  struct xing xing;
+  unsigned long bitrate = 0;
+  int has_xing = 0;
+  int is_vbr = 0;
+  int num_frames = 0;
+  mad_timer_t duration = mad_timer_zero;
+  struct mad_header header;
+  int good_header = 0; /* Have we decoded any header? */
 
-	mad_header_init (&header);
-	xing_init (&xing);
+  mad_header_init (&header);
+  xing_init (&xing);
 
-	/* There are three ways of calculating the length of an mp3:
-	  1) Constant bitrate: One frame can provide the information
-		 needed: # of frames and duration. Just see how long it
-		 is and do the division.
-	  2) Variable bitrate: Xing tag. It provides the number of 
-		 frames. Each frame has the same number of samples, so
-		 just use that.
-	  3) All: Count up the frames and duration of each frames
-		 by decoding each one. We do this if we've no other
-		 choice, i.e. if it's a VBR file with no Xing tag.
-	*/
+  /* There are three ways of calculating the length of an mp3:
+     1) Constant bitrate: One frame can provide the information
+needed: # of frames and duration. Just see how long it
+is and do the division.
+2) Variable bitrate: Xing tag. It provides the number of 
+frames. Each frame has the same number of samples, so
+just use that.
+3) All: Count up the frames and duration of each frames
+by decoding each one. We do this if we've no other
+choice, i.e. if it's a VBR file with no Xing tag.
+*/
 
-	while (1) {
-		/* Fill the input buffer if needed */
+  while (1) {
+    /* Fill the input buffer if needed */
     if (mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
-			if (!fillMadBuffer())
-				break;
-		}
+      if (!fillMadBuffer())
+        break;
+    }
 
-		if (mad_header_decode(&header, &mMP3Data.stream) == -1) {
-			if (MAD_RECOVERABLE(mMP3Data.stream.error))
-				continue;
-			else if (mMP3Data.stream.error == MAD_ERROR_BUFLEN)
-				continue;
-			else {
-				//debug ("Can't decode header: %s", mad_stream_errorstr( &data->stream));
-				break;
-			}
-		}
+    if (mad_header_decode(&header, &mMP3Data.stream) == -1) {
+      if (MAD_RECOVERABLE(mMP3Data.stream.error))
+        continue;
+      else if (mMP3Data.stream.error == MAD_ERROR_BUFLEN)
+        continue;
+      else {
+        //debug ("Can't decode header: %s", mad_stream_errorstr( &data->stream));
+        break;
+      }
+    }
 
-		good_header = 1;
+    good_header = 1;
 
-		/* Limit xing testing to the first frame header */
-		if (!num_frames++) {
-			if (xing_parse(&xing, mMP3Data.stream.anc_ptr, mMP3Data.stream.anc_bitlen) != -1) {
-				is_vbr = 1;
-				//debug ("Has XING header");
-				
-				if (xing.flags & XING_FRAMES) {
-					has_xing = 1;
-					num_frames = xing.frames;
-					break;
-				}
-				//debug ("XING header doesn't contain number of " "frames.");
-			}
-		}				
+    /* Limit xing testing to the first frame header */
+    if (!num_frames++) {
+      if (xing_parse(&xing, mMP3Data.stream.anc_ptr, mMP3Data.stream.anc_bitlen) != -1) {
+        is_vbr = 1;
+        //debug ("Has XING header");
 
-		/* Test the first n frames to see if this is a VBR file */
-		if (!is_vbr && !(num_frames > 20)) {
-			if (bitrate && header.bitrate != bitrate) {
-				//debug ("Detected VBR after %d frames", num_frames);
-				is_vbr = 1;
-			} else
-				bitrate = header.bitrate;
-		}
-		
-		/* We have to assume it's not a VBR file if it hasn't already
-		 * been marked as one and we've checked n frames for different
-		 * bitrates */
-		else if (!is_vbr) {
-			break;
-		}
-			
-		mad_timer_add (&duration, header.duration);
-	}
+        if (xing.flags & XING_FRAMES) {
+          has_xing = 1;
+          num_frames = xing.frames;
+          break;
+        }
+        //debug ("XING header doesn't contain number of " "frames.");
+      }
+    }				
 
-	if (!good_header)
-		return -1;
+    /* Test the first n frames to see if this is a VBR file */
+    if (!is_vbr && !(num_frames > 20)) {
+      if (bitrate && header.bitrate != bitrate) {
+        //debug ("Detected VBR after %d frames", num_frames);
+        is_vbr = 1;
+      } else
+        bitrate = header.bitrate;
+    }
 
-	if (!is_vbr) {
-		/* time in seconds */
-		double time = (mMP3Data.fileSize * 8.0) / (header.bitrate);
-		double timefrac = (double)time - ((long)(time));
+    /* We have to assume it's not a VBR file if it hasn't already
+     * been marked as one and we've checked n frames for different
+     * bitrates */
+    else if (!is_vbr) {
+      break;
+    }
 
-		/* samples per frame */
-		long nsamples = 32 * MAD_NSBSAMPLES(&header);
-		/* samplerate is a constant */
-		num_frames = (long) (time * header.samplerate / nsamples);
-		mad_timer_set(&duration, (long)time, (long)(timefrac*100), 100);
-	} else if (has_xing) {
-		mad_timer_multiply (&header.duration, num_frames);
-		duration = header.duration;
-	}
-	else {
-		/* the durations have been added up, and the number of frames
-		   counted. We do nothing here. */
-		//debug ("Counted duration by counting frames durations in "
-				//"VBR file.");
-	}
+    mad_timer_add (&duration, header.duration);
+  }
 
-	mad_header_finish(&header);
-	//debug ("MP3 time: %ld", mad_timer_count (duration, MAD_UNITS_SECONDS));
+  if (!good_header)
+    return -1;
 
-	return mad_timer_count(duration, MAD_UNITS_SECONDS);
+  if (!is_vbr) {
+    /* time in seconds */
+    double time = (mMP3Data.fileSize * 8.0) / (header.bitrate);
+    double timefrac = (double)time - ((long)(time));
+
+    /* samples per frame */
+    long nsamples = 32 * MAD_NSBSAMPLES(&header);
+    /* samplerate is a constant */
+    num_frames = (long) (time * header.samplerate / nsamples);
+    mad_timer_set(&duration, (long)time, (long)(timefrac*100), 100);
+  } else if (has_xing) {
+    mad_timer_multiply (&header.duration, num_frames);
+    duration = header.duration;
+  }
+  else {
+    /* the durations have been added up, and the number of frames
+       counted. We do nothing here. */
+    //debug ("Counted duration by counting frames durations in "
+    //"VBR file.");
+  }
+
+  mad_header_finish(&header);
+  //debug ("MP3 time: %ld", mad_timer_count (duration, MAD_UNITS_SECONDS));
+
+  return mad_timer_count(duration, MAD_UNITS_SECONDS);
 }
 
 unsigned int SoundFile::frames() const {
