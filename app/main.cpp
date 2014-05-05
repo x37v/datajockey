@@ -62,8 +62,6 @@ int main(int argc, char *argv[])
 
   //setup NSM, if we can, wait for nsm to create the client
   nsm_client_t* nsm = 0;
-  //non session manager uses this to quit
-  signal(SIGTERM, signalHanlder);
   //try to attach to nsm
   const char *nsm_url = getenv( "NSM_URL" );
   if (nsm_url) {
@@ -71,6 +69,8 @@ int main(int argc, char *argv[])
     nsm_set_open_callback(nsm, nsm_open_cb, &a);
     nsm_set_save_callback(nsm, nsm_save_cb, nullptr);
     if (nsm_init(nsm, nsm_url) == 0) {
+      //non session manager uses this to quit
+      signal(SIGTERM, signalHanlder);
       nsm_send_announce(nsm, "datajockey", "", argv[0]);
     } else {
       nsm_free(nsm);
@@ -171,18 +171,18 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   return app->exec();
 }
 
-static int nsm_open_cb(const char *name,
-    const char *display_name,
+static int nsm_open_cb(const char * /*name */,
+    const char * /*display_name*/,
     const char *client_id,
-    char **out_msg,
-    void *userdata)
+    char ** /*out_msg */,
+    void * /*userdata */)
 {
   clientName = QString(client_id);
   start_app = true;
   return ERR_OK;
 }
 
-static int nsm_save_cb(char **out_msg, void *userdata) {
+static int nsm_save_cb(char ** /*out_msg*/, void * /*userdata*/) {
   return 0; //doesn't do anything
 }
 
