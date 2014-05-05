@@ -41,6 +41,9 @@
 
 #include <iostream>
 
+using std::cerr;
+using std::endl;
+
 //forward declarations
 static inline signed int madScale(mad_fixed_t sample);
 
@@ -98,7 +101,11 @@ SoundFile::SoundFile(QString location) :
       mMP3Data.stream.sync = 0;
       //mMP3Data.stream.error = MAD_ERROR_NONE;
       mMP3Data.stream.error = MAD_ERROR_BUFLEN; //force a buffer read
+
+      mMP3Data.inputFile.clear(); //clears fail/eof bits
       mMP3Data.inputFile.seekg(0, std::ios::beg);
+      mMP3Data.remaining = 0;
+      mMP3Data.endOfFile = false;
 
       //synth our first frame so that we can get the sample rate
       synthMadFrame();
@@ -271,8 +278,9 @@ bool SoundFile::valid() const {
 size_t SoundFile::fillMadBuffer() {
   size_t readCount = 0;
   size_t inputRemaining = 0;
+
   //copy the unprocessed data to the start of our buffer..
-  if(mMP3Data.stream.next_frame != NULL){
+  if (mMP3Data.stream.next_frame != NULL){
     inputRemaining = mMP3Data.stream.bufend - mMP3Data.stream.next_frame;
     memmove(mMP3Data.inputBuffer, mMP3Data.stream.next_frame, inputRemaining);
   }
@@ -280,11 +288,11 @@ size_t SoundFile::fillMadBuffer() {
   mMP3Data.inBufLength = 0;
 
   //grab input data
-  for(unsigned int i = inputRemaining; i < MAX_BUF_LEN; i++){
+  for (unsigned int i = inputRemaining; i < MAX_BUF_LEN; i++){
     //read in the data
     int ch;
     ch = mMP3Data.inputFile.get();
-    if(EOF == ch){
+    if (EOF == ch) {
       //if we're at the end zero out the rest of the input buffer
       memset(mMP3Data.inputBuffer + i, 0, sizeof(unsigned char) * (MAD_BUFFER_GUARD + MAX_BUF_LEN - i));
       mMP3Data.endOfFile = true;
@@ -296,6 +304,7 @@ size_t SoundFile::fillMadBuffer() {
     mMP3Data.inputBuffer[i] = (unsigned char)ch;
     readCount++;
   }
+
   //decode our data
   mad_stream_buffer(&mMP3Data.stream, mMP3Data.inputBuffer, mMP3Data.inBufLength);
   mMP3Data.stream.error = (mad_error)0;
@@ -304,22 +313,24 @@ size_t SoundFile::fillMadBuffer() {
 
 void SoundFile::synthMadFrame(){
   do {
-    if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN)
+    if(mMP3Data.stream.buffer == NULL || mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
       fillMadBuffer();
-    if(mad_frame_decode(&mMP3Data.frame,&mMP3Data.stream)) {
+    }
+    if (mad_frame_decode(&mMP3Data.frame,&mMP3Data.stream)) {
       if(MAD_RECOVERABLE(mMP3Data.stream.error)){
         if(mMP3Data.endOfFile)
           return;
         else
           continue;
       } else {
-        if(mMP3Data.stream.error == MAD_ERROR_BUFLEN){
+        if(mMP3Data.stream.error == MAD_ERROR_BUFLEN) {
           mMP3Data.remaining = 0;
           if(mMP3Data.endOfFile)
             return;
           else
             continue;
         } else {
+          cerr << "ERROR" << endl;
           //XXX THROW ERROR!!
           return;
         }
@@ -423,7 +434,6 @@ signed long SoundFile::getMadDuration() {
 		 * been marked as one and we've checked n frames for different
 		 * bitrates */
 		else if (!is_vbr) {
-			//debug ("Fixed rate MP3");
 			break;
 		}
 			
