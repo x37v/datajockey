@@ -73,12 +73,12 @@ void MixerPanelWaveformsView::playerSetValueInt(int player, QString name, int v)
   update();
 }
 
-void MixerPanelWaveformsView::updateMarker(int player, dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end) {
+void MixerPanelWaveformsView::updateMarker(int player, dj::loop_and_jump_type_t type, int entry, int start, int end) {
   if (player >= mNumPlayers || player < 0)
     return;
   player *= 2;
-  mWaveforms[player]->updateMarker(type, entry, frame_start, frame_end);
-  mWaveforms[player + 1]->updateMarker(type, entry, frame_start, frame_end);
+  mWaveforms[player]->updateMarker(type, entry, start, end);
+  mWaveforms[player + 1]->updateMarker(type, entry, start, end);
   update();
 }
 

@@ -55,6 +55,7 @@ void WaveFormGL::setAudioBuffer(djaudio::AudioBufferPtr buffer) {
 }
  
 void WaveFormGL::setBeatBuffer(djaudio::BeatBufferPtr buffer) {
+  mBeatBuffer = buffer;
   mBeatLines.clear();
   if (!buffer)
     return;
@@ -175,13 +176,33 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
   }
 }
 
-void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end) {
+void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int start, int end) {
   if (entry < 0)
     return;
 
   marker_t marker;
-  marker.frame_start = frame_start;
-  marker.frame_end = frame_end;
+  switch (type) {
+    case dj::loop_and_jump_type_t::LOOP_BEAT:
+    case dj::loop_and_jump_type_t::JUMP_BEAT:
+      {
+        if (!mBeatBuffer) {
+          std::cerr << "no beat buffer to convert marker, skipping" << std::endl;
+          return;
+        }
+        int s = static_cast<int>(mBeatBuffer->size());
+        if (s <= start || s <= end || start < 0 || end < 0) {
+          std::cerr << "beat index out of range[" << s << "]: " << start << " " << end << std::endl;
+          return;
+        }
+        start = mBeatBuffer->at(start);
+        end = mBeatBuffer->at(end);
+      }
+      break;
+    default:
+      break;
+  }
+  marker.frame_start = start;
+  marker.frame_end = end;
 
   marker.label = QString::number(entry + 1);
 

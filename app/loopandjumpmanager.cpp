@@ -1,18 +1,17 @@
 #include "loopandjumpmanager.h"
 #include <yaml-cpp/yaml.h>
+#include <QTimer>
+
 #include <iostream>
 using std::cerr;
 using std::endl;
 
+using namespace dj;
+
 struct JumpOrLoopData {
-  enum loop_length_t { BEATS, FRAMES };
-
-  dj::loop_and_jump_type_t type = dj::loop_and_jump_type_t::JUMP;
-  int frame_start = 0;
-  int frame_end = 0; //XXX deal with it
-
-  //only used for loops
-  loop_length_t length_type = BEATS;
+  loop_and_jump_type_t type = dj::loop_and_jump_type_t::JUMP_BEAT;
+  int start = 0;
+  int end = 0; //XXX deal with it
   double length = 0;
 };
 
@@ -87,37 +86,67 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     } else {
       auto it = pdata->data.find(v);
       if (it != pdata->data.end()) {
-        emit(playerValueChangedInt(player, "seek_frame", it->frame_start));
+        int index = it->start;
+        switch (it->type) {
+          case loop_and_jump_type_t::LOOP_BEAT:
+          case loop_and_jump_type_t::JUMP_BEAT:
+            if (!pdata->beats || index < 0 || pdata->beats->size() <= static_cast<unsigned int>(index)) {
+              cerr << "stored beat index[" << index << "] out of range" << endl;
+              return;
+            }
+            index = pdata->beats->at(index);
+            break;
+          default: //otherwise it is a frame index already
+            break;
+        }
+        emit(playerValueChangedInt(player, "seek_frame", index));
       } else {
         int frame = pdata->frame;
+        int beat = -1;
         //find the closest beat
         //XXX make snap to be configurable!
         if (pdata->beats && pdata->beats->size() > 2) {
           if (frame <= pdata->beats->at(0)) {
             frame = pdata->beats->at(0);
+            beat = 0;
           } else if (frame >= pdata->beats->back()) {
             frame = pdata->beats->back();
+            beat = pdata->beats->size() - 1;
           } else {
             for (unsigned int i = 1; i < pdata->beats->size(); i++) {
               const int start = pdata->beats->at(i - 1);
               const int end = pdata->beats->at(i);
               if (frame >= start && frame < end) {
                 //closer to which side?
-                if (abs(frame - start) < abs(end - frame))
+                if (abs(frame - start) < abs(end - frame)) {
                   frame = start;
-                else
+                  beat = i - 1;
+                } else {
                   frame = end;
+                  beat = i;
+                }
                 break;
               }
             }
           }
         }
+
         JumpOrLoopData data;
-        data.frame_start = frame;
-        data.frame_end = frame;
-        data.type = dj::loop_and_jump_type_t::JUMP;
+        data.type = loop_and_jump_type_t::JUMP_BEAT; //XXX make configurable
+        switch (data.type) {
+          case loop_and_jump_type_t::LOOP_BEAT:
+          case loop_and_jump_type_t::JUMP_BEAT:
+            data.start = beat;
+            data.end = beat;
+            break;
+
+          default:
+            data.start = frame;
+            data.end = frame;
+            break;
+        }
         pdata->data[v] = data;
-        emit(entryUpdated(player, data.type, v, data.frame_start, data.frame_end));
+        emit(entryUpdated(player, data.type, v, data.start, data.end));
       }
     }
   }
@@ -133,7 +162,16 @@ void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr  audio_b
     mPlayerData[player]->jump_next = 0;
     mPlayerData[player]->clear_next = false;
     emit(entriesCleared(player));
-    loadData(player);
+
+    //wait to load data so that other objects get the beat buffer
+    //workaround for QTimer::singleShot not having lambda connections
+    QTimer * t = new QTimer;
+    t->setSingleShot(true);
+    connect(t, &QTimer::timeout, [player, this, t] {
+      loadData(player);
+      t->deleteLater();
+    });
+    t->start(1);
   }
 }
 
@@ -154,6 +192,12 @@ void LoopAndJumpManager::saveData(int player) {
 void LoopAndJumpManager::loadData(int player) {
   if (!mDB || mPlayerData[player]->work_id == 0)
     return;
+  const static std::map<std::string, loop_and_jump_type_t> type_map = {
+    {"jump_beat", loop_and_jump_type_t::JUMP_BEAT},
+    {"jump_frame", loop_and_jump_type_t::JUMP_FRAME},
+    {"loop_beat", loop_and_jump_type_t::LOOP_BEAT},
+    {"loop_frame", loop_and_jump_type_t::LOOP_FRAME}
+  };
   try {
     LoopAndJumpPlayerData * pdata = mPlayerData[player];
     QString data = mDB->work_jump_data(mPlayerData[player]->work_id);
@@ -164,11 +208,19 @@ void LoopAndJumpManager::loadData(int player) {
 
         int index = entry["index"].as<int>();
         JumpOrLoopData data;
-        data.frame_start = entry["frame_start"].as<int>();
-        data.frame_end = entry["frame_end"].as<int>();
-        data.type = entry["type"].as<std::string>() == "jump" ? dj::JUMP : dj::LOOP;
+        data.start = entry["start"].as<int>();
+        data.end = entry["end"].as<int>();
+
+        std::string t = entry["type"].as<std::string>();
+        auto it = type_map.find(t);
+        if (it == type_map.end()) {
+          cerr << t << " is not a recognized jump/loop type name" << endl;
+          continue;
+        }
+        data.type = it->second;
+
         pdata->data[index] = data;
-        emit(entryUpdated(player, data.type, index, data.frame_start, data.frame_end));
+        emit(entryUpdated(player, data.type, index, data.start, data.end));
       }
     }
   } catch (YAML::Exception& e) {
@@ -189,9 +241,22 @@ QString LoopAndJumpManager::yamlData(int player) {
 
     JumpOrLoopData * data = &it.value();
     entry["index"] = it.key();
-    entry["type"] = data->type == dj::JUMP ? "jump" : "loop";
-    entry["frame_start"] = data->frame_start;
-    entry["frame_end"] = data->frame_end;
+    switch (data->type) {
+      case JUMP_BEAT:
+        entry["type"] = "jump_beat";
+        break;
+      case JUMP_FRAME:
+        entry["type"] = "jump_frame";
+        break;
+      case LOOP_BEAT:
+        entry["type"] = "loop_beat";
+        break;
+      case LOOP_FRAME:
+        entry["type"] = "loop_frame";
+        break;
+    }
+    entry["start"] = data->start;
+    entry["end"] = data->end;
     root.push_back(entry);
   }
   return QString::fromStdString(YAML::Dump(root));

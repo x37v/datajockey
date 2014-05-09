@@ -57,7 +57,7 @@ class MixerPanelWaveformsView : public QGLWidget
     void playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer);
     void playerSetValueInt(int player, QString name, int v);
 
-    void updateMarker(int player, dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end);
+    void updateMarker(int player, dj::loop_and_jump_type_t type, int entry, int start, int end);
     void clearMarker(int player, int entry);
     void clearAllMarkers(int player);
   signals:

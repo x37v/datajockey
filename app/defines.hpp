@@ -47,7 +47,7 @@ namespace dj {
 
    const QStringList audio_file_extensions = (QStringList() << "flac" << "mp3" << "ogg");
 
-   enum loop_and_jump_type_t { JUMP, LOOP };
+   enum loop_and_jump_type_t { JUMP_BEAT, JUMP_FRAME, LOOP_BEAT, LOOP_FRAME };
 }
 
 //convert to and from QString

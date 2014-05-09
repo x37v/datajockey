@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     }
   }
   if (!nsm)
-    return startApp(&a, "datajockey", nullptr);
+    return startApp(&a, clientName, nullptr);
 
   while (1) {
     sleep(1);

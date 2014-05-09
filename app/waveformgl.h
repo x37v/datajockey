@@ -111,7 +111,7 @@ class WaveFormGL : public QObject
     void draw();
     void drawText(QPainter * painter, float width_scale);
 
-    void updateMarker(dj::loop_and_jump_type_t type, int entry, int frame_start, int frame_end);
+    void updateMarker(dj::loop_and_jump_type_t type, int entry, int start, int end);
     void clearMarker(int entry);
     void clearAllMarkers();
   signals:
@@ -124,6 +124,7 @@ class WaveFormGL : public QObject
 
   private:
     djaudio::AudioBufferPtr mAudioBuffer;
+    djaudio::BeatBufferPtr mBeatBuffer;
     int mWidth = 800;
     int mHistoryWidth = 100;
     int mFramesPerLine = 512;

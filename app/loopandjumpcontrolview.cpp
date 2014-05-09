@@ -62,10 +62,12 @@ void LoopAndJumpControlView::updateEntry(dj::loop_and_jump_type_t type, int entr
     return;
   QPushButton * btn = mJumpButtons[entry];
   switch (type) {
-    case dj::LOOP:
+    case dj::LOOP_BEAT:
+    case dj::LOOP_FRAME:
       btn->setProperty("jump_type", "loop");
       break;
-    case dj::JUMP:
+    case dj::JUMP_BEAT:
+    case dj::JUMP_FRAME:
       btn->setProperty("jump_type", "jump");
       break;
     default:
