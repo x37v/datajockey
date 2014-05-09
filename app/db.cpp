@@ -690,7 +690,7 @@ void DB::work_set_album(int work_id, int album_id, int track_num)  throw(std::ru
 QString DB::work_jump_data(int work_id) {
   MySqlQuery query(get());
 
-  query.prepare("SELECT data from audio_work_jump_data where audio_work_id=:audio_work_id");
+  query.prepare("SELECT data from audio_work_jumps where audio_work_id=:audio_work_id");
   query.bindValue(":audio_work_id", work_id);
   query.exec();
   if (query.first())
@@ -701,9 +701,9 @@ QString DB::work_jump_data(int work_id) {
 void DB::work_jump_data(int work_id, QString data) {
   MySqlQuery query(get());
   if (data.size() == 0) {
-    query.prepare("DELETE FROM audio_work_jump_data WHERE audio_work_id=:audio_work_id");
+    query.prepare("DELETE FROM audio_work_jumps WHERE audio_work_id=:audio_work_id");
   } else {
-    query.prepare("INSERT OR REPLACE INTO audio_work_jump_data (data, audio_work_id) VALUES(:data, :audio_work_id)");
+    query.prepare("INSERT OR REPLACE INTO audio_work_jumps (data, audio_work_id) VALUES(:data, :audio_work_id)");
     query.bindValue(":data", data);
   }
   query.bindValue(":audio_work_id", work_id);
