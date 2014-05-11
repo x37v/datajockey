@@ -20,7 +20,7 @@ class LoopAndJumpControlView : public QWidget {
     void clearEntry(int entry);
     void clearAll();
   signals:
-    void buttonTriggered(int index);
+    void valueChangedInt(QString name, int v);
     void triggered(QString name);
   private:
     Ui::LoopAndJumpControlView *ui;

@@ -21,31 +21,41 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     mJumpButtons.push_back(btn);
     ui->jumpButtonLayout->addWidget(btn);
     connect(btn, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this, i](bool /*checked*/) {
-        emit(buttonTriggered(i));
+        emit(valueChangedInt("jump", i));
     });
     btn->setProperty("jump_type", "none");
     btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: cyan; color: black; }");
   }
 
   for (int i = -2; i < 5; i++) {
-    QPushButton * btn = new QPushButton(QString::number(pow(2, i)), this);
-    mLoopButtons.push_back(btn);
-    ui->loopButtonLayout->addWidget(btn);
+    QPushButton * l = new QPushButton(QString::number(pow(2, i)), this);
+    mLoopButtons.push_back(l);
+    ui->loopButtonLayout->addWidget(l);
 
-    btn->setCheckable(true);
-  }
+    l->setCheckable(true);
 
-  //exclusive buttons but allowing none to be pressed
-  for(QPushButton * l: mLoopButtons) {
-    QObject::connect(l, &QPushButton::toggled, [this, l](bool down) {
+    //exclusive buttons but allowing none to be pressed
+    QObject::connect(l, &QPushButton::toggled, [this, l, i](bool down) {
       if (down) {
-        for(QPushButton * b: mLoopButtons) {
+        emit(valueChangedInt("loop_length", i));
+        for (QPushButton * b: mLoopButtons) {
           if (b != l && b->isChecked())
             b->setChecked(false);
         }
+      } else {
+        bool all_off = true;
+        for (QPushButton * b: mLoopButtons) {
+          if (b->isChecked()) {
+            all_off = false;
+            break;
+          }
+        }
+        if (all_off)
+          emit(triggered("loop_off"));
       }
     });
   }
+
 }
 
 LoopAndJumpControlView::~LoopAndJumpControlView() {

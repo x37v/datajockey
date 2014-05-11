@@ -57,10 +57,7 @@ PlayerView::PlayerView(QWidget *parent) :
   }
   connect(ui->jump_up, &QToolButton::released, [this] () { emit(triggered("jump")); });
 
-  connect(ui->loopAndJumpControl, &LoopAndJumpControlView::buttonTriggered, [this](int index) {
-      emit(valueChangedInt("jump", index));
-  });
-
+  connect(ui->loopAndJumpControl, &LoopAndJumpControlView::valueChangedInt, this, &PlayerView::valueChangedInt);
   connect(ui->loopAndJumpControl, &LoopAndJumpControlView::triggered, this, &PlayerView::triggered);
 }
 
