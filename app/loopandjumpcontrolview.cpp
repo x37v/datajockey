@@ -38,19 +38,17 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     loopGroup->addButton(btn);
   }
 
-#if 0
   //exclusive buttons but allowing none to be pressed
-  QObject::connect(loopGroup,
-      static_cast<void (QButtonGroup::*)(QAbstractButton *, bool)>(&QButtonGroup::buttonToggled),
-      [&loopGroup](QAbstractButton * c, bool checked) {
-      if (checked) {
-        foreach (QAbstractButton * btn, loopGroup->buttons()) {
-          if (btn != c)
-            btn->setChecked(false);
+  for(QPushButton * l: mLoopButtons) {
+    QObject::connect(l, &QPushButton::toggled, [this, l](bool down) {
+      if (down) {
+        for(QPushButton * b: mLoopButtons) {
+          if (b != l && b->isChecked())
+            b->setChecked(false);
         }
       }
-  });
-#endif
+    });
+  }
 }
 
 LoopAndJumpControlView::~LoopAndJumpControlView() {
