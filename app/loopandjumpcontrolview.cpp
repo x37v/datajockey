@@ -27,15 +27,12 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: cyan; color: black; }");
   }
 
-  QButtonGroup * loopGroup = new QButtonGroup(this);
-  loopGroup->setExclusive(false);
   for (int i = 0; i < 4; i++) {
     QPushButton * btn = new QPushButton(QString::number(pow(2, i)), this);
     mLoopButtons.push_back(btn);
     ui->loopButtonLayout->addWidget(btn);
 
     btn->setCheckable(true);
-    loopGroup->addButton(btn);
   }
 
   //exclusive buttons but allowing none to be pressed
