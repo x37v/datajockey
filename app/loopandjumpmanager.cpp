@@ -21,8 +21,6 @@ struct LoopAndJumpPlayerData {
   int frame = 0;
   int jump_next = 0;
   bool clear_next = false; //do we clear the next jump input
-  bool looping = false;
-  int loop_start_beat = 0;
   QHash<int, JumpOrLoopData> data;
   djaudio::BeatBufferPtr beats;
 };
@@ -84,7 +82,6 @@ void LoopAndJumpManager::playerTrigger(int player, QString name) {
     clearEntry(player, mPlayerData[player]->jump_next);
     playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
   } else if (name == "loop_off") {
-    mPlayerData[player]->looping = false;
     emit(playerValueChangedBool(player, "loop", false));
   }
 }
@@ -104,49 +101,8 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
   } else if (name == "position_frame") {
     pdata->frame = v;
   } else if (name == "loop_length") {
-    //XXX do we allow for some non beat approach?
-    if (!pdata->beats)
-      return;
-    if (pdata->beats->size() < 4)
-      return;
-    int beat_start = pdata->loop_start_beat;
-    int frame_start = 0;
-    int frame_end = 0;
-
-    if (pdata->looping == true) {
-      //just change the end position
-      frame_start = pdata->beats->at(beat_start);
-    } else {
-      pdata->loop_start_beat = beat_start = closest_beat(pdata->frame, pdata);
-      if (beat_start < 0)
-        beat_start = 0;
-      frame_start = pdata->beats->at(beat_start);
-      emit(playerValueChangedInt(player, "loop_start_frame", frame_start));
-    }
-
-    double beat_length = pow(2.0, static_cast<double>(v));
-    if (beat_length >= 1.0) {
-      int ibeat_end = static_cast<int>(beat_length) + beat_start;
-      if (ibeat_end < static_cast<int>(pdata->beats->size())) {
-        frame_end = pdata->beats->at(ibeat_end);
-      } else {
-        frame_end = pdata->beats->back(); //XXX what to do here?
-      }
-    } else {
-      if (beat_start + 2 < static_cast<int>(pdata->beats->size())) {
-        double frames = pdata->beats->at(beat_start + 1) - pdata->beats->at(beat_start);
-        frame_end = frames * beat_length + frame_start;
-      } else {
-        //XXX what to do?
-        return;
-      }
-    }
-
-    if (frame_start < frame_end) {
-      emit(playerValueChangedInt(player, "loop_end_frame", frame_end));
-      emit(playerValueChangedBool(player, "loop", true));
-      pdata->looping = true;
-    }
+    double beats = pow(2.0, static_cast<double>(v));
+    emit(playerValueChangedDouble(player, "loop_length_beats", beats));
   } else if (name == "jump_next") {
     if (v < 0)
       return;
@@ -214,8 +170,6 @@ void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr  audio_b
     mPlayerData[player]->frame = 0;
     mPlayerData[player]->jump_next = 0;
     mPlayerData[player]->clear_next = false;
-    mPlayerData[player]->loop_start_beat = 0;
-    mPlayerData[player]->looping = false;
     emit(entriesCleared(player));
 
     //wait to load data so that other objects get the beat buffer

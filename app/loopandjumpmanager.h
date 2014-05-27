@@ -27,6 +27,7 @@ class LoopAndJumpManager : public QObject {
     void entryCleared(int player_index, int entry_index);
 
     void playerValueChangedInt(int player, QString name, int value);
+    void playerValueChangedDouble(int player, QString name, double value);
     void playerValueChangedBool(int player, QString name, bool value);
   private:
     void clearEntry(int player, int entry_index);

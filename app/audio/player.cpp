@@ -870,7 +870,7 @@ bool PlayerPositionCommand::store(CommandIOData& data) const{
 }
 
 
-PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, unsigned int beats, resize_policy_t resize_policy, bool start_looping) :
+PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, double beats, resize_policy_t resize_policy, bool start_looping) :
   PlayerCommand(idx),
   mResizePolicy(resize_policy),
   mStartLooping(start_looping),
@@ -914,15 +914,22 @@ void PlayerLoopCommand::execute() {
       //find both start and end frame based on current location
       //we don't use the closest index, we use the last index before our frame so we stay in the current beat
       unsigned int beat = beat_index(beat_buff, p->frame());
-      if (beat + mBeats >= beat_buff->size())
+      unsigned int beat_end = beat + mBeats;
+      if (beat_end >= beat_buff->size())
         return;
 
       mStartFrame = beat_buff->at(beat);
-      mEndFrame = beat_buff->at(beat + mBeats);
+      mEndFrame = beat_buff->at(beat_end);
+      //do fractional part of mBeats
+      double remainder = mBeats - (beat_end - beat);
+      if (remainder > 0.0) {
+        //XXX do it!
+      }
     } else {
       unsigned int beat_end = beat_index(beat_buff, mStartFrame) + mBeats;
       mEndFrame = beat_buff->at(beat_end);
     }
+
   } else if (mStartFrame < 0) {
     if (!beat_buff)
       return;

@@ -86,6 +86,8 @@ AudioModel::AudioModel(QObject *parent) :
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SLOT(playerSetValueInt(int, QString, int))); 
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedBool(int, QString, bool)), SIGNAL(playerValueChangedBool(int, QString, bool))); 
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedBool(int, QString, bool)), SLOT(playerSetValueBool(int, QString, bool))); 
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedDouble(int, QString, double)), SIGNAL(playerValueChangedDouble(int, QString, double))); 
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedDouble(int, QString, double)), SLOT(playerSetValueDouble(int, QString, double))); 
 
   connect(mLoopAndJumpManager, &LoopAndJumpManager::entryUpdated, this, &AudioModel::jumpUpdated);
   connect(mLoopAndJumpManager, &LoopAndJumpManager::entriesCleared, this, &AudioModel::jumpsCleared);
@@ -169,6 +171,9 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
         pstate->doubleValue[name] = v;
         emit(playerValueChangedDouble(player, name, v));
         return nullptr;
+      } else if (name == "loop_length_beats") {
+        pstate->boolValue["loop"] = true;
+        return new djaudio::PlayerLoopCommand(player, v);
       }
 
       auto it = pstate->doubleValue.find(name);
@@ -224,10 +229,6 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_MID, to_double(v));
       } else if (name == "eq_low") {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_LOW, to_double(v));
-      } else if (name == "loop_start_frame") {
-        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_START, v);
-      } else if (name == "loop_end_frame") {
-        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_END, v);
       } else if (name == "position_frame") {
         pstate->intValue["updates_since_sync"] += 1;
         emit (playerValueChangedInt(player, name, v)); //relaying from Consumer

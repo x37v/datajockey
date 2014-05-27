@@ -257,7 +257,7 @@ namespace djaudio {
         RESIZE_FROM_BACK,
         RESIZE_AT_POSITION
       } resize_policy_t;
-      explicit PlayerLoopCommand(unsigned int idx, unsigned int beats, resize_policy_t resize_policy = RESIZE_FROM_FRONT, bool start_looping = true);
+      explicit PlayerLoopCommand(unsigned int idx, double beats, resize_policy_t resize_policy = RESIZE_FROM_FRONT, bool start_looping = true);
       explicit PlayerLoopCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
       virtual void execute();
       virtual bool store(CommandIOData& data) const;
@@ -268,7 +268,7 @@ namespace djaudio {
       resize_policy_t mResizePolicy = RESIZE_FROM_FRONT;
       bool mStartLooping = true;
       bool mLooping = true;
-      unsigned int mBeats = 0;
+      double mBeats = 0;
       long mStartFrame = -1; //less than zero implies that we need to compute it
       long mEndFrame = -1; //if they are both less than zero, we compute from current location
   };
