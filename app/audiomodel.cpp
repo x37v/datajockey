@@ -84,6 +84,8 @@ AudioModel::AudioModel(QObject *parent) :
   //broadcast the manager's updates, and hook it into us
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SIGNAL(playerValueChangedInt(int, QString, int))); 
   connect(mLoopAndJumpManager, SIGNAL(playerValueChangedInt(int, QString, int)), SLOT(playerSetValueInt(int, QString, int))); 
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedBool(int, QString, bool)), SIGNAL(playerValueChangedBool(int, QString, bool))); 
+  connect(mLoopAndJumpManager, SIGNAL(playerValueChangedBool(int, QString, bool)), SLOT(playerSetValueBool(int, QString, bool))); 
 
   connect(mLoopAndJumpManager, &LoopAndJumpManager::entryUpdated, this, &AudioModel::jumpUpdated);
   connect(mLoopAndJumpManager, &LoopAndJumpManager::entriesCleared, this, &AudioModel::jumpsCleared);
@@ -222,6 +224,10 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_MID, to_double(v));
       } else if (name == "eq_low") {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_LOW, to_double(v));
+      } else if (name == "loop_start_frame") {
+        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_START, v);
+      } else if (name == "loop_end_frame") {
+        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_END, v);
       } else if (name == "position_frame") {
         pstate->intValue["updates_since_sync"] += 1;
         emit (playerValueChangedInt(player, name, v)); //relaying from Consumer
@@ -246,16 +252,16 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
       if (it != pstate->boolValue.end() && *it == v)
         return nullptr;
 
-      if (name == "cue")
+      if (name == "cue") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::OUT_CUE : djaudio::PlayerStateCommand::OUT_MAIN);
-      else if (name == "play")
+      } else if (name == "play") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::PLAY : djaudio::PlayerStateCommand::PAUSE);
-      else if (name == "sync") {
+      } else if (name == "sync") {
         pstate->intValue["updates_since_sync"] = 0;
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::SYNC : djaudio::PlayerStateCommand::NO_SYNC);
-      } else if (name == "mute")
+      } else if (name == "mute") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
-      else if (name == "seeking") {
+      } else if (name == "seeking") {
         pstate->boolValue["seeking"] = v;
         emit(playerValueChangedBool(player, name, v));
         //if we are already paused, don't do anything
@@ -266,7 +272,9 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
         pstate->boolValue[name] = v; //relaying from Consumer
         emit(playerValueChangedBool(player, name, v));
         return nullptr;
-      }
+      } else if (name == "loop") {
+        cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::LOOP : djaudio::PlayerStateCommand::NO_LOOP);
+      } 
 
       if (cmd) {
         pstate->boolValue[name] = v;

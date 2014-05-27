@@ -3,6 +3,7 @@
 #include <QTimer>
 
 #include <iostream>
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -20,9 +21,37 @@ struct LoopAndJumpPlayerData {
   int frame = 0;
   int jump_next = 0;
   bool clear_next = false; //do we clear the next jump input
+  bool looping = false;
+  int loop_start_beat = 0;
   QHash<int, JumpOrLoopData> data;
   djaudio::BeatBufferPtr beats;
 };
+
+namespace {
+  int closest_beat(int frame, LoopAndJumpPlayerData * pdata) {
+    if (pdata->beats && pdata->beats->size() > 2) {
+      if (frame <= pdata->beats->at(0)) {
+        return 0;
+      } else if (frame >= pdata->beats->back()) {
+        return pdata->beats->size() - 1;
+      } else {
+        for (unsigned int i = 1; i < pdata->beats->size(); i++) {
+          const int start = pdata->beats->at(i - 1);
+          const int end = pdata->beats->at(i);
+          if (frame >= start && frame < end) {
+            //closer to which side?
+            if (abs(frame - start) < abs(end - frame)) {
+              return i - 1;
+            } else {
+              return i;
+            }
+          }
+        }
+      }
+    }
+    return -1;
+  }
+}
 
 LoopAndJumpManager::LoopAndJumpManager(QObject * parent) :
   QObject(parent)
@@ -45,15 +74,18 @@ void LoopAndJumpManager::saveData() {
 void LoopAndJumpManager::playerTrigger(int player, QString name) {
   if (player >= mPlayerData.size() || player < 0)
     return;
-  if (name == "jump")
+  if (name == "jump") {
     playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
-  else if (name == "jump_clear_next")
+  } else if (name == "jump_clear_next") {
     mPlayerData[player]->clear_next = true;
-  else if (name == "jump_clear_next_abort")
+  } else if (name == "jump_clear_next_abort") {
     mPlayerData[player]->clear_next = false;
-  else if (name == "jump_new") { //use the 'next' but reset it
+  } else if (name == "jump_new") { //use the 'next' but reset it
     clearEntry(player, mPlayerData[player]->jump_next);
     playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
+  } else if (name == "loop_off") {
+    mPlayerData[player]->looping = false;
+    emit(playerValueChangedBool(player, "loop", false));
   }
 }
 
@@ -71,6 +103,50 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     emit(entriesCleared(player));
   } else if (name == "position_frame") {
     pdata->frame = v;
+  } else if (name == "loop_length") {
+    //XXX do we allow for some non beat approach?
+    if (!pdata->beats)
+      return;
+    if (pdata->beats->size() < 4)
+      return;
+    int beat_start = pdata->loop_start_beat;
+    int frame_start = 0;
+    int frame_end = 0;
+
+    if (pdata->looping == true) {
+      //just change the end position
+      frame_start = pdata->beats->at(beat_start);
+    } else {
+      pdata->loop_start_beat = beat_start = closest_beat(pdata->frame, pdata);
+      if (beat_start < 0)
+        beat_start = 0;
+      frame_start = pdata->beats->at(beat_start);
+      emit(playerValueChangedInt(player, "loop_start_frame", frame_start));
+    }
+
+    double beat_length = pow(2.0, static_cast<double>(v));
+    if (beat_length >= 1.0) {
+      int ibeat_end = static_cast<int>(beat_length) + beat_start;
+      if (ibeat_end < static_cast<int>(pdata->beats->size())) {
+        frame_end = pdata->beats->at(ibeat_end);
+      } else {
+        frame_end = pdata->beats->back(); //XXX what to do here?
+      }
+    } else {
+      if (beat_start + 2 < static_cast<int>(pdata->beats->size())) {
+        double frames = pdata->beats->at(beat_start + 1) - pdata->beats->at(beat_start);
+        frame_end = frames * beat_length + frame_start;
+      } else {
+        //XXX what to do?
+        return;
+      }
+    }
+
+    if (frame_start < frame_end) {
+      emit(playerValueChangedInt(player, "loop_end_frame", frame_end));
+      emit(playerValueChangedBool(player, "loop", true));
+      pdata->looping = true;
+    }
   } else if (name == "jump_next") {
     if (v < 0)
       return;
@@ -101,35 +177,12 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
         }
         emit(playerValueChangedInt(player, "seek_frame", index));
       } else {
-        int frame = pdata->frame;
-        int beat = -1;
         //find the closest beat
         //XXX make snap to be configurable!
-        if (pdata->beats && pdata->beats->size() > 2) {
-          if (frame <= pdata->beats->at(0)) {
-            frame = pdata->beats->at(0);
-            beat = 0;
-          } else if (frame >= pdata->beats->back()) {
-            frame = pdata->beats->back();
-            beat = pdata->beats->size() - 1;
-          } else {
-            for (unsigned int i = 1; i < pdata->beats->size(); i++) {
-              const int start = pdata->beats->at(i - 1);
-              const int end = pdata->beats->at(i);
-              if (frame >= start && frame < end) {
-                //closer to which side?
-                if (abs(frame - start) < abs(end - frame)) {
-                  frame = start;
-                  beat = i - 1;
-                } else {
-                  frame = end;
-                  beat = i;
-                }
-                break;
-              }
-            }
-          }
-        }
+        int frame = pdata->frame;
+        int beat = closest_beat(frame, pdata);
+        if (beat >= 0)
+          frame = pdata->beats->at(beat);
 
         JumpOrLoopData data;
         data.type = loop_and_jump_type_t::JUMP_BEAT; //XXX make configurable
@@ -161,6 +214,8 @@ void LoopAndJumpManager::playerLoad(int player, djaudio::AudioBufferPtr  audio_b
     mPlayerData[player]->frame = 0;
     mPlayerData[player]->jump_next = 0;
     mPlayerData[player]->clear_next = false;
+    mPlayerData[player]->loop_start_beat = 0;
+    mPlayerData[player]->looping = false;
     emit(entriesCleared(player));
 
     //wait to load data so that other objects get the beat buffer

@@ -26,6 +26,7 @@ class AudioModel : public QObject {
     void playerValueChangedDouble(int player, QString name, double v);
     void playerValueChangedInt(int player, QString name, int v);
     void playerValueChangedBool(int player, QString name, bool v);
+    void playerTriggered(int player, QString name);
 
     void masterValueChangedDouble(QString name, double v);
     void masterValueChangedInt(QString name, int v);
