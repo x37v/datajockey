@@ -910,35 +910,60 @@ void PlayerLoopCommand::execute() {
   if (mEndFrame < 0) {
     if (!beat_buff)
       return;
+    unsigned int beat_end = 0;
     if (mStartFrame < 0) {
       //find both start and end frame based on current location
       //we don't use the closest index, we use the last index before our frame so we stay in the current beat
       unsigned int beat = beat_index(beat_buff, p->frame());
-      unsigned int beat_end = beat + mBeats;
+      beat_end = beat + mBeats;
       if (beat_end >= beat_buff->size())
         return;
 
       mStartFrame = beat_buff->at(beat);
-      mEndFrame = beat_buff->at(beat_end);
-      //do fractional part of mBeats
-      double remainder = mBeats - (beat_end - beat);
-      if (remainder > 0.0) {
-        //XXX do it!
-      }
+      if (beat == beat_end)
+        mEndFrame = mStartFrame;
+      else
+        mEndFrame = beat_buff->at(beat_end);
     } else {
-      unsigned int beat_end = beat_index(beat_buff, mStartFrame) + mBeats;
+      beat_end = beat_index(beat_buff, mStartFrame) + mBeats;
       mEndFrame = beat_buff->at(beat_end);
+    }
+
+    //deal with fractional part
+    double remainder = fmod(mBeats, 1.0);
+    if (remainder != 0.0) {
+      if (beat_end + 1 < beat_buff->size()) {
+        double frames = beat_buff->at(beat_end + 1) - mEndFrame;
+        mEndFrame += (frames * remainder);
+      } else {
+        //XXX what?
+      }
     }
 
   } else if (mStartFrame < 0) {
     if (!beat_buff)
       return;
     unsigned int beat_end = beat_index(beat_buff, mEndFrame);
-    if (beat_end < mBeats)
+    if (beat_end < mBeats) {
       mStartFrame = 0;
-    else
-      mStartFrame = beat_buff->at(beat_end - mBeats);
+    } else {
+      int beat_start = beat_end - mBeats;
+      mStartFrame = beat_buff->at(beat_start);
+      if (beat_start >= 1) {
+        //deal with fractional part
+        double remainder = fmod(mBeats, 1.0);
+        if (remainder != 0.0) {
+          double frames = mStartFrame - beat_buff->at(beat_start - 1);
+          mStartFrame -= (frames * remainder);
+          if (mStartFrame < 0)
+            mStartFrame = 0;
+        }
+      }
+    }
   }
+
+  if (mStartFrame >= mEndFrame)
+    return; //XXX what to do?
 
   p->loop_start_frame(mStartFrame);
   p->loop_end_frame(mEndFrame);
