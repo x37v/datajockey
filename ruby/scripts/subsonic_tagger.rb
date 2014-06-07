@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
-$: << ".."
-
 require 'yaml'
-require './subsonic'
-require 'datajockey/base'
-require 'datajockey/db'
+require_relative 'subsonic'
+require_relative '../datajockey/base'
+require_relative '../datajockey/db'
 
 MUSIC_BASE = "/home/alex/music"
 
@@ -32,11 +30,16 @@ s.playlists.each do |pl|
   end
 
 
-  c = TagClass.find_or_create_by_name(class_name)
-  t = Tag.find_or_create_by_name_and_tag_class_id(tag_name, c.id)
+  c = Tag.find_or_create_by_name_and_parent_id(class_name, 0)
+  t = Tag.find_or_create_by_name_and_parent_id(tag_name, c.id)
 
   puts "#{class_name}:#{tag_name}"
-  s.playlist(pl["id"])["entry"].each do |e|
+  entries = s.playlist(pl["id"])["entry"]
+  unless entries
+    puts "\tempty"
+    next
+  end
+  entries.each do |e|
     next unless e.is_a?(Hash)
     f = File.join(MUSIC_BASE, e["path"])
     w = AudioWork.where(:audio_file_location => f).first
