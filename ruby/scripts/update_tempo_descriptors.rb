@@ -29,7 +29,7 @@ Datajockey::connect
 
 include Datajockey
 
-AudioWork.where('descriptor_tempo_median IS NULL AND annotation_file_location IS NOT NULL').each do |w|
+AudioWork.where('(descriptor_tempo_median IS NULL OR descriptor_tempo_median <= 0) AND annotation_file_location IS NOT NULL').each do |w|
   sr = getsamplerate(w.audio_file_location)
   if sr == 0
     puts "skipping #{w.name}"
