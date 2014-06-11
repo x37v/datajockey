@@ -47,12 +47,14 @@ int main(int argc, char *argv[])
   QCoreApplication::setOrganizationDomain("x37v.info");
 
   QCommandLineOption daemonOption(QStringList() << "d" << "daemon", QCoreApplication::translate("main", "Run in daemon mode.  For the main application to communicate with via dbus"));
+  QCommandLineOption forceOption(QStringList() << "f" << "force", QCoreApplication::translate("main", "Force, reimport even existing files"));
 
   QCommandLineParser parser;
   parser.setApplicationDescription("DataJockey audio file importer");
   parser.addHelpOption();
   parser.addVersionOption();
   parser.addOption(daemonOption);
+  parser.addOption(forceOption);
   parser.addPositionalArgument("files", QCoreApplication::translate("main", "The files to process."));
 
   parser.process(a);
@@ -89,9 +91,15 @@ int main(int argc, char *argv[])
     }
 
     QStringList filesToProcess;
-    foreach(QString file, filesToCheck.toList()) {
-      if (db->work_find_by_audio_file_location(file) == 0)
+    if (!parser.isSet(forceOption)) {
+      foreach(QString file, filesToCheck.toList()) {
+        if (db->work_find_by_audio_file_location(file) == 0)
+          filesToProcess.push_back(file);
+      }
+    } else {
+      foreach(QString file, filesToCheck.toList()) {
         filesToProcess.push_back(file);
+      }
     }
 
     int import_countdown = filesToProcess.size();

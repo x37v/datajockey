@@ -650,14 +650,29 @@ void DB::work_set_played(int work_id, QDateTime time) {
 void DB::import(QString audioFilePath, QString annotationFilePath, QHash<QString, QVariant> tagData) {
   try {
     //import file
-    int id = work_create(tagData, audioFilePath);
+    int id = work_find_by_audio_file_location(audioFilePath);
+    QString movedAnnotation;
+    bool update_existing = false;
+
+    if (id == 0) {
+      id = work_create(tagData, audioFilePath);
+      movedAnnotation = default_file_location(id, tagData);
+    } else {
+      update_existing = true;
+      QString dummyAudioPath;
+      if (!find_locations_by_id(id, dummyAudioPath, movedAnnotation)) {
+        update_existing = false;
+        movedAnnotation = default_file_location(id, tagData);
+      }
+    }
 
     //move the annotation
-    QString movedAnnotation = default_file_location(id, tagData);
     QFileInfo movedInfo(movedAnnotation);
     QDir dir = movedInfo.dir();
     if (!dir.mkpath(dir.path()))
       throw std::runtime_error("couldn't create path to annotation file: " + movedAnnotation.toStdString());
+    if (update_existing)
+      QFile::remove(movedAnnotation);
     if (!QFile::rename(annotationFilePath, movedAnnotation))
       throw std::runtime_error("couldn't move to annotation file to: " + movedAnnotation.toStdString());
 
