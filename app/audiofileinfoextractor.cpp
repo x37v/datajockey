@@ -9,15 +9,15 @@
 #include <QtDebug>
 
 namespace {
-
   unsigned int smoothing_iterations = 20; //XXX make it configurable
 
 
   //find the mid point between the previous and next values
   //find the difference between the data we have and that value, add 1/2 of that to the point
-  unsigned int smoothed_point(unsigned int cur, unsigned int prev, unsigned int next) {
+  int smoothed_point(int cur, int prev, int next) {
     double mid = static_cast<double>(next - prev) / 2.0 + static_cast<double>(prev);
-    return static_cast<unsigned int>(cur + (mid - cur) / 2.0);
+    double dcur = static_cast<double>(cur);
+    return static_cast<int>(dcur + (mid - dcur) / 2.0);
   }
 
   void smooth(std::deque<int>& data, unsigned int iterations) {
@@ -84,12 +84,12 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
     }
     mBeatExtractor->process(audio_buffer, beat_buffer);
 
+    smooth(*beat_buffer, smoothing_iterations);
     std::deque<int> dist = beat_buffer->distances();
 
-    smooth(dist, smoothing_iterations);
-    
     int median = djaudio::median(dist);
-    float bpm = (60.0 * audio_buffer->sample_rate()) / median;
+
+    float bpm = (60.0 * audio_buffer->sample_rate()) / static_cast<float>(median);
     tag_data["tempo_median"] = bpm;
 
     //create the annotation temp file
