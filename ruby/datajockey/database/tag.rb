@@ -21,11 +21,10 @@
 
 module Datajockey
   class Tag < ActiveRecord::Base
-    belongs_to :tag_class
     has_many :audio_work_tags, :dependent => :destroy
     has_many :audio_works, :through => :audio_work_tags
-    def inheritance_column()
-    'tag_class_id'
-    end
+
+    belongs_to :parent, :class_name => 'Tag'
+    has_many :children, :class_name => 'Tag', :foreign_key => 'parent_id'
   end
 end

@@ -6,9 +6,15 @@ a.out
 *.o
 /datajockey
 /datajockey_importer
+/app/datajockey
+/importer/importer
 obj/
 moc/
+ui/
 Makefile
 Makefile.*
 qrc_*.cpp
 /*.app
+build-*
+*.pro.user
+*.txt.user
