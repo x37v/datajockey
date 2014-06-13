@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-   application.pro \
-   importer.pro
+   app/app.pro \
+	 importer/importer.pro
