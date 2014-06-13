@@ -60,6 +60,12 @@ int main(int argc, char *argv[])
   palette.setColor(QPalette::HighlightedText, Qt::black);
   a.setPalette(palette);
 
+  QFile file(":/resources/style.qss");
+  if(file.open(QFile::ReadOnly)){
+    QString styleSheet = QLatin1String(file.readAll());
+    a.setStyleSheet(styleSheet);
+  }
+
   //setup NSM, if we can, wait for nsm to create the client
   nsm_client_t* nsm = 0;
   //try to attach to nsm

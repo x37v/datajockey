@@ -24,7 +24,6 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
         emit(valueChangedInt("jump", i));
     });
     btn->setProperty("jump_type", "none");
-    btn->setStyleSheet("QPushButton[jump_type=jump] { background-color: cyan; color: black; }");
   }
 
   for (int i = -2; i < 5; i++) {
