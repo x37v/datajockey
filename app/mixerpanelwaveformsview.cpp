@@ -202,6 +202,8 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
   glMatrixMode(GL_MODELVIEW);
   glEnable(GL_MULTISAMPLE);
   glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND); //Enable blending.
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glViewport(0, 0, mWidth, mHeight);
   computeOffsetAndScale();

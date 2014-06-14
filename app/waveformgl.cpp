@@ -130,16 +130,32 @@ void WaveFormGL::draw() {
 
   if (mMarkers.size()) {
     glPushMatrix();
-    glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
     glLineWidth(mZoomFull ? 1.0 : 2.0);
-    glBegin(GL_LINES);
-    //XXX draw label
     for (marker_t m: mMarkers.values()) {
-      GLfloat x = static_cast<GLfloat>(m.frame_start) / static_cast<GLfloat>(mFramesPerLine);
-      glVertex2f(x, -1.0);
-      glVertex2f(x, 1.0);
+      glBegin(GL_LINES);
+      GLfloat x0 = static_cast<GLfloat>(m.frame_start) / static_cast<GLfloat>(mFramesPerLine);
+      if (m.frame_start == m.frame_end) {
+        glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
+        glVertex2f(x0, -1.0);
+        glVertex2f(x0, 1.0);
+      } else {
+        glColor4d(mMarkerColorLoop.redF(), mMarkerColorLoop.greenF(), mMarkerColorLoop.blueF(), mMarkerColorLoop.alphaF());
+        GLfloat x1 = static_cast<GLfloat>(m.frame_end) / static_cast<GLfloat>(mFramesPerLine);
+        GLfloat y = 1.0;
+        glVertex2f(x0, -y);
+        glVertex2f(x0, y);
+
+        glVertex2f(x0, y);
+        glVertex2f(x1, y);
+
+        glVertex2f(x1, y);
+        glVertex2f(x1, -y);
+
+        glVertex2f(x1, -y);
+        glVertex2f(x0, -y);
+      }
+      glEnd();
     }
-    glEnd();
     glPopMatrix();
   }
 

@@ -277,8 +277,10 @@ QString LoopAndJumpManager::yamlData(int player) {
 
   YAML::Node root;
   for (QHash<int, JumpOrLoopData>::iterator it = pdata->data.begin(); it != pdata->data.end(); it++) {
-    YAML::Node entry;
+    if (it.key() < 0)
+      continue;
 
+    YAML::Node entry;
     JumpOrLoopData * data = &it.value();
     entry["index"] = it.key();
     switch (data->type) {
