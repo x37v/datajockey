@@ -130,16 +130,32 @@ void WaveFormGL::draw() {
 
   if (mMarkers.size()) {
     glPushMatrix();
-    glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
     glLineWidth(mZoomFull ? 1.0 : 2.0);
-    glBegin(GL_LINES);
-    //XXX draw label
     for (marker_t m: mMarkers.values()) {
-      GLfloat x = static_cast<GLfloat>(m.frame_start) / static_cast<GLfloat>(mFramesPerLine);
-      glVertex2f(x, -1.0);
-      glVertex2f(x, 1.0);
+      glBegin(GL_LINES);
+      GLfloat x0 = static_cast<GLfloat>(m.frame_start) / static_cast<GLfloat>(mFramesPerLine);
+      if (m.frame_start == m.frame_end) {
+        glColor4d(mMarkerColorJump.redF(), mMarkerColorJump.greenF(), mMarkerColorJump.blueF(), mMarkerColorJump.alphaF());
+        glVertex2f(x0, -1.0);
+        glVertex2f(x0, 1.0);
+      } else {
+        glColor4d(mMarkerColorLoop.redF(), mMarkerColorLoop.greenF(), mMarkerColorLoop.blueF(), mMarkerColorLoop.alphaF());
+        GLfloat x1 = static_cast<GLfloat>(m.frame_end) / static_cast<GLfloat>(mFramesPerLine);
+        GLfloat y = 1.0;
+        glVertex2f(x0, -y);
+        glVertex2f(x0, y);
+
+        glVertex2f(x0, y);
+        glVertex2f(x1, y);
+
+        glVertex2f(x1, y);
+        glVertex2f(x1, -y);
+
+        glVertex2f(x1, -y);
+        glVertex2f(x0, -y);
+      }
+      glEnd();
     }
-    glEnd();
     glPopMatrix();
   }
 
@@ -164,12 +180,16 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
 
   if (!mZoomFull) {
     for (marker_t m: mMarkers.values()) {
+      if (m.label.length() == 0)
+        continue;
       painter->drawText(0.0,
           width_scale * (mWidth - mHistoryWidth - (static_cast<float>(m.frame_start - mFramePosition) / static_cast<float>(mFramesPerLine))), 40, 40,
           Qt::AlignLeft | Qt::TextWordWrap, m.label);
     }
   } else {
     for (marker_t m: mMarkers.values()) {
+      if (m.label.length() == 0)
+        continue;
       painter->drawText(0.0, width_scale * static_cast<float>(m.frame_start) / static_cast<float>(mFramesPerLine), 40, 40,
           Qt::AlignLeft | Qt::TextWordWrap, m.label);
     }
@@ -177,9 +197,6 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
 }
 
 void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int start, int end) {
-  if (entry < 0)
-    return;
-
   marker_t marker;
   switch (type) {
     case dj::loop_and_jump_type_t::LOOP_BEAT:
@@ -204,8 +221,10 @@ void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int star
   marker.frame_start = start;
   marker.frame_end = end;
 
-  marker.label = QString::number(entry + 1);
-
+  if (entry >= 0)
+    marker.label = QString::number(entry + 1);
+  else
+    marker.label = QString();
   mMarkers[entry] = marker;
 }
 

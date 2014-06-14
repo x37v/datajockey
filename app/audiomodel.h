@@ -95,6 +95,18 @@ class PlayerSetBuffersCommand : public QObject, public djaudio::PlayerCommand {
     djaudio::BeatBuffer * mOldBeatBuffer;
 };
 
+class PlayerLoopAndReportCommand : public QObject, public djaudio::PlayerLoopCommand {
+  Q_OBJECT
+  public:
+    explicit PlayerLoopAndReportCommand(unsigned int idx, double beats, PlayerLoopCommand::resize_policy_t resize_policy = PlayerLoopCommand::RESIZE_FROM_FRONT, bool start_looping = true);
+    explicit PlayerLoopAndReportCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
+    virtual ~PlayerLoopAndReportCommand();
+    virtual void execute_done();
+  signals:
+    void playerValueChangedInt(int player, QString name, int v);
+    void playerValueChangedBool(int player, QString name, bool v);
+};
+
 class EngineQueryCommand : public QObject, public djaudio::MasterCommand {
   Q_OBJECT
   public:
