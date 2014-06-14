@@ -23,9 +23,9 @@ CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
 PKGCONFIG += sndfile vorbisfile mad taglib
-LIBS += ../ext/yaml-cpp-0.5.1/build/libyaml-cpp.a -llo
+LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a -llo
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
-RESOURCES = ../gui.qrc ../db.qrc
+RESOURCES = $$TOP_DIR/gui.qrc $$TOP_DIR/db.qrc
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/

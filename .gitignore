@@ -16,5 +16,6 @@ Makefile.*
 qrc_*.cpp
 /*.app
 build-*
+/build/
 *.pro.user
 *.txt.user
