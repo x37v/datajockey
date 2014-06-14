@@ -9,14 +9,23 @@ using std::endl;
 
 using namespace dj;
 
+const int immediate_loop = -1;
+
 struct JumpOrLoopData {
   loop_and_jump_type_t type = dj::loop_and_jump_type_t::JUMP_BEAT;
   int start = 0;
   int end = 0; //XXX deal with it
   double length = 0;
+  JumpOrLoopData(loop_and_jump_type_t t = dj::loop_and_jump_type_t::JUMP_BEAT, int s = -1, int e = -1, double l = 0.0) {
+    type = t;
+    start = s;
+    end = e;
+    length = l;
+  }
 };
 
 struct LoopAndJumpPlayerData {
+  int loop_index = immediate_loop;
   int work_id = 0;
   int frame = 0;
   int jump_next = 0;
@@ -82,6 +91,7 @@ void LoopAndJumpManager::playerTrigger(int player, QString name) {
     clearEntry(player, mPlayerData[player]->jump_next);
     playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
   } else if (name == "loop_off") {
+    emit(entryCleared(player, immediate_loop));
     emit(playerValueChangedBool(player, "loop", false));
   }
 }
@@ -101,8 +111,29 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
   } else if (name == "position_frame") {
     pdata->frame = v;
   } else if (name == "loop_length") {
+    pdata->loop_index = immediate_loop;
+
+    //create a new immediate loop entry
+    emit(entryCleared(player, immediate_loop));
+    JumpOrLoopData d(dj::loop_and_jump_type_t::LOOP_FRAME, -1, -1, -1.0);
+    pdata->data[pdata->loop_index] = d;
+
     double beats = pow(2.0, static_cast<double>(v));
     emit(playerValueChangedDouble(player, "loop_length_beats", beats));
+  } else if (name == "loop_start_frame" || name == "loop_end_frame") {
+    if (!pdata->loop_index == immediate_loop)
+      return;
+    auto it = pdata->data.find(pdata->loop_index);
+    if (it == pdata->data.end())
+      return;
+    bool is_start = (name == "loop_start_frame");
+    if (is_start)
+      it->start = v;
+    else
+      it->end = v;
+    //indicate if the immediate loop is up full described
+    if (it->start >= 0 && it->end > 0)
+      emit(entryUpdated(player, it->type, immediate_loop, it->start, it->end));
   } else if (name == "jump_next") {
     if (v < 0)
       return;

@@ -173,7 +173,12 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
         return nullptr;
       } else if (name == "loop_length_beats") {
         pstate->boolValue["loop"] = true;
-        return new djaudio::PlayerLoopCommand(player, v);
+        PlayerLoopAndReportCommand * c = new PlayerLoopAndReportCommand(player, v);
+        //relay changes
+        //connect(c, &PlayerLoopAndReportCommand::playerValueChangedBool, mLoopAndJumpManager, &LoopAndJumpManager::playerSetValueBool);
+        connect(c, &PlayerLoopAndReportCommand::playerValueChangedInt, mLoopAndJumpManager, &LoopAndJumpManager::playerSetValueInt);
+
+        return c;
       }
 
       auto it = pstate->doubleValue.find(name);
@@ -495,6 +500,23 @@ bool PlayerSetBuffersCommand::store(djaudio::CommandIOData& data) const {
   PlayerCommand::store(data, "PlayerSetBuffersCommand");
   //TODO
   return false;
+}
+
+PlayerLoopAndReportCommand::PlayerLoopAndReportCommand(unsigned int idx, double beats, PlayerLoopCommand::resize_policy_t resize_policy, bool start_looping) : PlayerLoopCommand(idx, beats, resize_policy, start_looping) {
+}
+
+PlayerLoopAndReportCommand::PlayerLoopAndReportCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping) : PlayerLoopCommand(idx, start_frame, end_frame, start_looping) {
+}
+
+PlayerLoopAndReportCommand::~PlayerLoopAndReportCommand() {
+}
+
+void PlayerLoopAndReportCommand::execute_done() {
+  int pindex = index();
+
+  emit(playerValueChangedBool(pindex, "looping", looping()));
+  emit(playerValueChangedInt(pindex, "loop_start_frame", static_cast<int>(start_frame())));
+  emit(playerValueChangedInt(pindex, "loop_end_frame", static_cast<int>(end_frame())));
 }
 
 struct EnginePlayerState {

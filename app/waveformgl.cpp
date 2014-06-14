@@ -164,12 +164,16 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
 
   if (!mZoomFull) {
     for (marker_t m: mMarkers.values()) {
+      if (m.label.length() == 0)
+        continue;
       painter->drawText(0.0,
           width_scale * (mWidth - mHistoryWidth - (static_cast<float>(m.frame_start - mFramePosition) / static_cast<float>(mFramesPerLine))), 40, 40,
           Qt::AlignLeft | Qt::TextWordWrap, m.label);
     }
   } else {
     for (marker_t m: mMarkers.values()) {
+      if (m.label.length() == 0)
+        continue;
       painter->drawText(0.0, width_scale * static_cast<float>(m.frame_start) / static_cast<float>(mFramesPerLine), 40, 40,
           Qt::AlignLeft | Qt::TextWordWrap, m.label);
     }
@@ -177,9 +181,6 @@ void WaveFormGL::drawText(QPainter * painter, float width_scale) {
 }
 
 void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int start, int end) {
-  if (entry < 0)
-    return;
-
   marker_t marker;
   switch (type) {
     case dj::loop_and_jump_type_t::LOOP_BEAT:
@@ -204,8 +205,10 @@ void WaveFormGL::updateMarker(dj::loop_and_jump_type_t type, int entry, int star
   marker.frame_start = start;
   marker.frame_end = end;
 
-  marker.label = QString::number(entry + 1);
-
+  if (entry >= 0)
+    marker.label = QString::number(entry + 1);
+  else
+    marker.label = QString();
   mMarkers[entry] = marker;
 }
 
