@@ -121,7 +121,7 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     double beats = pow(2.0, static_cast<double>(v));
     emit(playerValueChangedDouble(player, "loop_length_beats", beats));
   } else if (name == "loop_start_frame" || name == "loop_end_frame") {
-    if (!pdata->loop_index == immediate_loop)
+    if (pdata->loop_index != immediate_loop)
       return;
     auto it = pdata->data.find(pdata->loop_index);
     if (it == pdata->data.end())
@@ -132,8 +132,9 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     else
       it->end = v;
     //indicate if the immediate loop is up full described
-    if (it->start >= 0 && it->end > 0)
+    if (it->start >= 0 && it->end > 0) {
       emit(entryUpdated(player, it->type, immediate_loop, it->start, it->end));
+    }
   } else if (name == "jump_next") {
     if (v < 0)
       return;
@@ -149,6 +150,8 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
     } else {
       auto it = pdata->data.find(v);
       if (it != pdata->data.end()) {
+        if (v != immediate_loop)
+          clearEntry(player, immediate_loop);
         int index = it->start;
         switch (it->type) {
           case loop_and_jump_type_t::LOOP_BEAT:
@@ -160,6 +163,7 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
             index = pdata->beats->at(index);
             break;
           case loop_and_jump_type_t::LOOP_FRAME:
+            pdata->loop_index = v;
             emit(playerValueChangedInt(player, "loop_start_frame", it->start));
             emit(playerValueChangedInt(player, "loop_end_frame", it->end));
             emit(playerValueChangedBool(player, "loop", true));
