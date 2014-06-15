@@ -234,6 +234,10 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_MID, to_double(v));
       } else if (name == "eq_low") {
         cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_LOW, to_double(v));
+      } else if (name == "loop_start_frame") {
+        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_START, v);
+      } else if (name == "loop_end_frame") {
+        cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_END, v);
       } else if (name == "position_frame") {
         pstate->intValue["updates_since_sync"] += 1;
         emit (playerValueChangedInt(player, name, v)); //relaying from Consumer

@@ -30,7 +30,6 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     QPushButton * l = new QPushButton(QString::number(pow(2, i)), this);
     mLoopButtons.push_back(l);
     ui->loopButtonLayout->addWidget(l);
-
     l->setCheckable(true);
 
     //exclusive buttons but allowing none to be pressed

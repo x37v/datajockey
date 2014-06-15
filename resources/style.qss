@@ -2,3 +2,8 @@ QPushButton[jump_type=jump] {
   background-color: cyan;
   color: black;
 }
+
+QPushButton[jump_type=loop] {
+  background-color: white;
+  color: black;
+}

@@ -159,31 +159,43 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
             }
             index = pdata->beats->at(index);
             break;
+          case loop_and_jump_type_t::LOOP_FRAME:
+            emit(playerValueChangedInt(player, "loop_start_frame", it->start));
+            emit(playerValueChangedInt(player, "loop_end_frame", it->end));
+            emit(playerValueChangedBool(player, "loop", true));
+            break;
           default: //otherwise it is a frame index already
             break;
         }
         emit(playerValueChangedInt(player, "seek_frame", index));
       } else {
-        //find the closest beat
-        //XXX make snap to be configurable!
-        int frame = pdata->frame;
-        int beat = closest_beat(frame, pdata);
-        if (beat >= 0)
-          frame = pdata->beats->at(beat);
-
         JumpOrLoopData data;
-        data.type = loop_and_jump_type_t::JUMP_BEAT; //XXX make configurable
-        switch (data.type) {
-          case loop_and_jump_type_t::LOOP_BEAT:
-          case loop_and_jump_type_t::JUMP_BEAT:
-            data.start = beat;
-            data.end = beat;
-            break;
+        //store the loop if we're currently looping
+        it = pdata->data.find(-1);
+        if (it != pdata->data.end()) {
+          data = *it;
+          clearEntry(player, -1);
+        } else {
+          //find the closest beat
+          //XXX make snap to be configurable!
+          int frame = pdata->frame;
+          int beat = closest_beat(frame, pdata);
+          if (beat >= 0)
+            frame = pdata->beats->at(beat);
 
-          default:
-            data.start = frame;
-            data.end = frame;
-            break;
+          data.type = loop_and_jump_type_t::JUMP_BEAT; //XXX make configurable
+          switch (data.type) {
+            case loop_and_jump_type_t::LOOP_BEAT:
+            case loop_and_jump_type_t::JUMP_BEAT:
+              data.start = beat;
+              data.end = beat;
+              break;
+
+            default:
+              data.start = frame;
+              data.end = frame;
+              break;
+          }
         }
         pdata->data[v] = data;
         emit(entryUpdated(player, data.type, v, data.start, data.end));
