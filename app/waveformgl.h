@@ -144,6 +144,7 @@ class WaveFormGL : public QObject
     QColor mBeatColor = Qt::yellow;
     QColor mMarkerColorJump = Qt::cyan;
     QColor mMarkerColorLoop = Qt::white;
+    QColor mMarkerColorLoopImmediate = Qt::red;
     void updateLines();
 
     GLfloat lineHeight(int line_index) const;

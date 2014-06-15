@@ -139,7 +139,10 @@ void WaveFormGL::draw() {
         glVertex2f(x0, -1.0);
         glVertex2f(x0, 1.0);
       } else {
-        glColor4d(mMarkerColorLoop.redF(), mMarkerColorLoop.greenF(), mMarkerColorLoop.blueF(), mMarkerColorLoop.alphaF());
+        if (m.label.length())
+          glColor4d(mMarkerColorLoop.redF(), mMarkerColorLoop.greenF(), mMarkerColorLoop.blueF(), mMarkerColorLoop.alphaF());
+        else
+          glColor4d(mMarkerColorLoopImmediate.redF(), mMarkerColorLoopImmediate.greenF(), mMarkerColorLoopImmediate.blueF(), mMarkerColorLoopImmediate.alphaF());
         GLfloat x1 = static_cast<GLfloat>(m.frame_end) / static_cast<GLfloat>(mFramesPerLine);
         GLfloat y = 1.0;
         glVertex2f(x0, -y);
