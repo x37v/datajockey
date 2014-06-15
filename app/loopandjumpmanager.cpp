@@ -91,7 +91,7 @@ void LoopAndJumpManager::playerTrigger(int player, QString name) {
     clearEntry(player, mPlayerData[player]->jump_next);
     playerSetValueInt(player, "jump", mPlayerData[player]->jump_next);
   } else if (name == "loop_off") {
-    emit(entryCleared(player, immediate_loop));
+    clearEntry(player, immediate_loop);
     emit(playerValueChangedBool(player, "loop", false));
   }
 }
