@@ -94,6 +94,7 @@ void PlayerView::setValueBool(QString name, bool v) {
     ui->sync->setChecked(v);
     ui->speedBox->setEnabled(!v);
   }
+  ui->loopAndJumpControl->setValueBool(name, v);
 }
 
 void PlayerView::jumpUpdate(dj::loop_and_jump_type_t type, int entry_index, int /*frame_start*/, int /*frame_end*/) {

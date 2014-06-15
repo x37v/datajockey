@@ -26,6 +26,10 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
     btn->setProperty("jump_type", "none");
   }
 
+  mLoopOnOffButton = new QPushButton("l", this);
+  ui->loopButtonLayout->addWidget(mLoopOnOffButton);
+  mLoopOnOffButton->setCheckable(true);
+
   for (int i = -2; i < 5; i++) {
     QPushButton * l = new QPushButton(QString::number(pow(2, i)), this);
     mLoopButtons.push_back(l);
@@ -40,6 +44,7 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
           if (b != l && b->isChecked())
             b->setChecked(false);
         }
+        mLoopOnOffButton->setChecked(true);
       } else {
         bool all_off = true;
         for (QPushButton * b: mLoopButtons) {
@@ -48,16 +53,31 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
             break;
           }
         }
-        if (all_off)
+        if (all_off) {
           emit(triggered("loop_off"));
+          mLoopOnOffButton->setChecked(false);
+        }
       }
     });
   }
 
+  QObject::connect(mLoopOnOffButton, &QPushButton::toggled, [this](bool down) {
+    if (!down) {
+      emit(triggered("loop_off"));
+      for (QPushButton * b: mLoopButtons)
+        b->setChecked(false);
+    }
+  });
 }
 
 LoopAndJumpControlView::~LoopAndJumpControlView() {
   delete ui;
+}
+
+void LoopAndJumpControlView::setValueBool(QString name, bool v) {
+  if (name == "loop") {
+    mLoopOnOffButton->setChecked(v);
+  }
 }
 
 void LoopAndJumpControlView::updateEntry(dj::loop_and_jump_type_t type, int entry) {

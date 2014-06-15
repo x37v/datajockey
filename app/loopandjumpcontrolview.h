@@ -16,6 +16,7 @@ class LoopAndJumpControlView : public QWidget {
     explicit LoopAndJumpControlView(QWidget *parent = 0);
     ~LoopAndJumpControlView();
   public slots:
+    void setValueBool(QString name, bool v);
     void updateEntry(dj::loop_and_jump_type_t type, int entry);
     void clearEntry(int entry);
     void clearAll();
@@ -26,6 +27,7 @@ class LoopAndJumpControlView : public QWidget {
     Ui::LoopAndJumpControlView *ui;
     QList<QPushButton *> mJumpButtons;
     QList<QPushButton *> mLoopButtons;
+    QPushButton * mLoopOnOffButton;
 };
 
 #endif // LOOPANDJUMPCONTROLVIEW_H
