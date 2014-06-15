@@ -175,7 +175,8 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
         pstate->boolValue["loop"] = true;
         PlayerLoopAndReportCommand * c = new PlayerLoopAndReportCommand(player, v);
         //relay changes
-        //connect(c, &PlayerLoopAndReportCommand::playerValueChangedBool, mLoopAndJumpManager, &LoopAndJumpManager::playerSetValueBool);
+        connect(c, &PlayerLoopAndReportCommand::playerValueChangedBool, this, &AudioModel::playerSetValueBool);
+        connect(c, &PlayerLoopAndReportCommand::playerValueChangedInt, this, &AudioModel::playerSetValueInt);
         connect(c, &PlayerLoopAndReportCommand::playerValueChangedInt, mLoopAndJumpManager, &LoopAndJumpManager::playerSetValueInt);
 
         return c;
