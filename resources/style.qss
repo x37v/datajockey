@@ -7,3 +7,12 @@ QPushButton[jump_type=loop] {
   background-color: white;
   color: black;
 }
+
+QPushButton:checked {
+  background-color: black;
+}
+
+QToolButton:checked {
+  background-color: black;
+}
+
