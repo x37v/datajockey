@@ -68,6 +68,11 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
         b->setChecked(false);
     }
   });
+  //clicking directly on the loop off button does nothing for now
+  QObject::connect(mLoopOnOffButton, &QPushButton::released, [this]() {
+    if (mLoopOnOffButton->isChecked())
+      mLoopOnOffButton->setChecked(false);
+  });
 }
 
 LoopAndJumpControlView::~LoopAndJumpControlView() {
