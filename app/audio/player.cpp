@@ -453,13 +453,30 @@ void Player::update_play_speed(const Transport * transport) {
   }
 
   //target the next beat
-  double frames_till_target = mBeatBuffer->at(beat_closest + 1) - frame;
   double transport_frames_till_target = transport->frames_per_beat() * (1.0 - transport->position().pos_in_beat());
   
   if (transport_frames_till_target <= 0)
     return;
 
+  //if we're looping we might have a loop that is smaller than a beat
+  if (mLoop && frame >= mLoopStartFrame && frame < mLoopEndFrame) {
+    int loop_frames = mLoopEndFrame - mLoopStartFrame;
+    int loop_beat_start = ::beat_index(mBeatBuffer, frame);
+    if (loop_beat_start + 1 < mBeatBuffer->size() && loop_frames > 0) {
+      int beat_frames = mBeatBuffer->at(loop_beat_start + 1) - mBeatBuffer->at(loop_beat_start);
+      double loop_size = static_cast<double>(loop_frames) / static_cast<double>(beat_frames);
+      //adjust frame that we're computing against to wrap at loop size
+      if (loop_size < 0.8) {
+        int closest_sub_beat = round(static_cast<double>(frame - mLoopStartFrame) / static_cast<double>(loop_frames));
+        frame -= closest_sub_beat * loop_frames;
+        beat_closest = loop_beat_start;
+      }
+    }
+  }
+
+  double frames_till_target = mBeatBuffer->at(beat_closest + 1) - frame;
   double speed = frames_till_target / transport_frames_till_target;
+
   mStretcher->speed(speed);
 }
 
