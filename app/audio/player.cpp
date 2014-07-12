@@ -467,6 +467,8 @@ void Player::update_play_speed(const Transport * transport) {
       double loop_size = static_cast<double>(loop_frames) / static_cast<double>(beat_frames);
       //adjust frame that we're computing against to wrap at loop size
       if (loop_size < 0.8) {
+        //XXX do we always loop from the start of the beat?  if not, we might/should add the subbeat we're starting
+        //our loop at
         int closest_sub_beat = round(static_cast<double>(frame - mLoopStartFrame) / static_cast<double>(loop_frames));
         frame -= closest_sub_beat * loop_frames;
         beat_closest = loop_beat_start;
