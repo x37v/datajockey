@@ -463,7 +463,7 @@ void Player::update_play_speed(const Transport * transport) {
   if (mLoop && frame >= mLoopStartFrame && frame < mLoopEndFrame) {
     int loop_frames = mLoopEndFrame - mLoopStartFrame;
     int loop_beat_start = ::beat_index(mBeatBuffer, frame);
-    if (loop_beat_start + 1 < mBeatBuffer->size() && loop_frames > 0) {
+    if (loop_beat_start + 1 < static_cast<int>(mBeatBuffer->size()) && loop_frames > 0) {
       int beat_frames = mBeatBuffer->at(loop_beat_start + 1) - mBeatBuffer->at(loop_beat_start);
       double loop_size = static_cast<double>(loop_frames) / static_cast<double>(beat_frames);
       //adjust frame that we're computing against to wrap at loop size
@@ -914,7 +914,7 @@ PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, long start_frame, long en
 {
 }
 
-void PlayerLoopCommand::execute(const Transport& /*transport*/) {
+void PlayerLoopCommand::execute(const Transport& transport) {
   Player * p = player();
   BeatBuffer * beat_buff = p->beat_buffer();
   AudioBuffer * audio = p->audio_buffer();
@@ -936,9 +936,10 @@ void PlayerLoopCommand::execute(const Transport& /*transport*/) {
     }
   }
 
-  int old_loop_length = 0;
+  int old_loop_frames = 0;
   if (p->looping())
-    old_loop_length = p->loop_end_frame() - p->loop_end_frame();
+    old_loop_frames = p->loop_end_frame() - p->loop_start_frame();
+  const unsigned int beat = beat_buff ? beat_index(beat_buff, p->frame()) : 0;
 
   if (mEndFrame < 0) {
     if (!beat_buff)
@@ -947,7 +948,6 @@ void PlayerLoopCommand::execute(const Transport& /*transport*/) {
     if (mStartFrame < 0) {
       //find both start and end frame based on current location
       //we don't use the closest index, we use the last index before our frame so we stay in the current beat
-      unsigned int beat = beat_index(beat_buff, p->frame());
       beat_end = beat + mBeats;
       if (beat_end >= beat_buff->size())
         return;
@@ -1006,16 +1006,25 @@ void PlayerLoopCommand::execute(const Transport& /*transport*/) {
 
   cout << "loop: " << mStartFrame << " " << mEndFrame << " f: " << p->frame() << endl;
 
-  double beat_frames = static_cast<double>(mEndFrame - mStartFrame);
+  double loop_frames = static_cast<double>(mEndFrame - mStartFrame);
   //if we are past the end point, fold
-  if (p->looping() && p->frame() > mEndFrame) {
-    int offset = round(beat_frames * floor(static_cast<double>(p->frame() - mStartFrame) / beat_frames));
-    p->position_at_frame(p->frame() - offset);
-    cout << "fold to: " << p->frame() << " offset: " << offset;
-    cout << " beat_frames: " << beat_frames << endl;
-    cout << endl;
-  } else if (old_loop_length > 0 && beat_frames > old_loop_length) {
-    //if the loop grows we might need to offset to before the loop 
+  if (p->looping()) {
+    if (p->frame() > mEndFrame) {
+      int offset = round(loop_frames * floor(static_cast<double>(p->frame() - mStartFrame) / loop_frames));
+      p->position_at_frame(p->frame() - offset);
+    } else if (old_loop_frames > 0 && loop_frames > old_loop_frames) {
+      //XXX untested, do we ever hit this?
+      //if the loop grows we might need to offset to before the loop 
+      if (beat_buff && beat + 1 < beat_buff->size()) {
+        double beat_frames = beat_buff->at(beat + 1) - beat_buff->at(beat);
+        //this is where we should be if we weren't looping
+        double target_offset_frames = transport.position().pos_in_beat() * beat_frames;
+        int loop_skip_back = target_offset_frames / static_cast<double>(old_loop_frames);
+        int offset = loop_skip_back * old_loop_frames;
+        p->position_at_frame(p->frame() - offset);
+        cout << "loop_skip_back: " << loop_skip_back << " offset: " << offset << endl;
+      }
+    }
   }
 }
 
