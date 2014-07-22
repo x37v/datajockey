@@ -482,6 +482,7 @@ void Player::update_play_speed(const Transport * transport) {
   double speed = frames_till_target / transport_frames_till_target;
 
   cout << "speed: " << speed << " frames till target: " << frames_till_target;
+  //cout << " transport_frames_till_target " << transport_frames_till_target;
   cout << " frame [actual]: " << mStretcher->frame();
   cout << " frame [comp]: " << frame;
   cout << " mLoopStartFrame: " << mLoopStartFrame;
@@ -935,6 +936,10 @@ void PlayerLoopCommand::execute() {
     }
   }
 
+  int old_loop_length = 0;
+  if (p->looping())
+    old_loop_length = p->loop_end_frame() - p->loop_end_frame();
+
   if (mEndFrame < 0) {
     if (!beat_buff)
       return;
@@ -999,17 +1004,18 @@ void PlayerLoopCommand::execute() {
     p->loop(true);
   mLooping = p->looping();
 
+  cout << "loop: " << mStartFrame << " " << mEndFrame << " f: " << p->frame() << endl;
+
+  double beat_frames = static_cast<double>(mEndFrame - mStartFrame);
   //if we are past the end point, fold
   if (p->looping() && p->frame() > mEndFrame) {
-    if (mBeats > 0) {
-      //estimate
-      int beat_frames = (mEndFrame - mStartFrame) / mBeats;
-      int offset = beat_frames * ((p->frame() - mStartFrame) / beat_frames);
-      p->position_at_frame(p->frame() - offset);
-      cout << "fold" << endl;
-    } else {
-      //XXX don't know what to do
-    }
+    int offset = round(beat_frames * floor(static_cast<double>(p->frame() - mStartFrame) / beat_frames));
+    p->position_at_frame(p->frame() - offset);
+    cout << "fold to: " << p->frame() << " offset: " << offset;
+    cout << " beat_frames: " << beat_frames << endl;
+    cout << endl;
+  } else if (old_loop_length > 0 && beat_frames > old_loop_length) {
+    //if the loop grows we might need to offset to before the loop 
   }
 }
 
