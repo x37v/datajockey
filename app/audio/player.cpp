@@ -590,7 +590,7 @@ PlayerStateCommand::PlayerStateCommand(unsigned int idx, action_t action) :
   mAction = action;
 }
 
-void PlayerStateCommand::execute(){
+void PlayerStateCommand::execute(const Transport& /*transport*/){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
@@ -677,7 +677,7 @@ PlayerDoubleCommand::PlayerDoubleCommand(unsigned int idx,
 
 }
 
-void PlayerDoubleCommand::execute(){
+void PlayerDoubleCommand::execute(const Transport& /*transport*/){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
@@ -747,7 +747,7 @@ PlayerSetAudioBufferCommand::~PlayerSetAudioBufferCommand() {
   }
 }
 
-void PlayerSetAudioBufferCommand::execute(){
+void PlayerSetAudioBufferCommand::execute(const Transport& /*transport*/){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
@@ -799,7 +799,7 @@ PlayerSetBeatBufferCommand::~PlayerSetBeatBufferCommand() {
   }
 }
 
-void PlayerSetBeatBufferCommand::execute(){
+void PlayerSetBeatBufferCommand::execute(const Transport& /*transport*/){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
@@ -841,7 +841,7 @@ PlayerPositionCommand::PlayerPositionCommand(unsigned int idx, position_t target
   mValue(value)
 { }
 
-void PlayerPositionCommand::execute(){
+void PlayerPositionCommand::execute(const Transport& /*transport*/){
   Player * p = player(); 
   if(p != NULL){
     //store the time executed
@@ -914,7 +914,7 @@ PlayerLoopCommand::PlayerLoopCommand(unsigned int idx, long start_frame, long en
 {
 }
 
-void PlayerLoopCommand::execute() {
+void PlayerLoopCommand::execute(const Transport& /*transport*/) {
   Player * p = player();
   BeatBuffer * beat_buff = p->beat_buffer();
   AudioBuffer * audio = p->audio_buffer();
@@ -1034,7 +1034,7 @@ PlayerLoopShiftCommand::PlayerLoopShiftCommand(unsigned int idx, int beats) :
 {
 }
 
-void PlayerLoopShiftCommand::execute() {
+void PlayerLoopShiftCommand::execute(const Transport& /*transport*/) {
   Player * p = player();
   BeatBuffer * beat_buff = p->beat_buffer();
   AudioBuffer * audio = p->audio_buffer();

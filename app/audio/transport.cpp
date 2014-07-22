@@ -69,7 +69,7 @@ TransportPositionCommand::TransportPositionCommand(
    mTimePoint = pos;
 }
 
-void TransportPositionCommand::execute(){
+void TransportPositionCommand::execute(const Transport& /*transport*/){
    if(mTimePoint.valid())
       transport()->position(mTimePoint);
 }
@@ -85,7 +85,7 @@ TransportBPMCommand::TransportBPMCommand(Transport * t, double bpm) :
    mBPM = bpm;
 }
 
-void TransportBPMCommand::execute(){
+void TransportBPMCommand::execute(const Transport& /*transport*/){
    Transport * t = transport();
    if (t)
       t->bpm(mBPM);

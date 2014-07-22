@@ -76,7 +76,7 @@ namespace djaudio {
       class AddCommand : public SchedulerCommand {
         public:
           AddCommand(Scheduler * scheduler, ScheduleNode * node);
-          virtual void execute();
+          virtual void execute(const Transport& transport);
           virtual bool store(CommandIOData& data) const;
         private:
           ScheduleNode * mNode;
@@ -85,7 +85,7 @@ namespace djaudio {
       class RemoveCommand : public SchedulerCommand {
         public:
           RemoveCommand(Scheduler * scheduler, ScheduleNode * node);
-          virtual void execute();
+          virtual void execute(const Transport& transport);
           virtual bool store(CommandIOData& data) const;
         private:
           ScheduleNode * mNode;

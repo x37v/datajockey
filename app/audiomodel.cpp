@@ -483,7 +483,7 @@ PlayerSetBuffersCommand::PlayerSetBuffersCommand(unsigned int idx,
 
 PlayerSetBuffersCommand::~PlayerSetBuffersCommand() { }
 
-void PlayerSetBuffersCommand::execute() {
+void PlayerSetBuffersCommand::execute(const djaudio::Transport& /*transport*/) {
   djaudio::Player * p = player(); 
   if(p != NULL){
     mOldBeatBuffer = p->beat_buffer();
@@ -539,7 +539,7 @@ EngineQueryCommand::EngineQueryCommand(int num_players, QObject * parent) : QObj
 
 bool EngineQueryCommand::delete_after_done() { return false; }
 
-void EngineQueryCommand::execute() {
+void EngineQueryCommand::execute(const djaudio::Transport& /*transport*/) {
   djaudio::Master * m = master();
   for (size_t i = 0; i < std::min(m->players().size(), (size_t)mPlayerStates.size()); i++) {
     djaudio::Player * p = m->players().at(i);
@@ -573,9 +573,9 @@ MasterSyncToPlayerCommand::MasterSyncToPlayerCommand(int value) :
   djaudio::MasterIntCommand(djaudio::MasterIntCommand::SYNC_TO_PLAYER, value), mBPM(0.0) {
   }
 
-void MasterSyncToPlayerCommand::execute() {
+void MasterSyncToPlayerCommand::execute(const djaudio::Transport& transport) {
   //execute the normal command then grab the bpm
-  djaudio::MasterIntCommand::execute();
+  djaudio::MasterIntCommand::execute(transport);
   mBPM = master()->transport()->bpm();
 }
 

@@ -178,7 +178,7 @@ namespace djaudio {
         LOOP, NO_LOOP
       };
       PlayerStateCommand(unsigned int idx, action_t action);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       action_t mAction;
@@ -192,7 +192,7 @@ namespace djaudio {
         EQ_LOW, EQ_MID, EQ_HIGH
       };
       PlayerDoubleCommand(unsigned int idx, action_t action, double value);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       action_t mAction;
@@ -206,7 +206,7 @@ namespace djaudio {
       //is up to you to deal with
       PlayerSetAudioBufferCommand(unsigned int idx, AudioBuffer * buffer, bool deleteOldBuffer = false);
       virtual ~PlayerSetAudioBufferCommand();
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual void execute_done();
       virtual bool store(CommandIOData& data) const;
       AudioBuffer * buffer() const;
@@ -224,7 +224,7 @@ namespace djaudio {
       //is up to you to deal with
       PlayerSetBeatBufferCommand(unsigned int idx, BeatBuffer * buffer, bool deleteOldBuffer = false);
       virtual ~PlayerSetBeatBufferCommand();
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual void execute_done();
       virtual bool store(CommandIOData& data) const;
       BeatBuffer * buffer() const;
@@ -243,7 +243,7 @@ namespace djaudio {
         LOOP_START, LOOP_END
       };
       PlayerPositionCommand(unsigned int idx, position_t target, int value);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       position_t mTarget;
@@ -259,7 +259,7 @@ namespace djaudio {
       } resize_policy_t;
       explicit PlayerLoopCommand(unsigned int idx, double beats, resize_policy_t resize_policy = RESIZE_FROM_FRONT, bool start_looping = true);
       explicit PlayerLoopCommand(unsigned int idx, long start_frame, long end_frame, bool start_looping = true);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
       long start_frame() const { return mStartFrame; }
       long end_frame() const { return mEndFrame; }
@@ -276,7 +276,7 @@ namespace djaudio {
   class PlayerLoopShiftCommand : public PlayerCommand {
     public:
       PlayerLoopShiftCommand(unsigned int idx, int beats);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
 
       long start_frame() const { return mStartFrame; }

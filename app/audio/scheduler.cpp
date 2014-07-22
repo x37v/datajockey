@@ -63,7 +63,7 @@ void Scheduler::execute_schedule(const Transport& transport){
       mCommandsIn.read(cmd);
       //shouldn't ever be null huh?
       if (cmd) {
-         cmd->execute();
+         cmd->execute(transport);
          cmd->time_executed(pos);
          if(mCommandsOut.getWriteSpace())
             mCommandsOut.write(cmd);
@@ -101,7 +101,7 @@ void Scheduler::execute_schedule(const Transport& transport){
          //greater than the transport position
          while(true){
             //execute
-            mScheduleCur->command->execute();
+            mScheduleCur->command->execute(transport);
 #ifdef DEBUG
             cout << "executing: " << mScheduleCur->time.bar() << " : " <<
                mScheduleCur->time.beat() << endl;
@@ -129,7 +129,7 @@ void Scheduler::execute_schedule(const Transport& transport){
 
       //execute everything at the time of the transport
       while(mScheduleCur->time == transport.position()){
-         mScheduleCur->command->execute();
+         mScheduleCur->command->execute(transport);
 #ifdef DEBUG
          cout << "executing: " << mScheduleCur->time.bar() << " : " <<
             mScheduleCur->time.beat() << endl;
@@ -235,7 +235,7 @@ Scheduler::AddCommand::AddCommand(Scheduler * scheduler, ScheduleNode * node) :
    mNode = node;
 }
 
-void Scheduler::AddCommand::execute(){
+void Scheduler::AddCommand::execute(const Transport& /*transport*/){
    scheduler()->add(mNode);
 }
 
@@ -250,7 +250,7 @@ Scheduler::RemoveCommand::RemoveCommand(Scheduler * scheduler, ScheduleNode * no
    mNode = node;
 }
 
-void Scheduler::RemoveCommand::execute(){
+void Scheduler::RemoveCommand::execute(const Transport& /*transport*/){
    scheduler()->remove(mNode);
 }
 

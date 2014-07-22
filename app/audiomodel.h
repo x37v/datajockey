@@ -6,6 +6,7 @@
 #include <functional>
 #include "audioio.hpp"
 #include "db.h"
+#include "transport.hpp"
 
 class Consumer;
 class EngineQueryCommand;
@@ -85,7 +86,7 @@ class PlayerSetBuffersCommand : public QObject, public djaudio::PlayerCommand {
   public:
     PlayerSetBuffersCommand(unsigned int idx, djaudio::AudioBuffer * audio_buffer, djaudio::BeatBuffer * beat_buffer);
     virtual ~PlayerSetBuffersCommand();
-    virtual void execute();
+    virtual void execute(const djaudio::Transport& transport);
     virtual void execute_done();
     virtual bool store(djaudio::CommandIOData& data) const;
   private:
@@ -112,7 +113,7 @@ class EngineQueryCommand : public QObject, public djaudio::MasterCommand {
   public:
     EngineQueryCommand(int num_players, QObject * parent = NULL);
     virtual bool delete_after_done();
-    virtual void execute();
+    virtual void execute(const djaudio::Transport& transport);
     virtual void execute_done();
     virtual bool store(djaudio::CommandIOData& /* data */) const;
   signals:
@@ -130,7 +131,7 @@ class MasterSyncToPlayerCommand : public QObject, public djaudio::MasterIntComma
   Q_OBJECT
   public:
     MasterSyncToPlayerCommand(int value);
-    virtual void execute();
+    virtual void execute(const djaudio::Transport& transport);
     virtual void execute_done();
   signals:
     void masterValueUpdateDouble(QString name, double value);

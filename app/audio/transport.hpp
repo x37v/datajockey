@@ -51,7 +51,7 @@ namespace djaudio {
   class TransportPositionCommand : public TransportCommand {
     public:
       TransportPositionCommand(Transport * t, const TimePoint& pos);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       TimePoint mTimePoint;
@@ -61,7 +61,7 @@ namespace djaudio {
   class TransportBPMCommand : public TransportCommand {
     public:
       TransportBPMCommand(Transport * t, double bpm);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       double mBPM;

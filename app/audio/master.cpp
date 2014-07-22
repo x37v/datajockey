@@ -313,7 +313,7 @@ MasterBoolCommand::MasterBoolCommand(action_t action)
   mAction = action;
 }
 
-void MasterBoolCommand::execute(){
+void MasterBoolCommand::execute(const Transport& /*transport*/){
   switch(mAction){
     case XFADE:
       master()->cross_fade(true);
@@ -333,7 +333,7 @@ MasterIntCommand::MasterIntCommand(action_t action, int value) :
   mAction(action), mValue (value){
   }
 
-void MasterIntCommand::execute() {
+void MasterIntCommand::execute(const Transport& /*transport*/) {
   switch(mAction) {
     case SYNC_TO_PLAYER:
       master()->sync_to_player(mValue);
@@ -352,7 +352,7 @@ MasterDoubleCommand::MasterDoubleCommand(action_t action, double val)
   mValue = val;
 }
 
-void MasterDoubleCommand::execute(){
+void MasterDoubleCommand::execute(const Transport& /*transport*/){
   switch(mAction){
     case MAIN_VOLUME:
       master()->master_volume(mValue);
@@ -378,7 +378,7 @@ MasterXFadeSelectCommand::MasterXFadeSelectCommand(
   mSel[1] = right;
 }
 
-void MasterXFadeSelectCommand::execute(){
+void MasterXFadeSelectCommand::execute(const Transport& /*transport*/){
   master()->cross_fade_mixers(mSel[0], mSel[1]);
 }
 

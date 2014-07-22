@@ -94,7 +94,7 @@ namespace djaudio {
         XFADE, NO_XFADE
       };
       MasterBoolCommand(action_t action);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       action_t mAction;
@@ -105,7 +105,7 @@ namespace djaudio {
         SYNC_TO_PLAYER
       };
       MasterIntCommand(action_t action, int value);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       action_t mAction;
@@ -119,7 +119,7 @@ namespace djaudio {
         XFADE_POSITION
       };
       MasterDoubleCommand(action_t action, double val);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       action_t mAction;
@@ -128,7 +128,7 @@ namespace djaudio {
   class MasterXFadeSelectCommand : public MasterCommand {
     public:
       MasterXFadeSelectCommand(unsigned int left, unsigned int right);
-      virtual void execute();
+      virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       unsigned int mSel[2];
