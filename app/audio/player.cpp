@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -479,6 +480,13 @@ void Player::update_play_speed(const Transport * transport) {
 
   double frames_till_target = mBeatBuffer->at(beat_closest + 1) - frame;
   double speed = frames_till_target / transport_frames_till_target;
+
+  cout << "speed: " << speed << " frames till target: " << frames_till_target;
+  cout << " frame [actual]: " << mStretcher->frame();
+  cout << " frame [comp]: " << frame;
+  cout << " mLoopStartFrame: " << mLoopStartFrame;
+  cout << " mLoopEndFrame: " << mLoopEndFrame;
+  cout << endl;
 
   mStretcher->speed(speed);
 }
@@ -998,6 +1006,7 @@ void PlayerLoopCommand::execute() {
       int beat_frames = (mEndFrame - mStartFrame) / mBeats;
       int offset = beat_frames * ((p->frame() - mStartFrame) / beat_frames);
       p->position_at_frame(p->frame() - offset);
+      cout << "fold" << endl;
     } else {
       //XXX don't know what to do
     }
