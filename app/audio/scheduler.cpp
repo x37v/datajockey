@@ -59,16 +59,10 @@ void Scheduler::execute_schedule(const Transport& transport){
    //and write them to the out buffer
    while(mCommandsIn.getReadSpace()){
       Command * cmd;
-      TimePoint pos = transport.position();
       mCommandsIn.read(cmd);
       //shouldn't ever be null huh?
-      if (cmd) {
-         cmd->execute(transport);
-         cmd->time_executed(pos);
-         if(mCommandsOut.getWriteSpace())
-            mCommandsOut.write(cmd);
-      }
-      //XXX what if there is no write space?
+      if (cmd)
+        execute_immediately(cmd, transport);
    }
    //actually eval the scheuldule
    if(mSchedule == NULL)
@@ -164,6 +158,14 @@ void Scheduler::execute_done_actions(){
 void Scheduler::invalidate_schedule_pointers(){
    mScheduleCur = NULL;
    mLastScheduledTime.invalidate();
+}
+
+void Scheduler::execute_immediately(Command * cmd, const Transport& transport) {
+  cmd->execute(transport);
+  cmd->time_executed(transport.position());
+  //XXX what if there is no write space?
+  if(mCommandsOut.getWriteSpace())
+    mCommandsOut.write(cmd);
 }
 
 Command * Scheduler::pop_complete_command() {

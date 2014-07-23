@@ -134,6 +134,14 @@ void Master::audio_compute_and_fill(
   for(unsigned int frame = 0; frame < numFrames; frame++){
     //tick the transport
     bool beat = mTransport.tick();
+    if (beat) {
+      for (unsigned int i = 0; i < mNextBeatCommandBufferIndex; i++) {
+        Command * cmd = mNextBeatCommandBuffer[i];
+        mNextBeatCommandBuffer[i] = nullptr;
+        mScheduler.execute_immediately(cmd, mTransport);
+      }
+      mNextBeatCommandBufferIndex = 0;
+    }
     //XXX this should be a setting
     //only execute every 64 samples, at 44.1khz this is every 1.45ms
     if(frame % 64 == 0){
@@ -207,6 +215,14 @@ void Master::audio_compute_and_fill(
         }
       }
     }
+  }
+}
+
+void Master::execute_next_beat(Command * cmd) {
+  if (mNextBeatCommandBuffer.size() > mNextBeatCommandBufferIndex) {
+    mNextBeatCommandBuffer[mNextBeatCommandBufferIndex++] = cmd;
+  } else {
+    //XXX
   }
 }
 
@@ -387,3 +403,15 @@ bool MasterXFadeSelectCommand::store(CommandIOData& /*data*/) const {
   return false;
 }
 
+MasterNextBeatCommand::MasterNextBeatCommand(Command * command) : mCommand(command) {
+}
+
+void MasterNextBeatCommand::execute(const Transport& /*transport*/) {
+  //XXX use transport to see if we're on the beat already?
+  master()->execute_next_beat(mCommand);
+  mCommand = nullptr;
+}
+
+bool MasterNextBeatCommand::store(CommandIOData& /* data */) const {
+  return false;
+}

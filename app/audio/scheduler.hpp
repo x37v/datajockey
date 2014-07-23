@@ -53,6 +53,9 @@ namespace djaudio {
       //incase we've jumped around in the transport
       void invalidate_schedule_pointers();
 
+      //this is only called from the audio thread, takes ownership of the command
+      void execute_immediately(Command * cmd, const Transport& transport);
+
       //this must be called in the same thread as execute_done_actions
       //get a command off the complete command list
       Command * pop_complete_command();

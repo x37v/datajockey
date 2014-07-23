@@ -34,6 +34,9 @@ namespace djaudio {
       void audio_compute_and_fill(JackCpp::AudioIO::audioBufVector outBufferVector,
           unsigned int numFrames);
 
+      //only call within the audio thread
+      void execute_next_beat(Command * cmd);
+
       //getters
       float master_volume() const;
       float cue_volume() const;
@@ -67,6 +70,8 @@ namespace djaudio {
       float ** mCrossFadeBuffer;
 
       std::vector<Player *> mPlayers;
+      std::array<Command *, 1024> mNextBeatCommandBuffer;
+      unsigned int mNextBeatCommandBufferIndex = 0;
       Transport mTransport;
       Scheduler mScheduler;
       float mMasterVolume;
@@ -132,6 +137,14 @@ namespace djaudio {
       virtual bool store(CommandIOData& data) const;
     private:
       unsigned int mSel[2];
+  };
+  class MasterNextBeatCommand : public MasterCommand {
+    public:
+      MasterNextBeatCommand(Command * command);
+      virtual void execute(const Transport& transport);
+      virtual bool store(CommandIOData& data) const;
+    private:
+      Command * mCommand;
   };
 }
 
