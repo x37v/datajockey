@@ -295,6 +295,10 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
         return nullptr;
       } else if (name == "loop") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::LOOP : djaudio::PlayerStateCommand::NO_LOOP);
+        //if we're stopping looping a less than 1 beat loop and trying to stay in sync we better wait till the next beat
+        if (!v && pstate->boolValue["sync"] && pstate->doubleValue["loop_length_beats"] < 1.0) {
+          cmd = new djaudio::MasterNextBeatCommand(cmd);
+        }
       } 
 
       if (cmd) {
