@@ -481,14 +481,6 @@ void Player::update_play_speed(const Transport * transport) {
   double frames_till_target = mBeatBuffer->at(beat_closest + 1) - frame;
   double speed = frames_till_target / transport_frames_till_target;
 
-  cout << "speed: " << speed << " frames till target: " << frames_till_target;
-  //cout << " transport_frames_till_target " << transport_frames_till_target;
-  cout << " frame [actual]: " << mStretcher->frame();
-  cout << " frame [comp]: " << frame;
-  cout << " mLoopStartFrame: " << mLoopStartFrame;
-  cout << " mLoopEndFrame: " << mLoopEndFrame;
-  cout << endl;
-
   mStretcher->speed(speed);
 }
 
@@ -1004,8 +996,6 @@ void PlayerLoopCommand::execute(const Transport& transport) {
     p->loop(true);
   mLooping = p->looping();
 
-  cout << "loop: " << mStartFrame << " " << mEndFrame << " f: " << p->frame() << endl;
-
   double loop_frames = static_cast<double>(mEndFrame - mStartFrame);
   //if we are past the end point, fold
   if (p->looping()) {
@@ -1015,14 +1005,19 @@ void PlayerLoopCommand::execute(const Transport& transport) {
     } else if (old_loop_frames > 0 && loop_frames > old_loop_frames) {
       //XXX untested, do we ever hit this?
       //if the loop grows we might need to offset to before the loop 
-      if (beat_buff && beat + 1 < beat_buff->size()) {
+      if (p->syncing() && beat_buff && beat + 1 < beat_buff->size()) {
         double beat_frames = beat_buff->at(beat + 1) - beat_buff->at(beat);
         //this is where we should be if we weren't looping
         double target_offset_frames = transport.position().pos_in_beat() * beat_frames;
+#if 1
+        //XXX hard jump to position we should be at for now
+        if (beat_frames > old_loop_frames)
+          p->position_at_frame(beat_buff->at(beat) + target_offset_frames);
+#else
         int loop_skip_back = target_offset_frames / static_cast<double>(old_loop_frames);
         int offset = loop_skip_back * old_loop_frames;
         p->position_at_frame(p->frame() - offset);
-        cout << "loop_skip_back: " << loop_skip_back << " offset: " << offset << endl;
+#endif
       }
     }
   }

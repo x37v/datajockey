@@ -116,8 +116,10 @@ AudioModel::AudioModel(QObject *parent) :
     pstate->boolValue["cue"] = p->out_state() == djaudio::Player::CUE;
     pstate->boolValue["mute"] = p->muted();
     pstate->boolValue["audible"] = false;
+    pstate->boolValue["loop"] = false;
 
     pstate->doubleValue["speed"] = p->play_speed() - 1.0;
+    pstate->doubleValue["loop_length_beats"] = 0;
   }
 
   mMasterDoubleValue["bpm"] = mMaster->transport()->bpm();
@@ -172,12 +174,20 @@ void AudioModel::playerSetValueDouble(int player, QString name, double v) {
         emit(playerValueChangedDouble(player, name, v));
         return nullptr;
       } else if (name == "loop_length_beats") {
+        bool was_looping = pstate->boolValue["loop"];
+        double loop_beats_last = pstate->doubleValue["loop_length_beats"];
         pstate->boolValue["loop"] = true;
         PlayerLoopAndReportCommand * c = new PlayerLoopAndReportCommand(player, v);
         //relay changes
         connect(c, &PlayerLoopAndReportCommand::playerValueChangedBool, this, &AudioModel::playerSetValueBool);
         connect(c, &PlayerLoopAndReportCommand::playerValueChangedInt, this, &AudioModel::playerSetValueInt);
         connect(c, &PlayerLoopAndReportCommand::playerValueChangedInt, mLoopAndJumpManager, &LoopAndJumpManager::playerSetValueInt);
+
+        //if we're growing an active synced loop from less than a beat length to longer, wait until the beat boundary to execute the new length
+        if (was_looping && loop_beats_last < 1.0 && loop_beats_last < v && pstate->boolValue["sync"]) {
+          cmd = new djaudio::MasterNextBeatCommand(c);
+          return cmd;
+        }
 
         return c;
       }
