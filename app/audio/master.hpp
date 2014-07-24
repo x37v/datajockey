@@ -35,7 +35,8 @@ namespace djaudio {
           unsigned int numFrames);
 
       //only call within the audio thread
-      void execute_next_beat(Command * cmd);
+      //returns true if it could be queued
+      bool execute_next_beat(Command * cmd);
 
       //getters
       float master_volume() const;
@@ -70,7 +71,7 @@ namespace djaudio {
       float ** mCrossFadeBuffer;
 
       std::vector<Player *> mPlayers;
-      std::array<Command *, 1024> mNextBeatCommandBuffer;
+      std::array<Command *, 256> mNextBeatCommandBuffer;
       unsigned int mNextBeatCommandBufferIndex = 0;
       Transport mTransport;
       Scheduler mScheduler;
@@ -141,6 +142,7 @@ namespace djaudio {
   class MasterNextBeatCommand : public MasterCommand {
     public:
       MasterNextBeatCommand(Command * command);
+      virtual ~MasterNextBeatCommand();
       virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:

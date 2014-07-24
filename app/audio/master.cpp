@@ -218,12 +218,12 @@ void Master::audio_compute_and_fill(
   }
 }
 
-void Master::execute_next_beat(Command * cmd) {
+bool Master::execute_next_beat(Command * cmd) {
   if (mNextBeatCommandBuffer.size() > mNextBeatCommandBufferIndex) {
     mNextBeatCommandBuffer[mNextBeatCommandBufferIndex++] = cmd;
-  } else {
-    //XXX
+    return true;
   }
+  return false;
 }
 
 //getters
@@ -406,10 +406,15 @@ bool MasterXFadeSelectCommand::store(CommandIOData& /*data*/) const {
 MasterNextBeatCommand::MasterNextBeatCommand(Command * command) : mCommand(command) {
 }
 
+MasterNextBeatCommand::~MasterNextBeatCommand() {
+  if (mCommand)
+    delete mCommand;
+}
+
 void MasterNextBeatCommand::execute(const Transport& /*transport*/) {
   //XXX use transport to see if we're on the beat already?
-  master()->execute_next_beat(mCommand);
-  mCommand = nullptr;
+  if (master()->execute_next_beat(mCommand))
+    mCommand = nullptr;
 }
 
 bool MasterNextBeatCommand::store(CommandIOData& /* data */) const {
