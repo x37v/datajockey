@@ -28,7 +28,8 @@ Datajockey::connect
 include Datajockey
 
 #update time info for all the files we can get
-AudioWork.all.each do |w|
+#AudioWork.all.each do |w|
+AudioWork.where(:audio_file_seconds => [nil, 0]).each do |w|
   f = w.audio_file_location
   s = 0
 
@@ -47,6 +48,7 @@ AudioWork.all.each do |w|
   if s == 0
     puts "problem with #{f}"
   else
+    #puts "#{w.name} #{s}"
     w.update_attribute(:audio_file_seconds, s)
   end
 end
