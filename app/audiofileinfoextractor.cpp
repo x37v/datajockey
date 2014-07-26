@@ -75,6 +75,7 @@ void AudioFileInfoExtractor::processAudioFile(QString audioFileName) {
       emit(error(audioFileName, QString("file exceeds maximum length allowed")));
       return;
     }
+    tag_data["seconds"] = static_cast<int>(seconds);
 
     //XXX use progress callbacks
     if (!audio_buffer->load()) {
