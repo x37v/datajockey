@@ -40,6 +40,12 @@ EQ:
 check denormals:
   http://users.ecs.soton.ac.uk/swh/denormal-finder
 
+Good mix:
+	provide a key binding or button that stores the last 2 songs that mixed, a ->
+	b, and indicate that you liked the mix so you can possibly do the same mix
+	later [for a recording or something] or analyze the two songs to discover
+	mixability
+
 session filtering:
   make it configurable
 Vinyl control:
