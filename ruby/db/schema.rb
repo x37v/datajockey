@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 28) do
+ActiveRecord::Schema.define(:version => 29) do
 
   create_table "album_artists", :force => true do |t|
     t.integer "album_id"
@@ -77,6 +77,7 @@ ActiveRecord::Schema.define(:version => 28) do
     t.datetime "last_played_at"
     t.integer  "album_id"
     t.integer  "album_track"
+    t.text     "note",                     :default => ""
   end
 
   create_table "tags", :force => true do |t|
