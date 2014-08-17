@@ -25,10 +25,19 @@ void WorkDetailView::setDB(DB* db) {
 }
 
 void WorkDetailView::selectWork(int workid) {
+  if (mWorkID)
+    mDB->work_update_attribute(mWorkID, "note", ui->noteView->toPlainText());
+
   mWorkID = workid;
   QString songinfo("<div><b>Title:</b> $title</div> <div><b>Artist:</b> $artist</div> <div><b>Album:</b> $album</div>");
   mDB->format_string_by_id(mWorkID, songinfo);
   ui->details->setText(songinfo);
+
+  if (mWorkID) {
+    QVariant note = mDB->work_attribute(mWorkID, "note");
+    ui->noteView->setText(note.isNull() ? "" : note.toString());
+  }
+
   if (mModel)
     mModel->setWork(workid);
   ui->tagsView->expandAll();

@@ -94,6 +94,9 @@ class DB : public QObject {
         int work_id,
         const QString& name,
         const QVariant& value) throw(std::runtime_error);
+    QVariant work_attribute(
+        int work_id,
+        const QString& name) throw(std::runtime_error);
     void work_descriptor_create_or_update(
         int work_id,
         QString descriptor_type_name,

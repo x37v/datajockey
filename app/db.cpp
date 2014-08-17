@@ -531,6 +531,20 @@ void DB::work_update_attribute(
   query.exec();
 }
 
+QVariant DB::work_attribute(
+    int work_id,
+    const QString& name) throw(std::runtime_error) {
+  QString sel = QString("SELECT %1 FROM audio_works WHERE audio_works.id = :id").arg(name);
+  MySqlQuery query(get());
+  query.prepare(sel);
+  query.bindValue(":id", work_id);
+  query.exec();
+
+  if (!query.first())
+    return QVariant();
+  return query.value(0);
+}
+
 void DB::work_descriptor_create_or_update(
     int work_id,
     QString name,
