@@ -135,6 +135,14 @@ void MainWindow::readSettings() {
   }
   settings.endArray();
   settings.endGroup();
+
+  /*
+  settings.beginGroup("MainWindow");
+  if (settings.contains("geometry")) {
+    restoreGeometry(settings.value("geometry").toByteArray());
+  }
+  settings.endGroup();
+  */
 }
 
 void MainWindow::writeSettings() {
@@ -142,7 +150,11 @@ void MainWindow::writeSettings() {
 
   QSettings settings;
 
-  //settings.setValue("geometry", saveGeometry());
+  /*
+  settings.beginGroup("MainWindow");
+  settings.setValue("geometry", saveGeometry());
+  settings.endGroup();
+  */
 
   settings.beginGroup("WorkFilterModelCollection");
 
