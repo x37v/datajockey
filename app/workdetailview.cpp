@@ -25,9 +25,7 @@ void WorkDetailView::setDB(DB* db) {
 }
 
 void WorkDetailView::selectWork(int workid) {
-  if (mWorkID)
-    mDB->work_update_attribute(mWorkID, "note", ui->noteView->toPlainText());
-
+  finalize();
   mWorkID = workid;
   QString songinfo("<div><b>Title:</b> $title</div> <div><b>Artist:</b> $artist</div> <div><b>Album:</b> $album</div>");
   mDB->format_string_by_id(mWorkID, songinfo);
@@ -41,6 +39,12 @@ void WorkDetailView::selectWork(int workid) {
   if (mModel)
     mModel->setWork(workid);
   ui->tagsView->expandAll();
+}
+
+void WorkDetailView::finalize() {
+  if (mWorkID)
+    mDB->work_update_attribute(mWorkID, "note", ui->noteView->toPlainText());
+  mWorkID = 0;
 }
 
 void WorkDetailView::dragEnterEvent(QDragEnterEvent *event) {

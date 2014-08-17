@@ -189,6 +189,11 @@ void MainWindow::workUpdateHistory(int work_id, QDateTime played_at) {
   mFilterCollection->updateHistory(work_id, played_at);
 }
 
+void MainWindow::finalize() {
+  ui->workDetail->finalize();
+  writeSettings();
+}
+
 void MainWindow::selectWork(int id) {
   ui->workDetail->selectWork(id);
   emit(workSelected(id));

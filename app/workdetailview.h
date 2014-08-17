@@ -22,6 +22,7 @@ class WorkDetailView : public QWidget
     virtual void keyPressEvent(QKeyEvent * event);
   public slots:
     void selectWork(int workid);
+    void finalize();
 
   private:
     void rereadTags();

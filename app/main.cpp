@@ -155,7 +155,7 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   QObject::connect(midi, &MidiRouter::masterValueChangedInt,     &w, &MainWindow::masterSetValueInt);
 
   QObject::connect(app, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
-    w.writeSettings();
+    w.finalize();
     midiThread->quit();
     audio->prepareToQuit();
     QThread::msleep(200);
