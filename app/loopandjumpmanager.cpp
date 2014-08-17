@@ -292,9 +292,11 @@ QString LoopAndJumpManager::yamlData(int player) {
     return QString();
 
   YAML::Node root;
+  bool got_data = false;
   for (QHash<int, JumpOrLoopData>::iterator it = pdata->data.begin(); it != pdata->data.end(); it++) {
     if (it.key() < 0)
       continue;
+    got_data = true;
 
     YAML::Node entry;
     JumpOrLoopData * data = &it.value();
@@ -317,6 +319,8 @@ QString LoopAndJumpManager::yamlData(int player) {
     entry["end"] = data->end;
     root.push_back(entry);
   }
+  if (!got_data)
+    return QString();
   return QString::fromStdString(YAML::Dump(root));
 }
 
