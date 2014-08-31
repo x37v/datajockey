@@ -23,10 +23,10 @@ INCLUDEPATH += /usr/local/include/
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
-  LIBS += -lvamp-hostsdk
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
   INCLUDEPATH += ../ext/vamp/
   LIBS += -lsndfile -lvorbisfile -lmad -ltag
+  LIBS += -lvamp-hostsdk
   LIBS += -L/usr/local/lib/
 }
 
