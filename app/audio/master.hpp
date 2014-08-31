@@ -6,6 +6,7 @@
 #include "scheduler.hpp"
 #include "types.hpp"
 #include <vector>
+#include <array>
 
 #ifdef USE_LV2
 #include <lilv/lilv.h>

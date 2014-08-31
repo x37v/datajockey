@@ -22,19 +22,25 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
-PKGCONFIG += sndfile vorbisfile mad taglib
-LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a -llo
+
+LIBS += -llo
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 RESOURCES = $$TOP_DIR/gui.qrc $$TOP_DIR/db.qrc
+
+LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1-build/libyaml-cpp.a
+INCLUDEPATH += /usr/local/include/
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
   LIBS += -lvamp-hostsdk -ljack
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
   INCLUDEPATH += ../ext/vamp/
+  LIBS += -lsndfile -lvorbisfile -lmad -ltag_c
+  LIBS += -L/usr/local/lib/
 }
 
 unix:!macx {
+  PKGCONFIG += sndfile vorbisfile mad taglib
   PKGCONFIG += jack lilv-0 vamp-hostsdk
   DEFINES += USE_LV2
 }

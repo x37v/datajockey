@@ -17,17 +17,21 @@ CONFIG += link_pkgconfig
 
 TEMPLATE = app
 
-PKGCONFIG += sndfile vorbisfile mad taglib
-LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a
+
+LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1-build/libyaml-cpp.a
+INCLUDEPATH += /usr/local/include/
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
   LIBS += -lvamp-hostsdk
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
   INCLUDEPATH += ../ext/vamp/
+  LIBS += -lsndfile -lvorbisfile -lmad -ltag
+  LIBS += -L/usr/local/lib/
 }
 
 unix:!macx {
+  PKGCONFIG += sndfile vorbisfile mad taglib
   PKGCONFIG += vamp-hostsdk
 }
 
