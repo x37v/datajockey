@@ -34,7 +34,7 @@ macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
   LIBS += -lvamp-hostsdk -ljack
   INCLUDEPATH += ../ext/vamp/ /opt/local/include/
-  LIBS += -lsndfile -lvorbisfile -lmad -ltag_c
+  LIBS += -lsndfile -lvorbisfile -lmad -ltag
   LIBS += -L/usr/local/lib/ -L/opt/local/lib/
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
   #QMAKE_MAC_SDK.macosx.path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/
