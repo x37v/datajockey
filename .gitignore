@@ -19,3 +19,4 @@ build-*
 /build/
 *.pro.user
 *.txt.user
+.qmake.stash
