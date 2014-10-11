@@ -1,4 +1,4 @@
-#include "doublelinkedlist.hpp"
+#include "doublelinkedlist.h"
 #include <stdlib.h>
 
 DoubleLinkedListNode::DoubleLinkedListNode() { }

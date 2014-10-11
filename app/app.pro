@@ -115,7 +115,7 @@ HEADERS  += mainwindow.h \
     audio/player.hpp \
     audio/master.hpp \
     audio/envelope.hpp \
-    audio/doublelinkedlist.hpp \
+    audio/doublelinkedlist.h \
     audio/command.hpp \
     audio/audioio.hpp \
     audio/audiobuffer.hpp \

@@ -1,5 +1,5 @@
-#ifndef DOUBLE_LINKED_LIST_HPP
-#define DOUBLE_LINKED_LIST_HPP
+#ifndef DOUBLE_LINKED_LIST_H
+#define DOUBLE_LINKED_LIST_H
 
 #include <functional>
 
