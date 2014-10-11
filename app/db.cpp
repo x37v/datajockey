@@ -252,7 +252,7 @@ DB::DB(
       }
       QFile db_file(":/resources/datajockey.sqlite3");
       if (!db_file.copy(name_or_loc) || !QFile::setPermissions(name_or_loc, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner))
-        throw(std::runtime_error("cannot create writable sqlite db :" + name_or_loc.toStdString()));
+        throw(std::runtime_error("cannot create writable sqlite db: " + name_or_loc.toStdString()));
     }
   }
 
