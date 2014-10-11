@@ -170,7 +170,7 @@ void WaveFormGL::draw() {
     cursor = static_cast<GLfloat>(mFramePosition) / static_cast<GLfloat>(mFramesPerLine);
 
   glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
-  glLineWidth(1.0);
+  glLineWidth(3.0);
   glBegin(GL_LINES);
   glVertex2f(cursor, -1.0);
   glVertex2f(cursor, 1.0);

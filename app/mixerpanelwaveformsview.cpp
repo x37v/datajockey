@@ -155,6 +155,7 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
 
     //draw center line
     glBegin(GL_LINES);
+    glLineWidth(1.0);
     qglColor(centerLineColor);
     glVertex3f(0.0, 0.0, divider_z);
     glVertex3f(mHeight, 0.0, divider_z);
