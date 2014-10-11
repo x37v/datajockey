@@ -38,6 +38,20 @@ class DoubleLinkedListNode {
     DoubleLinkedListNode<T> * prev = nullptr;
 };
 
+template <typename T>
+DoubleLinkedList<T>::DoubleLinkedList() {
+}
+
+template <typename T>
+DoubleLinkedList<T>::~DoubleLinkedList() {
+  DoubleLinkedListNode<T> * cur = mHead;
+  while (cur) {
+    mHead = cur;
+    cur = cur->next;
+    delete mHead;
+  }
+}
+
 
 template <typename T>
 void DoubleLinkedList<T>::push_back(DoubleLinkedListNode<T> * node) {
