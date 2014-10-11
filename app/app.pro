@@ -66,7 +66,6 @@ SOURCES += main.cpp\
     audio/player.cpp \
     audio/master.cpp \
     audio/envelope.cpp \
-    audio/doublelinkedlist.cpp \
     audio/command.cpp \
     audio/audioio.cpp \
     audio/audiobuffer.cpp \
