@@ -47,7 +47,7 @@ Player::Player() :
   mEnvelope(djaudio::quarter_sin, 4410),
   mFadeoutIndex(0)
 #ifdef USE_LV2
-  ,mEqInstance(NULL)
+  ,mEqPlugin(NULL)
 #endif
 {
   //states
@@ -77,8 +77,8 @@ Player::~Player(){
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
 #ifdef USE_LV2
-  if(mEqInstance)
-    lilv_instance_free(mEqInstance);
+  if(mEqPlugin)
+    delete mEqPlugin;
 #endif
 }
 
@@ -99,26 +99,13 @@ void Player::setup_audio(
   mFadeoutIndex = mFadeoutBuffer.size();
 
 #ifdef USE_LV2
-  //do lv2
-  Master * master = Master::instance();
-  LilvNode * plugin_uri = lilv_new_uri(master->lv2_world(), DJ_EQ_URI);
-  const LilvPlugin * eq_plugin = lilv_plugins_get_by_uri(master->lv2_plugins(), plugin_uri);
-  if (!eq_plugin) {
+  try {
+    Master * master = Master::instance();
+    mEqPlugin = new Lv2Plugin(DJ_EQ_URI, master->lv2_world(), master->lv2_plugins());
+    mEqPlugin->setup(sampleRate, maxBufferLen);
+  } catch (std::runtime_error& e) {
     cerr << "could not load eq lv2 plugin, do you have dj eq installed?:" << endl;
     cerr << "\t\t" << DJ_EQ_URI << endl;
-  } else {
-    //load the plugin
-    mEqInstance = lilv_plugin_instantiate(eq_plugin, mSampleRate, NULL);
-    if (!mEqInstance) {
-      cerr << "could not instantiate eq lv2 plugin, do you have dj eq installed?:" << endl;
-      cerr << "\t\t" << DJ_EQ_URI << endl;
-    } else {
-      lilv_instance_connect_port(mEqInstance, 0, &mEqControl.low);
-      lilv_instance_connect_port(mEqInstance, 1, &mEqControl.mid);
-      lilv_instance_connect_port(mEqInstance, 2, &mEqControl.high);
-      lilv_instance_connect_port(mEqInstance, 7, &mEqControl.latency);
-      lilv_instance_activate(mEqInstance);
-    }
   }
 #endif
 
@@ -185,13 +172,8 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
   if(!mStretcher->audio_buffer())
     return;
 #ifdef USE_LV2
-  if(mEqInstance) {
-    lilv_instance_connect_port(mEqInstance, 3, mixBuffer[0]);
-    lilv_instance_connect_port(mEqInstance, 4, mixBuffer[1]);
-    lilv_instance_connect_port(mEqInstance, 5, mixBuffer[0]);
-    lilv_instance_connect_port(mEqInstance, 6, mixBuffer[1]);
-    lilv_instance_run(mEqInstance, numFrames);
-  }
+  if(mEqPlugin)
+    mEqPlugin->compute(numFrames, mixBuffer);
 #endif
 }
 
@@ -403,19 +385,16 @@ void Player::beat_buffer(BeatBuffer * buf){
 }
 
 void Player::eq(eq_band_t band, double value) {
+#ifdef USE_LV2
+  if (!mEqPlugin)
+    return;
   value = dj::clamp(value, -1.0, 1.0);
   if (value < 0.0)
     value *= 70.0;
   else
     value *= 6.0;
-  switch (band) {
-    case LOW:
-      mEqControl.low = value; break;
-    case MID:
-      mEqControl.mid = value; break;
-    case HIGH:
-      mEqControl.high = value; break;
-  }
+  mEqPlugin->control_value(band, value);
+#endif
 }
 
 float Player::max_sample_value_reset() {
