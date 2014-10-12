@@ -16,18 +16,18 @@ namespace {
   }
 }
 
-Lv2Plugin::Lv2Plugin(std::string uri, LilvWorld * world, const LilvPlugins * plugins) throw (std::runtime_error) {
+Lv2Plugin::Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw (std::runtime_error) {
   setup_lilv(world);
 
-  LilvNode * plugin_uri = lilv_new_uri(world, uri.c_str());
+  LilvNode * plugin_uri = lilv_new_uri(world, qPrintable(uri));
   mLilvPlugin = lilv_plugins_get_by_uri(plugins, plugin_uri);
   if (!mLilvPlugin)
-    throw std::runtime_error("could not load lv2 plugin with uri " + uri);
+    throw std::runtime_error("could not load lv2 plugin with uri " + uri.toStdString());
 
   if (lilv_plugin_get_num_ports_of_class(mLilvPlugin, lv2PortAudio, lv2PortOutput, nullptr) != 2)
-    throw std::runtime_error("not a stereo output plugin: " + uri);
+    throw std::runtime_error("not a stereo output plugin: " + uri.toStdString());
   if (lilv_plugin_get_num_ports_of_class(mLilvPlugin, lv2PortAudio, lv2PortInput, nullptr) != 2)
-    throw std::runtime_error("not a stereo input plugin: " + uri);
+    throw std::runtime_error("not a stereo input plugin: " + uri.toStdString());
 
   mNumPorts = lilv_plugin_get_num_ports(mLilvPlugin);
   mPortValueMin.resize(mNumPorts, 0.0f);
@@ -37,7 +37,7 @@ Lv2Plugin::Lv2Plugin(std::string uri, LilvWorld * world, const LilvPlugins * plu
 
   for (uint32_t i = 0; i < mNumPorts; i++) {
     LilvNode* n = lilv_port_get_name(mLilvPlugin, lilv_plugin_get_port_by_index(mLilvPlugin, i));
-    mPortNames.push_back(std::string(lilv_node_as_string(n)));
+    mPortNames.push_back(QString(lilv_node_as_string(n)));
     lilv_node_free(n);
   }
 }
@@ -84,9 +84,9 @@ void Lv2Plugin::setup(unsigned int sample_rate, unsigned int /* max_buffer_lengt
   lilv_instance_activate(mLilvInstance);
 }
 
-std::string Lv2Plugin::port_name(uint32_t index) {
+QString Lv2Plugin::port_name(uint32_t index) {
   if (index >= mPortNames.size())
-    return std::string();
+    return QString();
   return mPortNames[index];
 }
 

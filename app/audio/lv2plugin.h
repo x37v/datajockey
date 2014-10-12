@@ -1,5 +1,6 @@
 #include "plugin.h"
 #include <lilv/lilv.h>
+#include <QString>
 #include <stdexcept>
 #include <map>
 #include <vector>
@@ -7,11 +8,11 @@
 class Lv2Plugin : public AudioPlugin {
   public:
     //constructor and destructor called in main thread
-    Lv2Plugin(std::string uri, LilvWorld * world, const LilvPlugins * plugins) throw(std::runtime_error);
+    Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw(std::runtime_error);
     virtual ~Lv2Plugin();
     virtual void setup(unsigned int sample_rate, unsigned int max_buffer_length);
 
-    std::string port_name(uint32_t index);
+    QString port_name(uint32_t index);
     std::vector<uint32_t> control_input_ports() const;
 
     //below called in audio thread
@@ -30,6 +31,6 @@ class Lv2Plugin : public AudioPlugin {
     std::vector<float> mPortValueMin;
     std::vector<float> mPortValueMax;
     std::vector<float> mPortValueDefault;
-    std::vector<std::string> mPortNames;
+    std::vector<QString> mPortNames;
 };
 

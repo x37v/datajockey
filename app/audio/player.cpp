@@ -4,8 +4,8 @@
 #include "stretcher.hpp"
 #include "stretcherrate.hpp"
 #include "defines.hpp"
+#include "config.hpp"
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
-#define DJ_EQ_URI "http://plugin.org.uk/swh-plugins/dj_eq"
 
 #include <algorithm>
 #include <iostream>
@@ -99,13 +99,14 @@ void Player::setup_audio(
   mFadeoutIndex = mFadeoutBuffer.size();
 
 #ifdef USE_LV2
+  dj::Configuration * config = dj::Configuration::instance();
   try {
     Master * master = Master::instance();
-    mEqPlugin = new Lv2Plugin(DJ_EQ_URI, master->lv2_world(), master->lv2_plugins());
+    mEqPlugin = new Lv2Plugin(config->eq_uri(), master->lv2_world(), master->lv2_plugins());
     mEqPlugin->setup(sampleRate, maxBufferLen);
   } catch (std::runtime_error& e) {
-    cerr << "could not load eq lv2 plugin, do you have dj eq installed?:" << endl;
-    cerr << "\t\t" << DJ_EQ_URI << endl;
+    cerr << "could not load eq lv2 plugin, do you have it installed?:" << endl;
+    cerr << "\t\t" << qPrintable(config->eq_uri()) << endl;
   }
 #endif
 
