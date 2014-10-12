@@ -57,6 +57,11 @@ namespace dj {
       QString db_host() const;
       int db_port() const;
 
+      QString eq_uri() const;
+      QString eq_port_symbol_low() const;
+      QString eq_port_symbol_mid() const;
+      QString eq_port_symbol_high() const;
+
       //if populated, run this after startup
       QString post_start_script();
 
@@ -79,6 +84,11 @@ namespace dj {
       QString mDBPassword;
       QString mDBHost;
       int mDBPort;
+
+      QString mEqPluginURI = "http://plugin.org.uk/swh-plugins/dj_eq";
+      QString mEqPluginLowSymbol = "lo";
+      QString mEqPluginMidSymbol = "mid";
+      QString mEqPluginHighSymbol = "hi";
 
       QString mPostStartScript;
 

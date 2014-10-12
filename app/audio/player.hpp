@@ -10,23 +10,16 @@
 #include "envelope.hpp"
 
 #ifdef USE_LV2
-#include <lilv/lilv.h>
+#include "lv2plugin.h"
 #endif
 
 namespace djaudio {
-  struct EqControl {
-    EqControl() : low(0.0), mid(0.0), high(0.0){}
-    float low;
-    float mid;
-    float high;
-    float latency;
-  };
   class Player {
     public:
       //internal types
       enum play_state_t {PLAY, PAUSE};
       enum out_state_t {MAIN_MIX, CUE};
-      enum eq_band_t {LOW, MID, HIGH};
+      enum eq_band_t {LOW = 0, MID = 1, HIGH = 2};
 
       Player();
       ~Player();
@@ -132,9 +125,11 @@ namespace djaudio {
 
       //the eq instance
 #ifdef USE_LV2
-      LilvInstance * mEqInstance;
+      Lv2Plugin * mEqPlugin;
+      std::array<uint32_t, 3> mEqBandPortMapping;
+      std::array<float, 3> mEqBandValuePositiveScaling;
+      std::array<float, 3> mEqBandValueNegativeScaling;
 #endif
-      EqControl mEqControl;
 
       //helpers
       //for updating the play speed while syncing

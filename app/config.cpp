@@ -202,6 +202,11 @@ QString Configuration::db_username() const { return mDBUserName; }
 QString Configuration::db_host() const { return mDBHost; }
 int Configuration::db_port() const { return mDBPort; }
 
+QString Configuration::eq_uri() const { return mEqPluginURI; }
+QString Configuration::eq_port_symbol_low() const { return mEqPluginLowSymbol; }
+QString Configuration::eq_port_symbol_mid() const { return mEqPluginMidSymbol; }
+QString Configuration::eq_port_symbol_high() const { return mEqPluginHighSymbol; }
+
 QString Configuration::post_start_script() {
   return mPostStartScript;
 }
