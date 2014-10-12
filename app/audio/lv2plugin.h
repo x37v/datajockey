@@ -12,14 +12,21 @@ class Lv2Plugin : public AudioPlugin {
     virtual ~Lv2Plugin();
     virtual void setup(unsigned int sample_rate, unsigned int max_buffer_length);
 
-    QString port_name(uint32_t index);
     std::vector<uint32_t> control_input_ports() const;
+
+    QString port_symbol(uint32_t index) const;
+    float port_value_min(uint32_t index) const;
+    float port_value_max(uint32_t index) const;
+    float port_value_default(uint32_t index) const;
+    uint32_t port_index(QString port_symbol) const throw(std::runtime_error);
+
 
     //below called in audio thread
     virtual void compute(unsigned int nframes, float ** mixBuffer);
     virtual void stop();
     void control_value(uint32_t index, float v);
   private:
+    LilvWorld * mWorld;
     LilvInstance * mLilvInstance;
     const LilvPlugin * mLilvPlugin;
     uint32_t mNumPorts = 0;
@@ -31,6 +38,6 @@ class Lv2Plugin : public AudioPlugin {
     std::vector<float> mPortValueMin;
     std::vector<float> mPortValueMax;
     std::vector<float> mPortValueDefault;
-    std::vector<QString> mPortNames;
+    std::vector<QString> mPortSymbols;
 };
 

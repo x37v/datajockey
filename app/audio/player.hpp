@@ -126,6 +126,9 @@ namespace djaudio {
       //the eq instance
 #ifdef USE_LV2
       Lv2Plugin * mEqPlugin;
+      std::array<uint32_t, 3> mEqBandPortMapping;
+      std::array<float, 3> mEqBandValuePositiveScaling;
+      std::array<float, 3> mEqBandValueNegativeScaling;
 #endif
 
       //helpers

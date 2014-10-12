@@ -104,8 +104,20 @@ void Player::setup_audio(
     Master * master = Master::instance();
     mEqPlugin = new Lv2Plugin(config->eq_uri(), master->lv2_world(), master->lv2_plugins());
     mEqPlugin->setup(sampleRate, maxBufferLen);
+    mEqBandPortMapping[0] = mEqPlugin->port_index(config->eq_port_symbol_low());
+    mEqBandPortMapping[1] = mEqPlugin->port_index(config->eq_port_symbol_mid());
+    mEqBandPortMapping[2] = mEqPlugin->port_index(config->eq_port_symbol_high());
+    for (int i = 0; i < 3; i++) {
+      mEqBandValuePositiveScaling[i] = mEqPlugin->port_value_max(mEqBandPortMapping[i]);
+      mEqBandValueNegativeScaling[i] = -mEqPlugin->port_value_min(mEqBandPortMapping[i]);
+    }
   } catch (std::runtime_error& e) {
-    cerr << "could not load eq lv2 plugin, do you have it installed?:" << endl;
+    if (mEqPlugin) {
+      delete mEqPlugin;
+      mEqPlugin = nullptr;
+    }
+    cerr << "error loading plugin: " << e.what() << endl;
+    cerr << "do you have it installed?:" << endl;
     cerr << "\t\t" << qPrintable(config->eq_uri()) << endl;
   }
 #endif
@@ -391,10 +403,10 @@ void Player::eq(eq_band_t band, double value) {
     return;
   value = dj::clamp(value, -1.0, 1.0);
   if (value < 0.0)
-    value *= 70.0;
+    value *= mEqBandValueNegativeScaling[band];
   else
-    value *= 6.0;
-  mEqPlugin->control_value(band, value);
+    value *= mEqBandValuePositiveScaling[band];
+  mEqPlugin->control_value(mEqBandPortMapping[band], value);
 #endif
 }
 

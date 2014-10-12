@@ -16,7 +16,9 @@ namespace {
   }
 }
 
-Lv2Plugin::Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw (std::runtime_error) {
+Lv2Plugin::Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw (std::runtime_error) :
+  mWorld(world)
+{
   setup_lilv(world);
 
   LilvNode * plugin_uri = lilv_new_uri(world, qPrintable(uri));
@@ -37,7 +39,7 @@ Lv2Plugin::Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins
 
   for (uint32_t i = 0; i < mNumPorts; i++) {
     LilvNode* n = lilv_port_get_name(mLilvPlugin, lilv_plugin_get_port_by_index(mLilvPlugin, i));
-    mPortNames.push_back(QString(lilv_node_as_string(n)));
+    mPortSymbols.push_back(QString(lilv_node_as_string(n)));
     lilv_node_free(n);
   }
 }
@@ -84,17 +86,44 @@ void Lv2Plugin::setup(unsigned int sample_rate, unsigned int /* max_buffer_lengt
   lilv_instance_activate(mLilvInstance);
 }
 
-QString Lv2Plugin::port_name(uint32_t index) {
-  if (index >= mPortNames.size())
-    return QString();
-  return mPortNames[index];
-}
-
 std::vector<uint32_t> Lv2Plugin::control_input_ports() const {
   std::vector<uint32_t> indices;
   for (auto& kv: mControlInputs)
     indices.push_back(kv.first);
   return indices;
+}
+
+QString Lv2Plugin::port_symbol(uint32_t index) const {
+  if (index >= mPortSymbols.size())
+    return QString();
+  return mPortSymbols[index];
+}
+
+float Lv2Plugin::port_value_min(uint32_t index) const {
+  if (index >= mPortValueMin.size())
+    return 0.0f;
+  return mPortValueMin[index];
+}
+
+float Lv2Plugin::port_value_max(uint32_t index) const {
+  if (index >= mPortValueMax.size())
+    return 0.0f;
+  return mPortValueMax[index];
+}
+
+float Lv2Plugin::port_value_default(uint32_t index) const {
+  if (index >= mPortValueDefault.size())
+    return 0.0f;
+  return mPortValueDefault[index];
+}
+
+uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_error) {
+  LilvNode * snode = lilv_new_string(mWorld, qPrintable(port_symbol));
+  const LilvPort * port = lilv_plugin_get_port_by_symbol(mLilvPlugin, snode);
+  lilv_node_free(snode);
+  if (!port)
+    throw std::runtime_error("cannot find port by symbol name: " + port_symbol.toStdString());
+  return lilv_port_get_index(mLilvPlugin, port);
 }
 
 void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
