@@ -13,6 +13,7 @@ class Lv2Plugin : public AudioPlugin {
 
     //below called in audio thread
     virtual void compute(unsigned int nframes, float ** mixBuffer);
+    virtual void stop();
     void control_value(uint32_t index, float v);
   private:
     LilvInstance * mLilvInstance;

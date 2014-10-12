@@ -76,6 +76,10 @@ void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
   lilv_instance_run(mLilvInstance, nframes);
 }
 
+void Lv2Plugin::stop() {
+  lilv_instance_deactivate(mLilvInstance);
+}
+
 void Lv2Plugin::control_value(uint32_t index, float v) {
   auto it = mControls.find(index);
   if (it == mControls.end())
