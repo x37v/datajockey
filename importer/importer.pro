@@ -19,6 +19,7 @@ TEMPLATE = app
 
 PKGCONFIG += sndfile vorbisfile mad taglib
 LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a
+RESOURCES = $$TOP_DIR/db.qrc
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/

@@ -65,8 +65,8 @@ void Configuration::load_default() {
 
   search_paths.push_back(homeConfig);
   search_paths.push_back("./config.yaml");
-  //search_paths.push_back("/usr/local/share/datajockey/config.yaml");
-  //search_paths.push_back("/usr/share/datajockey/config.yaml");
+  search_paths.push_back("/usr/local/share/datajockey/config.yaml");
+  search_paths.push_back("/usr/share/datajockey/config.yaml");
 
   for(std::vector<QString>::iterator it = search_paths.begin(); it != search_paths.end(); it++){
     try {
