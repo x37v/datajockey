@@ -8,6 +8,7 @@
 #include "annotation.hpp"
 #include "stretcher.hpp"
 #include "envelope.hpp"
+#include "defines.hpp"
 
 #ifdef USE_LV2
 #include "lv2plugin.h"
@@ -19,7 +20,6 @@ namespace djaudio {
       //internal types
       enum play_state_t {PLAY, PAUSE};
       enum out_state_t {MAIN_MIX, CUE};
-      enum eq_band_t {LOW = 0, MID = 1, HIGH = 2};
 
       Player();
       ~Player();
@@ -86,7 +86,7 @@ namespace djaudio {
 
       void audio_buffer(AudioBuffer * buf);
       void beat_buffer(BeatBuffer * buf);
-      void eq(eq_band_t band, double value);
+      void eq(dj::eq_band_t band, double value);
       float max_sample_value_reset();
 
       //misc
@@ -127,8 +127,10 @@ namespace djaudio {
 #ifdef USE_LV2
       Lv2Plugin * mEqPlugin;
       std::array<uint32_t, 3> mEqBandPortMapping;
-      std::array<float, 3> mEqBandValuePositiveScaling;
-      std::array<float, 3> mEqBandValueNegativeScaling;
+      std::array<float, 3> mEqBandValueMax;
+      std::array<float, 3> mEqBandValueMin;
+      std::array<float, 3> mEqBandValueDefault;
+      std::array<float, 3> mEqBandValueDBScale = std::array<float, 3>{0.0f, 0.0f, 0.0f};
 #endif
 
       //helpers

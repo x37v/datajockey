@@ -30,7 +30,8 @@ using namespace dj;
 
 Configuration * Configuration::cInstance = NULL;
 
-Configuration::Configuration(){ 
+Configuration::Configuration()
+{ 
   restore_defaults();
   mValidFile = false;
 }
@@ -203,9 +204,8 @@ QString Configuration::db_host() const { return mDBHost; }
 int Configuration::db_port() const { return mDBPort; }
 
 QString Configuration::eq_uri() const { return mEqPluginURI; }
-QString Configuration::eq_port_symbol_low() const { return mEqPluginLowSymbol; }
-QString Configuration::eq_port_symbol_mid() const { return mEqPluginMidSymbol; }
-QString Configuration::eq_port_symbol_high() const { return mEqPluginHighSymbol; }
+QString Configuration::eq_port_symbol(dj::eq_band_t band) const { return mEqPluginSymbol[band]; }
+float Configuration::eq_band_db_scale(dj::eq_band_t band) const { return mEqPluginDBScale[band]; }
 QString Configuration::eq_plugin_preset_file() const { return mEqPluginPresetFile; }
 
 QString Configuration::post_start_script() {

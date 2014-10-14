@@ -104,12 +104,13 @@ void Player::setup_audio(
     Master * master = Master::instance();
     mEqPlugin = new Lv2Plugin(config->eq_uri(), master->lv2_world(), master->lv2_plugins());
     mEqPlugin->setup(sampleRate, maxBufferLen);
-    mEqBandPortMapping[0] = mEqPlugin->port_index(config->eq_port_symbol_low());
-    mEqBandPortMapping[1] = mEqPlugin->port_index(config->eq_port_symbol_mid());
-    mEqBandPortMapping[2] = mEqPlugin->port_index(config->eq_port_symbol_high());
     for (int i = 0; i < 3; i++) {
-      mEqBandValuePositiveScaling[i] = mEqPlugin->port_value_max(mEqBandPortMapping[i]);
-      mEqBandValueNegativeScaling[i] = -mEqPlugin->port_value_min(mEqBandPortMapping[i]);
+      dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
+      mEqBandPortMapping[i] = mEqPlugin->port_index(config->eq_port_symbol(band));
+      mEqBandValueMax[i] = mEqPlugin->port_value_max(mEqBandPortMapping[i]);
+      mEqBandValueMin[i] = mEqPlugin->port_value_min(mEqBandPortMapping[i]);
+      mEqBandValueDefault[i] = mEqPlugin->port_value_default(mEqBandPortMapping[i]);
+      mEqBandValueDBScale[i] = config->eq_band_db_scale(band);
     }
     QString preset = config->eq_plugin_preset_file();
     if (preset.size())
@@ -400,15 +401,26 @@ void Player::beat_buffer(BeatBuffer * buf){
   mStretcher->frame(0);
 }
 
-void Player::eq(eq_band_t band, double value) {
+void Player::eq(dj::eq_band_t band, double value) {
 #ifdef USE_LV2
   if (!mEqPlugin)
     return;
-  value = dj::clamp(value, -1.0, 1.0);
-  if (value < 0.0)
-    value *= mEqBandValueNegativeScaling[band];
-  else
-    value *= mEqBandValuePositiveScaling[band];
+  //if we have a negative to positive range, map our -1..1 to that range
+  if (mEqBandValueDBScale[band] != 0) {
+    value = dj::db2amp(mEqBandValueDBScale[band] * value);
+  } else if (mEqBandValueMin[band] < 0) {
+    if (value < 0.0)
+      value *= -mEqBandValueMin[band];
+    else
+      value *= mEqBandValueMax[band];
+  } else {
+    //otherwise map our -1..0..1 to min..default..max
+    if (value >= 0.0)
+      value = mEqBandValueDefault[band] + value * (mEqBandValueMax[band] - mEqBandValueDefault[band]);
+    else 
+      value = mEqBandValueDefault[band] + value * (mEqBandValueDefault[band] - mEqBandValueMin[band]);
+  }
+  value = dj::clamp(value, (double)mEqBandValueMin[band], (double)mEqBandValueMax[band]);
   mEqPlugin->control_value(mEqBandPortMapping[band], value);
 #endif
 }
@@ -680,11 +692,11 @@ void PlayerDoubleCommand::execute(const Transport& /*transport*/){
       case PLAY_SPEED_RELATIVE:
         p->play_speed_relative(mValue); break;
       case EQ_LOW:
-        p->eq(Player::LOW, mValue); break;
+        p->eq(dj::LOW, mValue); break;
       case EQ_MID:
-        p->eq(Player::MID, mValue); break;
+        p->eq(dj::MID, mValue); break;
       case EQ_HIGH:
-        p->eq(Player::HIGH, mValue); break;
+        p->eq(dj::HIGH, mValue); break;
     };
   }
 }

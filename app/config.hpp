@@ -34,6 +34,7 @@
 #include <QStringList>
 #include <QPair>
 #include <yaml-cpp/yaml.h>
+#include <array>
 #include "defines.hpp"
 
 namespace dj {
@@ -58,9 +59,9 @@ namespace dj {
       int db_port() const;
 
       QString eq_uri() const;
-      QString eq_port_symbol_low() const;
-      QString eq_port_symbol_mid() const;
-      QString eq_port_symbol_high() const;
+      QString eq_port_symbol(dj::eq_band_t band) const;
+      //zero for no db scaling
+      float eq_band_db_scale(dj::eq_band_t band) const;
       QString eq_plugin_preset_file() const;
 
       //if populated, run this after startup
@@ -86,19 +87,17 @@ namespace dj {
       QString mDBHost;
       int mDBPort;
 
-      /*
       QString mEqPluginURI = "http://plugin.org.uk/swh-plugins/dj_eq";
-      QString mEqPluginLowSymbol = "lo";
-      QString mEqPluginMidSymbol = "mid";
-      QString mEqPluginHighSymbol = "hi";
+      std::array<QString, 3> mEqPluginSymbol = std::array<QString,3>{"lo", "mid", "hi"};
+      std::array<float, 3> mEqPluginDBScale = std::array<float,3>{0.0f, 0.0f, 0.0f};
       QString mEqPluginPresetFile = "";
-      */
 
+      /*
       QString mEqPluginURI = "http://calf.sourceforge.net/plugins/eq5";
-      QString mEqPluginLowSymbol = "ls_level";
-      QString mEqPluginMidSymbol = "p2_level";
-      QString mEqPluginHighSymbol = "hs_level";
+      std::array<QString, 3> mEqPluginSymbol = std::array<QString,3>{"ls_level", "p2_level", "hs_level"};
+      std::array<float, 3> mEqPluginDBScale = std::array<float,3>{36.0f, 36.0f, 36.0f};
       QString mEqPluginPresetFile = "/home/alex/lv2presets/calfeq5_djing_maybe.lv2/calfeq5_djing_maybe.ttl";
+      */
 
       QString mPostStartScript;
 

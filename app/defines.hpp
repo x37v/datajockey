@@ -13,6 +13,8 @@
 #define INAUDIBLE_VOLUME 0.001f
 
 namespace dj {
+  enum eq_band_t {LOW = 0, MID = 1, HIGH = 2};
+
    //this is the value we use to scale from an int to a double, this
    //represents 'one' as a double in int terms.
    extern const unsigned int one_scale;
@@ -37,6 +39,9 @@ namespace dj {
             return top;
          return val;
       }
+
+      double db2amp(double db);
+      double amp2db(double amp);
 
    template<typename Type>
      Type linear_interp(Type v0, Type v1, double dist){

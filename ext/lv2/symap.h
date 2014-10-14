@@ -26,6 +26,10 @@
 #ifndef SYMAP_H
 #define SYMAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 struct SymapImpl;
@@ -65,5 +69,9 @@ symap_map(Symap* map, const char* sym);
 */
 const char*
 symap_unmap(Symap* map, uint32_t id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SYMAP_H */
