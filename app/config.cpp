@@ -26,6 +26,10 @@
 #include <QRegExp>
 #include <QDebug>
 
+#include <iostream>
+using std::cerr;
+using std::cout;
+
 using namespace dj;
 
 Configuration * Configuration::cInstance = NULL;
@@ -163,6 +167,33 @@ void Configuration::load_file(const QString& path) throw(std::runtime_error) {
     try {
       for (auto it = root["import"]["ignore"].begin(); it != root["import"]["ignore"].end(); it++)
         mImportIgnores << QString::fromStdString(it->as<std::string>());
+    } catch (...) { /* do nothing */ }
+
+    try {
+      if (root["eq"]) {
+        if (root["eq"]["uri"]) {
+          mEqPluginURI = QString::fromStdString(root["eq"]["uri"].as<std::string>());
+        }
+        if (root["eq"]["controls"]) {
+          if (root["eq"]["controls"].size() == 3) {
+            for (int i = 0; i < 3; i++)
+              mEqPluginSymbol[i] = QString::fromStdString(root["eq"]["controls"][i].as<std::string>());
+          } else {
+            cerr << "eq:controls must be of length 3" << std::endl;
+          }
+        }
+        if (root["eq"]["dbscale"]) {
+          if (root["eq"]["dbscale"].size() == 3) {
+            for (int i = 0; i < 3; i++)
+              mEqPluginDBScale[i] = root["eq"]["dbscale"][i].as<float>();
+          } else {
+            cerr << "eq:dbscale must be of length 3" << std::endl;
+          }
+        }
+        if (root["eq"]["presetfile"]) {
+          mEqPluginPresetFile = QString::fromStdString(root["eq"]["presetfile"].as<std::string>());
+        }
+      }
     } catch (...) { /* do nothing */ }
 
 

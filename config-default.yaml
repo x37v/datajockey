@@ -7,6 +7,11 @@ database:
   database: /home/alex/.datajockey/database.sqlite3
   pool: 5
   timeout: 5000
+eq:
+  uri: "http://plugin.org.uk/swh-plugins/dj_eq"
+  controls: ["lo", "mid", "hi"]
+  #dbscale: [0.0, 0.0, 0.0]
+  #presetfile: /path/to/present.ttl
 osc:
   in_port: 10001
   out:
