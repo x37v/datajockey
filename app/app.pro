@@ -93,7 +93,9 @@ SOURCES += main.cpp\
     audiofileinfoextractor.cpp \
     audio/xing.c \
     loopandjumpcontrolview.cpp \
-    loopandjumpmanager.cpp
+    loopandjumpmanager.cpp \
+    ../ext/lv2/symap.c \
+    ../ext/lv2/uridmap.c
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -145,7 +147,12 @@ HEADERS  += mainwindow.h \
     audiofileinfoextractor.h \
     audio/xing.h \
     loopandjumpcontrolview.h \
-    loopandjumpmanager.h
+    loopandjumpmanager.h \
+    ../ext/lv2/zix/common.h \
+    ../ext/lv2/zix/sem.h \
+    ../ext/lv2/zix/thread.h \
+    ../ext/lv2/symap.h \
+    ../ext/lv2/uridmap.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
@@ -159,5 +166,6 @@ INCLUDEPATH += . \
 	audio \
 	../ext/jackcpp/include/ \
   ../ext/yaml-cpp-0.5.1/include/ \
+	../ext/lv2/ \
   ../ext
 

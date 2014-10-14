@@ -61,6 +61,7 @@ namespace dj {
       QString eq_port_symbol_low() const;
       QString eq_port_symbol_mid() const;
       QString eq_port_symbol_high() const;
+      QString eq_plugin_preset_file() const;
 
       //if populated, run this after startup
       QString post_start_script();
@@ -85,10 +86,19 @@ namespace dj {
       QString mDBHost;
       int mDBPort;
 
+      /*
       QString mEqPluginURI = "http://plugin.org.uk/swh-plugins/dj_eq";
       QString mEqPluginLowSymbol = "lo";
       QString mEqPluginMidSymbol = "mid";
       QString mEqPluginHighSymbol = "hi";
+      QString mEqPluginPresetFile = "";
+      */
+
+      QString mEqPluginURI = "http://calf.sourceforge.net/plugins/eq5";
+      QString mEqPluginLowSymbol = "ls_level";
+      QString mEqPluginMidSymbol = "p2_level";
+      QString mEqPluginHighSymbol = "hs_level";
+      QString mEqPluginPresetFile = "/home/alex/lv2presets/calfeq5_djing_maybe.lv2/calfeq5_djing_maybe.ttl";
 
       QString mPostStartScript;
 

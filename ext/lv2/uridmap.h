@@ -19,6 +19,10 @@
 #ifndef URID_H
 #define URID_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <lv2/lv2plug.in/ns/ext/urid/urid.h>
 #include <lv2/lv2plug.in/ns/ext/uri-map/uri-map.h>
 
@@ -30,5 +34,9 @@ const char* unmap_urid(LV2_URID_Unmap_Handle handle, LV2_URID urid);
 uint32_t uri_to_id(LV2_URI_Map_Callback_Data callback_data, const char* map, const char* uri);
 LV2_URID urid_to_id(LV2_URID_Map_Handle handle, const char* uri);
 const char* id_to_urid(LV2_URID_Unmap_Handle handle, LV2_URID urid);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

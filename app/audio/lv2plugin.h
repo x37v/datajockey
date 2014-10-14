@@ -20,6 +20,7 @@ class Lv2Plugin : public AudioPlugin {
     float port_value_default(uint32_t index) const;
     uint32_t port_index(QString port_symbol) const throw(std::runtime_error);
 
+    void load_preset_from_file(QString file_path) throw(std::runtime_error);
 
     //below called in audio thread
     virtual void compute(unsigned int nframes, float ** mixBuffer);

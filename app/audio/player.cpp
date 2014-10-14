@@ -111,6 +111,9 @@ void Player::setup_audio(
       mEqBandValuePositiveScaling[i] = mEqPlugin->port_value_max(mEqBandPortMapping[i]);
       mEqBandValueNegativeScaling[i] = -mEqPlugin->port_value_min(mEqBandPortMapping[i]);
     }
+    QString preset = config->eq_plugin_preset_file();
+    if (preset.size())
+      mEqPlugin->load_preset_from_file(preset);
   } catch (std::runtime_error& e) {
     if (mEqPlugin) {
       delete mEqPlugin;

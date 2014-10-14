@@ -1,4 +1,7 @@
 #include "lv2plugin.h"
+#include <QFile>
+#include <QTextStream>
+#include "uridmap.h"
 
 namespace {
   LilvNode * lv2PortControl = nullptr;
@@ -124,6 +127,15 @@ uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_err
   if (!port)
     throw std::runtime_error("cannot find port by symbol name: " + port_symbol.toStdString());
   return lilv_port_get_index(mLilvPlugin, port);
+}
+
+void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_error) {
+  const LilvNode* uri = lilv_plugin_get_uri(mLilvPlugin);
+  LV2_URID_Map map = { NULL, map_urid };
+  LilvState* state = lilv_state_new_from_file(mWorld, &map, uri, qPrintable(file_path));
+  if (!state)
+    throw std::runtime_error("couldn't load state from file: " + file_path.toStdString());
+  lilv_state_free(state);
 }
 
 void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
