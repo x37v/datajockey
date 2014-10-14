@@ -8,10 +8,10 @@ database:
   pool: 5
   timeout: 5000
 eq:
-  uri: "http://plugin.org.uk/swh-plugins/dj_eq"
-  controls: ["lo", "mid", "hi"]
-  #dbscale: [0.0, 0.0, 0.0]
-  #presetfile: /path/to/present.ttl
+  uri: "http://plugin.org.uk/swh-plugins/dj_eq" #uri for lv2 eq plugin
+  controls: ["lo", "mid", "hi"] #symbol name for low, medium, high
+  #dbscale: [0.0, 0.0, 0.0] #set these to non zero to scale linear -1..1 into -db .. db [separate for each band], optional, value will be scaled to stay in range
+  #presetfile: /path/to/present.ttl #preset file to be loaded, optional
 osc:
   in_port: 10001
   out:
