@@ -26,7 +26,10 @@ static int nsm_save_cb(char **out_msg, void *userdata);
 static void signalHanlder(int sigNum);
 static int startApp(QApplication * app, QString jackClientName, nsm_client_t * nsm_client);
 
-bool start_app = false;
+namespace {
+  bool quit_app = false;
+  bool start_app = false;
+}
 QString clientName("datajockey");
 
 int main(int argc, char *argv[])
@@ -78,6 +81,20 @@ int main(int argc, char *argv[])
       //non session manager uses this to quit
       signal(SIGTERM, signalHanlder);
       nsm_send_announce(nsm, "datajockey", "", argv[0]);
+
+      QTimer * quit_watch_timer = new QTimer();
+
+      auto quit_func = [&quit_watch_timer] (void) {
+        if (!quit_app)
+          return;
+        quit_app = false;
+        quit_watch_timer->stop();
+        qApp->quit();
+      };
+
+      QObject::connect(quit_watch_timer, &QTimer::timeout, quit_func);
+      quit_watch_timer->setInterval(500);
+      quit_watch_timer->start(500);
     } else {
       nsm_free(nsm);
       nsm = 0;
@@ -193,8 +210,7 @@ static int nsm_save_cb(char ** /*out_msg*/, void * /*userdata*/) {
 }
 
 void signalHanlder(int sigNum) {
-  if (sigNum == SIGTERM) {
-    qApp->quit();
-  }
+  if (sigNum == SIGTERM)
+    quit_app = true;
 }
 
