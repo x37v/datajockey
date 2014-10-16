@@ -26,6 +26,9 @@ class Lv2Plugin : public AudioPlugin {
     virtual void compute(unsigned int nframes, float ** mixBuffer);
     virtual void stop();
     void control_value(uint32_t index, float v);
+
+    LilvPlugin * lilvplugin() const { return mLilvPlugin; }
+    LilvInstance * lilvinstance() const { return mLilvInstance; }
   private:
     LilvWorld * mWorld;
     LilvInstance * mLilvInstance;

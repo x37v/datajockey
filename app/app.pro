@@ -36,7 +36,9 @@ macx {
 
 unix:!macx {
   PKGCONFIG += jack lilv-0 vamp-hostsdk
+  LIBS += -lsuil-0
   DEFINES += USE_LV2
+  INCLUDEPATH += /usr/include/suil-0/
 }
 
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
@@ -95,7 +97,9 @@ SOURCES += main.cpp\
     loopandjumpcontrolview.cpp \
     loopandjumpmanager.cpp \
     ../ext/lv2/symap.c \
-    ../ext/lv2/uridmap.c
+    ../ext/lv2/uridmap.c \
+    lv2pluginview.cpp \
+    pluginview.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -152,7 +156,9 @@ HEADERS  += mainwindow.h \
     ../ext/lv2/zix/sem.h \
     ../ext/lv2/zix/thread.h \
     ../ext/lv2/symap.h \
-    ../ext/lv2/uridmap.h
+    ../ext/lv2/uridmap.h \
+    lv2pluginview.h \
+    pluginview.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
