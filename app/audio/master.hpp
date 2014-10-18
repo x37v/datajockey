@@ -66,6 +66,7 @@ namespace djaudio {
     private:
       //internal buffers
       std::vector<float **> mPlayerBuffers;
+      std::vector<float **> mSendBuffers;
       float ** mCueBuffer;
       float * mMasterVolumeBuffer;
       float ** mCrossFadeBuffer;

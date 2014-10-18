@@ -28,7 +28,8 @@ namespace djaudio {
       //** must be called BEFORE the audio callback starts
       void setup_audio(
           unsigned int sampleRate,
-          unsigned int maxBufferLen);
+          unsigned int maxBufferLen,
+          unsigned int sendBufferCount);
 
       //the audio computation methods
       //the player doesn't own its own buffer, it is passed it..
@@ -44,9 +45,11 @@ namespace djaudio {
           const Transport& transport, bool inbeat); 
       //finalize audio computation, apply effects, etc.
       void audio_post_compute(unsigned int numFrames, float ** mixBuffer); 
+
       //actually fill the output vectors
+      //send buffers may already have audio in them, so mix into them
       void audio_fill_output_buffers(unsigned int numFrames, 
-          float ** mixBuffer, float ** cueBuffer);
+          float ** mixBuffer, float ** cueBuffer, std::vector<float **>& sendBuffers);
 
       //getters
       play_state_t play_state() const;
@@ -55,6 +58,7 @@ namespace djaudio {
       bool syncing() const;
       bool looping() const;
       double volume() const;
+      float send_volume(unsigned int send_index) const;
       double play_speed() const;
       unsigned int frame() const;
       unsigned int beat_index() const;
@@ -73,6 +77,7 @@ namespace djaudio {
       void sync(bool val, const Transport * transport = NULL);
       void loop(bool val);
       void volume(double val);
+      void send_volume(unsigned int send_index, float val);
       void play_speed(double val);
       void position_at_frame(unsigned long frame, Transport * transport = NULL);
       void position_at_beat(unsigned int beat, Transport * transport = NULL);
@@ -107,6 +112,7 @@ namespace djaudio {
 
       //continuous
       double mVolume;
+      std::vector<float> mSendVolumes;
 
       unsigned int mLoopStartFrame;
       unsigned int mLoopEndFrame;
@@ -114,6 +120,7 @@ namespace djaudio {
       //internals, bookkeeping, etc
       unsigned int mSampleRate;
       float * mVolumeBuffer;
+      std::vector<float *> mSendVolumeBuffers;
       BeatBuffer * mBeatBuffer;
       Stretcher * mStretcher;
       float mMaxSampleValue;

@@ -5,6 +5,7 @@
 using namespace djaudio;
 
 #define DEFAULT_NUM_PLAYERS 2
+#define DEFAULT_NUM_SENDS 2
 Master * Master::cInstance = NULL;
 
 Master * Master::instance(){
@@ -54,6 +55,11 @@ Master::~Master(){
     delete [] mPlayerBuffers[i][1];
     delete [] mPlayerBuffers[i];
   }
+  for(unsigned int i = 0; i < mSendBuffers.size(); i++){
+    delete [] mSendBuffers[i][0];
+    delete [] mSendBuffers[i][1];
+    delete [] mSendBuffers[i];
+  }
   if(mMasterVolumeBuffer)
     delete [] mMasterVolumeBuffer;
   if(mCrossFadeBuffer){
@@ -78,12 +84,31 @@ void Master::setup_audio(
   mCueBuffer[0] = new float[maxBufferLen];
   mCueBuffer[1] = new float[maxBufferLen];
 
-  if(mPlayerBuffers.size()){
+  if(mPlayerBuffers.size()) {
     for(unsigned int i = 0; i < mPlayerBuffers.size(); i++){
       delete [] mPlayerBuffers[i][0];
       delete [] mPlayerBuffers[i][1];
       delete [] mPlayerBuffers[i];
     }
+    mPlayerBuffers.clear();
+  }
+
+  if (mSendBuffers.size()) {
+    for(unsigned int i = 0; i < mSendBuffers.size(); i++){
+      delete [] mSendBuffers[i][0];
+      delete [] mSendBuffers[i][1];
+      delete [] mSendBuffers[i];
+    }
+    mSendBuffers.clear();
+  }
+
+  for (unsigned int i = 0; i < DEFAULT_NUM_SENDS; i++) {
+    float ** sampleBuffer = new float*[2];
+    sampleBuffer[0] = new float[maxBufferLen];
+    sampleBuffer[1] = new float[maxBufferLen];
+    memset(sampleBuffer[0], sizeof(float) * maxBufferLen, 0);
+    memset(sampleBuffer[1], sizeof(float) * maxBufferLen, 0);
+    mSendBuffers.push_back(sampleBuffer);
   }
 
   //set up the players and their buffers
@@ -91,11 +116,9 @@ void Master::setup_audio(
     float ** sampleBuffer = new float*[2];
     sampleBuffer[0] = new float[maxBufferLen];
     sampleBuffer[1] = new float[maxBufferLen];
-    mPlayers[i]->setup_audio(sampleRate, maxBufferLen);
-    for(unsigned int j = 0; j < maxBufferLen; j++) {
-      sampleBuffer[0][j] = 0.0f;
-      sampleBuffer[1][j] = 0.0f;
-    }
+    memset(sampleBuffer[0], sizeof(float) * maxBufferLen, 0);
+    memset(sampleBuffer[1], sizeof(float) * maxBufferLen, 0);
+    mPlayers[i]->setup_audio(sampleRate, maxBufferLen, mSendBuffers.size());
     mPlayerBuffers.push_back(sampleBuffer);
   }
   if(mMasterVolumeBuffer)
@@ -122,6 +145,12 @@ Player * Master::add_player(){
 void Master::audio_compute_and_fill(
     JackCpp::AudioIO::audioBufVector outBufferVector,
     unsigned int numFrames){
+
+  //clear out our sends
+  for (unsigned int i = 0; i < mSendBuffers.size(); i++) {
+    memset(mSendBuffers[i][0], sizeof(float) * numFrames, 0);
+    memset(mSendBuffers[i][1], sizeof(float) * numFrames, 0);
+  }
 
   //execute the schedule
   mScheduler.execute_schedule(mTransport);
@@ -176,43 +205,28 @@ void Master::audio_compute_and_fill(
     mMasterVolumeBuffer[frame] = mMasterVolume;
   }
 
+  auto compute_player_audio = [this, &outBufferVector](unsigned int player, unsigned int chan, unsigned int frame, float xfade_mul) {
+    outBufferVector[chan][frame] += 
+      xfade_mul * mMasterVolumeBuffer[frame] * mPlayerBuffers[player][chan][frame];
+    outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
+    //store the max sample value
+    mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
+  };
+
   //finalize each player, and copy its data out
   for(unsigned int p = 0; p < mPlayers.size(); p++){
     mPlayers[p]->audio_post_compute(numFrames, mPlayerBuffers[p]);
-    mPlayers[p]->audio_fill_output_buffers(numFrames, mPlayerBuffers[p], mCueBuffer);
-
-    //actually copy the data to the output, applying cross fade if needed
-    if(p == mCrossFadeMixers[0]){
-      for(unsigned int frame = 0; frame < numFrames; frame++){
-        for(unsigned int chan = 0; chan < 2; chan++){
-          outBufferVector[chan][frame] += 
-            mCrossFadeBuffer[0][frame] *
-            mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
-          outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
-          //store the max sample value
-          mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
-        }
-      }
-    } else if(p == mCrossFadeMixers[1]){
-      for(unsigned int frame = 0; frame < numFrames; frame++){
-        for(unsigned int chan = 0; chan < 2; chan++){
-          outBufferVector[chan][frame] += 
-            mCrossFadeBuffer[1][frame] *
-            mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
-          outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
-          //store the max sample value
-          mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
-        }
-      }
-    } else {
-      for(unsigned int frame = 0; frame < numFrames; frame++){
-        for(unsigned int chan = 0; chan < 2; chan++){
-          outBufferVector[chan][frame] += 
-            mMasterVolumeBuffer[frame] * mPlayerBuffers[p][chan][frame];
-          outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
-          //store the max sample value
-          mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
-        }
+    mPlayers[p]->audio_fill_output_buffers(numFrames, mPlayerBuffers[p], mCueBuffer, mSendBuffers);
+    int xfade_index = -1;
+    if (p == mCrossFadeMixers[0]) {
+      xfade_index = 0;
+    } else if (p == mCrossFadeMixers[1]) {
+      xfade_index = 1;
+    }
+    for(unsigned int frame = 0; frame < numFrames; frame++) {
+      for(unsigned int chan = 0; chan < 2; chan++) {
+        float xfade_mul = xfade_index < 0 ? 1.0f : mCrossFadeBuffer[xfade_index][frame];
+        compute_player_audio(p, chan, frame, xfade_mul);
       }
     }
   }

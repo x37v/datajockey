@@ -76,6 +76,9 @@ Player::~Player(){
   //cleanup
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
+  for (unsigned int i = 0; i < mSendVolumeBuffers.size(); i++)
+    delete [] mSendVolumeBuffers[i];
+  mSendVolumeBuffers.clear();
 #ifdef USE_LV2
   if(mEqPlugin)
     delete mEqPlugin;
@@ -86,17 +89,29 @@ Player::~Player(){
 //** must be called BEFORE the audio callback starts
 void Player::setup_audio(
     unsigned int sampleRate,
-    unsigned int maxBufferLen){
+    unsigned int maxBufferLen,
+    unsigned int sendBufferCount) {
   //set the sample rate, create our internal audio buffers
   mSampleRate = sampleRate;
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
   mVolumeBuffer = new float[maxBufferLen];
+  for (unsigned int i = 0; i < mSendVolumeBuffers.size(); i++)
+    delete [] mSendVolumeBuffers[i];
+  mSendVolumeBuffers.clear();
+  mSendVolumes.clear();
 
   unsigned int fade_length = static_cast<double>(sampleRate) * 0.020; //seconds
   mEnvelope.length(fade_length);
   mFadeoutBuffer.resize(2 * (fade_length + 1));
   mFadeoutIndex = mFadeoutBuffer.size();
+
+  for (unsigned int i = 0; i < sendBufferCount; i++) {
+    float * v = new float[maxBufferLen];
+    memset(v, sizeof(float) * maxBufferLen, 0);
+    mSendVolumeBuffers.push_back(v);
+    mSendVolumes.push_back(0.0f);
+  }
 
 #ifdef USE_LV2
   dj::Configuration * config = dj::Configuration::instance();
@@ -151,6 +166,11 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
   //compute the volume
   mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
+  for (unsigned int i = 0; i < mSendVolumes.size(); i++) {
+    //XXX post fader, should we allow for pre fader?
+    mSendVolumeBuffers[i][frame] = mSendVolumes[i] * mVolumeBuffer[frame];
+  }
+
   //compute the actual frame
   if(mPlayState == PLAY) {
     //only update the rate on the beat.
@@ -196,34 +216,24 @@ void Player::audio_post_compute(unsigned int numFrames, float ** mixBuffer){
 
 //actually fill the output vectors
 void Player::audio_fill_output_buffers(unsigned int numFrames,
-    float ** mixBuffer, float ** cueBuffer){
+    float ** mixBuffer, float ** cueBuffer, std::vector<float **>& sendBuffers){
   if(!mStretcher->audio_buffer()) {
     mMaxSampleValue = std::max(mMaxSampleValue, 0.0f);
     return;
   }
 
   //send the data out, copying to the cue buffer before volume if needed
-  if(mOutState == CUE){
-    for(unsigned int i = 0; i < 2; i++){
-      for(unsigned int j = 0; j < numFrames; j++){
-        float sample_with_volume = mixBuffer[i][j] * mVolumeBuffer[j];
+  const bool cueing = (mOutState == CUE);
+  const bool mute_main = cueing && mCueMutesMain;
+  for (unsigned int i = 0; i < 2; i++){
+    for (unsigned int j = 0; j < numFrames; j++){
+      float sample_with_volume = mixBuffer[i][j] * mVolumeBuffer[j];
 
-        cueBuffer[i][j] = mixBuffer[i][j];
-        mMaxSampleValue = std::max(mMaxSampleValue, fabsf(sample_with_volume));
-
-        if (mCueMutesMain)
-          mixBuffer[i][j] = 0.0f;
-        else
-          mixBuffer[i][j] = sample_with_volume;
-      }
-    }
-  } else {
-    for(unsigned int i = 0; i < 2; i++){
-      for(unsigned int j = 0; j < numFrames; j++) {
-        cueBuffer[i][j] = 0.0f;
-        mixBuffer[i][j] *= mVolumeBuffer[j];
-        mMaxSampleValue = std::max(mMaxSampleValue, fabsf(mixBuffer[i][j]));
-      }
+      cueBuffer[i][j] = cueing ? mixBuffer[i][j] : 0.0f;
+      mMaxSampleValue = std::max(mMaxSampleValue, fabsf(sample_with_volume));
+      mixBuffer[i][j] = mute_main ? 0.0f : sample_with_volume;
+      for (int k = 0; k < std::min(mSendVolumeBuffers.size(), sendBuffers.size()); k++)
+        sendBuffers[k][i][j] += mixBuffer[i][j] * mSendVolumeBuffers[k][j];
     }
   }
 }
@@ -235,6 +245,11 @@ bool Player::muted() const { return mMute; }
 bool Player::syncing() const { return mSync; }
 bool Player::looping() const { return mLoop; }
 double Player::volume() const { return mVolume; }
+float Player::send_volume(unsigned int index) const {
+  if (index >= mSendVolumes.size())
+    return 0.0f;
+  return mSendVolumes[index];
+}
 double Player::play_speed() const { return mStretcher->speed(); }
 
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
@@ -320,6 +335,12 @@ void Player::loop(bool val){
 
 void Player::volume(double val){
   mVolume = val;
+}
+
+void Player::send_volume(unsigned int send_index, float val) {
+  if (send_index >= mSendVolumes.size())
+    return;
+  mSendVolumes[send_index] = val;
 }
 
 void Player::play_speed(double val){
