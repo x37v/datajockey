@@ -13,6 +13,7 @@
 #include "defines.hpp"
 #include "midirouter.h"
 #include "config.hpp"
+#include "oscsender.h"
 #include "historymanager.h"
 #include "nsm.h"
 
@@ -164,6 +165,24 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
 
   if (QFileInfo::exists(config->midi_mapping_file()))
     midi->readFile(config->midi_mapping_file());
+
+  OSCSender * osc_send = new OSCSender();
+  QThread * osc_send_thread = new QThread;
+  osc_send_thread->moveToThread(osc_send_thread);
+  osc_send_thread->start();
+
+  //XXX tmp
+  osc_send->setHostAndPort("", "10101");
+
+  QObject::connect(audio, &AudioModel::playerValueChangedDouble, osc_send, &OSCSender::playerSetValueDouble);
+  QObject::connect(audio, &AudioModel::playerValueChangedInt,    osc_send, &OSCSender::playerSetValueInt);
+  QObject::connect(audio, &AudioModel::playerValueChangedBool,   osc_send, &OSCSender::playerSetValueBool);
+  QObject::connect(audio, &AudioModel::playerTriggered,          osc_send, &OSCSender::playerTrigger);
+
+  QObject::connect(audio, &AudioModel::masterValueChangedDouble, osc_send, &OSCSender::masterSetValueDouble);
+  QObject::connect(audio, &AudioModel::masterValueChangedInt,    osc_send, &OSCSender::masterSetValueInt);
+  QObject::connect(audio, &AudioModel::masterValueChangedBool,   osc_send, &OSCSender::masterSetValueBool);
+  QObject::connect(audio, &AudioModel::masterTriggered,          osc_send, &OSCSender::masterTrigger);
 
 
   MainWindow w(db, audio);

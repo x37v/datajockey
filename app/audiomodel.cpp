@@ -18,12 +18,10 @@ using djaudio::BeatBuffer;
 using djaudio::BeatBufferPtr;
 using djaudio::Command;
 
-namespace {
-  //convert between our integer based 'one_scale' and double
-  const double done_scale = static_cast<double>(dj::one_scale);
-  int to_int(double v) { return static_cast<int>(v * done_scale); }
-  double to_double(int v) { return static_cast<double>(v) / done_scale; }
+using dj::to_int;
+using dj::to_double;
 
+namespace {
   //convert a *_relative into an absolute value if we have the non _relative verison
   //in our map
   template <typename T, typename V>
