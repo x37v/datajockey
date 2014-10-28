@@ -86,6 +86,7 @@ SOURCES += main.cpp\
     workfiltermodelcollection.cpp \
     renameabletabwidget.cpp \
     midirouter.cpp \
+    oscsender.cpp \
     tagmodel.cpp \
     historymanager.cpp \
     audiofiletag.cpp \
@@ -140,6 +141,7 @@ HEADERS  += mainwindow.h \
     workfiltermodelcollection.hpp \
     renameabletabwidget.h \
     midirouter.h \
+    oscsender.h \
     tagmodel.h \
     historymanager.h \
     audiofiletag.h \

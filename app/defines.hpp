@@ -19,6 +19,9 @@ namespace dj {
    //represents 'one' as a double in int terms.
    extern const unsigned int one_scale;
    extern const double pi;
+
+   int to_int(double v);
+   double to_double(int v);
    
    const QString version_string = STRINGIFY(DJ_VERSION);
 
