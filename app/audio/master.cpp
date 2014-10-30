@@ -60,6 +60,7 @@ Master::~Master(){
     delete [] mSendBuffers[i][1];
     delete [] mSendBuffers[i];
   }
+
   if(mMasterVolumeBuffer)
     delete [] mMasterVolumeBuffer;
   if(mCrossFadeBuffer){
@@ -102,6 +103,7 @@ void Master::setup_audio(
     mSendBuffers.clear();
   }
 
+  mSendPlugins.resize(DEFAULT_NUM_SENDS);
   for (unsigned int i = 0; i < DEFAULT_NUM_SENDS; i++) {
     float ** sampleBuffer = new float*[2];
     sampleBuffer[0] = new float[maxBufferLen];
@@ -109,6 +111,7 @@ void Master::setup_audio(
     memset(sampleBuffer[0], sizeof(float) * maxBufferLen, 0);
     memset(sampleBuffer[1], sizeof(float) * maxBufferLen, 0);
     mSendBuffers.push_back(sampleBuffer);
+    mSendPlugins[i].setup(sampleRate, maxBufferLen);
   }
 
   //set up the players and their buffers
@@ -121,6 +124,7 @@ void Master::setup_audio(
     mPlayers[i]->setup_audio(sampleRate, maxBufferLen, mSendBuffers.size());
     mPlayerBuffers.push_back(sampleBuffer);
   }
+
   if(mMasterVolumeBuffer)
     delete [] mMasterVolumeBuffer;
   mMasterVolumeBuffer = new float[maxBufferLen];
@@ -144,7 +148,7 @@ Player * Master::add_player(){
 
 void Master::audio_compute_and_fill(
     JackCpp::AudioIO::audioBufVector outBufferVector,
-    unsigned int numFrames){
+    unsigned int numFrames) {
 
   //clear out our sends
   for (unsigned int i = 0; i < mSendBuffers.size(); i++) {
@@ -228,6 +232,15 @@ void Master::audio_compute_and_fill(
         float xfade_mul = xfade_index < 0 ? 1.0f : mCrossFadeBuffer[xfade_index][frame];
         compute_player_audio(p, chan, frame, xfade_mul);
       }
+    }
+  }
+
+  //mix in the effects
+  for (unsigned int i = 0; i < mSendPlugins.size(); i++) {
+    mSendPlugins[i].compute(numFrames, mSendBuffers[i]);
+    for (unsigned int j = 0; j < numFrames; j++) {
+      outBufferVector[0][j] += mSendBuffers[i][0][j];
+      outBufferVector[1][j] += mSendBuffers[i][1][j];
     }
   }
 }

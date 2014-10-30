@@ -1,6 +1,7 @@
 #ifndef DATAJOCKEY_MIXER_HPP
 #define DATAJOCKEY_MIXER_HPP
 
+#include "plugin.h"
 #include "player.hpp"
 #include "transport.hpp"
 #include "scheduler.hpp"
@@ -67,6 +68,8 @@ namespace djaudio {
       //internal buffers
       std::vector<float **> mPlayerBuffers;
       std::vector<float **> mSendBuffers;
+      std::vector<AudioPluginCollection> mSendPlugins;
+
       float ** mCueBuffer;
       float * mMasterVolumeBuffer;
       float ** mCrossFadeBuffer;

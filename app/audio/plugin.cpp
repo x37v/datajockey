@@ -27,3 +27,7 @@ void AudioPluginCollection::stop() {
     });
 }
 
+void AudioPluginCollection::append(AudioPluginNode * plugin) {
+  mEffects.push_back(plugin);
+}
+

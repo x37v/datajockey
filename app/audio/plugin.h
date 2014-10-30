@@ -14,6 +14,8 @@ class AudioPlugin {
     virtual void stop(){}
 };
 
+typedef DoubleLinkedListNode<AudioPlugin * > AudioPluginNode;
+
 class AudioPluginCollection : public AudioPlugin {
   public:
     AudioPluginCollection();
@@ -22,6 +24,8 @@ class AudioPluginCollection : public AudioPlugin {
 
     virtual void compute(unsigned int nframes, float ** mixBuffer);
     virtual void stop();
+
+    void append(AudioPluginNode * plugin); 
   private:
     DoubleLinkedList<AudioPlugin *> mEffects;
 };
