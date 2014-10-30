@@ -108,7 +108,7 @@ void Player::setup_audio(
 
   for (unsigned int i = 0; i < sendBufferCount; i++) {
     float * v = new float[maxBufferLen];
-    memset(v, sizeof(float) * maxBufferLen, 0);
+    memset(v, 0, sizeof(float) * maxBufferLen);
     mSendVolumeBuffers.push_back(v);
     mSendVolumes.push_back(0.0f);
   }

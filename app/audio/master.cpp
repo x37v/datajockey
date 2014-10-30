@@ -108,8 +108,8 @@ void Master::setup_audio(
     float ** sampleBuffer = new float*[2];
     sampleBuffer[0] = new float[maxBufferLen];
     sampleBuffer[1] = new float[maxBufferLen];
-    memset(sampleBuffer[0], sizeof(float) * maxBufferLen, 0);
-    memset(sampleBuffer[1], sizeof(float) * maxBufferLen, 0);
+    memset(sampleBuffer[0], 0, sizeof(float) * maxBufferLen);
+    memset(sampleBuffer[1], 0, sizeof(float) * maxBufferLen);
     mSendBuffers.push_back(sampleBuffer);
     mSendPlugins[i].setup(sampleRate, maxBufferLen);
   }
@@ -119,8 +119,8 @@ void Master::setup_audio(
     float ** sampleBuffer = new float*[2];
     sampleBuffer[0] = new float[maxBufferLen];
     sampleBuffer[1] = new float[maxBufferLen];
-    memset(sampleBuffer[0], sizeof(float) * maxBufferLen, 0);
-    memset(sampleBuffer[1], sizeof(float) * maxBufferLen, 0);
+    memset(sampleBuffer[0], 0, sizeof(float) * maxBufferLen);
+    memset(sampleBuffer[1], 0, sizeof(float) * maxBufferLen);
     mPlayers[i]->setup_audio(sampleRate, maxBufferLen, mSendBuffers.size());
     mPlayerBuffers.push_back(sampleBuffer);
   }
@@ -138,6 +138,21 @@ void Master::setup_audio(
   mCrossFadeBuffer[0] = new float[maxBufferLen];
   mCrossFadeBuffer[1] = new float[maxBufferLen];
   mTransport.setup(sampleRate);
+
+#if 0
+  //XXX tmp
+  
+  Lv2Plugin * sendPlugin = new Lv2Plugin(
+      "http://calf.sourceforge.net/plugins/VintageDelay",
+      lv2_world(), lv2_plugins());
+  sendPlugin->setup(sampleRate, maxBufferLen);
+  sendPlugin->load_preset_from_file("/home/alex/lv2presets/delay_lv2.lv2/delay_lv2.ttl");
+
+  AudioPluginNode * node = new AudioPluginNode(sendPlugin);
+  add_send_plugin(0, node);
+
+  mPlayers[0]->send_volume(0, 1.0);
+#endif
 }
 
 Player * Master::add_player(){
@@ -152,8 +167,8 @@ void Master::audio_compute_and_fill(
 
   //clear out our sends
   for (unsigned int i = 0; i < mSendBuffers.size(); i++) {
-    memset(mSendBuffers[i][0], sizeof(float) * numFrames, 0);
-    memset(mSendBuffers[i][1], sizeof(float) * numFrames, 0);
+    memset(mSendBuffers[i][0], 0, sizeof(float) * numFrames);
+    memset(mSendBuffers[i][1], 0, sizeof(float) * numFrames);
   }
 
   //execute the schedule
@@ -211,7 +226,7 @@ void Master::audio_compute_and_fill(
 
   auto compute_player_audio = [this, &outBufferVector](unsigned int player, unsigned int chan, unsigned int frame, float xfade_mul) {
     outBufferVector[chan][frame] += 
-      xfade_mul * mMasterVolumeBuffer[frame] * mPlayerBuffers[player][chan][frame];
+      xfade_mul * mPlayerBuffers[player][chan][frame];
     outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
     //store the max sample value
     mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
@@ -237,11 +252,18 @@ void Master::audio_compute_and_fill(
 
   //mix in the effects
   for (unsigned int i = 0; i < mSendPlugins.size(); i++) {
-    mSendPlugins[i].compute(numFrames, mSendBuffers[i]);
+    float ** buf = mSendBuffers[i];
+    mSendPlugins[i].compute(numFrames, buf);
     for (unsigned int j = 0; j < numFrames; j++) {
-      outBufferVector[0][j] += mSendBuffers[i][0][j];
-      outBufferVector[1][j] += mSendBuffers[i][1][j];
+      outBufferVector[0][j] += buf[0][j];
+      outBufferVector[1][j] += buf[1][j];
     }
+  }
+
+  //XXX do a vector multiply?
+  for (int i = 0; i < numFrames; i++) {
+    outBufferVector[0][i] *= mMasterVolumeBuffer[i];
+    outBufferVector[1][i] *= mMasterVolumeBuffer[i];
   }
 }
 
@@ -298,6 +320,12 @@ Transport * Master::transport(){ return &mTransport; }
 LilvWorld * Master::lv2_world() const { return mLV2World; }
 const LilvPlugins * Master::lv2_plugins() const { return mLV2Plugins; }
 #endif
+
+void Master::add_send_plugin(unsigned int send, AudioPluginNode * plugin_node) {
+  if (send >= mSendPlugins.size())
+    return; //XXX error
+  mSendPlugins[send].append(plugin_node);
+}
 
 float Master::max_sample_value() const { return mMaxSampleValue; }
 
@@ -447,3 +475,20 @@ void MasterNextBeatCommand::execute(const Transport& /*transport*/) {
 bool MasterNextBeatCommand::store(CommandIOData& /* data */) const {
   return false;
 }
+
+MasterAddPluginCommand::MasterAddPluginCommand(unsigned int send, AudioPluginNode * plugin_node) :
+  mSend(send), mPlugin(plugin_node)
+{
+}
+
+MasterAddPluginCommand::~MasterAddPluginCommand() {
+}
+
+void MasterAddPluginCommand::execute(const Transport& /*transport*/) {
+  master()->add_send_plugin(mSend, mPlugin);
+}
+
+bool MasterAddPluginCommand::store(CommandIOData& /* data */) const {
+  return false;
+}
+

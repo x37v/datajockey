@@ -176,8 +176,8 @@ void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_erro
 }
 
 void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
-  memset(&mComputeBuffer[0].front(), sizeof(float) * nframes, 0);
-  memset(&mComputeBuffer[1].front(), sizeof(float) * nframes, 0);
+  memset(&mComputeBuffer[0].front(), 0, sizeof(float) * nframes);
+  memset(&mComputeBuffer[1].front(), 0, sizeof(float) * nframes);
 
   for (uint32_t i = 0; i < 2; i++) {
     lilv_instance_connect_port(mLilvInstance, mAudioInputs[i], mixBuffer[i]);

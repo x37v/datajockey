@@ -56,6 +56,8 @@ namespace djaudio {
       const LilvPlugins * lv2_plugins() const;
 #endif
 
+      void add_send_plugin(unsigned int send, AudioPluginNode * plugin_node);
+
       //setters
       void master_volume(float val);
       void cue_volume(float val);
@@ -151,6 +153,17 @@ namespace djaudio {
       virtual bool store(CommandIOData& data) const;
     private:
       Command * mCommand;
+  };
+
+  class MasterAddPluginCommand : public MasterCommand {
+    public:
+      MasterAddPluginCommand(unsigned int send, AudioPluginNode * plugin_node);
+      virtual ~MasterAddPluginCommand();
+      virtual void execute(const Transport& transport);
+      virtual bool store(CommandIOData& data) const;
+    private:
+      unsigned int mSend;
+      AudioPluginNode * mPlugin;
   };
 }
 
