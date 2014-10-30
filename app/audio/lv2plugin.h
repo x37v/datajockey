@@ -36,6 +36,8 @@ class Lv2Plugin : public AudioPlugin {
     std::vector<uint32_t> mAudioInputs;
     std::vector<uint32_t> mAudioOutputs;
 
+    std::vector<float> mComputeBuffer[2];
+
     std::vector<float> mPortValueMin;
     std::vector<float> mPortValueMax;
     std::vector<float> mPortValueDefault;

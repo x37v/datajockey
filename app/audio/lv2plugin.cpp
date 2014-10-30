@@ -86,8 +86,11 @@ Lv2Plugin::~Lv2Plugin() {
     delete kv.second;
 }
 
-void Lv2Plugin::setup(unsigned int sample_rate, unsigned int /* max_buffer_length */) {
+void Lv2Plugin::setup(unsigned int sample_rate, unsigned int max_buffer_length) {
   mLilvInstance = lilv_plugin_instantiate(mLilvPlugin, sample_rate, NULL);
+
+  mComputeBuffer[0].resize(max_buffer_length, 0.0f);
+  mComputeBuffer[1].resize(max_buffer_length, 0.0f);
 
   for (uint32_t i = 0; i < mNumPorts; i++) {
     const LilvPort * port = lilv_plugin_get_port_by_index(mLilvPlugin, i);
@@ -173,11 +176,20 @@ void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_erro
 }
 
 void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
+  memset(&mComputeBuffer[0].front(), sizeof(float) * nframes, 0);
+  memset(&mComputeBuffer[1].front(), sizeof(float) * nframes, 0);
+
   for (uint32_t i = 0; i < 2; i++) {
     lilv_instance_connect_port(mLilvInstance, mAudioInputs[i], mixBuffer[i]);
-    lilv_instance_connect_port(mLilvInstance, mAudioOutputs[i], mixBuffer[i]);
+    lilv_instance_connect_port(mLilvInstance, mAudioOutputs[i], &mComputeBuffer[i].front());
   }
   lilv_instance_run(mLilvInstance, nframes);
+
+  //XXX vector copy?
+  for (unsigned int i = 0; i < nframes; i++) {
+    mixBuffer[0][i] = mComputeBuffer[0][i];
+    mixBuffer[1][i] = mComputeBuffer[1][i];
+  }
 }
 
 void Lv2Plugin::stop() {
