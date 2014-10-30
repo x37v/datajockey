@@ -166,10 +166,8 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
   //compute the volume
   mVolumeBuffer[frame] = mMute ? 0.0 : mVolume;
 
-  for (unsigned int i = 0; i < mSendVolumes.size(); i++) {
-    //XXX post fader, should we allow for pre fader?
-    mSendVolumeBuffers[i][frame] = mSendVolumes[i] * mVolumeBuffer[frame];
-  }
+  for (unsigned int i = 0; i < mSendVolumes.size(); i++)
+    mSendVolumeBuffers[i][frame] = mSendVolumes[i];
 
   //compute the actual frame
   if(mPlayState == PLAY) {
