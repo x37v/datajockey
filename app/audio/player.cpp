@@ -116,8 +116,7 @@ void Player::setup_audio(
 #ifdef USE_LV2
   dj::Configuration * config = dj::Configuration::instance();
   try {
-    Master * master = Master::instance();
-    mEqPlugin = new Lv2Plugin(config->eq_uri(), master->lv2_world(), master->lv2_plugins());
+    mEqPlugin = new Lv2Plugin(config->eq_uri());
     mEqPlugin->setup(sampleRate, maxBufferLen);
     for (int i = 0; i < 3; i++) {
       dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
@@ -230,7 +229,7 @@ void Player::audio_fill_output_buffers(unsigned int numFrames,
       cueBuffer[i][j] = cueing ? mixBuffer[i][j] : 0.0f;
       mMaxSampleValue = std::max(mMaxSampleValue, fabsf(sample_with_volume));
       mixBuffer[i][j] = mute_main ? 0.0f : sample_with_volume;
-      for (int k = 0; k < std::min(mSendVolumeBuffers.size(), sendBuffers.size()); k++)
+      for (unsigned int k = 0; k < std::min(mSendVolumeBuffers.size(), sendBuffers.size()); k++)
         sendBuffers[k][i][j] += mixBuffer[i][j] * mSendVolumeBuffers[k][j];
     }
   }
@@ -486,7 +485,9 @@ void Player::update_play_speed(const Transport * transport) {
     return;
 
   //if we're looping we might have a loop that is smaller than a beat
-  if (mLoop && frame >= mLoopStartFrame && frame < mLoopEndFrame) {
+  if (mLoop && frame > 0 &&
+      static_cast<unsigned int>(frame) >= mLoopStartFrame &&
+      static_cast<unsigned int>(frame) < mLoopEndFrame) {
     int loop_frames = mLoopEndFrame - mLoopStartFrame;
     int loop_beat_start = ::beat_index(mBeatBuffer, frame);
     if (loop_beat_start + 1 < static_cast<int>(mBeatBuffer->size()) && loop_frames > 0) {

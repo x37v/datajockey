@@ -8,7 +8,7 @@
 class Lv2Plugin : public AudioPlugin {
   public:
     //constructor and destructor called in main thread
-    Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw(std::runtime_error);
+    Lv2Plugin(QString uri) throw(std::runtime_error);
     virtual ~Lv2Plugin();
     virtual void setup(unsigned int sample_rate, unsigned int max_buffer_length);
 
@@ -27,7 +27,6 @@ class Lv2Plugin : public AudioPlugin {
     virtual void stop();
     void control_value(uint32_t index, float v);
   private:
-    LilvWorld * mWorld;
     LilvInstance * mLilvInstance;
     const LilvPlugin * mLilvPlugin;
     uint32_t mNumPorts = 0;

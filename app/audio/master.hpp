@@ -8,10 +8,6 @@
 #include "types.hpp"
 #include <vector>
 
-#ifdef USE_LV2
-#include <lilv/lilv.h>
-#endif
-
 namespace djaudio {
   class Master {
     private:
@@ -51,11 +47,6 @@ namespace djaudio {
       float max_sample_value() const;
       bool player_audible(unsigned int player_index) const;
 
-#ifdef USE_LV2
-      LilvWorld * lv2_world() const;
-      const LilvPlugins * lv2_plugins() const;
-#endif
-
       void add_send_plugin(unsigned int send, AudioPluginNode * plugin_node);
 
       //setters
@@ -87,11 +78,6 @@ namespace djaudio {
       bool mCrossFade;
       float mCrossFadePosition;
       float mMaxSampleValue;
-
-#ifdef USE_LV2
-      LilvWorld * mLV2World;
-      const LilvPlugins * mLV2Plugins;
-#endif
   };
   class MasterCommand : public Command {
     public:

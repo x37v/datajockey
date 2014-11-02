@@ -16,15 +16,26 @@ namespace {
   LilvNode * lv2PortInput = nullptr;
   LilvNode * lv2PortOutput = nullptr;
 
+  LilvWorld * cLV2World = nullptr;
+  const LilvPlugins * cLV2Plugins = nullptr;
+
   Symap * sym_map = nullptr;
 
-  void setup_lilv(LilvWorld * world) {
-    if (lv2PortControl)
+  void setup_lilv() {
+    if (cLV2World)
       return;
-    lv2PortAudio = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
-    lv2PortControl = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
-    lv2PortInput = lilv_new_uri(world, LILV_URI_INPUT_PORT);
-    lv2PortOutput = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+
+    //set up lv2
+    cLV2World = lilv_world_new();
+    if (cLV2World) {
+      lilv_world_load_all(cLV2World);
+      cLV2Plugins = lilv_world_get_all_plugins(cLV2World);
+    }
+
+    lv2PortAudio = lilv_new_uri(cLV2World, LILV_URI_AUDIO_PORT);
+    lv2PortControl = lilv_new_uri(cLV2World, LILV_URI_CONTROL_PORT);
+    lv2PortInput = lilv_new_uri(cLV2World, LILV_URI_INPUT_PORT);
+    lv2PortOutput = lilv_new_uri(cLV2World, LILV_URI_OUTPUT_PORT);
     sym_map = symap_new();
     urid_sem_init();
   }
@@ -50,13 +61,12 @@ namespace {
     }
 }
 
-Lv2Plugin::Lv2Plugin(QString uri, LilvWorld * world, const LilvPlugins * plugins) throw (std::runtime_error) :
-  mWorld(world)
+Lv2Plugin::Lv2Plugin(QString uri) throw (std::runtime_error)
 {
-  setup_lilv(world);
+  setup_lilv();
 
-  LilvNode * plugin_uri = lilv_new_uri(world, qPrintable(uri));
-  mLilvPlugin = lilv_plugins_get_by_uri(plugins, plugin_uri);
+  LilvNode * plugin_uri = lilv_new_uri(cLV2World, qPrintable(uri));
+  mLilvPlugin = lilv_plugins_get_by_uri(cLV2Plugins, plugin_uri);
   if (!mLilvPlugin)
     throw std::runtime_error("could not load lv2 plugin with uri " + uri.toStdString());
 
@@ -155,7 +165,7 @@ float Lv2Plugin::port_value_default(uint32_t index) const {
 }
 
 uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_error) {
-  LilvNode * snode = lilv_new_string(mWorld, qPrintable(port_symbol));
+  LilvNode * snode = lilv_new_string(cLV2World, qPrintable(port_symbol));
   const LilvPort * port = lilv_plugin_get_port_by_symbol(mLilvPlugin, snode);
   lilv_node_free(snode);
   if (!port)
@@ -164,10 +174,10 @@ uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_err
 }
 
 void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_error) {
-  const LilvNode* uri = lilv_plugin_get_uri(mLilvPlugin);
+  //const LilvNode* uri = lilv_plugin_get_uri(mLilvPlugin);
   LV2_URID_Map map = { sym_map, map_urid };
-  //LilvState* state = lilv_state_new_from_file(mWorld, &map, uri, qPrintable(file_path));
-  LilvState* state = lilv_state_new_from_file(mWorld, &map, NULL, qPrintable(file_path));
+  //LilvState* state = lilv_state_new_from_file(cLV2World, &map, uri, qPrintable(file_path));
+  LilvState* state = lilv_state_new_from_file(cLV2World, &map, NULL, qPrintable(file_path));
   if (!state)
     throw std::runtime_error("couldn't load state from file: " + file_path.toStdString());
   lilv_state_restore(state, mLilvInstance, set_port_value, this, 0, NULL);

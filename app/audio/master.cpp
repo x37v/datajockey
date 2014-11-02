@@ -30,16 +30,6 @@ Master::Master(){
   mCrossFadeMixers[0] = 0;
   mCrossFadeMixers[1] = 1;
   mMaxSampleValue = 0.0f;
-
-#ifdef USE_LV2
-  //set up lv2
-  mLV2World = lilv_world_new();
-  mLV2Plugins = NULL;
-  if (mLV2World) {
-    lilv_world_load_all(mLV2World);
-    mLV2Plugins = lilv_world_get_all_plugins(mLV2World);
-  }
-#endif
 }
 
 Master::~Master(){
@@ -143,8 +133,7 @@ void Master::setup_audio(
   //XXX tmp
   
   Lv2Plugin * sendPlugin = new Lv2Plugin(
-      "http://calf.sourceforge.net/plugins/VintageDelay",
-      lv2_world(), lv2_plugins());
+      "http://calf.sourceforge.net/plugins/VintageDelay");
   sendPlugin->setup(sampleRate, maxBufferLen);
   sendPlugin->load_preset_from_file("/home/alex/lv2presets/delay_lv2.lv2/delay_lv2.ttl");
 
@@ -261,7 +250,7 @@ void Master::audio_compute_and_fill(
   }
 
   //XXX do a vector multiply?
-  for (int i = 0; i < numFrames; i++) {
+  for (unsigned int i = 0; i < numFrames; i++) {
     outBufferVector[0][i] *= mMasterVolumeBuffer[i];
     outBufferVector[1][i] *= mMasterVolumeBuffer[i];
   }
@@ -315,11 +304,6 @@ void Master::sync_to_player(unsigned int player_index) {
 const std::vector<Player *>& Master::players() const { return mPlayers; }
 Scheduler * Master::scheduler(){ return &mScheduler; }
 Transport * Master::transport(){ return &mTransport; }
-
-#ifdef USE_LV2
-LilvWorld * Master::lv2_world() const { return mLV2World; }
-const LilvPlugins * Master::lv2_plugins() const { return mLV2Plugins; }
-#endif
 
 void Master::add_send_plugin(unsigned int send, AudioPluginNode * plugin_node) {
   if (send >= mSendPlugins.size())
