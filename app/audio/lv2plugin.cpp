@@ -185,11 +185,8 @@ void Lv2Plugin::compute(unsigned int nframes, float ** mixBuffer) {
   }
   lilv_instance_run(mLilvInstance, nframes);
 
-  //XXX vector copy?
-  for (unsigned int i = 0; i < nframes; i++) {
-    mixBuffer[0][i] = mComputeBuffer[0][i];
-    mixBuffer[1][i] = mComputeBuffer[1][i];
-  }
+  memcpy(mixBuffer[0], &mComputeBuffer[0].front(), sizeof(float) * nframes);
+  memcpy(mixBuffer[1], &mComputeBuffer[1].front(), sizeof(float) * nframes);
 }
 
 void Lv2Plugin::stop() {
