@@ -1,6 +1,11 @@
+There is a lot of development going on right now.  I would love help if you're interested.  Contact me on irc [ax in #lad on freenode] or via email [alex at x37v.info]
+
+
+For beat analysis you need the queen mary vamp plugins: http://vamp-plugins.org/plugin-doc/qm-vamp-plugins.html
+
 vamp ubuntu:
 headers are in vamp-plugin-sdk
 you'll also want libvamp-hostsdk3 installed
 
 osx:
-qmake -recursive -spec macx-llvm
+vamp libaray binaries are included
