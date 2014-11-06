@@ -3,4 +3,6 @@ headers are in vamp-plugin-sdk
 you'll also want libvamp-hostsdk3 installed
 
 osx:
-qmake -recursive -spec macx-llvm
+debugging with xcode 6, you must select 'run in terminal' in the 'run' settings of the project
+
+
