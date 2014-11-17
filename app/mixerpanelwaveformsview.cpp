@@ -49,6 +49,10 @@ void MixerPanelWaveformsView::computeOffsetAndScale() {
 
   mOffsetAndScale[1].first = -mOffsetAndScale[2].first;
   mOffsetAndScale[0].first = -mOffsetAndScale[3].first;
+
+  for (int i = 0; i < 4; i++) {
+    cout << "offset/scale: " << i << " " << mOffsetAndScale[i].first << " " << mOffsetAndScale[i].second << endl;
+  }
 }
 
 void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
@@ -141,6 +145,7 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
 
     //draw waveform
     glPushMatrix();
+
     //if we aren't in full zoom, draw from the bottom
     if (!wf->zoomFull()) {
       glTranslatef(mHeight, 0.0, 0.0);
@@ -151,6 +156,7 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
     glScalef(height_scale, mOffsetAndScale[i].second, 1.0);
     glLineWidth(1.0);
     wf->draw();
+
     glPopMatrix();
 
     //draw center line
