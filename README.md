@@ -2,7 +2,9 @@
 
 ## all:
  * qt >= 5
- * jack _jackd and libjack development headers_
+ * jack
+   * jackd
+   * libjack
  * cmake
  * Queen Mary Beat Analysis plugins: http://isophonics.net/QMVampPlugins
  * libraries:
