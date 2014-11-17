@@ -2,16 +2,21 @@
 
 ## all:
  * qt >= 5
- * jack
+ * jack _jackd and libjack development headers_
  * cmake
- * http://isophonics.net/QMVampPlugins
- * boost libsndfile libmad libvorbisfile liblo
+ * Queen Mary Beat Analysis plugins: http://isophonics.net/QMVampPlugins
+ * libraries:
+   * boost
+   * libsndfile
+   * libmad
+   * libvorbisfile
+   * liblo
 
-## ubuntu:
+## linux:
  * lilv and its dependencies
-### vamp:
- * headers are in vamp-plugin-sdk
- * you'll also want libvamp-hostsdk3 installed
+ * vamp:
+   * headers are in vamp-plugin-sdk
+   * you'll also want libvamp-hostsdk3 installed
 
 # Notes:
 
