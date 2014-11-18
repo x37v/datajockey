@@ -204,7 +204,7 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, mWidth, mHeight, 0, 0, 1);
+  glOrtho(0, mWidth, mHeight, 0, -1, 1);
   glMatrixMode(GL_MODELVIEW);
   glEnable(GL_MULTISAMPLE);
   glDisable(GL_DEPTH_TEST);
