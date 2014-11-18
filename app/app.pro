@@ -74,7 +74,6 @@ SOURCES += main.cpp\
     audio/schedulenode.cpp \
     audio/player.cpp \
     audio/plugin.cpp \
-    audio/lv2plugin.cpp \
     audio/master.cpp \
     audio/envelope.cpp \
     audio/command.cpp \
@@ -103,9 +102,7 @@ SOURCES += main.cpp\
     audiofileinfoextractor.cpp \
     audio/xing.c \
     loopandjumpcontrolview.cpp \
-    loopandjumpmanager.cpp \
-    ../ext/lv2/symap.c \
-    ../ext/lv2/uridmap.c
+    loopandjumpmanager.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -127,7 +124,6 @@ HEADERS  += mainwindow.h \
     audio/scheduledataparser.hpp \
     audio/player.hpp \
     audio/plugin.h \
-    audio/lv2plugin.h \
     audio/master.hpp \
     audio/envelope.hpp \
     audio/doublelinkedlist.h \
@@ -158,12 +154,7 @@ HEADERS  += mainwindow.h \
     audiofileinfoextractor.h \
     audio/xing.h \
     loopandjumpcontrolview.h \
-    loopandjumpmanager.h \
-    ../ext/lv2/zix/common.h \
-    ../ext/lv2/zix/sem.h \
-    ../ext/lv2/zix/thread.h \
-    ../ext/lv2/symap.h \
-    ../ext/lv2/uridmap.h
+    loopandjumpmanager.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
@@ -177,6 +168,24 @@ INCLUDEPATH += . \
 	audio \
 	../ext/jackcpp/include/ \
   ../ext/yaml-cpp-0.5.1/include/ \
-	../ext/lv2/ \
   ../ext
+
+#lv2 specific stuff
+unix:!macx {
+SOURCES += \
+    audio/lv2plugin.h \
+    ../ext/lv2/zix/common.h \
+    ../ext/lv2/zix/sem.h \
+    ../ext/lv2/zix/thread.h \
+    ../ext/lv2/symap.h \
+    ../ext/lv2/uridmap.h
+
+HEADERS += \
+    audio/lv2plugin.cpp \
+    ../ext/lv2/symap.c \
+    ../ext/lv2/uridmap.c
+
+INCLUDEPATH += \
+	../ext/lv2/
+}
 
