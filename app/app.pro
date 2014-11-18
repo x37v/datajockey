@@ -172,7 +172,7 @@ INCLUDEPATH += . \
 
 #lv2 specific stuff
 unix:!macx {
-SOURCES += \
+HEADERS+= \
     audio/lv2plugin.h \
     ../ext/lv2/zix/common.h \
     ../ext/lv2/zix/sem.h \
@@ -180,7 +180,7 @@ SOURCES += \
     ../ext/lv2/symap.h \
     ../ext/lv2/uridmap.h
 
-HEADERS += \
+SOURCES += \
     audio/lv2plugin.cpp \
     ../ext/lv2/symap.c \
     ../ext/lv2/uridmap.c
