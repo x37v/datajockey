@@ -7,6 +7,7 @@
 #include "scheduler.hpp"
 #include "types.hpp"
 #include <vector>
+#include <array>
 
 namespace djaudio {
   class Master {

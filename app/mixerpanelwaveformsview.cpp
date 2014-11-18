@@ -141,6 +141,7 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
 
     //draw waveform
     glPushMatrix();
+
     //if we aren't in full zoom, draw from the bottom
     if (!wf->zoomFull()) {
       glTranslatef(mHeight, 0.0, 0.0);
@@ -151,6 +152,7 @@ void MixerPanelWaveformsView::paintEvent(QPaintEvent * event) {
     glScalef(height_scale, mOffsetAndScale[i].second, 1.0);
     glLineWidth(1.0);
     wf->draw();
+
     glPopMatrix();
 
     //draw center line
@@ -199,7 +201,7 @@ void MixerPanelWaveformsView::resizeGL(int width, int height) {
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, mWidth, mHeight, 0, 0, 1);
+  glOrtho(0, mWidth, mHeight, 0, -1, 1);
   glMatrixMode(GL_MODELVIEW);
   glEnable(GL_MULTISAMPLE);
   glDisable(GL_DEPTH_TEST);

@@ -1,11 +1,4 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-03-02T15:43:41
-#
-#-------------------------------------------------
-
 QT       += core sql
-
 QT       -= gui
 
 TARGET = importer
@@ -17,18 +10,24 @@ CONFIG += link_pkgconfig
 
 TEMPLATE = app
 
-PKGCONFIG += sndfile vorbisfile mad taglib
 LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a
+INCLUDEPATH += /usr/local/include/
 RESOURCES = $$TOP_DIR/db.qrc
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
+  INCLUDEPATH += ../ext/vamp/ /opt/local/include/
+  LIBS += -lsndfile -lvorbisfile -lmad -ltag
   LIBS += -lvamp-hostsdk
+  LIBS += -L/usr/local/lib/ -L/opt/local/lib/
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
-  INCLUDEPATH += ../ext/vamp/
+  #QMAKE_MAC_SDK.macosx.path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/
+  QMAKE_MAC_SDK = macosx10.9
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
 }
 
 unix:!macx {
+  PKGCONFIG += sndfile vorbisfile mad taglib
   PKGCONFIG += vamp-hostsdk
 }
 

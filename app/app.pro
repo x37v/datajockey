@@ -22,19 +22,28 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug
 CONFIG += c++11
 CONFIG += link_pkgconfig
-PKGCONFIG += sndfile vorbisfile mad taglib
-LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1/build/libyaml-cpp.a -llo
+
+LIBS += -llo
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 RESOURCES = $$TOP_DIR/gui.qrc $$TOP_DIR/db.qrc
+
+LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1-build/libyaml-cpp.a
+INCLUDEPATH += /usr/local/include/
 
 macx {
   QMAKE_LIBDIR += ../ext/vamp/osx/
   LIBS += -lvamp-hostsdk -ljack
+  INCLUDEPATH += ../ext/vamp/ /opt/local/include/
+  LIBS += -lsndfile -lvorbisfile -lmad -ltag
+  LIBS += -L/usr/local/lib/ -L/opt/local/lib/
   #QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
-  INCLUDEPATH += ../ext/vamp/
+  #QMAKE_MAC_SDK.macosx.path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/
+  QMAKE_MAC_SDK = macosx10.9
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
 }
 
 unix:!macx {
+  PKGCONFIG += sndfile vorbisfile mad taglib
   PKGCONFIG += jack lilv-0 vamp-hostsdk
   DEFINES += USE_LV2
 }
