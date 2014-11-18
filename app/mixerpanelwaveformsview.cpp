@@ -49,10 +49,6 @@ void MixerPanelWaveformsView::computeOffsetAndScale() {
 
   mOffsetAndScale[1].first = -mOffsetAndScale[2].first;
   mOffsetAndScale[0].first = -mOffsetAndScale[3].first;
-
-  for (int i = 0; i < 4; i++) {
-    cout << "offset/scale: " << i << " " << mOffsetAndScale[i].first << " " << mOffsetAndScale[i].second << endl;
-  }
 }
 
 void MixerPanelWaveformsView::playerSetBuffers(int player, djaudio::AudioBufferPtr audio_buffer, djaudio::BeatBufferPtr beat_buffer) {
