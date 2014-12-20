@@ -1,5 +1,7 @@
 #include "plugin.h"
 
+unsigned int AudioPlugin::cIndexCount = 0;
+
 AudioPluginCollection::AudioPluginCollection() {
 }
 
@@ -29,5 +31,9 @@ void AudioPluginCollection::stop() {
 
 void AudioPluginCollection::append(AudioPluginNode * plugin) {
   mEffects.push_back(plugin);
+}
+
+AudioPlugin::AudioPlugin() {
+  mIndex = cIndexCount++;
 }
 
