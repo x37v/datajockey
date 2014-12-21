@@ -137,7 +137,8 @@ void Master::setup_audio(
   sendPlugin->setup(sampleRate, maxBufferLen);
   sendPlugin->load_preset_from_file("/home/alex/lv2presets/delay_lv2.lv2/delay_lv2.ttl");
 
-  AudioPluginNode * node = new AudioPluginNode(sendPlugin);
+  AudioPluginPtr shared(sendPlugin);
+  AudioPluginNode * node = new AudioPluginNode(shared);
   add_send_plugin(0, node);
 
   mPlayers[0]->send_volume(0, 1.0);
@@ -305,10 +306,10 @@ const std::vector<Player *>& Master::players() const { return mPlayers; }
 Scheduler * Master::scheduler(){ return &mScheduler; }
 Transport * Master::transport(){ return &mTransport; }
 
-void Master::add_send_plugin(unsigned int send, AudioPluginNode * plugin_node) {
+void Master::add_send_plugin(unsigned int send, unsigned int location_index, AudioPluginNode * plugin_node) {
   if (send >= mSendPlugins.size())
     return; //XXX error
-  mSendPlugins[send].append(plugin_node);
+  mSendPlugins[send].insert(location_index, plugin_node);
 }
 
 float Master::max_sample_value() const { return mMaxSampleValue; }
@@ -460,8 +461,8 @@ bool MasterNextBeatCommand::store(CommandIOData& /* data */) const {
   return false;
 }
 
-MasterAddPluginCommand::MasterAddPluginCommand(unsigned int send, AudioPluginNode * plugin_node) :
-  mSend(send), mPlugin(plugin_node)
+MasterAddPluginCommand::MasterAddPluginCommand(unsigned int send, unsigned int location_index, AudioPluginNode * plugin_node) :
+  mSend(send), mLocationIndex(location_index), mPlugin(plugin_node)
 {
 }
 
@@ -469,7 +470,7 @@ MasterAddPluginCommand::~MasterAddPluginCommand() {
 }
 
 void MasterAddPluginCommand::execute(const Transport& /*transport*/) {
-  master()->add_send_plugin(mSend, mPlugin);
+  master()->add_send_plugin(mSend, mLocationIndex, mPlugin);
 }
 
 bool MasterAddPluginCommand::store(CommandIOData& /* data */) const {

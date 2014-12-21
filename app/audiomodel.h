@@ -51,6 +51,11 @@ class AudioModel : public QObject {
     void masterSetValueBool(QString name, bool v);
     void masterTrigger(QString name);
 
+    void pluginSetValueInt(int plugin_index, QString parameter_name, int value);
+    void pluginAddToPlayer(int player_index, int location_index, AudioPluginPtr plugin);
+    void pluginAddToMaster(int send_index, int location_index, AudioPluginPtr plugin);
+    void pluginRemove(int plugin_index);
+
     //start/stop the audio processing
     void run(bool doit);
 
@@ -72,6 +77,9 @@ class AudioModel : public QObject {
 
     QHash<QString, double> mMasterDoubleValue;
     QHash<QString, int> mMasterIntValue;
+
+    QHash<int, AudioPluginPtr> mPlugins; //valid plugins
+    QList<AudioPluginPtr> mPluginsToDelete; //plugins that will be deleted once they come out of the audio thread
 
     bool inRange(int player);
     void queue(djaudio::Command * cmd);

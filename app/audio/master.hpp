@@ -48,7 +48,8 @@ namespace djaudio {
       float max_sample_value() const;
       bool player_audible(unsigned int player_index) const;
 
-      void add_send_plugin(unsigned int send, AudioPluginNode * plugin_node);
+      //add at index given [if its greater than size just add to end]
+      void add_send_plugin(unsigned int send, unsigned int location_index, AudioPluginNode * plugin_node);
 
       //setters
       void master_volume(float val);
@@ -144,12 +145,13 @@ namespace djaudio {
 
   class MasterAddPluginCommand : public MasterCommand {
     public:
-      MasterAddPluginCommand(unsigned int send, AudioPluginNode * plugin_node);
+      MasterAddPluginCommand(unsigned int send, unsigned int location_index, AudioPluginNode * plugin_node);
       virtual ~MasterAddPluginCommand();
       virtual void execute(const Transport& transport);
       virtual bool store(CommandIOData& data) const;
     private:
       unsigned int mSend;
+      unsigned int mLocationIndex;
       AudioPluginNode * mPlugin;
   };
 }

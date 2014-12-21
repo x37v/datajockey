@@ -3,6 +3,7 @@
 
 #include "doublelinkedlist.h"
 #include <QString>
+#include <QSharedPointer>
 
 class AudioPluginControlDescription {
   public:
@@ -23,13 +24,14 @@ class AudioPlugin {
     //below called in audio thread
     virtual void compute(unsigned int nframes, float ** mixBuffer) = 0;
     virtual void stop(){}
-    unsigned int index() const { return mIndex; }
+    int index() const { return mIndex; }
   private:
-    unsigned int mIndex = 0;
-    static unsigned int cIndexCount;
+    int mIndex = 0;
+    static int cIndexCount;
 };
 
-typedef DoubleLinkedListNode<AudioPlugin * > AudioPluginNode;
+typedef QSharedPointer<AudioPlugin> AudioPluginPtr;
+typedef DoubleLinkedListNode<AudioPluginPtr> AudioPluginNode;
 
 class AudioPluginCollection : public AudioPlugin {
   public:
@@ -40,9 +42,10 @@ class AudioPluginCollection : public AudioPlugin {
     virtual void compute(unsigned int nframes, float ** mixBuffer);
     virtual void stop();
 
+    void insert(unsigned int index, AudioPluginNode * plugin);
     void append(AudioPluginNode * plugin); 
   private:
-    DoubleLinkedList<AudioPlugin *> mEffects;
+    DoubleLinkedList<AudioPluginPtr> mEffects;
 };
 
 #endif

@@ -442,6 +442,32 @@ void AudioModel::masterTrigger(QString name) {
   cout << "master name " << qPrintable(name) << endl;
 }
 
+void AudioModel::pluginSetValueInt(int plugin_index, QString parameter_name, int value) {
+  auto it = mPlugins.find(plugin_index);
+  if (it == mPlugins.end())
+    return;
+  //XXX do it
+}
+
+void AudioModel::pluginAddToPlayer(int player_index, int location_index, AudioPluginPtr plugin) {
+  mPlugins[plugin->index()] = plugin;
+  //XXX do it
+}
+
+void AudioModel::pluginAddToMaster(int send_index, int location_index, AudioPluginPtr plugin) {
+  mPlugins[plugin->index()] = plugin;
+  //XXX do it
+}
+
+void AudioModel::pluginRemove(int plugin_index) {
+  auto it = mPlugins.find(plugin_index);
+  if (it != mPlugins.end()) {
+    mPluginsToDelete << *it;
+    mPlugins.erase(it);
+  }
+  //XXX do it!
+}
+
 void AudioModel::run(bool doit) {
   mAudioIO->run(doit);
   if (doit) {
