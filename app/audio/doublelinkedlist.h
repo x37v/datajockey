@@ -16,6 +16,8 @@ class DoubleLinkedList {
     void push_back(DoubleLinkedListNode<T> * node);
     void push_front(DoubleLinkedListNode<T> * node);
 
+    void insert(unsigned int index, DoubleLinkedListNode<T> * node);
+
     //returns true when found and removed, ownership ditched
     bool remove(DoubleLinkedListNode<T> * node);
 
@@ -77,6 +79,25 @@ void DoubleLinkedList<T>::push_front(DoubleLinkedListNode<T> * node) {
   if (mHead)
     mHead->prev = node;
   mHead = node;
+}
+
+template <typename T>
+void DoubleLinkedList<T>::insert(unsigned int index, DoubleLinkedListNode<T> * node) {
+  if (!mHead) {
+    push_front(node);
+    return;
+  }
+  DoubleLinkedListNode<T> * cur = mHead;
+  while (index > 0 && cur->next) {
+    index--;
+    cur = cur->next;
+  }
+
+  node->next = cur;
+  node->prev = cur->prev;
+  cur->prev = node;
+  if (node->prev)
+    node->prev->next = node;
 }
 
 template <typename T>
