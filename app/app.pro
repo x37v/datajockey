@@ -74,6 +74,7 @@ SOURCES += main.cpp\
     audio/schedulenode.cpp \
     audio/player.cpp \
     audio/plugin.cpp \
+    audio/pluginmanager.cpp \
     audio/master.cpp \
     audio/envelope.cpp \
     audio/command.cpp \
@@ -124,6 +125,7 @@ HEADERS  += mainwindow.h \
     audio/scheduledataparser.hpp \
     audio/player.hpp \
     audio/plugin.h \
+    audio/pluginmanager.h \
     audio/master.hpp \
     audio/envelope.hpp \
     audio/doublelinkedlist.h \
