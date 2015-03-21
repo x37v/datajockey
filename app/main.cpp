@@ -190,6 +190,14 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   QObject::connect(history, &HistoryManager::workHistoryChanged, &w, &MainWindow::workUpdateHistory);
   QObject::connect(midi, &MidiRouter::masterValueChangedInt,     &w, &MainWindow::masterSetValueInt);
 
+  //set master volume to 0.8
+  QTimer * del = new QTimer(app);
+  del->setSingleShot(true);
+  QObject::connect(del, &QTimer::timeout, [audio]() {
+    audio->masterSetValueInt("volume", dj::to_int(0.8));
+  });
+  del->start(10);
+
   QObject::connect(app, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
     w.finalize();
     midiThread->quit();

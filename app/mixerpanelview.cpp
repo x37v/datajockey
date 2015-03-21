@@ -104,6 +104,8 @@ void MixerPanelView::jumpClear(int player, int entry_index) {
 }
 
 void MixerPanelView::masterSetValueInt(QString name, int value) {
+  if (name == "volume")
+    ui->volume->setValue(value);
 }
 
 void MixerPanelView::masterSetValueBool(QString name, bool value) {
