@@ -52,6 +52,7 @@ module Datajockey
     belongs_to :artist
 
     has_one :album_audio_work, :dependent => :destroy
+    has_one :audio_work_jump
 
     has_many :audio_work_tags, :dependent => :destroy
 
@@ -99,6 +100,20 @@ module Datajockey
     #Find the album that an audio work is a part of
     def album
       self.album_audio_work.album
+    end
+
+    def jumps
+      j = self.audio_work_jump
+      return {} unless j
+      data = {}
+      YAML.load(j.data).each do |d|
+        data[d['index']] = {
+          :start => d['start'],
+          :end => d['end'],
+          :type => d['type'],
+        }
+      end
+      return data
     end
 
     #Find a work through a regular expression, passed as a hash.
