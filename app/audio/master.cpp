@@ -218,8 +218,6 @@ void Master::audio_compute_and_fill(
     outBufferVector[chan][frame] += 
       xfade_mul * mPlayerBuffers[player][chan][frame];
     outBufferVector[chan + 2][frame] += mCueVolume * mCueBuffer[chan][frame];
-    //store the max sample value
-    mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[chan][frame]));
   };
 
   //finalize each player, and copy its data out
@@ -254,6 +252,8 @@ void Master::audio_compute_and_fill(
   for (unsigned int i = 0; i < numFrames; i++) {
     outBufferVector[0][i] *= mMasterVolumeBuffer[i];
     outBufferVector[1][i] *= mMasterVolumeBuffer[i];
+    mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[0][i]));
+    mMaxSampleValue = std::max(mMaxSampleValue, fabsf(outBufferVector[1][i]));
   }
 }
 
