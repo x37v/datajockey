@@ -4,9 +4,10 @@
 #include <QObject>
 #include <QHash>
 
-class AudioPluginManager {
+class AudioPluginManager : public QObject {
   Q_OBJECT
   public slots:
+    //relay info to the eq
     void playerSetValueInt(int player, QString name, int value);
   signals:
     void pluginValueChangedDouble(int plugin_index, QString parameter_name, int value);
