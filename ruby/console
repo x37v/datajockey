@@ -25,4 +25,5 @@ require 'irb'
 
 #connect to the database then jump to IRB
 Datajockey::connect
+include Datajockey
 IRB.start
