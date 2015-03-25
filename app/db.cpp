@@ -49,7 +49,7 @@ namespace {
       "INSERT INTO audio_work_histories\n"
       "(audio_work_id, session_id, played_at)\n"
       "VALUES\n"
-      "(:audio_work_id, :session_id, :played_at)"
+      "(:work_id, :session_id, :played_at)"
       );
 
   const QString cSessionQuery("SELECT distinct session_id FROM audio_work_histories ORDER BY session_id DESC");
