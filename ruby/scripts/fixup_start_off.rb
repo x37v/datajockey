@@ -36,11 +36,11 @@ t = Tag.find_by_name("starts_off_beat")
 #NOTE markers are shown as + 1 in GUI, so in GUI it'll look like 6
 
 puts "DISABLED"
-
 exit
 
+
 t.audio_works.each do |w|
-  puts "#{w.name} #{w.artist.name}"
+  puts "#{w.name} #{w.artist.name} #{w.annotation_file_location}"
 
   start = w.jumps[5]
   if start
@@ -97,6 +97,7 @@ t.audio_works.each do |w|
 
   annotation["beat_locations"]["frames"] = beats
   File.open(w.annotation_file_location, "w") { |f|  f.print annotation.to_yaml }
+  puts "#{w.name} done"
 end
 
 puts "DONE!"
