@@ -30,13 +30,10 @@ Datajockey::connect
 
 include Datajockey
 
-t = Tag.find_by_name("gets_off_tempo")
+t = Tag.find_by_name("middle_off")
 
-#tag a work with gets_off_tempo and put marker 4 just before the start of the fucked up zone, and marker 5 just after
+#tag a work with middle_off and put marker 4 just before the start of the fucked up zone, and marker 5 just after
 #NOTE markers are shown as + 1 in GUI, so in GUI it'll look like 5 and 6
-
-puts "DISABLING.."
-exit
 
 t.audio_works.each do |w|
   puts "#{w.name} #{w.artist.name}"
