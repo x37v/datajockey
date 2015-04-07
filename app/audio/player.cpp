@@ -247,7 +247,10 @@ float Player::send_volume(unsigned int index) const {
     return 0.0f;
   return mSendVolumes[index];
 }
-double Player::play_speed() const { return mStretcher->speed(); }
+
+double Player::play_speed() const {
+  return mStretcher->speed() / mSampleRateMult;
+}
 
 unsigned int Player::frame() const { return (!mStretcher->audio_buffer()) ? 0 : mStretcher->frame(); }
 unsigned int Player::beat_index() const { return mBeatIndex; }
@@ -263,7 +266,7 @@ double Player::bpm() {
     beat = mBeatBuffer->size() - 2;
 
   const double seconds = static_cast<double>(mBeatBuffer->at(beat + 1) - mBeatBuffer->at(beat)) / static_cast<double>(mSampleRate);
-  const double s_per_beat = seconds / play_speed();
+  const double s_per_beat = seconds / mStretcher->speed();
 
   return 60.0 / s_per_beat; //becomes beats per min
 }
@@ -341,7 +344,7 @@ void Player::send_volume(unsigned int send_index, float val) {
 }
 
 void Player::play_speed(double val){
-  mStretcher->speed(val);
+  mStretcher->speed(val * mSampleRateMult);
 }
 
 void Player::position_at_frame(unsigned long frame, Transport * transport) {
@@ -409,6 +412,12 @@ void Player::loop_end_frame(unsigned int val){
 }
 
 void Player::audio_buffer(AudioBuffer * buf){
+  if (buf) {
+    double speed_last = play_speed();
+    mSampleRateMult = buf->sample_rate() / static_cast<double>(mSampleRate);
+    if (!mSync)
+      play_speed(speed_last);
+  }
   mStretcher->audio_buffer(buf);
   mStretcher->frame(0);
 }

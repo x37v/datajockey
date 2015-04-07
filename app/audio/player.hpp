@@ -119,6 +119,7 @@ namespace djaudio {
 
       //internals, bookkeeping, etc
       unsigned int mSampleRate;
+      double mSampleRateMult = 1.0;
       float * mVolumeBuffer;
       std::vector<float *> mSendVolumeBuffers;
       BeatBuffer * mBeatBuffer;
