@@ -24,7 +24,7 @@
           <string>b&gt;</string>
          </property>
          <property name="autoRepeat">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -64,7 +64,7 @@
           <string>&lt;b</string>
          </property>
          <property name="autoRepeat">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>

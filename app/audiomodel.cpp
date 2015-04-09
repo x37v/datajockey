@@ -305,7 +305,8 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
       }
       return cmd;
     });
-  //cout << player << qPrintable(name) << " " << v << endl;
+  if (name != "audible")
+    cout << player << qPrintable(name) << " " << v << endl;
 }
 
 void AudioModel::playerTrigger(int player, QString name) {

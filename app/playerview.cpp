@@ -54,6 +54,10 @@ PlayerView::PlayerView(QWidget *parent) :
     QString name = kv.second;
     connect(kv.first, &QToolButton::clicked,
         [this, name] () { emit(triggered(name)); });
+    connect(kv.first, &QToolButton::pressed,
+        [this, name] () { emit(valueChangedBool(name + "_down", true)); });
+    connect(kv.first, &QToolButton::released,
+        [this, name] () { emit(valueChangedBool(name + "_down", false)); });
   }
   connect(ui->jump_up, &QToolButton::released, [this] () { emit(triggered("jump")); });
 
