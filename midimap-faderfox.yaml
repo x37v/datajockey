@@ -3,9 +3,13 @@ player0:
     trigger: sync
   - note_off: [89, 3]
     trigger: play
-  - note_on: [72, 3]
+  - note: [72, 3]
+    bool: bump_back_down
+  - note: [73, 3]
+    bool: bump_fwd_down
+  - note_on: [76, 3]
     trigger: seek_back
-  - note_on: [73, 3]
+  - note_on: [77, 3]
     trigger: seek_fwd
   - note_on: [90, 3] #cue
     trigger: jump
@@ -42,9 +46,13 @@ player1:
     trigger: sync
   - note_off: [93, 3]
     trigger: play
-  - note_on: [74, 3]
+  - note: [74, 3]
+    bool: bump_back_down
+  - note: [75, 3]
+    bool: bump_fwd_down
+  - note_on: [78, 3]
     trigger: seek_back
-  - note_on: [75, 3]
+  - note_on: [79, 3]
     trigger: seek_fwd
   - cc: [105, 3]
     trigger: cue
