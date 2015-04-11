@@ -11,6 +11,10 @@ Envelope::Envelope(envelope_func_t func, unsigned int length) :
 {
 }
 
+void Envelope::function(envelope_func_t func) {
+  mFunc = func;
+}
+
 void Envelope::reset() { mPosition = 0; }
 void Envelope::complete() { mPosition = mLengthMinusOne; }
 
@@ -38,3 +42,5 @@ double Envelope::value_step(bool forward) {
 
 double djaudio::half_sin(double p) { return sin(p * dj::pi); }
 double djaudio::quarter_sin(double p) { return half_sin(p * 0.5); }
+double djaudio::ramp_down(double p) { return std::max(0.0, 1.0 - p); }
+double djaudio::ramp_up(double p) { return std::min(1.0, p); }

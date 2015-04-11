@@ -45,6 +45,7 @@ Player::Player() :
   mLoopEndFrame(0),
   mMaxSampleValue(0.0),
   mEnvelope(djaudio::quarter_sin, 4410),
+  mBumpEnvelope(djaudio::ramp_down, 44100 * 10),
   mFadeoutIndex(0)
 #ifdef USE_LV2
   ,mEqPlugin(NULL)
@@ -93,6 +94,7 @@ void Player::setup_audio(
     unsigned int sendBufferCount) {
   //set the sample rate, create our internal audio buffers
   mSampleRate = sampleRate;
+  mBumpEnvelope.length(mSampleRate * 10);
   if(mVolumeBuffer)
     delete [] mVolumeBuffer;
   mVolumeBuffer = new float[maxBufferLen];
@@ -171,13 +173,19 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
   //compute the actual frame
   if(mPlayState == PLAY) {
     //only update the rate on the beat.
-    if(inbeat && mSync && mBeatBuffer) {
+    if (inbeat && mSync && mBeatBuffer) {
       mBeatIndex = ::beat_index(mBeatBuffer, mStretcher->frame());
       update_play_speed(&transport);
     }
 
     float buffer[2];
-    mStretcher->next_frame(buffer);
+    if (mBumpState == BUMP_OFF) {
+      mStretcher->next_frame(buffer);
+    } else {
+      double rate_offset = mBumpState == BUMP_REV ? mBumpEnvelope.value() : (1.0 + mBumpEnvelope.reversed_value()) ;
+      mBumpEnvelope.step();
+      mStretcher->next_frame(buffer, rate_offset);
+    }
 
     if (!mEnvelope.at_end()) {
       double v = mEnvelope.value_step();
@@ -331,6 +339,15 @@ void Player::sync(bool val, const Transport * transport) {
 
 void Player::loop(bool val){
   mLoop = val;
+}
+
+void Player::bump_start(bool forward) {
+  mBumpEnvelope.reset();
+  mBumpState = forward ? BUMP_FWD : BUMP_REV;
+}
+
+void Player::bump_stop() {
+  mBumpState = BUMP_OFF;
 }
 
 void Player::volume(double val){
@@ -652,6 +669,15 @@ void PlayerStateCommand::execute(const Transport& /*transport*/){
       case LOOP:
         p->loop(true);
         break;
+      case BUMP_FWD:
+        p->bump_start(true);
+        break;
+      case BUMP_REV:
+        p->bump_start(false);
+        break;
+      case BUMP_OFF:
+        p->bump_stop();
+        break;
       case NO_LOOP:
         p->loop(false);
         break;
@@ -691,6 +717,15 @@ bool PlayerStateCommand::store(CommandIOData& data) const{
       break;
     case NO_LOOP:
       data["action"] = "no_loop";
+      break;
+    case BUMP_FWD:
+      data["action"] = "bump_fwd";
+      break;
+    case BUMP_REV:
+      data["action"] = "bump_back";
+      break;
+    case BUMP_OFF:
+      data["action"] = "bump_off";
       break;
   };
   return true;

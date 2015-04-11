@@ -68,7 +68,7 @@ namespace djaudio {
 
   double Stretcher::speed() const { return mSpeed; }
 
-  void Stretcher::next_frame(float * frame) {
+  void Stretcher::next_frame(float * frame, double rate_offset) {
     if (!mAudioBuffer) {
       frame[0] = frame[1] = 0.0;
       return;
@@ -78,7 +78,7 @@ namespace djaudio {
     unsigned int last_frame = mFrame;
 
     //update our indices
-    mFrameSubsample += speed();
+    mFrameSubsample += (speed() * rate_offset);
     while (mFrameSubsample >= 1.0) {
       mFrame += 1;
       mFrameSubsample -= 1.0;

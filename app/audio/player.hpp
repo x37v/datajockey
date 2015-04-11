@@ -76,6 +76,8 @@ namespace djaudio {
       void mute(bool val);
       void sync(bool val, const Transport * transport = NULL);
       void loop(bool val);
+      void bump_start(bool forward);
+      void bump_stop();
       void volume(double val);
       void send_volume(unsigned int send_index, float val);
       void play_speed(double val);
@@ -100,6 +102,7 @@ namespace djaudio {
       void volume_relative(double amt); //increment or decrement the current volume
 
     private:
+      enum bump_state_t { BUMP_FWD, BUMP_REV, BUMP_OFF };
       //states
       unsigned int mBeatIndex;
       play_state_t mPlayState;
@@ -109,6 +112,7 @@ namespace djaudio {
       bool mSync; //sync to main transport or not
       bool mLoop;
       bool mSetup;
+      bump_state_t mBumpState = BUMP_OFF;
 
       //continuous
       double mVolume;
@@ -127,6 +131,7 @@ namespace djaudio {
       float mMaxSampleValue;
 
       Envelope mEnvelope;
+      Envelope mBumpEnvelope;
 
       unsigned int mFadeoutIndex;
       std::vector<float> mFadeoutBuffer;
@@ -180,7 +185,8 @@ namespace djaudio {
         OUT_MAIN, OUT_CUE,
         SYNC, NO_SYNC,
         MUTE, NO_MUTE,
-        LOOP, NO_LOOP
+        LOOP, NO_LOOP,
+        BUMP_FWD, BUMP_REV, BUMP_OFF
       };
       PlayerStateCommand(unsigned int idx, action_t action);
       virtual void execute(const Transport& transport);

@@ -278,6 +278,14 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
       } else if (name == "sync") {
         pstate->intValue["updates_since_sync"] = 0;
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::SYNC : djaudio::PlayerStateCommand::NO_SYNC);
+      } else if (name == "bump_fwd_down") {
+        if (!pstate->boolValue["sync"]) {
+          cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::BUMP_FWD : djaudio::PlayerStateCommand::BUMP_OFF);
+        }
+      } else if (name == "bump_back_down") {
+        if (!pstate->boolValue["sync"]) {
+          cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::BUMP_REV : djaudio::PlayerStateCommand::BUMP_OFF);
+        }
       } else if (name == "mute") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
       } else if (name == "seeking") {

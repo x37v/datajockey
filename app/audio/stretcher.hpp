@@ -27,7 +27,7 @@ namespace djaudio {
       void speed(double play_speed);
       double speed() const;
 
-      void next_frame(float * frame); 
+      void next_frame(float * frame, double rate_offset = 1.0); 
       void next(float * frame_buffer, unsigned int frames);
 
       virtual bool pitch_independent() const;

@@ -10,6 +10,8 @@ namespace djaudio {
     public:
       Envelope(envelope_func_t func, unsigned int length);
 
+      void function(envelope_func_t func);
+
       void length(unsigned int l) {
         mLength = l;
         mLengthMinusOne = l - 1;
@@ -39,6 +41,8 @@ namespace djaudio {
 
   double half_sin(double p);
   double quarter_sin(double p);
+  double ramp_down(double p);
+  double ramp_up(double p);
 }
 
 #endif
