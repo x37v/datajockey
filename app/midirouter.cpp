@@ -11,7 +11,11 @@ namespace {
   typedef QSharedPointer<MidiMap> MidiMapPtr;
 
   QList<QString> player_triggers = {
-    "cue", "play", "sync", "load", "seek_fwd", "seek_back", "bump_fwd", "bump_back", "jump", "jump_clear_next", "jump_new"
+    "cue", "play", "sync", "load", "seek_fwd", "seek_back", "jump", "jump_clear_next", "jump_new"
+  };
+
+  QList<QString> player_bool = {
+     "sync", "cue", "bump_fwd", "bump_back",
   };
 
   QList<QString> player_continuous = {
@@ -52,6 +56,7 @@ namespace {
   };
 
   const std::map<QString, midi_t> yamls_cc_map = {
+    {"note", NOTE},
     {"note_on", NOTE_ON},
     {"note_off", NOTE_OFF},
     {"cc", CC}
@@ -143,6 +148,15 @@ void MidiRouter::readFile(QString fileName) {
           } catch (std::runtime_error& e) {
             emit(mappingError(key + QString::fromStdString(e.what()) + " in element " + QString::number(i)));
           }
+        } else if (node["bool"]) {
+          mmap->signal_name = node["bool"].as<QString>();
+          mmap->mapping_type = BOOL;
+          try {
+            if (!find_midi(node, mmap, yamls_cc_map))
+              emit(mappingError(key + " could not find bool mapping in element " + QString::number(i)));
+          } catch (std::runtime_error& e) {
+            emit(mappingError(key + QString::fromStdString(e.what()) + " in element " + QString::number(i)));
+          }
         } else if (node["continuous"]) {
           mmap->signal_name = node["continuous"].as<QString>();
           mmap->mapping_type = CONTINUOUS;
@@ -198,6 +212,7 @@ void MidiRouter::process() {
         int intvalue = value * static_cast<double>(dj::one_scale);
         int player = mmap->player_index;
         QString signal_name = mmap->signal_name;
+        const uint8_t status = buff.data[0] & 0xF0;
         switch (mmap->mapping_type) {
           case TRIGGER:
             //only non zero CCs trigger
@@ -229,6 +244,9 @@ void MidiRouter::process() {
             }
             break;
           case BOOL:
+            if (player >= 0)
+              emit (playerValueChangedBool(player, signal_name, buff.data[2] > 0 && status != JackCpp::MIDIPort::NOTEOFF));
+            break;
           case SHIFT:
             break;
         }
