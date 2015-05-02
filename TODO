@@ -1,3 +1,5 @@
+traktor shades the played half of the full waveform view.. really easy to see where the play position is.
+
 importer:
 	allow for recomputing annotation file and overwriting an existing one
 		this way we can fix files we screwed up while developing

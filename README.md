@@ -1,5 +1,5 @@
 There is a lot of development going on right now.  I would love help if you're
-interested.  Contact me on irc [ax in #lad on freenode] or via email [alex at
+interested.  Contact me on irc [xnor in #lad on freenode] or via email [alex at
 x37v.info]
 
 # Dependencies: 
