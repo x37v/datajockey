@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
       QTimer * quit_watch_timer = new QTimer();
 
-      auto quit_func = [&quit_watch_timer] (void) {
+      auto quit_func = [quit_watch_timer] (void) {
         if (!quit_app)
           return;
         quit_app = false;
@@ -185,10 +185,10 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   QObject::connect(audio, &AudioModel::masterTriggered,          osc_send, &OSCSender::masterTrigger);
 
 
-  MainWindow w(db, audio);
-  w.loader(loader);
-  QObject::connect(history, &HistoryManager::workHistoryChanged, &w, &MainWindow::workUpdateHistory);
-  QObject::connect(midi, &MidiRouter::masterValueChangedInt,     &w, &MainWindow::masterSetValueInt);
+  MainWindow * w = new MainWindow(db, audio);
+  w->loader(loader);
+  QObject::connect(history, &HistoryManager::workHistoryChanged, w, &MainWindow::workUpdateHistory);
+  QObject::connect(midi, &MidiRouter::masterValueChangedInt,     w, &MainWindow::masterSetValueInt);
 
   //set master volume to 0.8
   QTimer * del = new QTimer(app);
@@ -198,17 +198,17 @@ static int startApp(QApplication * app, QString jackClientName, nsm_client_t * n
   });
   del->start(10);
 
-  QObject::connect(app, &QApplication::aboutToQuit, [&audio, &w, &midiThread] {
-    w.finalize();
+  QObject::connect(app, &QApplication::aboutToQuit, [audio, w, midiThread] {
+    w->finalize();
     midiThread->quit();
     audio->prepareToQuit();
     QThread::msleep(200);
   });
-  w.show();
+  w->show();
 
   if (nsm_client) {
     QTimer * nsmTimer = new QTimer();
-    QObject::connect(nsmTimer, &QTimer::timeout, [&nsm_client]() {
+    QObject::connect(nsmTimer, &QTimer::timeout, [nsm_client]() {
         nsm_check_nowait(nsm_client);
     });
     QObject::connect(app, &QApplication::aboutToQuit, nsmTimer, &QTimer::stop);
