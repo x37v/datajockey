@@ -137,11 +137,11 @@ void MainWindow::readSettings() {
   settings.endGroup();
 
   settings.beginGroup("MainWindow");
-  if (settings.contains("geometry")) {
-    restoreGeometry(settings.value("geometry").toByteArray());
-  }
-  if (settings.contains("windowState"))
-    restoreState(settings.value("windowState").toByteArray(), 0);
+  //if (settings.contains("geometry")) {
+    //restoreGeometry(settings.value("geometry").toByteArray());
+  //}
+  //if (settings.contains("windowState"))
+    //restoreState(settings.value("windowState").toByteArray(), 0);
   if (settings.contains("topSplitter"))
     ui->topSplitter->restoreState(settings.value("topSplitter").toByteArray());
   if (settings.contains("leftSplitter"))
@@ -155,8 +155,8 @@ void MainWindow::writeSettings() {
   QSettings settings;
 
   settings.beginGroup("MainWindow");
-  settings.setValue("geometry", saveGeometry());
-  settings.setValue("windowState", saveState(0));
+  //settings.setValue("geometry", saveGeometry());
+  //settings.setValue("windowState", saveState(0));
   settings.setValue("topSplitter", ui->topSplitter->saveState());
   settings.setValue("leftSplitter", ui->leftSplitter->saveState());
   settings.endGroup();
