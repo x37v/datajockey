@@ -25,6 +25,8 @@ MainWindow::MainWindow(DB *db, AudioModel * audio, QWidget *parent) :
   QSqlQueryModel *model = new QSqlQueryModel(this);
   model->setQuery(db->work_table_query(), db->get());
 
+  centralWidget()->layout()->setContentsMargins(2,2,2,2);
+
   ui->workDetail->setDB(db);
 
   //QSortFilterProxyModel * sortable = new WorksSortFilterProxyModel(model);
