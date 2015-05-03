@@ -7,6 +7,8 @@ LoopAndJumpControlView::LoopAndJumpControlView(QWidget *parent) :
   ui(new Ui::LoopAndJumpControlView)
 {
   ui->setupUi(this);
+  ui->loopButtonLayout->setSpacing(1);
+  ui->jumpButtonLayout->setSpacing(1);
 
   ui->deleteJumpButton->setCheckable(true);
   connect(ui->deleteJumpButton, static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked), [this](bool checked) {
