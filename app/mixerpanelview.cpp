@@ -10,6 +10,8 @@ MixerPanelView::MixerPanelView(QWidget *parent) :
   mPlayerViews.push_back(ui->leftPlayer);
   mPlayerViews.push_back(ui->rightPlayer);
 
+  layout()->setContentsMargins(0,4,0,4);
+
   //connect up the players
   for (int i = 0; i < mPlayerViews.size(); i++) {
     PlayerView * player = mPlayerViews[i];
