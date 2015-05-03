@@ -166,11 +166,32 @@ void WaveFormGL::draw() {
 
   //draw cursor
   GLfloat cursor = mHistoryWidth;
-  if (mZoomFull)
+  if (mZoomFull) {
     cursor = static_cast<GLfloat>(mFramePosition) / static_cast<GLfloat>(mFramesPerLine);
+  }
+
+  //dim the played section of the waveform
+  glPushMatrix();
+  glLineWidth(1.0);
+  glEnable(GL_BLEND); //Enable blending.
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glColor4d(0.0f, 0.0f, 0.0f, 0.6f);
+  glBegin(GL_TRIANGLES);
+
+  glVertex2f(0.0, -1.0);
+  glVertex2f(0.0, 1.0);
+  glVertex2f(cursor, 1.0);
+
+  glVertex2f(cursor, 1.0);
+  glVertex2f(cursor, -1.0);
+  glVertex2f(0.0, -1.0);
+
+  glEnd();
+  glPopMatrix();
 
   glColor4d(cursorColor.redF(), cursorColor.greenF(), cursorColor.blueF(), cursorColor.alphaF());
-  glLineWidth(3.0);
+  glLineWidth(2.0);
   glBegin(GL_LINES);
   glVertex2f(cursor, -1.0);
   glVertex2f(cursor, 1.0);
