@@ -10,9 +10,6 @@ WorkFilterView::WorkFilterView(QWidget *parent) :
 {
   ui->setupUi(this);
   connect(ui->worksTable, &WorksTableView::workSelected, this, &WorkFilterView::workSelected);
-
-  ui->splitter->setStretchFactor(0,0);
-  ui->splitter->setStretchFactor(1,10);
 }
 
 void WorkFilterView::setModel(WorkFilterModel * model) {

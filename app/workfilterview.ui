@@ -35,11 +35,32 @@
         <height>40</height>
        </size>
       </property>
+      <property name="baseSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="lineWrapColumnOrWidth">
+       <number>0</number>
+      </property>
+      <property name="overwriteMode">
+       <bool>false</bool>
+      </property>
       <property name="tabStopWidth">
        <number>80</number>
       </property>
+      <property name="placeholderText">
+       <string>(tag parent:child)</string>
+      </property>
      </widget>
      <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>100</verstretch>
+       </sizepolicy>
+      </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
         <spacer name="horizontalSpacer">
@@ -75,7 +96,14 @@
         </spacer>
        </item>
        <item row="1" column="0" colspan="3">
-        <widget class="WorksTableView" name="worksTable"/>
+        <widget class="WorksTableView" name="worksTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>100</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
