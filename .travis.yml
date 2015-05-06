@@ -1,4 +1,6 @@
 language: cpp
+compiler:
+  - clang
 before_install:
   - sudo add-apt-repository ppa:ubuntu-sdk-team/ppa -y #for qt5
   - sudo apt-get update -qq
