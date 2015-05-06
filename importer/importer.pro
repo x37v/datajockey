@@ -33,7 +33,8 @@ unix:!macx {
 
 QMAKE_CXXFLAGS += -fexceptions -DDJ_VERSION=$$VERSION
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
-!defined(TRAVIS) {
+_TRAVIS = $$(TRAVIS)
+isEmpty(_TRAVIS) {
 	QMAKE_CXXFLAGS += $$DENORMAL_FLAGS 
 }
 
