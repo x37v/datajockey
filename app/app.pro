@@ -50,9 +50,10 @@ unix:!macx {
 
 QMAKE_CXXFLAGS += -fexceptions -DDJ_VERSION=$$VERSION
 DENORMAL_FLAGS = -msse -mfpmath=sse -ffast-math
-if !defined(TRAVIS)
+
+!defined(TRAVIS) {
 	QMAKE_CXXFLAGS += $$DENORMAL_FLAGS 
-end
+}
 
 
 MOC_DIR = moc/
