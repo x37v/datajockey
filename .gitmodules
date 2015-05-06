@@ -1,3 +1,3 @@
 [submodule "ext/jackcpp"]
 	path = ext/jackcpp
-	url = git@github.com:x37v/jackcpp.git
+	url = https://github.com/x37v/jackcpp.git
