@@ -17,6 +17,7 @@ x37v.info]
    * libmad
    * libvorbisfile
    * liblo
+   * libtag
 
 ## linux:
  * lilv and its dependencies
