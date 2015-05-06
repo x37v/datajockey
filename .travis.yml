@@ -1,5 +1,6 @@
 language: cpp
 before_install:
+  - sudo add-apt-repository ppa:ubuntu-sdk-team/ppa -y #for qt5
   - sudo apt-get update -qq
-  - sudo apt-get install -y qt5-default cmake libboost-dev libsndfile-dev libjack-dev libmad0-dev libvorbis-dev liblo-dev liblilv-dev libvamp-hostsdk3 vamp-plugin-sdk
+  - sudo apt-get install -y qt5-default cmake libboost-dev libsndfile1-dev libjack-dev libmad0-dev libvorbis-dev liblo-dev liblilv-dev libvamp-hostsdk3 vamp-plugin-sdk
 script: mkdir -p ext/yaml-cpp-0.5.1-build/ && pushd ext/yaml-cpp-0.5.1-build/ && cmake ../yaml-cpp-0.5.1/ && make && popd && qmake && make
