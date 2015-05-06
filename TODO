@@ -1,3 +1,6 @@
+waveform:
+	disable blend until needed
+
 importer:
 	allow for recomputing annotation file and overwriting an existing one
 		this way we can fix files we screwed up while developing
