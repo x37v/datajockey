@@ -2,6 +2,8 @@
 #define WORKFILTERVIEW_H
 
 #include <QWidget>
+#include <QMap>
+#include <QByteArray>
 #include "workfiltermodel.hpp"
 
 namespace Ui {
@@ -19,6 +21,8 @@ class WorkFilterView : public QWidget
     ~WorkFilterView();
     void setModel(WorkFilterModel * model);
     QString filterExpression() const;
+    QMap<QString, QVariant> saveState() const;
+    bool restoreState(const QMap<QString, QVariant>& state);
   public slots:
     void setSessionNumber(int session);
     void selectWorkRelative(int rows);

@@ -133,7 +133,9 @@ void MainWindow::readSettings() {
     QString label("filtered");
     if (settings.contains("label"))
       label = settings.value("label").toString();
-    addFilterTab(settings.value("expression").toString(), label);
+    WorkFilterView * view = addFilterTab(settings.value("expression").toString(), label);
+    if (settings.contains("guiState"))
+      view->restoreState(settings.value("guiState").toMap());
   }
   settings.endArray();
   settings.endGroup();
@@ -181,6 +183,7 @@ void MainWindow::writeSettings() {
     valid_index++;
     settings.setValue("expression", expression);
     settings.setValue("label", ui->workViews->tabText(ui->workViews->indexOf(view)));
+    settings.setValue("guiState", view->saveState());
   }
   settings.endArray();
 
@@ -218,7 +221,7 @@ void MainWindow::selectWork(int id) {
   emit(workSelected(id));
 }
 
-void MainWindow::addFilterTab(QString filterExpression, QString title) {
+WorkFilterView * MainWindow::addFilterTab(QString filterExpression, QString title) {
   WorkFilterView * view = new WorkFilterView(this);
   WorkFilterModel * model = mFilterCollection->newFilterModel(view);
   model->setFilterExpression(filterExpression);
@@ -226,4 +229,5 @@ void MainWindow::addFilterTab(QString filterExpression, QString title) {
   view->setModel(model);
   ui->workViews->addTab(view, title);
   connect(view, &WorkFilterView::workSelected, this, &MainWindow::selectWork);
+  return view;
 }

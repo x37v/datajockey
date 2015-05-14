@@ -3,6 +3,8 @@
 #include "db.h"
 #include "workstableview.h"
 #include <QMessageBox>
+#include <QMap>
+#include <QDataStream>
 
 WorkFilterView::WorkFilterView(QWidget *parent) :
   QWidget(parent),
@@ -33,6 +35,19 @@ void WorkFilterView::setModel(WorkFilterModel * model) {
 
 QString WorkFilterView::filterExpression() const { return ui->filterEdit->toPlainText(); }
 WorkFilterView::~WorkFilterView() { delete ui; }
+
+QMap<QString, QVariant> WorkFilterView::saveState() const {
+  QMap<QString, QVariant> state;
+  state["splitter"] = ui->splitter->saveState();
+  return state;
+}
+
+bool WorkFilterView::restoreState(const QMap<QString, QVariant>& state) {
+  auto it = state.find("splitter");
+  if (it != state.end())
+    ui->splitter->restoreState(it->toByteArray());
+  return true;
+}
 
 void WorkFilterView::setSessionNumber(int session) { ui->worksTable->setSessionNumber(session); }
 void WorkFilterView::selectWorkRelative(int rows) { ui->worksTable->selectWorkRelative(rows); }
