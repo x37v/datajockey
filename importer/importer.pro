@@ -10,7 +10,7 @@ CONFIG += link_pkgconfig
 
 TEMPLATE = app
 
-LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1-build/libyaml-cpp.a
+LIBS += $$TOP_DIR/ext/yaml-cpp-build/libyaml-cpp.a
 INCLUDEPATH += /usr/local/include/
 RESOURCES = $$TOP_DIR/db.qrc
 
@@ -71,4 +71,4 @@ HEADERS += \
 INCLUDEPATH += . \
   ../app/ \
   ../app/audio \
-  ../ext/yaml-cpp-0.5.1/include/
+  ../ext/yaml-cpp/include/
