@@ -19,12 +19,12 @@ class WorksTableView : public QTableView
   protected:
     virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
   public slots:
-    void readSettings();
-    void writeSettings();
     void selectWorkRelative(int rows);
     void emitSelected();
     void setSessionNumber(int session);
     void workUpdateHistory(int work_id, QDateTime played_at);
+    QMap<QString, QVariant> saveState() const;
+    bool restoreState(const QMap<QString, QVariant>& state);
   signals:
     void workSelected(int workid);
   private:

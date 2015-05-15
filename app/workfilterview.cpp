@@ -39,6 +39,7 @@ WorkFilterView::~WorkFilterView() { delete ui; }
 QMap<QString, QVariant> WorkFilterView::saveState() const {
   QMap<QString, QVariant> state;
   state["splitter"] = ui->splitter->saveState();
+  state["tableState"] = ui->worksTable->saveState();
   return state;
 }
 
@@ -46,6 +47,9 @@ bool WorkFilterView::restoreState(const QMap<QString, QVariant>& state) {
   auto it = state.find("splitter");
   if (it != state.end())
     ui->splitter->restoreState(it->toByteArray());
+  it = state.find("tableState");
+  if (it != state.end())
+    ui->worksTable->restoreState(it->toMap());
   return true;
 }
 

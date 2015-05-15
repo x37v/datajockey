@@ -59,8 +59,6 @@ class SessionDisplayDelegate : public QStyledItemDelegate {
 WorksTableView::WorksTableView(QWidget *parent) :
   QTableView(parent)
 {
-  //schedule the settings reading to happen after view construction
-  QTimer::singleShot(0, this, SLOT(readSettings()));
 }
 
 void WorksTableView::setModel(QAbstractItemModel * model) {
@@ -100,19 +98,17 @@ void WorksTableView::selectionChanged(const QItemSelection& selected, const QIte
   emit(workSelected(workid));
 }
 
-void WorksTableView::readSettings() {
-  QSettings settings;
-  settings.beginGroup("WorksTableView");
-  if (settings.contains("headerState"))
-    horizontalHeader()->restoreState(settings.value("headerState").toByteArray()); 
-  settings.endGroup();
+QMap<QString, QVariant> WorksTableView::saveState() const {
+  QMap<QString, QVariant> state;
+  state["headerState"] = horizontalHeader()->saveState();
+  return state;
 }
 
-void WorksTableView::writeSettings() {
-  QSettings settings;
-  settings.beginGroup("WorksTableView");
-  settings.setValue("headerState", horizontalHeader()->saveState());
-  settings.endGroup();
+bool WorksTableView::restoreState(const QMap<QString, QVariant>& state) {
+  auto it = state.find("headerState");
+  if (it != state.end())
+    horizontalHeader()->restoreState(it->toByteArray()); 
+  return true;
 }
 
 void WorksTableView::selectWorkRelative(int rows) {

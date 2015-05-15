@@ -140,6 +140,11 @@ void MainWindow::readSettings() {
   settings.endArray();
   settings.endGroup();
 
+  settings.beginGroup("WorksTableView");
+  if (settings.contains("guiState"))
+    ui->allWorks->restoreState(settings.value("guiState").toMap());
+  settings.endGroup();
+
   settings.beginGroup("MainWindow");
   //if (settings.contains("geometry")) {
     //restoreGeometry(settings.value("geometry").toByteArray());
@@ -154,8 +159,6 @@ void MainWindow::readSettings() {
 }
 
 void MainWindow::writeSettings() {
-  ui->allWorks->writeSettings();
-
   QSettings settings;
 
   settings.beginGroup("MainWindow");
@@ -163,6 +166,10 @@ void MainWindow::writeSettings() {
   //settings.setValue("windowState", saveState(0));
   settings.setValue("topSplitter", ui->topSplitter->saveState());
   settings.setValue("leftSplitter", ui->leftSplitter->saveState());
+  settings.endGroup();
+
+  settings.beginGroup("WorksTableView");
+  settings.setValue("guiState", ui->allWorks->saveState());
   settings.endGroup();
 
   settings.beginGroup("WorkFilterModelCollection");
