@@ -236,5 +236,20 @@ WorkFilterView * MainWindow::addFilterTab(QString filterExpression, QString titl
   view->setModel(model);
   ui->workViews->addTab(view, title);
   connect(view, &WorkFilterView::workSelected, this, &MainWindow::selectWork);
+
+  //make it reflect the first tab or the main view
+  QMap<QString, QVariant> state;
+  state["tableState"] = ui->allWorks->saveState();
+
+  for (int i = 0; i < ui->workViews->count(); i++) {
+    QWidget * widget = ui->workViews->widget(i);
+    WorkFilterView * view = dynamic_cast<WorkFilterView *>(widget);
+    if (!view)
+      continue;
+    state = view->saveState();
+    break;
+  }
+  view->restoreState(state);
+
   return view;
 }
