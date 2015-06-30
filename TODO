@@ -1,3 +1,6 @@
+include in:
+	http://www.nongnu.org/crossfade/
+	need to make a fedora package for that
 waveform:
 	disable blend until needed
 
