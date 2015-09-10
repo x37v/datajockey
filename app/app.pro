@@ -27,7 +27,7 @@ LIBS += -llo
 //LIBS += -lboost_program_options-mt -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt 
 RESOURCES = $$TOP_DIR/gui.qrc $$TOP_DIR/db.qrc
 
-LIBS += $$TOP_DIR/ext/yaml-cpp-0.5.1-build/libyaml-cpp.a
+LIBS += $$TOP_DIR/ext/yaml-cpp-build/libyaml-cpp.a
 INCLUDEPATH += /usr/local/include/
 
 macx {
@@ -175,7 +175,7 @@ FORMS    += mainwindow.ui \
 INCLUDEPATH += . \
 	audio \
 	../ext/jackcpp/include/ \
-  ../ext/yaml-cpp-0.5.1/include/ \
+  ../ext/yaml-cpp/include/ \
   ../ext
 
 #lv2 specific stuff

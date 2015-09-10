@@ -1,3 +1,6 @@
 [submodule "ext/jackcpp"]
 	path = ext/jackcpp
 	url = https://github.com/x37v/jackcpp.git
+[submodule "ext/yaml-cpp"]
+	path = ext/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
