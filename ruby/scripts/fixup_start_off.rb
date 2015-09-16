@@ -35,8 +35,6 @@ t = Tag.find_by_name("starts_off_beat")
 #tag a work with starts_off_beat and put marker 5 where it starts to get good
 #NOTE markers are shown as + 1 in GUI, so in GUI it'll look like 6
 
-puts "DISABLED"
-exit
 
 
 t.audio_works.each do |w|
