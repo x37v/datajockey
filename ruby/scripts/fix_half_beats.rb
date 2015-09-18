@@ -47,9 +47,9 @@ t.audio_works.each do |w|
   annotation["beat_locations"]["frames"] = beats
   puts "#{w.name} #{median} #{off}"
   puts w.annotation_file_location
-  AudioWorkTag.where(:tag_id => t.id, :audio_work_id => w.id).each do |tw|
-    tw.destroy
-  end
+#  AudioWorkTag.where(:tag_id => t.id, :audio_work_id => w.id).each do |tw|
+#    tw.destroy
+#  end
   File.open(w.annotation_file_location, "w") { |f|  f.print annotation.to_yaml }
 end
 
