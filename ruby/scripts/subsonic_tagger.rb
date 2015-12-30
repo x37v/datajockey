@@ -16,9 +16,11 @@ include Datajockey
 s.playlists.each do |pl|
   name = pl["name"]
 
-  if name =~ /\Amix-/
+  mix_prefix = /\A(a*-)?mix-/
+
+  if name =~ mix_prefix
     class_name = 'mix'
-    tag_name = name.sub(/\Amix-/, "")
+    tag_name = name.sub(mix_prefix, "")
   elsif name =~ /\Atag-/
     class_name = 'tag'
     tag_name = name.sub(/\Atag-/, "")
