@@ -9,6 +9,7 @@
 #include "stretcher.hpp"
 #include "envelope.hpp"
 #include "defines.hpp"
+#include "plugin.h"
 
 #ifdef USE_LV2
 #include "lv2plugin.h"
@@ -100,6 +101,7 @@ namespace djaudio {
       void position_at_frame_relative(long offset);
       void play_speed_relative(double amt); //increment or decrement the current play speed by amt
       void volume_relative(double amt); //increment or decrement the current volume
+      int eq_plugin_index() const { return mEqPluginIndex; }
 
     private:
       enum bump_state_t { BUMP_FWD, BUMP_REV, BUMP_OFF };
@@ -113,6 +115,7 @@ namespace djaudio {
       bool mLoop;
       bool mSetup;
       bump_state_t mBumpState = BUMP_OFF;
+      int mEqPluginIndex = -1;
 
       //continuous
       double mVolume;
@@ -136,6 +139,8 @@ namespace djaudio {
       unsigned int mFadeoutIndex;
       std::vector<float> mFadeoutBuffer;
 
+      AudioPluginCollection mPreFaderPlugins;
+
       //the eq instance
 #ifdef USE_LV2
       Lv2Plugin * mEqPlugin;
@@ -145,6 +150,7 @@ namespace djaudio {
       std::array<float, 3> mEqBandValueDefault;
       std::array<float, 3> mEqBandValueDBScale = std::array<float, 3>{0.0f, 0.0f, 0.0f};
 #endif
+
 
       //helpers
       //for updating the play speed while syncing

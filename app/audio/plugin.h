@@ -24,6 +24,8 @@ class AudioPlugin {
     //below called in audio thread
     virtual void compute(unsigned int nframes, float ** mixBuffer) = 0;
     virtual void stop(){}
+    virtual void control_value(uint32_t index, float v) = 0;
+
     int index() const { return mIndex; }
   private:
     int mIndex = 0;
@@ -41,6 +43,7 @@ class AudioPluginCollection : public AudioPlugin {
 
     virtual void compute(unsigned int nframes, float ** mixBuffer);
     virtual void stop();
+    virtual void control_value(uint32_t index, float v) override;
 
     void insert(unsigned int index, AudioPluginNode * plugin);
     void append(AudioPluginNode * plugin); 

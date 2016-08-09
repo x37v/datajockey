@@ -51,7 +51,7 @@ class AudioModel : public QObject {
     void masterSetValueBool(QString name, bool v);
     void masterTrigger(QString name);
 
-    void pluginSetValueInt(int plugin_index, QString parameter_name, int value);
+    void pluginSetValueInt(int plugin_index, int parameter_index, int value);
     void pluginAddToPlayer(int player_index, int location_index, AudioPluginPtr plugin);
     void pluginAddToMaster(int send_index, int location_index, AudioPluginPtr plugin);
     void pluginRemove(int plugin_index);
@@ -146,6 +146,18 @@ class MasterSyncToPlayerCommand : public QObject, public djaudio::MasterIntComma
     void masterValueUpdateDouble(QString name, double value);
   private:
     double mBPM;
+};
+
+class PluginValueCommand : public djaudio::Command
+{
+  public:
+    PluginValueCommand(AudioPluginPtr plugin, int parameter_index, double value);
+    virtual void execute(const djaudio::Transport& transport) override;
+    virtual bool store(djaudio::CommandIOData& /*data*/) const override { return false; }
+  private:
+    AudioPluginPtr mPlugin;
+    int mParameterIndex;
+    double mValue;
 };
 
 #endif // AUDIOMODEL_H

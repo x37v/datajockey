@@ -109,7 +109,8 @@ SOURCES += main.cpp\
     audiofileinfoextractor.cpp \
     audio/xing.c \
     loopandjumpcontrolview.cpp \
-    loopandjumpmanager.cpp
+    loopandjumpmanager.cpp \
+    pluginmixerview.cpp
 
 HEADERS  += mainwindow.h \
     playerview.h \
@@ -162,7 +163,8 @@ HEADERS  += mainwindow.h \
     audiofileinfoextractor.h \
     audio/xing.h \
     loopandjumpcontrolview.h \
-    loopandjumpmanager.h
+    loopandjumpmanager.h \
+    pluginmixerview.h
 
 FORMS    += mainwindow.ui \
     playerview.ui \
@@ -170,7 +172,8 @@ FORMS    += mainwindow.ui \
     workdetailview.ui \
     tagsview.ui \
     workfilterview.ui \
-    loopandjumpcontrolview.ui
+    loopandjumpcontrolview.ui \
+    pluginmixerview.ui
 
 INCLUDEPATH += . \
 	audio \

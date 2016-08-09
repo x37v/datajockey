@@ -451,11 +451,13 @@ void AudioModel::masterTrigger(QString name) {
   cout << "master name " << qPrintable(name) << endl;
 }
 
-void AudioModel::pluginSetValueInt(int plugin_index, QString parameter_name, int value) {
+void AudioModel::pluginSetValueInt(int plugin_index, int parameter_index, int value) {
   auto it = mPlugins.find(plugin_index);
   if (it == mPlugins.end())
     return;
-  //XXX do it
+  double fvalue = to_double(value);
+  PluginValueCommand * cmd = new PluginValueCommand(*it, parameter_index, fvalue);
+  queue(cmd);
 }
 
 void AudioModel::pluginAddToPlayer(int player_index, int location_index, AudioPluginPtr plugin) {
@@ -629,3 +631,13 @@ void MasterSyncToPlayerCommand::execute(const djaudio::Transport& transport) {
 void MasterSyncToPlayerCommand::execute_done() {
   emit(masterValueUpdateDouble("update_bpm", mBPM));
 }
+
+PluginValueCommand::PluginValueCommand(AudioPluginPtr plugin, int parameter_index, double value) :
+  mPlugin(plugin), mParameterIndex(parameter_index), mValue(value)
+{
+}
+
+void PluginValueCommand::execute(const djaudio::Transport& /*transport*/) {
+  mPlugin->control_value(mParameterIndex, mValue);
+}
+

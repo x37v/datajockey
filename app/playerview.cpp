@@ -1,6 +1,7 @@
 #include "playerview.h"
 #include "ui_playerview.h"
 #include "audiolevelview.h"
+#include "pluginmixerview.h"
 #include "loopandjumpcontrolview.h"
 #include <QDoubleSpinBox>
 #include <map>
@@ -64,6 +65,9 @@ PlayerView::PlayerView(QWidget *parent) :
 
   connect(ui->loopAndJumpControl, &LoopAndJumpControlView::valueChangedInt, this, &PlayerView::valueChangedInt);
   connect(ui->loopAndJumpControl, &LoopAndJumpControlView::triggered, this, &PlayerView::triggered);
+
+  PluginMixerView * pv = new PluginMixerView(this);
+  ui->effectsLayout->addWidget(pv);
 }
 
 void PlayerView::setWorkInfo(QString info) {

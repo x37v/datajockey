@@ -29,6 +29,9 @@ void AudioPluginCollection::stop() {
     });
 }
 
+//do nothing
+void AudioPluginCollection::control_value(uint32_t /*index*/, float /*v*/) { }
+
 void AudioPluginCollection::append(AudioPluginNode * plugin) {
   mEffects.push_back(plugin);
 }
