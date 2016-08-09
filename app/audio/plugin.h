@@ -25,6 +25,8 @@ class AudioPlugin {
     virtual void compute(unsigned int nframes, float ** mixBuffer) = 0;
     virtual void stop(){}
     virtual void control_value(uint32_t index, float v) = 0;
+    virtual int control_index(QString /*paramterName*/) const { return -1; }
+    virtual void load_default_preset() {}
 
     int index() const { return mIndex; }
   private:

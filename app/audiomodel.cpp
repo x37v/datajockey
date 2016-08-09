@@ -218,6 +218,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
   mLoopAndJumpManager->playerSetValueInt(player, name, v);
   playerSet(player, [player, &name, &v, this](PlayerState * pstate) -> Command *
     {
+      bool force_state_update = false;
       if (name == "seek_frame_relative") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_RELATIVE, v);
       } else if (name == "seek_beat_relative") {
@@ -238,11 +239,14 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
       } else if (name == "seek_beat") {
         return new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::PLAY_BEAT, v < 0 ? 0 : v);
       } else if (name == "eq_high") {
-        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_HIGH, to_double(v));
+        playerSetEq(player, dj::HIGH, v);
+        force_state_update = true;
       } else if (name == "eq_mid") {
-        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_MID, to_double(v));
+        playerSetEq(player, dj::MID, v);
+        force_state_update = true;
       } else if (name == "eq_low") {
-        cmd = new djaudio::PlayerDoubleCommand(player, djaudio::PlayerDoubleCommand::EQ_LOW, to_double(v));
+        playerSetEq(player, dj::LOW, v);
+        force_state_update = true;
       } else if (name == "loop_start_frame") {
         cmd = new djaudio::PlayerPositionCommand(player, djaudio::PlayerPositionCommand::LOOP_START, v);
       } else if (name == "loop_end_frame") {
@@ -254,7 +258,7 @@ void AudioModel::playerSetValueInt(int player, QString name, int v) {
         return nullptr;
       }
 
-      if (cmd) {
+      if (cmd || force_state_update) {
         pstate->intValue[name] = v;
         emit(playerValueChangedInt(player, name, v));
       }
@@ -513,6 +517,12 @@ void AudioModel::masterSet(std::function<djaudio::Command *(void)> func) {
   Command * cmd = func();
   if (cmd)
     queue(cmd);
+}
+
+void AudioModel::playerSetEq(int player_index, dj::eq_band_t band, int value) {
+  djaudio::Player * p = djaudio::Master::instance()->players().at(player_index);
+  pluginSetValueInt(p->eq_plugin_index(), p->eq_plugin_parameter_index(band), to_double(value));
+  //XXX emit
 }
 
 void AudioModel::queue(djaudio::Command * cmd) {

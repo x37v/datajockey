@@ -20,6 +20,9 @@ class Lv2Plugin : public AudioPlugin {
     float port_value_default(uint32_t index) const;
     uint32_t port_index(QString port_symbol) const throw(std::runtime_error);
 
+    virtual int control_index(QString paramterName) const override;
+    virtual void load_default_preset() override;
+
     void load_preset_from_file(QString file_path) throw(std::runtime_error);
 
     //below called in audio thread
@@ -27,6 +30,7 @@ class Lv2Plugin : public AudioPlugin {
     virtual void stop();
     virtual void control_value(uint32_t index, float v) override;
   private:
+    QString mURI;
     LilvInstance * mLilvInstance;
     const LilvPlugin * mLilvPlugin;
     uint32_t mNumPorts = 0;

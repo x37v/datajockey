@@ -5,6 +5,7 @@
 #include "stretcherrate.hpp"
 #include "defines.hpp"
 #include "config.hpp"
+#include "pluginmanager.h"
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 
 #include <algorithm>
@@ -46,10 +47,8 @@ Player::Player() :
   mMaxSampleValue(0.0),
   mEnvelope(djaudio::quarter_sin, 4410),
   mBumpEnvelope(djaudio::ramp_down, 44100 * 10),
-  mFadeoutIndex(0)
-#ifdef USE_LV2
-  ,mEqPlugin(NULL)
-#endif
+  mFadeoutIndex(0),
+  mEqPlugin(NULL)
 {
   //states
   mPlayState = PAUSE;
@@ -80,10 +79,8 @@ Player::~Player(){
   for (unsigned int i = 0; i < mSendVolumeBuffers.size(); i++)
     delete [] mSendVolumeBuffers[i];
   mSendVolumeBuffers.clear();
-#ifdef USE_LV2
-  if(mEqPlugin)
-    delete mEqPlugin;
-#endif
+  if (mEqPlugin)
+    AudioPluginManager::instance()->destroy(mEqPlugin);
 }
 
 //this creates internal buffers
@@ -114,33 +111,30 @@ void Player::setup_audio(
     mSendVolumeBuffers.push_back(v);
     mSendVolumes.push_back(0.0f);
   }
-
-#ifdef USE_LV2
   dj::Configuration * config = dj::Configuration::instance();
+
   try {
-    mEqPlugin = new Lv2Plugin(config->eq_uri());
-    mEqPlugin->setup(sampleRate, maxBufferLen);
-    for (int i = 0; i < 3; i++) {
-      dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
-      mEqBandPortMapping[i] = mEqPlugin->port_index(config->eq_port_symbol(band));
-      mEqBandValueMax[i] = mEqPlugin->port_value_max(mEqBandPortMapping[i]);
-      mEqBandValueMin[i] = mEqPlugin->port_value_min(mEqBandPortMapping[i]);
-      mEqBandValueDefault[i] = mEqPlugin->port_value_default(mEqBandPortMapping[i]);
-      mEqBandValueDBScale[i] = config->eq_band_db_scale(band);
-    }
-    QString preset = config->eq_plugin_preset_file();
-    if (preset.size())
-      mEqPlugin->load_preset_from_file(preset);
-  } catch (std::runtime_error& e) {
+    mEqPlugin = AudioPluginManager::instance()->create(config->eq_plugin_uuid());
     if (mEqPlugin) {
-      delete mEqPlugin;
-      mEqPlugin = nullptr;
+      mEqPlugin->setup(sampleRate, maxBufferLen);
+      mEqPlugin->load_default_preset();
+      for (int i = 0; i < 3; i++) {
+        dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
+        mEqBandPortMapping[i] = mEqPlugin->control_index(config->eq_port_symbol(band));
+        /*
+        mEqBandValueMax[i] = lv2Plugin->port_value_max(mEqBandPortMapping[i]);
+        mEqBandValueMin[i] = lv2Plugin->port_value_min(mEqBandPortMapping[i]);
+        mEqBandValueDefault[i] = lv2Plugin->port_value_default(mEqBandPortMapping[i]);
+        mEqBandValueDBScale[i] = config->eq_band_db_scale(band);
+        */
+      }
     }
+  } catch (std::runtime_error& e) {
+    mEqPlugin.clear();
     cerr << "error loading plugin: " << e.what() << endl;
     cerr << "do you have it installed?:" << endl;
     cerr << "\t\t" << qPrintable(config->eq_uri()) << endl;
   }
-#endif
 
   mSetup = true;
 }
@@ -488,6 +482,10 @@ void Player::play_speed_relative(double amt){
 
 void Player::volume_relative(double amt){
   mVolume += amt;
+}
+
+int Player::eq_plugin_parameter_index(dj::eq_band_t band) const {
+  return mEqBandPortMapping[band];
 }
 
 

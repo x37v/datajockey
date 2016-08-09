@@ -234,10 +234,17 @@ QString Configuration::db_username() const { return mDBUserName; }
 QString Configuration::db_host() const { return mDBHost; }
 int Configuration::db_port() const { return mDBPort; }
 
+QString Configuration::eq_plugin_uuid() const { return mEqPluginURI; }
 QString Configuration::eq_uri() const { return mEqPluginURI; }
 QString Configuration::eq_port_symbol(dj::eq_band_t band) const { return mEqPluginSymbol[band]; }
 float Configuration::eq_band_db_scale(dj::eq_band_t band) const { return mEqPluginDBScale[band]; }
-QString Configuration::eq_plugin_preset_file() const { return mEqPluginPresetFile; }
+
+QString Configuration::plugin_preset_file(QString pluginUUID) {
+  //XXX allow for more of these
+  if (pluginUUID == mEqPluginURI)
+    return mEqPluginPresetFile;
+  return QString();
+}
 
 QString Configuration::post_start_script() {
   return mPostStartScript;

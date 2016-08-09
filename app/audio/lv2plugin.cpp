@@ -4,6 +4,8 @@
 #include "uridmap.h"
 #include "symap.h"
 #include <iostream>
+#include "defines.hpp"
+#include "config.hpp"
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 
@@ -62,6 +64,7 @@ namespace {
 }
 
 Lv2Plugin::Lv2Plugin(QString uri) throw (std::runtime_error)
+  : mURI(uri)
 {
   setup_lilv();
 
@@ -164,6 +167,14 @@ float Lv2Plugin::port_value_default(uint32_t index) const {
   return mPortValueDefault[index];
 }
 
+int Lv2Plugin::control_index(QString paramterName) const {
+  try {
+    return static_cast<int>(port_index(paramterName));
+  } catch (...) {
+  }
+  return -1;
+}
+
 uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_error) {
   LilvNode * snode = lilv_new_string(cLV2World, qPrintable(port_symbol));
   const LilvPort * port = lilv_plugin_get_port_by_symbol(mLilvPlugin, snode);
@@ -171,6 +182,13 @@ uint32_t Lv2Plugin::port_index(QString port_symbol) const throw(std::runtime_err
   if (!port)
     throw std::runtime_error("cannot find port by symbol name: " + port_symbol.toStdString());
   return lilv_port_get_index(mLilvPlugin, port);
+}
+
+void Lv2Plugin::load_default_preset() {
+  dj::Configuration * config = dj::Configuration::instance();
+  QString preset = config->plugin_preset_file(mURI);
+  if (preset.size())
+    load_preset_from_file(preset);
 }
 
 void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_error) {
@@ -207,6 +225,7 @@ void Lv2Plugin::control_value(uint32_t index, float v) {
   auto it = mControlInputs.find(index);
   if (it == mControlInputs.end())
     return; //XXX error
+  v = dj::clamp(v, (float)mPortValueMin[index], (float)mPortValueMax[index]);
   *(it->second) = v;
 }
 

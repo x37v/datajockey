@@ -85,6 +85,7 @@ class AudioModel : public QObject {
     void queue(djaudio::Command * cmd);
     void playerSet(int player, std::function<djaudio::Command *(PlayerState * state)> func);
     void masterSet(std::function<djaudio::Command *(void)> func);
+    void playerSetEq(int player, dj::eq_band_t band, int value);
 };
 
 

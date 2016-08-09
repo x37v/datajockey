@@ -58,11 +58,12 @@ namespace dj {
       QString db_host() const;
       int db_port() const;
 
+      QString eq_plugin_uuid() const;
       QString eq_uri() const;
       QString eq_port_symbol(dj::eq_band_t band) const;
       //zero for no db scaling
       float eq_band_db_scale(dj::eq_band_t band) const;
-      QString eq_plugin_preset_file() const;
+      QString plugin_preset_file(QString pluginUUID);
 
       //if populated, run this after startup
       QString post_start_script();

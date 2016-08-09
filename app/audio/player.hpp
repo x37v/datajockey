@@ -102,6 +102,7 @@ namespace djaudio {
       void play_speed_relative(double amt); //increment or decrement the current play speed by amt
       void volume_relative(double amt); //increment or decrement the current volume
       int eq_plugin_index() const { return mEqPluginIndex; }
+      int eq_plugin_parameter_index(dj::eq_band_t band) const;
 
     private:
       enum bump_state_t { BUMP_FWD, BUMP_REV, BUMP_OFF };
@@ -142,15 +143,14 @@ namespace djaudio {
       AudioPluginCollection mPreFaderPlugins;
 
       //the eq instance
-#ifdef USE_LV2
-      Lv2Plugin * mEqPlugin;
+      AudioPluginPtr mEqPlugin;
       std::array<uint32_t, 3> mEqBandPortMapping;
+#ifdef USE_LV2
       std::array<float, 3> mEqBandValueMax;
       std::array<float, 3> mEqBandValueMin;
       std::array<float, 3> mEqBandValueDefault;
       std::array<float, 3> mEqBandValueDBScale = std::array<float, 3>{0.0f, 0.0f, 0.0f};
 #endif
-
 
       //helpers
       //for updating the play speed while syncing
