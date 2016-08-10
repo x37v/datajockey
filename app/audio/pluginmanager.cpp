@@ -1,5 +1,6 @@
 #include "audio/pluginmanager.h"
 #include <QMutex>
+#include "defines.hpp"
 #ifdef USE_LV2
 #include "lv2plugin.h"
 #endif
@@ -42,12 +43,12 @@ void AudioPluginManager::destroy(AudioPluginPtr plugin) {
 double AudioPluginManager::range_remap(int plugin_index, int parameter_index, int value) {
   auto it = mPlugins.find(plugin_index);
   if (it == mPlugins.end())
-    return 0;
+    return dj::to_double(value);
   return (*it)->range_remap(parameter_index, value);
 }
 
 AudioPluginManager::AudioPluginManager() : QObject() { }
 
-void AudioPluginManager::playerSetValueInt(int player, QString name, int value) {
+void AudioPluginManager::playerSetValueInt(int /*player*/, QString /*name*/, int /*value*/) {
 }
 

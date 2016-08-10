@@ -200,26 +200,24 @@ void Lv2Plugin::load_default_preset() {
 }
 
 double Lv2Plugin::range_remap(int parameter_index, int value) {
-  float fvalue = dj::to_double(value);
-  auto it = mPortValueDBScale.find(parameter_index);
-  if (it != mPortValueDBScale.end()) {
-    return dj::db2amp(it->second * fvalue);
-  }
+  float fvalue = dj::to_double(value); //should be 0..1
   if (parameter_index < 0 || parameter_index >= (int)mNumPorts)
-    return 0;
+    return fvalue;
+  auto it = mPortValueDBScale.find(parameter_index);
+  if (it != mPortValueDBScale.end())
+    return dj::db2amp(it->second * (2.0 * fvalue - 1.0));
+
+  //if the min is less than zero then remap so that our mid point lines up with
+  //the plugin's zero
   if (mPortValueMin[parameter_index] < 0) {
-    if (fvalue < 0.0)
+    fvalue = fvalue * 2.0 - 1; //remap to -1..1
+    if (fvalue < 0)
       return fvalue * -mPortValueMin[parameter_index];
     else
       return fvalue * mPortValueMax[parameter_index];
-  } else {
-    //otherwise map our -1..0..1 to min..default..max
-    if (value >= 0.0)
-      return mPortValueDefault[parameter_index] + fvalue * (mPortValueMax[parameter_index] - mPortValueDefault[parameter_index]);
-    return mPortValueDefault[parameter_index] + fvalue * (mPortValueDefault[parameter_index] - mPortValueMin[parameter_index]);
   }
-
-  return 0;
+  //otherwise map our 0..1 to min..max
+  return mPortValueMin[parameter_index] + fvalue * (mPortValueMax[parameter_index] - mPortValueMin[parameter_index]);
 }
 
 void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_error) {

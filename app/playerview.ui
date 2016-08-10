@@ -153,7 +153,7 @@
         </size>
        </property>
        <property name="minimum">
-        <number>-1000</number>
+        <number>0</number>
        </property>
        <property name="maximum">
         <number>1000</number>
@@ -162,7 +162,10 @@
         <number>10</number>
        </property>
        <property name="pageStep">
-        <number>100</number>
+        <number>50</number>
+       </property>
+       <property name="value">
+        <number>500</number>
        </property>
        <property name="invertedAppearance">
         <bool>false</bool>
@@ -190,7 +193,7 @@
         </size>
        </property>
        <property name="minimum">
-        <number>-1000</number>
+        <number>0</number>
        </property>
        <property name="maximum">
         <number>1000</number>
@@ -199,7 +202,10 @@
         <number>10</number>
        </property>
        <property name="pageStep">
-        <number>100</number>
+        <number>50</number>
+       </property>
+       <property name="value">
+        <number>500</number>
        </property>
        <property name="invertedAppearance">
         <bool>false</bool>
@@ -227,7 +233,7 @@
         </size>
        </property>
        <property name="minimum">
-        <number>-1000</number>
+        <number>0</number>
        </property>
        <property name="maximum">
         <number>1000</number>
@@ -236,7 +242,10 @@
         <number>10</number>
        </property>
        <property name="pageStep">
-        <number>100</number>
+        <number>50</number>
+       </property>
+       <property name="value">
+        <number>500</number>
        </property>
        <property name="invertedAppearance">
         <bool>false</bool>

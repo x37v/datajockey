@@ -121,12 +121,6 @@ void Player::setup_audio(
       for (int i = 0; i < 3; i++) {
         dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
         mEqBandPortMapping[i] = mEqPlugin->control_index(config->eq_port_symbol(band));
-        /*
-        mEqBandValueMax[i] = lv2Plugin->port_value_max(mEqBandPortMapping[i]);
-        mEqBandValueMin[i] = lv2Plugin->port_value_min(mEqBandPortMapping[i]);
-        mEqBandValueDefault[i] = lv2Plugin->port_value_default(mEqBandPortMapping[i]);
-        mEqBandValueDBScale[i] = config->eq_band_db_scale(band);
-        */
       }
     }
   } catch (std::runtime_error& e) {
@@ -439,30 +433,6 @@ void Player::beat_buffer(BeatBuffer * buf){
   mStretcher->frame(0);
 }
 
-void Player::eq(dj::eq_band_t band, double value) {
-#if 0
-  if (!mEqPlugin)
-    return;
-  //if we have a negative to positive range, map our -1..1 to that range
-  if (mEqBandValueDBScale[band] != 0) {
-    value = dj::db2amp(mEqBandValueDBScale[band] * value);
-  } else if (mEqBandValueMin[band] < 0) {
-    if (value < 0.0)
-      value *= -mEqBandValueMin[band];
-    else
-      value *= mEqBandValueMax[band];
-  } else {
-    //otherwise map our -1..0..1 to min..default..max
-    if (value >= 0.0)
-      value = mEqBandValueDefault[band] + value * (mEqBandValueMax[band] - mEqBandValueDefault[band]);
-    else 
-      value = mEqBandValueDefault[band] + value * (mEqBandValueDefault[band] - mEqBandValueMin[band]);
-  }
-  value = dj::clamp(value, (double)mEqBandValueMin[band], (double)mEqBandValueMax[band]);
-  mEqPlugin->control_value(mEqBandPortMapping[band], value);
-#endif
-}
-
 float Player::max_sample_value_reset() {
   float v = mMaxSampleValue;
   mMaxSampleValue = 0.0;
@@ -759,12 +729,6 @@ void PlayerDoubleCommand::execute(const Transport& /*transport*/){
         p->play_speed(mValue); break;
       case PLAY_SPEED_RELATIVE:
         p->play_speed_relative(mValue); break;
-      case EQ_LOW:
-        p->eq(dj::LOW, mValue); break;
-      case EQ_MID:
-        p->eq(dj::MID, mValue); break;
-      case EQ_HIGH:
-        p->eq(dj::HIGH, mValue); break;
     };
   }
 }
@@ -783,15 +747,6 @@ bool PlayerDoubleCommand::store(CommandIOData& data) const{
       break;
     case PLAY_SPEED_RELATIVE:
       data["action"] = "play_speed_relative";
-      break;
-    case EQ_LOW:
-      data["action"] = "eq_low";
-      break;
-    case EQ_MID:
-      data["action"] = "eq_mid";
-      break;
-    case EQ_HIGH:
-      data["action"] = "eq_high";
       break;
   };
   data["value"] = mValue;

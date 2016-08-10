@@ -22,6 +22,7 @@ class Lv2Plugin : public AudioPlugin {
 
     virtual int control_index(QString paramterName) const override;
     virtual void load_default_preset() override;
+    //value expected to be between 0...1000 
     virtual double range_remap(int parameter_index, int value) override;
 
     void load_preset_from_file(QString file_path) throw(std::runtime_error);

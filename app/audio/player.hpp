@@ -94,7 +94,6 @@ namespace djaudio {
 
       void audio_buffer(AudioBuffer * buf);
       void beat_buffer(BeatBuffer * buf);
-      void eq(dj::eq_band_t band, double value);
       float max_sample_value_reset();
 
       //misc
@@ -144,12 +143,6 @@ namespace djaudio {
       //the eq instance
       AudioPluginPtr mEqPlugin;
       std::array<uint32_t, 3> mEqBandPortMapping;
-#ifdef USE_LV2
-      std::array<float, 3> mEqBandValueMax;
-      std::array<float, 3> mEqBandValueMin;
-      std::array<float, 3> mEqBandValueDefault;
-      std::array<float, 3> mEqBandValueDBScale = std::array<float, 3>{0.0f, 0.0f, 0.0f};
-#endif
 
       //helpers
       //for updating the play speed while syncing
@@ -205,7 +198,6 @@ namespace djaudio {
       enum action_t {
         VOLUME, VOLUME_RELATIVE,
         PLAY_SPEED, PLAY_SPEED_RELATIVE,
-        EQ_LOW, EQ_MID, EQ_HIGH
       };
       PlayerDoubleCommand(unsigned int idx, action_t action, double value);
       virtual void execute(const Transport& transport);

@@ -14,7 +14,7 @@ class AudioPluginManager : public QObject {
     //only call once you've ditched all instances from elsewhere
     void destroy(AudioPluginPtr plugin);
 
-    double range_remap(int plugin_index, int parameter_index, int value); //standard -1000..1000 -> double that the plugin expects
+    double range_remap(int plugin_index, int parameter_index, int value); //standard 0..1000 -> double that the plugin expects
   public slots:
     //relay info to the eq
     void playerSetValueInt(int player, QString name, int value);
