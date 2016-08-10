@@ -29,16 +29,10 @@ player0:
     mult: 1.5
     continuous: volume
   - cc: [1,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_high
   - cc: [2,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_mid
   - cc: [3,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_low
 
 player1:
@@ -73,16 +67,10 @@ player1:
     mult: 1.5
     continuous: volume
   - cc: [5,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_high
   - cc: [6,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_mid
   - cc: [7,3]
-    offset: -1.0
-    mult: 2.0
     continuous: eq_low
 
 master:
