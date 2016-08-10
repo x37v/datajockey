@@ -440,7 +440,7 @@ void Player::beat_buffer(BeatBuffer * buf){
 }
 
 void Player::eq(dj::eq_band_t band, double value) {
-#ifdef USE_LV2
+#if 0
   if (!mEqPlugin)
     return;
   //if we have a negative to positive range, map our -1..1 to that range
@@ -482,6 +482,12 @@ void Player::play_speed_relative(double amt){
 
 void Player::volume_relative(double amt){
   mVolume += amt;
+}
+
+int Player::eq_plugin_index() const {
+  if (!mEqPlugin)
+    return -1;
+  return mEqPlugin->index();
 }
 
 int Player::eq_plugin_parameter_index(dj::eq_band_t band) const {

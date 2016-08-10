@@ -22,6 +22,7 @@ class Lv2Plugin : public AudioPlugin {
 
     virtual int control_index(QString paramterName) const override;
     virtual void load_default_preset() override;
+    virtual double range_remap(int parameter_index, int value) override;
 
     void load_preset_from_file(QString file_path) throw(std::runtime_error);
 
@@ -45,5 +46,7 @@ class Lv2Plugin : public AudioPlugin {
     std::vector<float> mPortValueMax;
     std::vector<float> mPortValueDefault;
     std::vector<QString> mPortSymbols;
+
+    std::map<uint32_t, int> mPortValueDBScale; //b.s. to work around calf's fucked up scaling
 };
 

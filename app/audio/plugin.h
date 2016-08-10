@@ -27,6 +27,8 @@ class AudioPlugin {
     virtual void control_value(uint32_t index, float v) = 0;
     virtual int control_index(QString /*paramterName*/) const { return -1; }
     virtual void load_default_preset() {}
+    //remap the standard -1000...1000 range to what the plugin expects for the parameter
+    virtual double range_remap(int parameter_index, int value);
 
     int index() const { return mIndex; }
   private:

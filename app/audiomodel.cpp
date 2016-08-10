@@ -3,6 +3,7 @@
 #include "player.hpp"
 #include "command.hpp"
 #include "loopandjumpmanager.h"
+#include "pluginmanager.h"
 #include <QThread>
 #include <QTimer>
 #include <QHash>
@@ -456,30 +457,23 @@ void AudioModel::masterTrigger(QString name) {
 }
 
 void AudioModel::pluginSetValueInt(int plugin_index, int parameter_index, int value) {
-  auto it = mPlugins.find(plugin_index);
-  if (it == mPlugins.end())
+  AudioPluginPtr plugin = AudioPluginManager::instance()->instance(plugin_index);
+  if (!plugin)
     return;
-  double fvalue = to_double(value);
-  PluginValueCommand * cmd = new PluginValueCommand(*it, parameter_index, fvalue);
+  double fvalue = plugin->range_remap(parameter_index, value);
+  PluginValueCommand * cmd = new PluginValueCommand(plugin, parameter_index, fvalue);
   queue(cmd);
 }
 
 void AudioModel::pluginAddToPlayer(int player_index, int location_index, AudioPluginPtr plugin) {
-  mPlugins[plugin->index()] = plugin;
   //XXX do it
 }
 
 void AudioModel::pluginAddToMaster(int send_index, int location_index, AudioPluginPtr plugin) {
-  mPlugins[plugin->index()] = plugin;
   //XXX do it
 }
 
 void AudioModel::pluginRemove(int plugin_index) {
-  auto it = mPlugins.find(plugin_index);
-  if (it != mPlugins.end()) {
-    mPluginsToDelete << *it;
-    mPlugins.erase(it);
-  }
   //XXX do it!
 }
 
@@ -521,8 +515,7 @@ void AudioModel::masterSet(std::function<djaudio::Command *(void)> func) {
 
 void AudioModel::playerSetEq(int player_index, dj::eq_band_t band, int value) {
   djaudio::Player * p = djaudio::Master::instance()->players().at(player_index);
-  pluginSetValueInt(p->eq_plugin_index(), p->eq_plugin_parameter_index(band), to_double(value));
-  //XXX emit
+  pluginSetValueInt(p->eq_plugin_index(), p->eq_plugin_parameter_index(band), value);
 }
 
 void AudioModel::queue(djaudio::Command * cmd) {

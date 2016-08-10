@@ -9,9 +9,12 @@ class AudioPluginManager : public QObject {
   Q_OBJECT
   public:
     static AudioPluginManager * instance();
+    AudioPluginPtr instance(int instanceid);
     AudioPluginPtr create(QString uniqueId);
     //only call once you've ditched all instances from elsewhere
     void destroy(AudioPluginPtr plugin);
+
+    double range_remap(int plugin_index, int parameter_index, int value); //standard -1000..1000 -> double that the plugin expects
   public slots:
     //relay info to the eq
     void playerSetValueInt(int player, QString name, int value);

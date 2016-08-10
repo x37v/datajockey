@@ -16,14 +16,20 @@ AudioPluginManager * AudioPluginManager::instance() {
   return cInstance;
 }
 
+AudioPluginPtr AudioPluginManager::instance(int instanceid) {
+  auto it = mPlugins.find(instanceid);
+  if (it == mPlugins.end())
+    return AudioPluginPtr();
+  return *it;
+}
+
 AudioPluginPtr AudioPluginManager::create(QString uniqueId) {
   AudioPluginPtr plugin;
 #ifdef USE_LV2
   plugin = AudioPluginPtr(new Lv2Plugin(uniqueId));
 #endif
-  if (plugin) {
+  if (plugin)
     mPlugins[plugin->index()] = plugin;
-  }
   return plugin;
 }
 
@@ -31,6 +37,13 @@ void AudioPluginManager::destroy(AudioPluginPtr plugin) {
   if (!plugin)
     return;
   mPlugins.remove(plugin->index());
+}
+
+double AudioPluginManager::range_remap(int plugin_index, int parameter_index, int value) {
+  auto it = mPlugins.find(plugin_index);
+  if (it == mPlugins.end())
+    return 0;
+  return (*it)->range_remap(parameter_index, value);
 }
 
 AudioPluginManager::AudioPluginManager() : QObject() { }

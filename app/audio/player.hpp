@@ -101,7 +101,7 @@ namespace djaudio {
       void position_at_frame_relative(long offset);
       void play_speed_relative(double amt); //increment or decrement the current play speed by amt
       void volume_relative(double amt); //increment or decrement the current volume
-      int eq_plugin_index() const { return mEqPluginIndex; }
+      int eq_plugin_index() const;
       int eq_plugin_parameter_index(dj::eq_band_t band) const;
 
     private:
@@ -116,7 +116,6 @@ namespace djaudio {
       bool mLoop;
       bool mSetup;
       bump_state_t mBumpState = BUMP_OFF;
-      int mEqPluginIndex = -1;
 
       //continuous
       double mVolume;

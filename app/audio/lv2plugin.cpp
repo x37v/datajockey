@@ -189,6 +189,37 @@ void Lv2Plugin::load_default_preset() {
   QString preset = config->plugin_preset_file(mURI);
   if (preset.size())
     load_preset_from_file(preset);
+
+  if (mURI == config->eq_plugin_uuid()) {
+    for (int i = 0; i < 3; i++) {
+      dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
+      uint32_t port = control_index(config->eq_port_symbol(band));
+      mPortValueDBScale[port] = config->eq_band_db_scale(band);
+    }
+  }
+}
+
+double Lv2Plugin::range_remap(int parameter_index, int value) {
+  float fvalue = dj::to_double(value);
+  auto it = mPortValueDBScale.find(parameter_index);
+  if (it != mPortValueDBScale.end()) {
+    return dj::db2amp(it->second * fvalue);
+  }
+  if (parameter_index < 0 || parameter_index >= (int)mNumPorts)
+    return 0;
+  if (mPortValueMin[parameter_index] < 0) {
+    if (fvalue < 0.0)
+      return fvalue * -mPortValueMin[parameter_index];
+    else
+      return fvalue * mPortValueMax[parameter_index];
+  } else {
+    //otherwise map our -1..0..1 to min..default..max
+    if (value >= 0.0)
+      return mPortValueDefault[parameter_index] + fvalue * (mPortValueMax[parameter_index] - mPortValueDefault[parameter_index]);
+    return mPortValueDefault[parameter_index] + fvalue * (mPortValueDefault[parameter_index] - mPortValueMin[parameter_index]);
+  }
+
+  return 0;
 }
 
 void Lv2Plugin::load_preset_from_file(QString file_path) throw(std::runtime_error) {

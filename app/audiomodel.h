@@ -78,7 +78,6 @@ class AudioModel : public QObject {
     QHash<QString, double> mMasterDoubleValue;
     QHash<QString, int> mMasterIntValue;
 
-    QHash<int, AudioPluginPtr> mPlugins; //valid plugins
     QList<AudioPluginPtr> mPluginsToDelete; //plugins that will be deleted once they come out of the audio thread
 
     bool inRange(int player);

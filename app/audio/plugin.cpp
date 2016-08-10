@@ -1,6 +1,11 @@
 #include "plugin.h"
+#include "defines.hpp"
 
 int AudioPlugin::cIndexCount = 0;
+
+double AudioPlugin::range_remap(int /*parameter_index*/, int value) {
+  return dj::to_double(value);
+}
 
 AudioPluginCollection::AudioPluginCollection() {
 }
