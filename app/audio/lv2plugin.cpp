@@ -194,7 +194,9 @@ void Lv2Plugin::load_default_preset() {
     for (int i = 0; i < 3; i++) {
       dj::eq_band_t band = static_cast<dj::eq_band_t>(i);
       uint32_t port = control_index(config->eq_port_symbol(band));
-      mPortValueDBScale[port] = config->eq_band_db_scale(band);
+      float dbscale = config->eq_band_db_scale(band);
+      if (dbscale != 0)
+        mPortValueDBScale[port] = dbscale;
     }
   }
 }
