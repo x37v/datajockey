@@ -25,6 +25,18 @@ x37v.info]
    * headers are in vamp-plugin-sdk
    * you'll also want libvamp-hostsdk3 installed
 
+## Ubuntu Quick Start:
+ * sudo apt-get install qt5-default qttools5-dev-tools qtcreator liblilv-dev vamp-plugin-sdk libvamp-hostsdk3v5 libsndfile-dev libmad0-dev libvorbis-dev liblo-dev libtag1-dev cmake libjack-jackd2-dev libboost-dev jackd2
+ * download the gziped tar for linux [choose your bit-flavor]: http://isophonics.net/QMVampPlugins
+ * install the qm vamp plugins, read the INSTALL_linux.txt file
+ * start up qtcreator and create a project for, *I use all default settings*:
+	 * ext/yaml-cpp/CMakeLists.txt
+	 * app/app.pro
+	   * make depend on yaml-cpp
+	 * importer/importer.pro
+	   * make depend on yaml-cpp
+ * Build!
+
 # Notes:
 
 ## osx:
