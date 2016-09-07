@@ -39,18 +39,8 @@ puts "doing it"
 
 files = File.readlines(file_location).collect { |f| f.chomp }
 
-c = TagClass.where(:name => 'mix').first
-unless c
-  c = TagClass.create(:name => 'mix')
-  c.save
-end
-t = Tag.where(:name => tag_name, :tag_class_id => c.id).first
-
-unless t
-  puts "creating tag #{tag_name}"
-  t = Tag.create(:name => tag_name, :tag_class => c)
-  t.save
-end
+c = Tag.find_or_create_by_name_and_parent_id("mix", 0)
+t = Tag.find_or_create_by_name_and_parent_id(tag_name, c.id)
 
 #t2 = Tag.where(:name => 'aug282012').first
 
