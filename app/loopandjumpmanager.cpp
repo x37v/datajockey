@@ -203,6 +203,7 @@ void LoopAndJumpManager::playerSetValueInt(int player, QString name, int v) {
         }
         pdata->data[v] = data;
         emit(entryUpdated(player, data.type, v, data.start, data.end));
+        saveData(player);
       }
     }
   }
@@ -237,6 +238,7 @@ void LoopAndJumpManager::clearEntry(int player, int entry_index) {
   if (it != pdata->data.end())
     pdata->data.erase(it);
   emit(entryCleared(player, entry_index));
+  saveData(player);
 }
 
 void LoopAndJumpManager::saveData(int player) {
