@@ -281,10 +281,16 @@ void AudioModel::playerSetValueBool(int player, QString name, bool v) {
       } else if (name == "bump_fwd_down") {
         if (!pstate->boolValue["sync"]) {
           cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::BUMP_FWD : djaudio::PlayerStateCommand::BUMP_OFF);
+        } else {
+          if (v)
+            playerTrigger(player, "seek_fwd");
         }
       } else if (name == "bump_back_down") {
         if (!pstate->boolValue["sync"]) {
           cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::BUMP_REV : djaudio::PlayerStateCommand::BUMP_OFF);
+        } else {
+          if (v)
+            playerTrigger(player, "seek_back");
         }
       } else if (name == "mute") {
         cmd = new djaudio::PlayerStateCommand(player, v ? djaudio::PlayerStateCommand::MUTE : djaudio::PlayerStateCommand::NO_MUTE);
