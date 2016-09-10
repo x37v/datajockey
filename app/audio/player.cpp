@@ -196,16 +196,17 @@ void Player::audio_compute_frame(unsigned int frame, float ** mixBuffer,
     mixBuffer[0][frame] = buffer[0];
     mixBuffer[1][frame] = buffer[1];
 
-    if (mLoop) {
-      if(mLoopEndFrame > mLoopStartFrame && mStretcher->frame() >= mLoopEndFrame)
-        position_at_frame(mLoopStartFrame);
-    }
   }
 
-  if (mFadeoutIndex < mFadeoutBuffer.size()) {
+  if ((mFadeoutIndex + 1) < mFadeoutBuffer.size()) {
     mixBuffer[0][frame] += mFadeoutBuffer[mFadeoutIndex];
     mixBuffer[1][frame] += mFadeoutBuffer[mFadeoutIndex + 1];
     mFadeoutIndex += 2;
+  }
+
+  if (mLoop && mPlayState == PLAY) {
+    if(mLoopEndFrame > mLoopStartFrame && mStretcher->frame() >= mLoopEndFrame)
+      position_at_frame(mLoopStartFrame);
   }
 }
 
