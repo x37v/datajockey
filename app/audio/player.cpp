@@ -105,7 +105,7 @@ void Player::setup_audio(
 
   unsigned int fade_length = static_cast<double>(sampleRate) * 0.020; //seconds
   mEnvelope.length(fade_length);
-  mFadeoutBuffer.resize(2 * (fade_length + 1));
+  mFadeoutBuffer.resize(2 * fade_length);
   mFadeoutIndex = mFadeoutBuffer.size();
 
   for (unsigned int i = 0; i < sendBufferCount; i++) {
@@ -384,10 +384,7 @@ void Player::position_at_beat(unsigned int beat, Transport * transport) {
   if (!mStretcher->audio_buffer() || !mBeatBuffer || mBeatBuffer->size() <= beat)
     return;
 
-  if (mPlayState == PLAY)
-    setup_seek_fade();
   mBeatIndex = beat;
-
   position_at_frame(mBeatBuffer->at(beat), transport);
 }
 
