@@ -17,8 +17,6 @@
 	with Data Jockey.  If not, see <http://www.gnu.org/licenses/>.
 =end
 
-SESSION = 141
-
 $: << ".."
 
 require 'datajockey/base'
@@ -31,7 +29,10 @@ Datajockey::connect
 
 include Datajockey
 
-AudioWorkHistory.where(:session_id => SESSION).order(:played_at).each do |h|
+session = ARGV[0]
+session = AudioWorkHistory.order("session_id").last.session_id unless session
+
+AudioWorkHistory.where(:session_id => session).order(:played_at).each do |h|
   w = h.audio_work
   puts "#{w.artist.name}: '#{w.name}'"
 end
