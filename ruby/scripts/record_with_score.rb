@@ -11,7 +11,8 @@ audio_file_out = "datajockey_capture-#{@@start_time.to_s.gsub(" ", "_")}.wav"
 score_file_out = "datajockey_capture-#{@@start_time.to_s.gsub(" ", "_")}.txt"
 
 @@rec_process = fork do
-  exec('jack_capture', '-dc', '-c', jack_ports.size.to_s, '-fn', audio_file_out, *jack_ports.collect { |p| ['--port', p] }.flatten)
+  #exec('jack_capture', '-dc', '-c', jack_ports.size.to_s, '-fn', audio_file_out, *jack_ports.collect { |p| ['--port', p] }.flatten)
+  exec('jack_capture', '-dc', '-c', '2', '-fn', audio_file_out)
 end
 
 @@score_file = File.open(score_file_out, "w")
