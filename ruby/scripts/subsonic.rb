@@ -1,8 +1,9 @@
 require 'rest_client'
 require 'json'
+require 'digest'
 
 class Subsonic
-  API_VER = "1.9.0"
+  API_VER = "1.14.0"
   RESOURCES = {
     :artists => "getArtists.view",
     :playlists => "getPlaylists.view",
@@ -22,10 +23,16 @@ class Subsonic
     @username = username
     @password = password
     @server = server
+    @md5 = Digest::MD5.new
   end
 
   def get(resource, params = {})
-    params = { :u => @username, :p => @password, :v => API_VER, :c => "xnorgrabber", :f => "json"}.merge(params)
+    params = { :u => @username, :v => API_VER, :c => "xnorgrabber", :f => "json"}.merge(params)
+    salt = rand(36**8).to_s(36) #random 8 character string
+    token = @md5.hexdigest(@password + salt)
+    params[:s] = salt
+    params[:t] = token
+
     v = RestClient.get(@server + "/rest/" + RESOURCES[resource],
                    {:params => params})
     JSON.parse(v)["subsonic-response"]
