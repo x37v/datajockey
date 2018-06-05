@@ -51,8 +51,9 @@ files.each do |f|
   if w
     #unless w.tags.include?(t2) or w.tags.include?(t)
     unless w.tags.include?(t)
-      w.tags << t
-      w.save
+      AudioWorkTag.create(:tag => t, :audio_work => w)
+      #w.tags << t
+      #w.save
     end
   else
     puts "#{f} not found in db"
