@@ -30,3 +30,8 @@ x37v.info]
 ## osx:
 debugging with xcode 6, you must select 'run in terminal' in the 'run' settings of the project
 
+## Ubuntu 17.10:
+```
+sudo apt-get install qt5-default libjack-jackd2-dev cmake libboost-dev libsndfile1-dev libmad0-dev libvorbisfile3 liblo-dev libtagc0-dev liblilv-dev vamp-plugin-sdk libvamp-hostsdk3v5 qtcreator
+```
+
