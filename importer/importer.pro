@@ -10,7 +10,6 @@ CONFIG += link_pkgconfig
 
 TEMPLATE = app
 
-LIBS += $$TOP_DIR/ext/yaml-cpp-build/libyaml-cpp.a
 INCLUDEPATH += /usr/local/include/
 RESOURCES = $$TOP_DIR/db.qrc
 
@@ -70,5 +69,17 @@ HEADERS += \
 
 INCLUDEPATH += . \
   ../app/ \
-  ../app/audio \
-  ../ext/yaml-cpp/include/
+  ../app/audio
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../ext/build-yaml-cpp-default/release/ -lyaml-cpp
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../ext/build-yaml-cpp-default/debug/ -lyaml-cpp
+else:unix: LIBS += -L$$PWD/../ext/build-yaml-cpp-default/ -lyaml-cpp
+
+INCLUDEPATH += $$PWD/../ext/yaml-cpp/include
+DEPENDPATH += $$PWD/../ext/yaml-cpp/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../ext/build-yaml-cpp-default/release/libyaml-cpp.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../ext/build-yaml-cpp-default/debug/libyaml-cpp.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../ext/build-yaml-cpp-default/release/yaml-cpp.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../ext/build-yaml-cpp-default/debug/yaml-cpp.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../ext/build-yaml-cpp-default/libyaml-cpp.a
